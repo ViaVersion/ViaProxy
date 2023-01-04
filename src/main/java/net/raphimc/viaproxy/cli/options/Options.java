@@ -28,8 +28,6 @@ public class Options {
     public static boolean BETACRAFT_AUTH;
 
     public static void parse(final String[] args) throws IOException {
-        VersionEnum.init(); // We need to init the version list already here
-
         final OptionParser parser = new OptionParser();
         final OptionSpec<Void> help = parser.acceptsAll(asList("help", "h", "?"), "Get a list of all arguments").forHelp();
 
