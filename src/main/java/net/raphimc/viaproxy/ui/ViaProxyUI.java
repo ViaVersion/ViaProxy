@@ -9,6 +9,9 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
 
 public class ViaProxyUI extends JFrame {
 
@@ -74,6 +77,29 @@ public class ViaProxyUI extends JFrame {
             titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
             titleLabel.setFont(titleLabel.getFont().deriveFont(30F));
             this.contentPane.add(titleLabel);
+        }
+        {
+            JLabel copyrightLabel = new JLabel("© RK_01 & Lenni0451");
+            copyrightLabel.setBounds(360, 10, 500, 20);
+            this.contentPane.add(copyrightLabel);
+        }
+        {
+            JLabel discordLabel = new JLabel("Discord");
+            discordLabel.setBounds(10, 10, 500, 20);
+            discordLabel.setForeground(new Color(124, 171, 241));
+            discordLabel.addMouseListener(new MouseAdapter() {
+                private static final String LINK = "https://viaproxy.raphimc.net";
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(LINK));
+                    } catch (Throwable t) {
+                        showInfo("Couldn't open the link :(\nHere it is for you: " + LINK);
+                    }
+                }
+            });
+            this.contentPane.add(discordLabel);
         }
         {
             JLabel addressLabel = new JLabel("Server Address:");
