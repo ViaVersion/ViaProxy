@@ -142,8 +142,8 @@ public class ViaProxyUI extends JFrame {
             this.contentPane.add(this.bindPort);
         }
         {
-            JLabel authMethodLabel = new JLabel("Auth Method:");
-            authMethodLabel.setBounds(10, 200, 100, 20);
+            JLabel authMethodLabel = new JLabel("Server Online Mode Auth Method:");
+            authMethodLabel.setBounds(10, 200, 250, 20);
             this.contentPane.add(authMethodLabel);
 
             this.authMethod = new JComboBox<>(new String[]{"OpenAuthMod"});
