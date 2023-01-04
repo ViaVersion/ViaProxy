@@ -59,6 +59,10 @@ You will find 4 config files there:
 - viarewind.yml (ViaRewind)
 - vialegacy.yml (ViaLegacy)
 
+### Developer Plugin API
+ViaProxy has a plugin API which allows you to create plugins for ViaProxy.
+You can find the documentation and examples [here](https://github.com/Lenni0451/NoLocalConnections).
+
 ## Contact
 If you encounter any issues, please report them on the
 [issue tracker](https://github.com/RaphiMC/ViaProxy/issues).  
