@@ -4,7 +4,7 @@ Standalone proxy which uses ViaVersion to translate the protocol between minecra
 ViaProxy allows you to join to essentially any minecraft version server from a modern client.  
 To download the latest version, go to the [Releases section](#executable-jar-file) and download the latest version.  
 Using it is very simple, just run the jar file, and it will start a user interface where everything can be configured.  
-For a full user guide go to the [Usage for Players](#usage-for-players--gui-) section or the [Usage for Server Owners](#usage-for-server-owners--cli-) section.
+For a full user guide go to the [Usage for Players](#usage-for-players-gui) section or the [Usage for Server Owners](#usage-for-server-owners-cli) section.
 
 ## Supported Server versions
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
