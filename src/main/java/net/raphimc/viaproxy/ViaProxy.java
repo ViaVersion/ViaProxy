@@ -72,7 +72,7 @@ public class ViaProxy {
             Options.parse(args);
         } catch (Throwable t) {
             Logger.LOGGER.fatal("[" + t.getClass().getSimpleName() + "] " + t.getMessage());
-            return;
+            System.exit(0);
         }
 
         loaderThread.start();
