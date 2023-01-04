@@ -24,6 +24,7 @@ public class ViaProxyUI extends JFrame {
     private JSpinner bindPort;
     private JComboBox<String> authMethod;
     private JCheckBox betaCraftAuth;
+    private JCheckBox proxyOnlineMode;
     private JLabel stateLabel;
     private JButton stateButton;
 
@@ -85,7 +86,7 @@ public class ViaProxyUI extends JFrame {
         }
         {
             JLabel discordLabel = new JLabel("Discord");
-            discordLabel.setBounds(10, 10, 500, 20);
+            discordLabel.setBounds(10, 10, 45, 20);
             discordLabel.setForeground(new Color(124, 171, 241));
             discordLabel.addMouseListener(new MouseAdapter() {
                 private static final String LINK = "https://viaproxy.raphimc.net";
@@ -151,8 +152,13 @@ public class ViaProxyUI extends JFrame {
         }
         {
             this.betaCraftAuth = new JCheckBox("BetaCraft Auth (Classic)");
-            this.betaCraftAuth.setBounds(10, 250, 465, 20);
+            this.betaCraftAuth.setBounds(10, 250, 150, 20);
             this.contentPane.add(this.betaCraftAuth);
+        }
+        {
+            this.proxyOnlineMode = new JCheckBox("Proxy Online Mode");
+            this.proxyOnlineMode.setBounds(350, 250, 465, 20);
+            this.contentPane.add(this.proxyOnlineMode);
         }
         {
             this.stateLabel = new JLabel();
@@ -178,6 +184,7 @@ public class ViaProxyUI extends JFrame {
         this.bindPort.setEnabled(state);
         this.authMethod.setEnabled(state);
         this.betaCraftAuth.setEnabled(state);
+        this.proxyOnlineMode.setEnabled(state);
     }
 
     private void updateStateLabel() {
@@ -196,12 +203,14 @@ public class ViaProxyUI extends JFrame {
             final int bindPort = (int) this.bindPort.getValue();
             final String authMethod = (String) this.authMethod.getSelectedItem();
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();
+            final boolean proxyOnlineMode = this.proxyOnlineMode.isSelected();
 
             try {
                 final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
 
                 Options.BIND_ADDRESS = "127.0.0.1";
                 Options.BIND_PORT = bindPort;
+                Options.ONLINE_MODE = proxyOnlineMode;
                 Options.CONNECT_ADDRESS = hostAndPort.getHost();
                 Options.CONNECT_PORT = hostAndPort.getPortOrDefault(25565);
                 Options.PROTOCOL_VERSION = serverVersion;
