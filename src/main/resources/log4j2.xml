@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<!--	System out	-->
+		<Console name="SysOut" target="SYSTEM_OUT">
+			<PatternLayout pattern="%style{[%d{HH:mm:ss}]}{blue} %highlight{[%t/%level]}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=green, TRACE=blue} %style{(%logger{1})}{cyan} %highlight{%msg%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=normal, TRACE=normal}" disableAnsi="false"/>
+		</Console>
+
+		<!--	latest.log same as vanilla	-->
+		<RollingRandomAccessFile name="LatestFile" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] (%logger{1}) %msg{nolookups}%n"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<OnStartupTriggeringPolicy />
+			</Policies>
+		</RollingRandomAccessFile>
+
+		<!--	Debug log file	-->
+		<RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz">
+			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] (%logger) %msg{nolookups}%n"/>
+
+			<!--	Keep 5 files max	-->
+			<DefaultRolloverStrategy max="5" fileIndex="min"/>
+
+			<Policies>
+				<SizeBasedTriggeringPolicy size="200MB"/>
+				<OnStartupTriggeringPolicy />
+			</Policies>
+		</RollingRandomAccessFile>
+	</Appenders>
+
+	<Loggers>
+		<Root level="all">
+			<AppenderRef ref="DebugFile" level="debug"/>
+			<AppenderRef ref="SysOut" level="info"/>
+			<AppenderRef ref="LatestFile" level="info"/>
+		</Root>
+	</Loggers>
+</Configuration>
