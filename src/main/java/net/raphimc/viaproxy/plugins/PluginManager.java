@@ -2,13 +2,16 @@ package net.raphimc.viaproxy.plugins;
 
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
+import net.raphimc.viaproxy.util.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class PluginManager {
 
@@ -37,28 +40,25 @@ public class PluginManager {
     private static void loadAndScanJar(final File file) throws Throwable {
         URLClassLoader loader = new URLClassLoader(new URL[]{new URL("jar:file:" + file.getAbsolutePath() + "!/")}, PluginManager.class.getClassLoader());
         InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
-        if (viaproxyYml == null)
-            throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
+        if (viaproxyYml == null) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
         Map<String, Object> yaml = YAML.load(viaproxyYml);
-        if (!yaml.containsKey("name"))
-            throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a name attribute in the viaproxy.yml");
-        if (!yaml.containsKey("author"))
-            throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a author attribute in the viaproxy.yml");
-        if (!yaml.containsKey("version"))
-            throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a version attribute in the viaproxy.yml");
-        if (!yaml.containsKey("main"))
-            throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a main attribute in the viaproxy.yml");
+        if (!yaml.containsKey("name")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a name attribute in the viaproxy.yml");
+        if (!yaml.containsKey("author")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a author attribute in the viaproxy.yml");
+        if (!yaml.containsKey("version")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a version attribute in the viaproxy.yml");
+        if (!yaml.containsKey("main")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a main attribute in the viaproxy.yml");
 
         String main = (String) yaml.get("main");
 
         Class<?> mainClass = loader.loadClass(main);
-        if (!ViaProxyPlugin.class.isAssignableFrom(mainClass))
+        if (!ViaProxyPlugin.class.isAssignableFrom(mainClass)) {
             throw new IllegalStateException("Class '" + mainClass.getName() + "' from '" + file.getName() + "' does not extend ViaProxyPlugin");
+        }
         Object instance = mainClass.newInstance();
         ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
         PLUGINS.add(plugin);
 
         plugin.onEnable();
+        Logger.LOGGER.info("Successfully loaded plugin '" + yaml.get("name") + "' by " + yaml.get("author") + " (v" + yaml.get("version") + ")");
     }
 
 }
