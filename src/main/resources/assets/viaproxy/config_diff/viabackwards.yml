@@ -1,0 +1,4 @@
+#Overwrite default value
+fix-1_13-face-player: true
+#Overwrite default value
+handle-pings-as-inv-acknowledgements: true

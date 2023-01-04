@@ -1,0 +1,6 @@
+#Overwrite default value
+1_13-tab-complete-delay: 5
+#Overwrite default value
+no-delay-shield-blocking: true
+#Overwrite default value
+chunk-border-fix: true

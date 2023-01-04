@@ -1,0 +1,4 @@
+#Overwrite default value
+replace-adventure: true
+#Overwrite default value
+replace-particles: true
