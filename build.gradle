@@ -1,6 +1,7 @@
 plugins {
     id "java"
     id "maven-publish"
+    id "net.kyori.blossom" version "1.3.1"
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
@@ -60,8 +61,8 @@ dependencies {
     include "net.raphimc.netminecraft:all:2.2.2"
 }
 
-java {
-    withSourcesJar()
+blossom {
+    replaceToken("\${version}", project.version, "src/main/java/net/raphimc/viaproxy/ViaProxy.java")
 }
 
 jar {

@@ -61,7 +61,7 @@ public class ViaProxyUI extends JFrame {
     }
 
     private void initWindow() {
-        this.setTitle("ViaProxy");
+        this.setTitle("ViaProxy v" + ViaProxy.VERSION);
         this.setIconImage(this.icon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(500, 370);
@@ -131,7 +131,7 @@ public class ViaProxyUI extends JFrame {
             this.contentPane.add(this.serverVersion);
         }
         {
-            JLabel bindPortLabel = new JLabel("Bind Port:");
+            JLabel bindPortLabel = new JLabel("Local Port:");
             bindPortLabel.setBounds(10, 150, 100, 20);
             this.contentPane.add(bindPortLabel);
 
@@ -142,8 +142,8 @@ public class ViaProxyUI extends JFrame {
             this.contentPane.add(this.bindPort);
         }
         {
-            JLabel authMethodLabel = new JLabel("Auth Method:");
-            authMethodLabel.setBounds(10, 200, 100, 20);
+            JLabel authMethodLabel = new JLabel("Server Online Mode Auth Method:");
+            authMethodLabel.setBounds(10, 200, 250, 20);
             this.contentPane.add(authMethodLabel);
 
             this.authMethod = new JComboBox<>(new String[]{"OpenAuthMod"});

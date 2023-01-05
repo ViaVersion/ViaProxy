@@ -29,6 +29,8 @@ import java.awt.*;
 
 public class ViaProxy {
 
+    public static final String VERSION = "${version}";
+
     public static NetServer currentProxyServer;
     public static Thread loaderThread;
     public static ChannelGroup c2pChannels;
@@ -46,7 +48,7 @@ public class ViaProxy {
     public static void injectedMain(String[] args) throws InterruptedException {
         Logger.setup();
         ConsoleHandler.hookConsole();
-        Logger.LOGGER.info("Initializing ViaProxy...");
+        Logger.LOGGER.info("Initializing ViaProxy v" + VERSION + "...");
         VersionEnum.init();
         setNettyParameters();
         MCPipeline.useOptimizedPipeline();
@@ -70,7 +72,7 @@ public class ViaProxy {
             Options.parse(args);
         } catch (Throwable t) {
             Logger.LOGGER.fatal("[" + t.getClass().getSimpleName() + "] " + t.getMessage());
-            return;
+            System.exit(0);
         }
 
         loaderThread.start();
