@@ -47,6 +47,7 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
+    include "com.google.code.gson:gson:2.10"
     include "com.formdev:flatlaf:3.0"
     include "com.google.guava:guava:31.1-jre"
     include "net.sf.jopt-simple:jopt-simple:5.0.4"
