@@ -39,7 +39,7 @@ public class ViaProxyUI extends JFrame {
             final StringBuilder builder = new StringBuilder("An error occurred:\n");
             builder.append("[").append(e.getClass().getSimpleName()).append("] ").append(e.getMessage()).append("\n");
             for (StackTraceElement element : e.getStackTrace()) {
-                builder.append("\tat ").append(element.toString()).append("\n");
+                builder.append(element.toString()).append("\n");
             }
             this.showError(builder.toString());
         });
