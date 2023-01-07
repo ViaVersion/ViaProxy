@@ -90,11 +90,11 @@ public class GeneralTab extends AUITab {
             contentPane.add(this.bindPort);
         }
         {
-            JLabel authMethodLabel = new JLabel("Minecraft Account: (used when server is in online mode)");
+            JLabel authMethodLabel = new JLabel("Minecraft Account:");
             authMethodLabel.setBounds(10, 200, 400, 20);
             contentPane.add(authMethodLabel);
 
-            this.authMethod = new JComboBox<>(new String[]{"Use selected account", "Use OpenAuthMod"});
+            this.authMethod = new JComboBox<>(new String[]{"Use no account", "Use selected account", "Use OpenAuthMod"});
             this.authMethod.setBounds(10, 220, 465, 20);
             contentPane.add(this.authMethod);
         }
@@ -165,7 +165,7 @@ public class GeneralTab extends AUITab {
                 Options.PROTOCOL_VERSION = serverVersion;
                 Options.BETACRAFT_AUTH = betaCraftAuth;
 
-                if (authMethod == 1) Options.OPENAUTHMOD_AUTH = true;
+                if (authMethod == 2) Options.OPENAUTHMOD_AUTH = true;
 
                 ViaProxy.startProxy();
 
