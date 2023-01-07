@@ -19,7 +19,7 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 
 ## Releases
 ### Executable Jar File
-If you want the executable jar file you can download a stable release from [GitHub](https://github.com/RaphiMC/ViaProxy/releases/latest) or the latest version from this [Jenkins](https://build.lenni0451.net/job/ViaProxy/).
+If you want the executable jar file you can download a stable release from [GitHub](https://github.com/RaphiMC/ViaProxy/releases/latest) or the latest dev version from this [Jenkins](https://build.lenni0451.net/job/ViaProxy/).
 
 ### Gradle/Maven
 To use ViaProxy with Gradle/Maven you can use this [Maven server](https://maven.lenni0451.net/#/releases/net/raphimc/ViaProxy) or [Jitpack](https://jitpack.io/#RaphiMC/ViaProxy).  
