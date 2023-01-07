@@ -44,6 +44,7 @@ public class ViaProxy {
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.transformer.**");
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
         final InjectionClassLoader injectionClassLoader = new InjectionClassLoader(transformerManager, ClassLoaders.getSystemClassPath());
+        injectionClassLoader.addProtectedPackage("com.sun.");
         injectionClassLoader.setPriority(EnumLoaderPriority.PARENT_FIRST);
         injectionClassLoader.executeMain(ViaProxy.class.getName(), "injectedMain", args);
     }
