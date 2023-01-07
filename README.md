@@ -46,11 +46,6 @@ You can also find instructions how to implement it into your build script there.
 Here is an example command to allow players to join on yourserverip:25568 and connect to a beta 1.7.3 server running on port 25565:
 ``java -jar ViaProxy-whateverversion.jar --bind_port 25568 --target_ip 127.0.0.1 --target_port 25565 --version b1.7-b1.7.3``
 
-## Advanced Usage
-### Online Mode
-If you want to join online mode servers you need to install the [OpenAuthMod](https://modrinth.com/mod/openauthmod) mod.
-When you have the mod installed and select "OpenAuthMod" as authentication type in the GUI / CLI.
-
 ### Configuring the protocol translation
 To change the protocol translation settings/features you can look into the ViaProtocolHack folder.
 You will find 4 config files there:
