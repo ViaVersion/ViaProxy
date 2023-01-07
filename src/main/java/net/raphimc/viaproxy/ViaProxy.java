@@ -1,5 +1,7 @@
 package net.raphimc.viaproxy;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -27,6 +29,9 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class ViaProxy {
 
@@ -34,8 +39,6 @@ public class ViaProxy {
 
     public static SaveManager saveManager;
     public static NetServer currentProxyServer;
-    public static Thread loaderThread;
-    public static Thread accountRefreshThread;
     public static ChannelGroup c2pChannels;
 
     public static void main(String[] args) throws Throwable {
@@ -50,6 +53,7 @@ public class ViaProxy {
 
     public static void injectedMain(String[] args) throws InterruptedException {
         Logger.setup();
+        final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         ConsoleHandler.hookConsole();
         Logger.LOGGER.info("Initializing ViaProxy v" + VERSION + "...");
         saveManager = new SaveManager();
@@ -57,19 +61,52 @@ public class ViaProxy {
         setNettyParameters();
         MCPipeline.useOptimizedPipeline();
         c2pChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-        loaderThread = new Thread(() -> {
+        Thread loaderThread = new Thread(() -> {
             ProtocolHack.init();
             PluginManager.loadPlugins();
         }, "ViaProtocolHack-Loader");
-        accountRefreshThread = new Thread(() -> {
+        Thread accountRefreshThread = new Thread(() -> {
             saveManager.accountsSave.refreshAccounts();
         }, "AccountRefresh");
+        Thread updateCheckThread = new Thread(() -> {
+            if (VERSION.startsWith("$")) return; // Dev env check
+            try {
+                URL url = new URL("https://api.github.com/repos/RaphiMC/ViaProxy/releases/latest");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+                con.setRequestProperty("User-Agent", "ViaProxy/" + VERSION);
+                con.setConnectTimeout(5000);
+                con.setReadTimeout(5000);
 
-        if (args.length == 0 && !GraphicsEnvironment.isHeadless()) {
+                InputStream in = con.getInputStream();
+                byte[] bytes = new byte[1024];
+                int read;
+                StringBuilder builder = new StringBuilder();
+                while ((read = in.read(bytes)) != -1) builder.append(new String(bytes, 0, read));
+                con.disconnect();
+
+                JsonObject object = JsonParser.parseString(builder.toString()).getAsJsonObject();
+                String latestVersion = object.get("tag_name").getAsString().substring(1);
+                if (!VERSION.equals(latestVersion)) {
+                    Logger.LOGGER.warn("You are running an outdated version of ViaProxy! Latest version: " + latestVersion);
+                    if (hasUI) {
+                        SwingUtilities.invokeLater(() -> {
+                            JFrame frontFrame = new JFrame();
+                            frontFrame.setAlwaysOnTop(true);
+                            JOptionPane.showMessageDialog(frontFrame, "You are running an outdated version of ViaProxy!\nCurrent version: " + VERSION + "\nLatest version: " + latestVersion, "ViaProxy", JOptionPane.WARNING_MESSAGE);
+                        });
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }, "UpdateCheck");
+
+        if (hasUI) {
             loaderThread.start();
             accountRefreshThread.start();
             final ViaProxyUI[] ui = new ViaProxyUI[1];
             SwingUtilities.invokeLater(() -> ui[0] = new ViaProxyUI());
+            updateCheckThread.start();
             loaderThread.join();
             accountRefreshThread.join();
             ui[0].setReady();
@@ -84,6 +121,7 @@ public class ViaProxy {
             System.exit(0);
         }
 
+        updateCheckThread.start();
         loaderThread.start();
         loaderThread.join();
         Logger.LOGGER.info("ViaProxy started successfully!");
