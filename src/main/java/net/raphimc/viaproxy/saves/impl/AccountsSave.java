@@ -1,6 +1,8 @@
 package net.raphimc.viaproxy.saves.impl;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.java.StepGameOwnership;
 import net.raphimc.mcauth.step.java.StepMCProfile;
@@ -9,7 +11,10 @@ import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public class AccountsSave extends AbstractSave {
 
@@ -48,16 +53,18 @@ public class AccountsSave extends AbstractSave {
         return array;
     }
 
-    public void addAccount(final StepMCProfile.MCProfile profile) {
+    public StepMCProfile.MCProfile addAccount(final StepMCProfile.MCProfile profile) {
         this.accounts.add(profile);
+        return profile;
     }
 
-    public void addAccount(final int index, final StepMCProfile.MCProfile profile) {
+    public StepMCProfile.MCProfile addAccount(final int index, final StepMCProfile.MCProfile profile) {
         this.accounts.add(index, profile);
+        return profile;
     }
 
-    public void addOfflineAccount(final String name) {
-        this.addAccount(new StepMCProfile.MCProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes()), name, null, new StepGameOwnership.GameOwnership(Collections.emptyList(), null)));
+    public StepMCProfile.MCProfile addOfflineAccount(final String name) {
+        return this.addAccount(new StepMCProfile.MCProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes()), name, null, new StepGameOwnership.GameOwnership(Collections.emptyList(), null)));
     }
 
     public void removeAccount(final StepMCProfile.MCProfile profile) {

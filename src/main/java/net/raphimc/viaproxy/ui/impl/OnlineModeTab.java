@@ -18,13 +18,13 @@ import java.util.concurrent.TimeoutException;
 public class OnlineModeTab extends AUITab {
 
     private JList<String> accountsList;
-    private JButton addAccountButton;
+    private JButton addMicrosoftAccountButton;
 
     private AddAccountPopup addAccountPopup;
     private Thread addThread;
 
     public OnlineModeTab(final ViaProxyUI frame) {
-        super(frame, "Online Mode");
+        super(frame, "Accounts");
     }
 
     @Override
@@ -91,7 +91,7 @@ public class OnlineModeTab extends AUITab {
 
             JPopupMenu contextMenu = new JPopupMenu();
             {
-                JMenuItem selectItem = new JMenuItem("Use to join online mode servers");
+                JMenuItem selectItem = new JMenuItem("Select account");
                 selectItem.addActionListener(e -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) this.markSelected(index);
@@ -141,10 +141,23 @@ public class OnlineModeTab extends AUITab {
             this.accountsList.setComponentPopupMenu(contextMenu);
         }
         {
-            this.addAccountButton = new JButton("Add Account");
-            this.addAccountButton.setBounds(300, 300, 175, 20);
-            this.addAccountButton.addActionListener(event -> {
-                this.addAccountButton.setEnabled(false);
+            JButton addOfflineAccountButton = new JButton("Add Offline Account");
+            addOfflineAccountButton.setBounds(10, 300, 230, 20);
+            addOfflineAccountButton.addActionListener(event -> {
+                String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
+                if (username != null) {
+                    StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.addOfflineAccount(username);
+                    ViaProxy.saveManager.save();
+                    this.addAccount(account);
+                }
+            });
+            contentPane.add(addOfflineAccountButton);
+        }
+        {
+            this.addMicrosoftAccountButton = new JButton("Add Microsoft Account");
+            this.addMicrosoftAccountButton.setBounds(245, 300, 230, 20);
+            this.addMicrosoftAccountButton.addActionListener(event -> {
+                this.addMicrosoftAccountButton.setEnabled(false);
                 this.addThread = new Thread(() -> {
                     try {
                         StepMCProfile.MCProfile profile = MinecraftAuth.requestJavaLogin(msaDeviceCode -> {
@@ -159,8 +172,7 @@ public class OnlineModeTab extends AUITab {
                             this.closePopup();
                             ViaProxy.saveManager.accountsSave.addAccount(profile);
                             ViaProxy.saveManager.save();
-                            DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
-                            model.addElement(profile.name());
+                            this.addAccount(profile);
                             this.frame.showInfo("The account " + profile.name() + " was added successfully.");
                         });
                     } catch (InterruptedException ignored) {
@@ -179,14 +191,14 @@ public class OnlineModeTab extends AUITab {
                 this.addThread.setDaemon(true);
                 this.addThread.start();
             });
-            contentPane.add(this.addAccountButton);
+            contentPane.add(this.addMicrosoftAccountButton);
         }
     }
 
     @Override
     public void setReady() {
-        final DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
-        ViaProxy.saveManager.accountsSave.getAccounts().forEach(account -> model.addElement(account.name()));
+        ViaProxy.saveManager.accountsSave.getAccounts().forEach(this::addAccount);
+        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
         if (!model.isEmpty()) this.markSelected(0);
     }
 
@@ -195,7 +207,13 @@ public class OnlineModeTab extends AUITab {
         this.addAccountPopup.setVisible(false);
         this.addAccountPopup.dispose();
         this.addAccountPopup = null;
-        this.addAccountButton.setEnabled(true);
+        this.addMicrosoftAccountButton.setEnabled(true);
+    }
+
+    private void addAccount(final StepMCProfile.MCProfile account) {
+        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        if (account.prevResult().items().isEmpty()) model.addElement(account.name() + " (Offline)");
+        else model.addElement(account.name() + " (Microsoft)");
     }
 
     private void markSelected(final int index) {
