@@ -66,11 +66,14 @@ public class ViaProxyUI extends JFrame {
                     this.tabs.add(field.get());
                     tab.add(this.contentPane);
                 });
+
+        this.contentPane.setEnabledAt(1, false);
     }
 
 
     public void setReady() {
         for (AUITab tab : this.tabs) tab.setReady();
+        for (int i = 0; i < this.contentPane.getTabCount(); i++) this.contentPane.setEnabledAt(i, true);
     }
 
     public void openURL(final String url) {
