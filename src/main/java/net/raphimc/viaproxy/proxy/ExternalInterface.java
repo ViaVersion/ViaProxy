@@ -84,7 +84,7 @@ public class ExternalInterface {
             }
         } else if (Options.LOCAL_SOCKET_AUTH) {
             new LocalSocketClient(48941).request("authenticate", serverIdHash);
-        } else if (Options.MC_ACCOUNT != null) {
+        } else if (Options.MC_ACCOUNT != null && !Options.MC_ACCOUNT.prevResult().items().isEmpty()) {
             try {
                 ViaProxyGameProfileFetcher.sessionService.joinServer(new GameProfile(Options.MC_ACCOUNT.id(), Options.MC_ACCOUNT.name()), Options.MC_ACCOUNT.prevResult().prevResult().access_token(), serverIdHash);
             } catch (Throwable e) {
