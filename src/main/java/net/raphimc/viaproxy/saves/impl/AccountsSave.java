@@ -1,17 +1,15 @@
 package net.raphimc.viaproxy.saves.impl;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import net.raphimc.mcauth.MinecraftAuth;
+import net.raphimc.mcauth.step.java.StepGameOwnership;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class AccountsSave extends AbstractSave {
 
@@ -25,7 +23,12 @@ public class AccountsSave extends AbstractSave {
     public void load(JsonElement jsonElement) throws Exception {
         this.accounts = new ArrayList<>();
         for (JsonElement element : jsonElement.getAsJsonArray()) {
-            this.accounts.add(MinecraftAuth.Java.Title.MC_PROFILE.fromJson(element.getAsJsonObject()));
+            final JsonObject object = element.getAsJsonObject();
+            if (object.has("is_offline_mode_account") && object.get("is_offline_mode_account").getAsBoolean()) {
+                this.addOfflineAccount(object.get("name").getAsString());
+            } else {
+                this.addAccount(MinecraftAuth.Java.Title.MC_PROFILE.fromJson(object));
+            }
         }
     }
 
@@ -33,7 +36,14 @@ public class AccountsSave extends AbstractSave {
     public JsonElement save() {
         final JsonArray array = new JsonArray();
         for (StepMCProfile.MCProfile account : this.accounts) {
-            array.add(account.toJson());
+            if (account.prevResult().items().isEmpty()) {
+                final JsonObject object = new JsonObject();
+                object.addProperty("is_offline_mode_account", true);
+                object.addProperty("name", account.name());
+                array.add(object);
+            } else {
+                array.add(account.toJson());
+            }
         }
         return array;
     }
@@ -46,6 +56,10 @@ public class AccountsSave extends AbstractSave {
         this.accounts.add(index, profile);
     }
 
+    public void addOfflineAccount(final String name) {
+        this.addAccount(new StepMCProfile.MCProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes()), name, null, new StepGameOwnership.GameOwnership(Collections.emptyList(), null)));
+    }
+
     public void removeAccount(final StepMCProfile.MCProfile profile) {
         this.accounts.remove(profile);
     }
@@ -53,6 +67,11 @@ public class AccountsSave extends AbstractSave {
     public void refreshAccounts() {
         final List<StepMCProfile.MCProfile> accounts = new ArrayList<>();
         for (StepMCProfile.MCProfile account : this.accounts) {
+            if (account.prevResult().items().isEmpty()) {
+                accounts.add(account);
+                continue;
+            }
+
             try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
                 accounts.add(MinecraftAuth.Java.Title.MC_PROFILE.refresh(httpClient, account));
             } catch (Throwable e) {
