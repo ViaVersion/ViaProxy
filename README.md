@@ -26,7 +26,7 @@ To use ViaProxy with Gradle/Maven you can use this [Maven server](https://maven.
 You can also find instructions how to implement it into your build script there.
 
 ## Usage for Players (GUI)
-![ViaProxy GUI](https://i.imgur.com/N2JCvEp.png)
+![ViaProxy GUI](https://i.imgur.com/iN7cmSB.png)
 1. Download the latest version from the [Releases section](#executable-jar-file)
 2. Put the jar file into a folder (ViaProxy will generate config files and store some data there)
 3. Run the jar file
