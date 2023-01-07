@@ -9,13 +9,10 @@ import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
 
 import javax.swing.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.concurrent.TimeoutException;
 
-public class OnlineModeTab extends AUITab {
+public class AccountsTab extends AUITab {
 
     private JList<String> accountsList;
     private JButton addMicrosoftAccountButton;
@@ -23,7 +20,7 @@ public class OnlineModeTab extends AUITab {
     private AddAccountPopup addAccountPopup;
     private Thread addThread;
 
-    public OnlineModeTab(final ViaProxyUI frame) {
+    public AccountsTab(final ViaProxyUI frame) {
         super(frame, "Accounts");
     }
 
@@ -145,7 +142,7 @@ public class OnlineModeTab extends AUITab {
             addOfflineAccountButton.setBounds(10, 300, 230, 20);
             addOfflineAccountButton.addActionListener(event -> {
                 String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
-                if (username != null) {
+                if (username != null && !username.trim().isEmpty()) {
                     StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.addOfflineAccount(username);
                     ViaProxy.saveManager.save();
                     this.addAccount(account);

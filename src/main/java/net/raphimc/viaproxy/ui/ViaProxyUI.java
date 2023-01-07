@@ -3,8 +3,8 @@ package net.raphimc.viaproxy.ui;
 import com.formdev.flatlaf.FlatDarkLaf;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.ui.impl.AccountsTab;
 import net.raphimc.viaproxy.ui.impl.GeneralTab;
-import net.raphimc.viaproxy.ui.impl.OnlineModeTab;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -18,7 +18,7 @@ public class ViaProxyUI extends JFrame {
     private final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
     private final GeneralTab generalTab = new GeneralTab(this);
-    private final OnlineModeTab onlineModeTab = new OnlineModeTab(this);
+    private final AccountsTab accountsTab = new AccountsTab(this);
 
     private ImageIcon icon;
 
