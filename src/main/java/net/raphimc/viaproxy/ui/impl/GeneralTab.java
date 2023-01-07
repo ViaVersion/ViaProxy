@@ -94,7 +94,7 @@ public class GeneralTab extends AUITab {
             authMethodLabel.setBounds(10, 200, 400, 20);
             contentPane.add(authMethodLabel);
 
-            this.authMethod = new JComboBox<>(new String[]{"Use stored account", "Use OpenAuthMod"});
+            this.authMethod = new JComboBox<>(new String[]{"Use selected account", "Use OpenAuthMod"});
             this.authMethod.setBounds(10, 220, 465, 20);
             contentPane.add(this.authMethod);
         }
