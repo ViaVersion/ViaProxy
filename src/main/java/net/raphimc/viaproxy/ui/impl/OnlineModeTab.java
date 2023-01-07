@@ -9,6 +9,8 @@ import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
 
 import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.TimeoutException;
@@ -63,39 +65,79 @@ public class OnlineModeTab extends AUITab {
 
             DefaultListModel<String> model = new DefaultListModel<>();
             this.accountsList = new JList<>(model);
+            this.accountsList.addMouseListener(new MouseAdapter() {
+                public void mousePressed(MouseEvent e) {
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        int row = accountsList.locationToIndex(e.getPoint());
+                        accountsList.setSelectedIndex(row);
+                    }
+                }
+            });
+            this.accountsList.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    int index = accountsList.getSelectedIndex();
+                    if (index == -1) return;
+                    if (e.getKeyCode() == KeyEvent.VK_UP) {
+                        moveUp(index);
+                        e.consume();
+                    } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                        moveDown(index);
+                        e.consume();
+                    }
+                }
+            });
             scrollPane.setViewportView(this.accountsList);
 
             JPopupMenu contextMenu = new JPopupMenu();
-            JMenuItem selectItem = new JMenuItem("Use to join online mode servers");
-            selectItem.addActionListener(e -> {
-                int index = this.accountsList.getSelectedIndex();
-                if (index != -1) {
-                    final StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
-                    if (account != null) {
-                        Options.MC_ACCOUNT = account;
-                    } else {
-                        throw new IllegalStateException("Account is null");
+            {
+                JMenuItem selectItem = new JMenuItem("Use to join online mode servers");
+                selectItem.addActionListener(e -> {
+                    int index = this.accountsList.getSelectedIndex();
+                    if (index != -1) this.markSelected(index);
+                });
+                contextMenu.add(selectItem);
+            }
+            {
+                JMenuItem removeItem = new JMenuItem("Remove");
+                removeItem.addActionListener(e -> {
+                    int index = this.accountsList.getSelectedIndex();
+                    if (index != -1) {
+                        String removedName = model.remove(index);
+                        if (removedName.contains("<")) {
+                            if (model.isEmpty()) this.markSelected(-1);
+                            else this.markSelected(0);
+                        }
+
+                        final StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+                        if (account != null) {
+                            ViaProxy.saveManager.accountsSave.removeAccount(account);
+                            ViaProxy.saveManager.save();
+                        } else {
+                            throw new IllegalStateException("Account is null");
+                        }
                     }
-                }
-            });
-            contextMenu.add(selectItem);
-            JMenuItem removeItem = new JMenuItem("Remove");
-            removeItem.addActionListener(e -> {
-                int index = this.accountsList.getSelectedIndex();
-                if (index != -1) {
-                    model.remove(index);
-                    final StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
-                    if (account != null) {
-                        ViaProxy.saveManager.accountsSave.removeAccount(account);
-                        ViaProxy.saveManager.save();
-                    } else {
-                        throw new IllegalStateException("Account is null");
-                    }
-                }
-                if (index < model.getSize()) this.accountsList.setSelectedIndex(index);
-                else if (index > 0) this.accountsList.setSelectedIndex(index - 1);
-            });
-            contextMenu.add(removeItem);
+                    if (index < model.getSize()) this.accountsList.setSelectedIndex(index);
+                    else if (index > 0) this.accountsList.setSelectedIndex(index - 1);
+                });
+                contextMenu.add(removeItem);
+            }
+            {
+                JMenuItem moveUp = new JMenuItem("Move up ↑");
+                moveUp.addActionListener(e -> {
+                    int index = this.accountsList.getSelectedIndex();
+                    if (index != -1) this.moveUp(index);
+                });
+                contextMenu.add(moveUp);
+            }
+            {
+                JMenuItem moveDown = new JMenuItem("Move down ↓");
+                moveDown.addActionListener(e -> {
+                    int index = this.accountsList.getSelectedIndex();
+                    if (index != -1) this.moveDown(index);
+                });
+                contextMenu.add(moveDown);
+            }
             this.accountsList.setComponentPopupMenu(contextMenu);
         }
         {
@@ -145,6 +187,7 @@ public class OnlineModeTab extends AUITab {
     public void setReady() {
         final DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
         ViaProxy.saveManager.accountsSave.getAccounts().forEach(account -> model.addElement(account.name()));
+        if (!model.isEmpty()) this.markSelected(0);
     }
 
     private void closePopup() {
@@ -153,6 +196,55 @@ public class OnlineModeTab extends AUITab {
         this.addAccountPopup.dispose();
         this.addAccountPopup = null;
         this.addAccountButton.setEnabled(true);
+    }
+
+    private void markSelected(final int index) {
+        if (index == -1) {
+            Options.MC_ACCOUNT = null;
+            return;
+        }
+
+        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        for (int i = 0; i < model.getSize(); i++) model.setElementAt(model.getElementAt(i).replaceAll("<[^>]+>", ""), i);
+        model.setElementAt("<html><span style=\"color:rgb(0, 180, 0)\"><b>" + model.getElementAt(index) + "</b></span></html>", index);
+
+        StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        if (account != null) Options.MC_ACCOUNT = account;
+        else throw new IllegalStateException("Account is null"); //Lists desynced
+    }
+
+    private void moveUp(final int index) {
+        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        if (index == 0) return;
+        String name = model.remove(index);
+        model.add(index - 1, name);
+        this.accountsList.setSelectedIndex(index - 1);
+
+        StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        if (account != null) {
+            ViaProxy.saveManager.accountsSave.removeAccount(account);
+            ViaProxy.saveManager.accountsSave.addAccount(index - 1, account);
+            ViaProxy.saveManager.save();
+        } else {
+            throw new IllegalStateException("Account is null");
+        }
+    }
+
+    private void moveDown(final int index) {
+        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        if (index == model.getSize() - 1) return;
+        String name = model.remove(index);
+        model.add(index + 1, name);
+        this.accountsList.setSelectedIndex(index + 1);
+
+        StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        if (account != null) {
+            ViaProxy.saveManager.accountsSave.removeAccount(account);
+            ViaProxy.saveManager.accountsSave.addAccount(index + 1, account);
+            ViaProxy.saveManager.save();
+        } else {
+            throw new IllegalStateException("Account is null");
+        }
     }
 
 }

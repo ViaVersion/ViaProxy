@@ -164,11 +164,7 @@ public class GeneralTab extends AUITab {
                 Options.PROTOCOL_VERSION = serverVersion;
                 Options.BETACRAFT_AUTH = betaCraftAuth;
 
-                if (authMethod == 0 && Options.MC_ACCOUNT == null && !ViaProxy.saveManager.accountsSave.getAccounts().isEmpty()) {
-                    Options.MC_ACCOUNT = ViaProxy.saveManager.accountsSave.getAccounts().get(0);
-                } else if (authMethod == 1) {
-                    Options.OPENAUTHMOD_AUTH = true;
-                }
+                if (authMethod == 1) Options.OPENAUTHMOD_AUTH = true;
 
                 ViaProxy.startProxy();
 

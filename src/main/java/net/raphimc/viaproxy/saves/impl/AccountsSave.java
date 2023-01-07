@@ -9,7 +9,9 @@ import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class AccountsSave extends AbstractSave {
 
@@ -38,6 +40,10 @@ public class AccountsSave extends AbstractSave {
 
     public void addAccount(final StepMCProfile.MCProfile profile) {
         this.accounts.add(profile);
+    }
+
+    public void addAccount(final int index, final StepMCProfile.MCProfile profile) {
+        this.accounts.add(index, profile);
     }
 
     public void removeAccount(final StepMCProfile.MCProfile profile) {
