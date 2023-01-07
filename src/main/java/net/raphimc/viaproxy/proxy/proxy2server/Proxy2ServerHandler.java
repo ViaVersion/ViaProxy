@@ -11,7 +11,7 @@ import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.vialegacy.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.proxy.CustomPayloadInterface;
+import net.raphimc.viaproxy.proxy.ExternalInterface;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -76,7 +76,7 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
             auth = this.proxyConnection.getUserConnection().get(ProtocolMetadataStorage.class).authenticate;
         }
         if (auth) {
-            CustomPayloadInterface.joinServer(serverHash, this.proxyConnection);
+            ExternalInterface.joinServer(serverHash, this.proxyConnection);
         }
 
         final byte[] encryptedSecretKey = CryptUtil.encryptData(publicKey, secretKey.getEncoded());
@@ -84,7 +84,7 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
 
         final C2SLoginKeyPacket1_19_3 loginKey = new C2SLoginKeyPacket1_19_3(encryptedSecretKey, encryptedNonce);
         if (this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
-            CustomPayloadInterface.signNonce(packet.nonce, loginKey, this.proxyConnection);
+            ExternalInterface.signNonce(packet.nonce, loginKey, this.proxyConnection);
         }
         this.proxyConnection.getChannel().writeAndFlush(loginKey).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 

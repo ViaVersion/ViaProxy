@@ -179,7 +179,7 @@ public class ProxyConnection extends NetClient {
                     PacketTypes.writeString(disconnectPacketData, channel);
                     PacketTypes.writeVarInt(disconnectPacketData, id);
                     disconnectPacketData.writeBytes(data);
-                    this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(messageToJson("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + CustomPayloadInterface.OPENAUTHMOD_LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(messageToJson("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + ExternalInterface.OPENAUTHMOD_LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 }
                 break;
             case PLAY:

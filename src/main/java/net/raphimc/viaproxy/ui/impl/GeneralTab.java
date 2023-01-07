@@ -94,7 +94,7 @@ public class GeneralTab extends AUITab {
             authMethodLabel.setBounds(10, 200, 400, 20);
             contentPane.add(authMethodLabel);
 
-            this.authMethod = new JComboBox<>(new String[]{"Use OpenAuthMod"});
+            this.authMethod = new JComboBox<>(new String[]{"Use stored account", "Use OpenAuthMod"});
             this.authMethod.setBounds(10, 220, 465, 20);
             contentPane.add(this.authMethod);
         }
@@ -149,7 +149,7 @@ public class GeneralTab extends AUITab {
             final String serverAddress = this.serverAddress.getText();
             final VersionEnum serverVersion = (VersionEnum) this.serverVersion.getSelectedItem();
             final int bindPort = (int) this.bindPort.getValue();
-            final String authMethod = (String) this.authMethod.getSelectedItem();
+            final int authMethod = this.authMethod.getSelectedIndex();
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();
             final boolean proxyOnlineMode = this.proxyOnlineMode.isSelected();
 
@@ -162,9 +162,13 @@ public class GeneralTab extends AUITab {
                 Options.CONNECT_ADDRESS = hostAndPort.getHost();
                 Options.CONNECT_PORT = hostAndPort.getPortOrDefault(25565);
                 Options.PROTOCOL_VERSION = serverVersion;
-
-                Options.OPENAUTHMOD_AUTH = true;
                 Options.BETACRAFT_AUTH = betaCraftAuth;
+
+                if (authMethod == 0 && Options.MC_ACCOUNT == null && !ViaProxy.saveManager.accountsSave.getAccounts().isEmpty()) {
+                    Options.MC_ACCOUNT = ViaProxy.saveManager.accountsSave.getAccounts().get(0);
+                } else if (authMethod == 1) {
+                    Options.OPENAUTHMOD_AUTH = true;
+                }
 
                 ViaProxy.startProxy();
 

@@ -21,6 +21,7 @@ import net.raphimc.viaproxy.protocolhack.ProtocolHack;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
+import net.raphimc.viaproxy.saves.SaveManager;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -31,8 +32,10 @@ public class ViaProxy {
 
     public static final String VERSION = "${version}";
 
+    public static SaveManager saveManager;
     public static NetServer currentProxyServer;
     public static Thread loaderThread;
+    public static Thread accountRefreshThread;
     public static ChannelGroup c2pChannels;
 
     public static void main(String[] args) throws Throwable {
@@ -49,6 +52,7 @@ public class ViaProxy {
         Logger.setup();
         ConsoleHandler.hookConsole();
         Logger.LOGGER.info("Initializing ViaProxy v" + VERSION + "...");
+        saveManager = new SaveManager();
         VersionEnum.init();
         setNettyParameters();
         MCPipeline.useOptimizedPipeline();
@@ -57,12 +61,17 @@ public class ViaProxy {
             ProtocolHack.init();
             PluginManager.loadPlugins();
         }, "ViaProtocolHack-Loader");
+        accountRefreshThread = new Thread(() -> {
+            saveManager.accountsSave.refreshAccounts();
+        }, "AccountRefresh");
 
         if (args.length == 0 && !GraphicsEnvironment.isHeadless()) {
             loaderThread.start();
+            accountRefreshThread.start();
             final ViaProxyUI[] ui = new ViaProxyUI[1];
             SwingUtilities.invokeLater(() -> ui[0] = new ViaProxyUI());
             loaderThread.join();
+            accountRefreshThread.join();
             ui[0].setReady();
             Logger.LOGGER.info("ViaProxy started successfully!");
             return;

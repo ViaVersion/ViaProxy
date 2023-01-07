@@ -1,7 +1,5 @@
 package net.raphimc.viaproxy.proxy.client2proxy;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
-import com.github.steveice10.mc.auth.util.UUIDSerializer;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -26,7 +24,6 @@ import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.util.ArrayHelper;
-import net.raphimc.viaproxy.util.LocalSocketClient;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.crypto.SecretKey;
@@ -34,9 +31,9 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
@@ -208,31 +205,17 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
-        this.proxyConnection.setLoginHelloPacket(packet);
-        this.proxyConnection.setGameProfile(new GameProfile((UUID) null, packet.name));
+        ExternalInterface.fillPlayerData(packet, this.proxyConnection);
 
         if (Options.ONLINE_MODE) {
             this.proxyConnection.getC2P().writeAndFlush(new S2CLoginKeyPacket1_8("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         } else {
-            if (Options.LOCAL_SOCKET_AUTH) {
-                String[] response = new LocalSocketClient(48941).request("getusername");
-                if (response != null && response[0].equals("success")) {
-                    this.proxyConnection.setGameProfile(new GameProfile((UUID) null, response[1]));
-                }
-                response = new LocalSocketClient(48941).request("get_public_key_data");
-                if (response != null && response[0].equals("success")) {
-                    final UUID uuid = UUIDSerializer.fromString(response[1].replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"));
-                    final PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(response[2])));
-                    packet = new C2SLoginHelloPacket1_19_3(packet.name, Instant.ofEpochMilli(Long.parseLong(response[4])), publicKey, Base64.getDecoder().decode(response[3]), uuid);
-                }
-            }
-
-            this.proxyConnection.getChannel().writeAndFlush(packet).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
     }
 
     private void handleLoginKey(final C2SLoginKeyPacket1_7 packet) throws GeneralSecurityException, InterruptedException {
-        if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(packet.encryptedNonce, StandardCharsets.UTF_8).equals(CustomPayloadInterface.OPENAUTHMOD_DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
+        if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(packet.encryptedNonce, StandardCharsets.UTF_8).equals(ExternalInterface.OPENAUTHMOD_DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
             final ByteBuf byteBuf = Unpooled.wrappedBuffer(packet.encryptedSecretKey);
             this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);
             return;
@@ -283,7 +266,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
     private boolean handlePlayCustomPayload(final ByteBuf packet) {
         final String channel = PacketTypes.readString(packet, Short.MAX_VALUE); // channel
-        if (channel.equals(CustomPayloadInterface.OPENAUTHMOD_DATA_CHANNEL)) {
+        if (channel.equals(ExternalInterface.OPENAUTHMOD_DATA_CHANNEL)) {
             return this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(packet), packet);
         }
         return false;

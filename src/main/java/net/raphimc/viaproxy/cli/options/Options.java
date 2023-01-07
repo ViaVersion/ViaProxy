@@ -1,6 +1,7 @@
 package net.raphimc.viaproxy.cli.options;
 
 import joptsimple.*;
+import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.vialegacy.util.VersionEnum;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -26,6 +27,9 @@ public class Options {
     public static boolean OPENAUTHMOD_AUTH;
     public static boolean LOCAL_SOCKET_AUTH;
     public static boolean BETACRAFT_AUTH;
+
+    // GUI only config options
+    public static StepMCProfile.MCProfile MC_ACCOUNT;
 
     public static void parse(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();

@@ -2,6 +2,8 @@ package net.raphimc.viaproxy.ui.impl;
 
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.java.StepMCProfile;
+import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
@@ -31,16 +33,21 @@ public class OnlineModeTab extends AUITab {
             contentPane.add(infoLabel);
         }
         {
+            JLabel info2Label = new JLabel("You can select the account to use by right clicking it. By default the first one will be used.");
+            info2Label.setBounds(10, 30, 500, 20);
+            contentPane.add(info2Label);
+        }
+        {
             JLabel infoLabel = new JLabel("<html>If you change your account frequently, you might want to install <a href=\"\">OpenAuthMod</a> on your</html>");
-            infoLabel.setBounds(10, 40, 500, 20);
+            infoLabel.setBounds(10, 60, 500, 20);
             contentPane.add(infoLabel);
 
             JLabel infoLabel2 = new JLabel("client. This allows ViaProxy to use the account you are logged in with on the client.");
-            infoLabel2.setBounds(10, 60, 500, 20);
+            infoLabel2.setBounds(10, 80, 500, 20);
             contentPane.add(infoLabel2);
 
             JLabel clickRect = new JLabel();
-            clickRect.setBounds(353, 40, 80, 20);
+            clickRect.setBounds(353, 60, 80, 20);
             clickRect.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
@@ -51,7 +58,7 @@ public class OnlineModeTab extends AUITab {
         }
         {
             JScrollPane scrollPane = new JScrollPane();
-            scrollPane.setBounds(10, 85, 465, 205);
+            scrollPane.setBounds(10, 105, 465, 185);
             contentPane.add(scrollPane);
 
             DefaultListModel<String> model = new DefaultListModel<>();
@@ -59,12 +66,31 @@ public class OnlineModeTab extends AUITab {
             scrollPane.setViewportView(this.accountsList);
 
             JPopupMenu contextMenu = new JPopupMenu();
+            JMenuItem selectItem = new JMenuItem("Use to join online mode servers");
+            selectItem.addActionListener(e -> {
+                int index = this.accountsList.getSelectedIndex();
+                if (index != -1) {
+                    final StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+                    if (account != null) {
+                        Options.MC_ACCOUNT = account;
+                    } else {
+                        throw new IllegalStateException("Account is null");
+                    }
+                }
+            });
+            contextMenu.add(selectItem);
             JMenuItem removeItem = new JMenuItem("Remove");
             removeItem.addActionListener(e -> {
                 int index = this.accountsList.getSelectedIndex();
                 if (index != -1) {
                     model.remove(index);
-                    //TODO: Remove from save
+                    final StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+                    if (account != null) {
+                        ViaProxy.saveManager.accountsSave.removeAccount(account);
+                        ViaProxy.saveManager.save();
+                    } else {
+                        throw new IllegalStateException("Account is null");
+                    }
                 }
                 if (index < model.getSize()) this.accountsList.setSelectedIndex(index);
                 else if (index > 0) this.accountsList.setSelectedIndex(index - 1);
@@ -89,10 +115,11 @@ public class OnlineModeTab extends AUITab {
                         });
                         SwingUtilities.invokeLater(() -> {
                             this.closePopup();
+                            ViaProxy.saveManager.accountsSave.addAccount(profile);
+                            ViaProxy.saveManager.save();
                             DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
                             model.addElement(profile.name());
                             this.frame.showInfo("The account " + profile.name() + " was added successfully.");
-                            //TODO: Add to save
                         });
                     } catch (InterruptedException ignored) {
                     } catch (TimeoutException e) {
@@ -112,6 +139,12 @@ public class OnlineModeTab extends AUITab {
             });
             contentPane.add(this.addAccountButton);
         }
+    }
+
+    @Override
+    public void setReady() {
+        final DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        ViaProxy.saveManager.accountsSave.getAccounts().forEach(account -> model.addElement(account.name()));
     }
 
     private void closePopup() {
