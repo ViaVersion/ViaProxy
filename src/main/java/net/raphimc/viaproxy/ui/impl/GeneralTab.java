@@ -106,6 +106,7 @@ public class GeneralTab extends AUITab {
         {
             this.proxyOnlineMode = new JCheckBox("Proxy Online Mode");
             this.proxyOnlineMode.setBounds(350, 250, 465, 20);
+            this.proxyOnlineMode.setToolTipText("Enabling Proxy Online Mode requires your client to have a valid account.\nProxy Online Mode allows your client to see skins on online mode servers and use the signed chat features.");
             contentPane.add(this.proxyOnlineMode);
         }
         {
