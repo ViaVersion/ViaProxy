@@ -110,6 +110,10 @@ public class ViaProxy {
             updateCheckThread.start();
             loaderThread.join();
             accountRefreshThread.join();
+            while (ui[0] == null) {
+                Logger.LOGGER.info("Waiting for UI to be initialized...");
+                Thread.sleep(1000);
+            }
             ui[0].setReady();
             Logger.LOGGER.info("ViaProxy started successfully!");
             return;
