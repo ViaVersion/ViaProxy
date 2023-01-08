@@ -157,7 +157,6 @@ public class GeneralTab extends AUITab {
             try {
                 final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
 
-                Options.BIND_ADDRESS = "127.0.0.1";
                 Options.BIND_PORT = bindPort;
                 Options.ONLINE_MODE = proxyOnlineMode;
                 Options.CONNECT_ADDRESS = hostAndPort.getHost();
