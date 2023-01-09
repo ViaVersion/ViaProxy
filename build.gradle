@@ -56,7 +56,7 @@ dependencies {
     include("com.github.GeyserMC:MCAuthLib:1.4") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    include "net.lenni0451.classtransform:mixinstranslator:1.7.6"
+    include "net.lenni0451.classtransform:mixinstranslator:1.7.7"
     include "net.lenni0451.classtransform:mixinsdummy:1.7.6"
     include "net.lenni0451.classtransform:additionalclassprovider:1.7.6"
     include "net.lenni0451:Reflect:1.0.2"
