@@ -137,9 +137,14 @@ public class ViaProxy {
         if (currentProxyServer != null) {
             throw new IllegalStateException("Proxy is already running");
         }
-        currentProxyServer = new NetServer(Client2ProxyHandler::new, Client2ProxyChannelInitializer::new);
-        Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS + ":" + Options.BIND_PORT);
-        currentProxyServer.bind(Options.BIND_ADDRESS, Options.BIND_PORT, false);
+        try {
+            currentProxyServer = new NetServer(Client2ProxyHandler::new, Client2ProxyChannelInitializer::new);
+            Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS + ":" + Options.BIND_PORT);
+            currentProxyServer.bind(Options.BIND_ADDRESS, Options.BIND_PORT, false);
+        } catch (Throwable e) {
+            currentProxyServer = null;
+            throw e;
+        }
     }
 
     public static void stopProxy() {
