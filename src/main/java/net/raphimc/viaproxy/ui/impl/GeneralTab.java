@@ -147,7 +147,7 @@ public class GeneralTab extends AUITab {
         this.stateButton.setText("Starting...");
 
         new Thread(() -> {
-            final String serverAddress = this.serverAddress.getText();
+            final String serverAddress = this.serverAddress.getText().trim();
             final VersionEnum serverVersion = (VersionEnum) this.serverVersion.getSelectedItem();
             final int bindPort = (int) this.bindPort.getValue();
             final int authMethod = this.authMethod.getSelectedIndex();
