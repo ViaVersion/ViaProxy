@@ -6,6 +6,7 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -155,18 +156,32 @@ public class GeneralTab extends AUITab {
             final boolean proxyOnlineMode = this.proxyOnlineMode.isSelected();
 
             try {
-                final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
+                try {
+                    final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
 
-                Options.BIND_PORT = bindPort;
-                Options.ONLINE_MODE = proxyOnlineMode;
-                Options.CONNECT_ADDRESS = hostAndPort.getHost();
-                Options.CONNECT_PORT = hostAndPort.getPortOrDefault(25565);
-                Options.PROTOCOL_VERSION = serverVersion;
-                Options.BETACRAFT_AUTH = betaCraftAuth;
+                    Options.BIND_PORT = bindPort;
+                    Options.ONLINE_MODE = proxyOnlineMode;
+                    Options.CONNECT_ADDRESS = hostAndPort.getHost();
+                    Options.CONNECT_PORT = hostAndPort.getPortOrDefault(25565);
+                    Options.PROTOCOL_VERSION = serverVersion;
+                    Options.BETACRAFT_AUTH = betaCraftAuth;
 
-                if (authMethod == 2) Options.OPENAUTHMOD_AUTH = true;
+                    if (authMethod == 2) Options.OPENAUTHMOD_AUTH = true;
+                } catch (Throwable e) {
+                    SwingUtilities.invokeLater(() -> {
+                        this.frame.showError("Invalid server address!");
+                    });
+                    throw e;
+                }
 
-                ViaProxy.startProxy();
+                try {
+                    ViaProxy.startProxy();
+                } catch (Throwable e) {
+                    SwingUtilities.invokeLater(() -> {
+                        this.frame.showError("Failed to start ViaProxy! Ensure that the local port is not already in use and try again.");
+                    });
+                    throw e;
+                }
 
                 SwingUtilities.invokeLater(() -> {
                     this.updateStateLabel();
@@ -174,8 +189,8 @@ public class GeneralTab extends AUITab {
                     this.stateButton.setText("Stop");
                 });
             } catch (Throwable e) {
+                Logger.LOGGER.error("Error while starting ViaProxy", e);
                 SwingUtilities.invokeLater(() -> {
-                    this.frame.showError("Invalid server address!");
                     this.setComponentsEnabled(true);
                     this.stateButton.setEnabled(true);
                     this.stateButton.setText("Start");
