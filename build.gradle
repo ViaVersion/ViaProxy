@@ -58,7 +58,7 @@ dependencies {
     }
     include "net.lenni0451.classtransform:mixinstranslator:1.7.7"
     include "net.lenni0451.classtransform:mixinsdummy:1.7.6"
-    include "net.lenni0451.classtransform:additionalclassprovider:1.7.6"
+    include "net.lenni0451.classtransform:additionalclassprovider:1.7.7"
     include "net.lenni0451:Reflect:1.0.2"
     include "net.lenni0451:LambdaEvents:2.0.3"
     include "net.raphimc.netminecraft:all:2.2.2"
