@@ -166,7 +166,15 @@ public class GeneralTab extends AUITab {
                     Options.PROTOCOL_VERSION = serverVersion;
                     Options.BETACRAFT_AUTH = betaCraftAuth;
 
-                    if (authMethod == 2) Options.OPENAUTHMOD_AUTH = true;
+                    if (authMethod != 1) {
+                        Options.MC_ACCOUNT = null;
+                    } else if (Options.MC_ACCOUNT == null) {
+                        this.frame.accountsTab.markSelected(0);
+                    }
+
+                    if (authMethod == 2) {
+                        Options.OPENAUTHMOD_AUTH = true;
+                    }
                 } catch (Throwable e) {
                     SwingUtilities.invokeLater(() -> {
                         this.frame.showError("Invalid server address!");

@@ -9,7 +9,10 @@ import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.concurrent.TimeoutException;
 
 public class AccountsTab extends AUITab {
@@ -213,8 +216,8 @@ public class AccountsTab extends AUITab {
         else model.addElement(account.name() + " (Microsoft)");
     }
 
-    private void markSelected(final int index) {
-        if (index == -1) {
+    public void markSelected(final int index) {
+        if (index < 0 || index >= this.accountsList.getModel().getSize()) {
             Options.MC_ACCOUNT = null;
             return;
         }

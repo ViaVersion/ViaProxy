@@ -17,8 +17,8 @@ public class ViaProxyUI extends JFrame {
 
     private final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
-    private final GeneralTab generalTab = new GeneralTab(this);
-    private final AccountsTab accountsTab = new AccountsTab(this);
+    public final GeneralTab generalTab = new GeneralTab(this);
+    public final AccountsTab accountsTab = new AccountsTab(this);
 
     private ImageIcon icon;
 
