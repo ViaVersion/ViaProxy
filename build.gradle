@@ -42,8 +42,8 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-core:2.0.3-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.0.4"
-    include("net.raphimc:ViaProtocolHack:2.0.1") {
+    include "net.raphimc:ViaLegacy:2.1.0"
+    include("net.raphimc:ViaProtocolHack:2.1.0") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 

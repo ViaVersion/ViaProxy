@@ -4,8 +4,10 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.BlockFace;
 import com.viaversion.viaversion.api.minecraft.Position;
 import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.blockconnections.AbstractFenceConnectionHandler;
-import net.raphimc.vialegacy.util.VersionEnum;
-import org.spongepowered.asm.mixin.*;
+import net.raphimc.viaprotocolhack.util.VersionEnum;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(value = AbstractFenceConnectionHandler.class, remap = false)
 public abstract class MixinAbstractFenceConnectionHandler {

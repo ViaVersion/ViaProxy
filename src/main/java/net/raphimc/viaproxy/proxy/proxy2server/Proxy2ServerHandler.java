@@ -1,7 +1,9 @@
 package net.raphimc.viaproxy.proxy.proxy2server;
 
 import com.github.steveice10.mc.auth.data.GameProfile;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.crypto.AESEncryption;
@@ -9,7 +11,7 @@ import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
-import net.raphimc.vialegacy.util.VersionEnum;
+import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.proxy.ExternalInterface;
 import net.raphimc.viaproxy.proxy.ProxyConnection;

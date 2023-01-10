@@ -15,7 +15,6 @@ import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.reflect.ClassLoaders;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
-import net.raphimc.vialegacy.util.VersionEnum;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
@@ -58,7 +57,6 @@ public class ViaProxy {
         ConsoleHandler.hookConsole();
         Logger.LOGGER.info("Initializing ViaProxy v" + VERSION + "...");
         saveManager = new SaveManager();
-        VersionEnum.init();
         setNettyParameters();
         MCPipeline.useOptimizedPipeline();
         c2pChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);

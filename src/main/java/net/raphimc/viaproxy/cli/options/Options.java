@@ -1,8 +1,10 @@
 package net.raphimc.viaproxy.cli.options;
 
-import joptsimple.*;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import net.raphimc.mcauth.step.java.StepMCProfile;
-import net.raphimc.vialegacy.util.VersionEnum;
+import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.IOException;

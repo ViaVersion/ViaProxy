@@ -1,7 +1,7 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import com.google.common.net.HostAndPort;
-import net.raphimc.vialegacy.util.VersionEnum;
+import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.ui.AUITab;
@@ -67,7 +67,7 @@ public class GeneralTab extends AUITab {
             serverVersionLabel.setBounds(10, 100, 100, 20);
             contentPane.add(serverVersionLabel);
 
-            this.serverVersion = new JComboBox<>(VersionEnum.RENDER_VERSIONS.toArray(new VersionEnum[0]));
+            this.serverVersion = new JComboBox<>(VersionEnum.SORTED_VERSIONS.toArray(new VersionEnum[0]));
             this.serverVersion.setBounds(10, 120, 465, 20);
             this.serverVersion.setRenderer(new DefaultListCellRenderer() {
                 @Override
