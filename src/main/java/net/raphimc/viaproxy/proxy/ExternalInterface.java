@@ -5,7 +5,9 @@ import com.github.steveice10.mc.auth.util.UUIDSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.raphimc.netminecraft.packet.PacketTypes;
-import net.raphimc.netminecraft.packet.impl.login.*;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.protocolhack.providers.ViaProxyGameProfileFetcher;
 import net.raphimc.viaproxy.util.LocalSocketClient;
@@ -13,13 +15,17 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class ExternalInterface {
 
@@ -99,13 +105,12 @@ public class ExternalInterface {
         Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Requesting nonce signature");
         if (Options.OPENAUTHMOD_AUTH) {
             try {
-                final ByteBuf response = proxyConnection.sendCustomPayload(OPENAUTHMOD_SIGN_NONCE_CHANNEL, PacketTypes.writeByteArray(Unpooled.buffer(), nonce)).get(4, TimeUnit.SECONDS);
+                final ByteBuf response = proxyConnection.sendCustomPayload(OPENAUTHMOD_SIGN_NONCE_CHANNEL, PacketTypes.writeByteArray(Unpooled.buffer(), nonce)).get(5, TimeUnit.SECONDS);
                 if (response == null) throw new TimeoutException();
                 if (!response.readBoolean()) throw new TimeoutException();
                 packet.salt = response.readLong();
                 packet.signature = PacketTypes.readByteArray(response);
-            } catch (TimeoutException e) {
-                proxyConnection.kickClient("§cAuthentication cancelled! You need to install OpenAuthMod in order to join this server.");
+            } catch (TimeoutException ignored) {
             }
         } else if (Options.LOCAL_SOCKET_AUTH) {
             final String[] response = new LocalSocketClient(48941).request("sign_nonce", Base64.getEncoder().encodeToString(nonce));
@@ -114,9 +119,6 @@ public class ExternalInterface {
                 packet.signature = Base64.getDecoder().decode(response[2]);
             }
         } else if (Options.MC_ACCOUNT != null) { // TODO: Key
-            proxyConnection.kickClient("§cJoining servers which requires a signed nonce is not yet supported.");
-        } else {
-            proxyConnection.kickClient("§cThis server is in online mode and requires a valid authentication mode.");
         }
     }
 

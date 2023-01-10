@@ -85,7 +85,7 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
         final byte[] encryptedNonce = CryptUtil.encryptData(publicKey, packet.nonce);
 
         final C2SLoginKeyPacket1_19_3 loginKey = new C2SLoginKeyPacket1_19_3(encryptedSecretKey, encryptedNonce);
-        if (this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
+        if (this.proxyConnection.getServerVersion().isNewerThanOrEqualTo(VersionEnum.r1_19) && this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
             ExternalInterface.signNonce(packet.nonce, loginKey, this.proxyConnection);
         }
         this.proxyConnection.getChannel().writeAndFlush(loginKey).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
