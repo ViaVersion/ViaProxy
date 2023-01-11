@@ -12,6 +12,7 @@ import net.lenni0451.classtransform.additionalclassprovider.GuavaClassPathProvid
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.classtransform.utils.loader.EnumLoaderPriority;
 import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
+import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.reflect.ClassLoaders;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
@@ -41,7 +42,8 @@ public class ViaProxy {
     public static ChannelGroup c2pChannels;
 
     public static void main(String[] args) throws Throwable {
-        final TransformerManager transformerManager = new TransformerManager(new GuavaClassPathProvider());
+        final IClassProvider classProvider = new GuavaClassPathProvider();
+        final TransformerManager transformerManager = new TransformerManager(classProvider);
         transformerManager.addTransformerPreprocessor(new MixinsTranslator());
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.transformer.**");
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
@@ -66,6 +68,7 @@ public class ViaProxy {
         }, "ViaProtocolHack-Loader");
         Thread accountRefreshThread = new Thread(() -> {
             saveManager.accountsSave.refreshAccounts();
+            saveManager.save();
         }, "AccountRefresh");
         Thread updateCheckThread = new Thread(() -> {
             if (VERSION.startsWith("$")) return; // Dev env check

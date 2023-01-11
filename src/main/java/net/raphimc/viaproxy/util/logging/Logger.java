@@ -1,6 +1,6 @@
 package net.raphimc.viaproxy.util.logging;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
+import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

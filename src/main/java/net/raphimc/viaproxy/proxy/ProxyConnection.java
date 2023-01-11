@@ -1,6 +1,6 @@
 package net.raphimc.viaproxy.proxy;
 
-import com.github.steveice10.mc.auth.data.GameProfile;
+import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.libs.gson.JsonPrimitive;
@@ -24,6 +24,7 @@ import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -185,7 +186,7 @@ public class ProxyConnection extends NetClient {
                     PacketTypes.writeString(disconnectPacketData, channel);
                     PacketTypes.writeVarInt(disconnectPacketData, id);
                     disconnectPacketData.writeBytes(data);
-                    this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(messageToJson("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + ExternalInterface.OPENAUTHMOD_LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(messageToJson("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + OpenAuthModConstants.LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 }
                 break;
             case PLAY:

@@ -23,10 +23,11 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
-import net.raphimc.viaproxy.protocolhack.providers.ViaProxyGameProfileFetcher;
-import net.raphimc.viaproxy.proxy.ExternalInterface;
 import net.raphimc.viaproxy.proxy.LoginState;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
+import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
+import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
+import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
@@ -225,7 +226,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     }
 
     private void handleLoginKey(final C2SLoginKeyPacket1_7 packet) throws GeneralSecurityException, InterruptedException {
-        if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(packet.encryptedNonce, StandardCharsets.UTF_8).equals(ExternalInterface.OPENAUTHMOD_DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
+        if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(packet.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
             final ByteBuf byteBuf = Unpooled.wrappedBuffer(packet.encryptedSecretKey);
             this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);
             return;
@@ -255,12 +256,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
         try {
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
-            this.proxyConnection.setGameProfile(ViaProxyGameProfileFetcher.sessionService.getProfileByServer(userName, serverHash));
+            this.proxyConnection.setGameProfile(AuthLibServices.sessionService.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, this.proxyConnection.getC2P().remoteAddress().getAddress()));
             if (this.proxyConnection.getGameProfile() == null) {
                 Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid session");
                 this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
             }
-            Logger.u_info("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Authenticated as " + this.proxyConnection.getGameProfile().getIdAsString());
+            Logger.u_info("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
         } catch (Throwable e) {
             throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
         }
@@ -276,7 +277,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
     private boolean handlePlayCustomPayload(final ByteBuf packet) {
         final String channel = PacketTypes.readString(packet, Short.MAX_VALUE); // channel
-        if (channel.equals(ExternalInterface.OPENAUTHMOD_DATA_CHANNEL)) {
+        if (channel.equals(OpenAuthModConstants.DATA_CHANNEL)) {
             return this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(packet), packet);
         }
         return false;
