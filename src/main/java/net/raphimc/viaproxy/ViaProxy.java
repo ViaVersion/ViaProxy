@@ -35,6 +35,7 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.injection.Java17ToJava8;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.protocolhack.ProtocolHack;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
@@ -62,6 +63,7 @@ public class ViaProxy {
         final IClassProvider classProvider = new GuavaClassPathProvider();
         final TransformerManager transformerManager = new TransformerManager(classProvider);
         transformerManager.addTransformerPreprocessor(new MixinsTranslator());
+        transformerManager.addBytecodeTransformer(new Java17ToJava8(classProvider));
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.transformer.**");
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
         final InjectionClassLoader injectionClassLoader = new InjectionClassLoader(transformerManager, ClassLoaders.getSystemClassPath());
