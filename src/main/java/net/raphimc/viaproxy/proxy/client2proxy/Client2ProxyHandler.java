@@ -70,11 +70,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     private static final Random RANDOM = new Random();
 
     static {
-        if (Options.ONLINE_MODE) {
-            KEY_PAIR = CryptUtil.generateKeyPair();
-        } else {
-            KEY_PAIR = null;
-        }
+        KEY_PAIR = CryptUtil.generateKeyPair();
     }
 
     private ProxyConnection proxyConnection;
@@ -88,7 +84,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
 
-        if (Options.ONLINE_MODE) RANDOM.nextBytes(this.verifyToken);
+        RANDOM.nextBytes(this.verifyToken);
         this.proxyConnection = new ProxyConnection(Proxy2ServerHandler::new, Proxy2ServerChannelInitializer::new, (SocketChannel) ctx.channel());
         ctx.channel().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
