@@ -43,4 +43,7 @@ public abstract class AUITab {
     public void setReady() {
     }
 
+    public void onClose() {
+    }
+
 }

@@ -26,6 +26,8 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,12 @@ public class ViaProxyUI extends JFrame {
         this.setTitle("ViaProxy v" + ViaProxy.VERSION);
         this.setIconImage(this.icon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                for (AUITab tab : tabs) tab.onClose();
+            }
+        });
         this.setSize(500, 403);
         this.setResizable(false);
         this.setLocationRelativeTo(null);

@@ -21,6 +21,7 @@ import com.google.common.net.HostAndPort;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -77,6 +78,7 @@ public class GeneralTab extends AUITab {
 
             this.serverAddress = new JTextField();
             this.serverAddress.setBounds(10, 70, 465, 20);
+            ViaProxy.saveManager.uiSave.loadTextField("server_address", this.serverAddress);
             contentPane.add(this.serverAddress);
         }
         {
@@ -96,6 +98,7 @@ public class GeneralTab extends AUITab {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
             });
+            ViaProxy.saveManager.uiSave.loadComboBox("server_version", this.serverVersion);
             contentPane.add(this.serverVersion);
         }
         {
@@ -105,6 +108,7 @@ public class GeneralTab extends AUITab {
 
             this.bindPort = new JSpinner(new SpinnerNumberModel(25568, 1, 65535, 1));
             this.bindPort.setBounds(10, 170, 465, 20);
+            ViaProxy.saveManager.uiSave.loadSpinner("bind_port", this.bindPort);
             contentPane.add(this.bindPort);
         }
         {
@@ -114,17 +118,20 @@ public class GeneralTab extends AUITab {
 
             this.authMethod = new JComboBox<>(new String[]{"Use no account", "Use selected account", "Use OpenAuthMod"});
             this.authMethod.setBounds(10, 220, 465, 20);
+            ViaProxy.saveManager.uiSave.loadComboBox("auth_method", this.authMethod);
             contentPane.add(this.authMethod);
         }
         {
             this.betaCraftAuth = new JCheckBox("BetaCraft Auth (Classic)");
             this.betaCraftAuth.setBounds(10, 250, 150, 20);
+            ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
             contentPane.add(this.betaCraftAuth);
         }
         {
             this.proxyOnlineMode = new JCheckBox("Proxy Online Mode");
             this.proxyOnlineMode.setBounds(350, 250, 465, 20);
             this.proxyOnlineMode.setToolTipText("Enabling Proxy Online Mode requires your client to have a valid account.\nProxy Online Mode allows your client to see skins on online mode servers and use the signed chat features.");
+            ViaProxy.saveManager.uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
             contentPane.add(this.proxyOnlineMode);
         }
         {
@@ -143,6 +150,26 @@ public class GeneralTab extends AUITab {
             this.stateButton.setEnabled(false);
             contentPane.add(this.stateButton);
         }
+    }
+
+    @Override
+    public void setReady() {
+        SwingUtilities.invokeLater(() -> {
+            this.stateButton.setText("Start");
+            this.stateButton.setEnabled(true);
+        });
+    }
+
+    @Override
+    public void onClose() {
+        UISave save = ViaProxy.saveManager.uiSave;
+        save.put("server_address", this.serverAddress.getText());
+        save.put("server_version", String.valueOf(this.serverVersion.getSelectedIndex()));
+        save.put("bind_port", String.valueOf(this.bindPort.getValue()));
+        save.put("auth_method", String.valueOf(this.authMethod.getSelectedIndex()));
+        save.put("betacraft_auth", String.valueOf(this.betaCraftAuth.isSelected()));
+        save.put("proxy_online_mode", String.valueOf(this.proxyOnlineMode.isSelected()));
+        ViaProxy.saveManager.save();
     }
 
     private void setComponentsEnabled(final boolean state) {
@@ -231,14 +258,6 @@ public class GeneralTab extends AUITab {
         this.stateLabel.setVisible(false);
         this.stateButton.setText("Start");
         this.setComponentsEnabled(true);
-    }
-
-    @Override
-    public void setReady() {
-        SwingUtilities.invokeLater(() -> {
-            this.stateButton.setText("Start");
-            this.stateButton.setEnabled(true);
-        });
     }
 
 }
