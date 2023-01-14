@@ -15,35 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.ui;
+package net.raphimc.viaproxy.tasks;
 
-import javax.swing.*;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.protocolhack.ProtocolHack;
 
-public abstract class AUITab {
+public class LoaderTask implements Runnable {
 
-    protected final ViaProxyUI frame;
-    private final String name;
-    private final JPanel contentPane;
-
-    public AUITab(final ViaProxyUI frame, final String name) {
-        this.frame = frame;
-        this.name = name;
-        this.contentPane = new JPanel();
-
-        this.contentPane.setLayout(null);
-        this.init(this.contentPane);
-    }
-
-    public void add(final JTabbedPane tabbedPane) {
-        tabbedPane.addTab(this.name, this.contentPane);
-    }
-
-    protected abstract void init(final JPanel contentPane);
-
-    public void setReady() {
-    }
-
-    public void onClose() {
+    @Override
+    public void run() {
+        ProtocolHack.init();
+        PluginManager.loadPlugins();
     }
 
 }
