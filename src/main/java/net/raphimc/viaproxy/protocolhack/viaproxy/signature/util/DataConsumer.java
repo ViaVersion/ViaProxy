@@ -15,16 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack;
+package net.raphimc.viaproxy.protocolhack.viaproxy.signature.util;
 
-import net.raphimc.viaprotocolhack.ViaProtocolHack;
-import net.raphimc.viaprotocolhack.impl.platform.ViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.protocolhack.impl.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.UUID;
+import java.util.function.Consumer;
 
-public class ProtocolHack {
+@FunctionalInterface
+public interface DataConsumer extends Consumer<byte[]> {
 
-    public static void init() {
-        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, ViaProxyViaBackwardsPlatformImpl::new, ViaProxyViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new);
+    default void accept(final UUID uuid) {
+        final byte[] serializedUuid = new byte[16];
+        ByteBuffer.wrap(serializedUuid).order(ByteOrder.BIG_ENDIAN).putLong(uuid.getMostSignificantBits()).putLong(uuid.getLeastSignificantBits());
+        this.accept(serializedUuid);
     }
 
 }

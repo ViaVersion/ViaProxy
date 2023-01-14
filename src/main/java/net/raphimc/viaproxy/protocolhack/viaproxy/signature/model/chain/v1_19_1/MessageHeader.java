@@ -15,16 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack;
+package net.raphimc.viaproxy.protocolhack.viaproxy.signature.model.chain.v1_19_1;
 
-import net.raphimc.viaprotocolhack.ViaProtocolHack;
-import net.raphimc.viaprotocolhack.impl.platform.ViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.protocolhack.impl.*;
+import net.raphimc.viaproxy.protocolhack.viaproxy.signature.util.DataConsumer;
 
-public class ProtocolHack {
+import java.util.UUID;
 
-    public static void init() {
-        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, ViaProxyViaBackwardsPlatformImpl::new, ViaProxyViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new);
+public class MessageHeader {
+
+    private final byte[] precedingSignature;
+    private final UUID sender;
+
+    public MessageHeader(final byte[] precedingSignature, final UUID sender) {
+        this.precedingSignature = precedingSignature;
+        this.sender = sender;
+    }
+
+    public void update(final DataConsumer dataConsumer) {
+        if (this.precedingSignature != null) {
+            dataConsumer.accept(this.precedingSignature);
+        }
+
+        dataConsumer.accept(this.sender);
     }
 
 }

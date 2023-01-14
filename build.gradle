@@ -66,8 +66,9 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-core:2.0.3-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.1.0"
-    include("net.raphimc:ViaProtocolHack:2.1.1") {
+    include "net.raphimc:ViaLegacy:2.2.1"
+    include "net.raphimc:ViaAprilFools:2.0.1"
+    include("net.raphimc:ViaProtocolHack:2.1.2") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
@@ -80,15 +81,18 @@ dependencies {
     include "org.apache.logging.log4j:log4j-core:2.19.0"
     include "org.apache.logging.log4j:log4j-slf4j-impl:2.19.0"
     include "com/mojang:authlib:3.16.29"
-    include "net.lenni0451.classtransform:mixinstranslator:1.7.7"
-    include "net.lenni0451.classtransform:mixinsdummy:1.7.7"
-    include "net.lenni0451.classtransform:additionalclassprovider:1.7.7"
+    include "net.lenni0451.classtransform:mixinstranslator:1.8.0"
+    include "net.lenni0451.classtransform:mixinsdummy:1.8.0"
+    include "net.lenni0451.classtransform:additionalclassprovider:1.8.0"
     include "net.lenni0451:Reflect:1.0.2"
     include "net.lenni0451:LambdaEvents:2.0.3"
-    include "net.raphimc.netminecraft:all:2.2.2"
+    include "net.raphimc.netminecraft:all:2.2.3"
     include("net.raphimc:MinecraftAuth:2.0.1") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
+    }
+    include("net.lenni0451.mcstructs:all:2.1.1") {
+        exclude group: "com.google.code.gson", module: "gson"
     }
 }
 

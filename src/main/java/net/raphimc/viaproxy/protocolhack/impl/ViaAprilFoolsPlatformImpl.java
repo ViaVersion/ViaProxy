@@ -15,16 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack;
+package net.raphimc.viaproxy.protocolhack.impl;
 
-import net.raphimc.viaprotocolhack.ViaProtocolHack;
-import net.raphimc.viaprotocolhack.impl.platform.ViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.protocolhack.impl.*;
+import com.viaversion.viaversion.api.Via;
+import net.raphimc.viaaprilfools.platform.ViaAprilFoolsPlatform;
+import net.raphimc.viaprotocolhack.util.JLoggerToSLF4J;
+import org.slf4j.LoggerFactory;
 
-public class ProtocolHack {
+import java.io.File;
+import java.util.logging.Logger;
 
-    public static void init() {
-        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, ViaProxyViaBackwardsPlatformImpl::new, ViaProxyViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new);
+public class ViaAprilFoolsPlatformImpl implements ViaAprilFoolsPlatform {
+
+    private static final Logger LOGGER = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaAprilFools"));
+
+    public ViaAprilFoolsPlatformImpl() {
+        this.init(this.getDataFolder());
+    }
+
+    @Override
+    public Logger getLogger() {
+        return LOGGER;
+    }
+
+    @Override
+    public File getDataFolder() {
+        return Via.getPlatform().getDataFolder();
     }
 
 }

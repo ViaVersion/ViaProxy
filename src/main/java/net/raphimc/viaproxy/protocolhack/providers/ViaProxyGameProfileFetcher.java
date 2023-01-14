@@ -35,7 +35,7 @@ public class ViaProxyGameProfileFetcher extends GameProfileFetcher {
     @Override
     public UUID loadMojangUUID(String playerName) throws ExecutionException, InterruptedException {
         final CompletableFuture<com.mojang.authlib.GameProfile> future = new CompletableFuture<>();
-        AuthLibServices.gameProfileRepository.findProfilesByNames(new String[]{playerName}, Agent.MINECRAFT, new ProfileLookupCallback() {
+        AuthLibServices.PROFILE_REPOSITORY.findProfilesByNames(new String[]{playerName}, Agent.MINECRAFT, new ProfileLookupCallback() {
             @Override
             public void onProfileLookupSucceeded(com.mojang.authlib.GameProfile gameProfile) {
                 future.complete(gameProfile);
@@ -55,7 +55,7 @@ public class ViaProxyGameProfileFetcher extends GameProfileFetcher {
     @Override
     public GameProfile loadGameProfile(UUID uuid) {
         final com.mojang.authlib.GameProfile inProfile = new com.mojang.authlib.GameProfile(uuid, null);
-        final com.mojang.authlib.GameProfile mojangProfile = AuthLibServices.sessionService.fillProfileProperties(inProfile, true);
+        final com.mojang.authlib.GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.fillProfileProperties(inProfile, true);
         if (mojangProfile.equals(inProfile)) throw new ProfileNotFoundException();
 
         final GameProfile gameProfile = new GameProfile(mojangProfile.getName(), mojangProfile.getId());

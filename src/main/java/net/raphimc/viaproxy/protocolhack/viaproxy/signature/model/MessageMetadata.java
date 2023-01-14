@@ -15,16 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack;
+package net.raphimc.viaproxy.protocolhack.viaproxy.signature.model;
 
-import net.raphimc.viaprotocolhack.ViaProtocolHack;
-import net.raphimc.viaprotocolhack.impl.platform.ViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.protocolhack.impl.*;
+import java.time.Instant;
+import java.util.UUID;
 
-public class ProtocolHack {
+public class MessageMetadata {
 
-    public static void init() {
-        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, ViaProxyViaBackwardsPlatformImpl::new, ViaProxyViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new);
+    private final UUID sender;
+    private final Instant timestamp;
+    private final long salt;
+
+    public MessageMetadata(final UUID sender, final Instant timestamp, final long salt) {
+        this.sender = sender;
+        this.timestamp = timestamp;
+        this.salt = salt;
+    }
+
+    public MessageMetadata(final UUID sender, final long timestamp, final long salt) {
+        this(sender, Instant.ofEpochMilli(timestamp), salt);
+    }
+
+    public UUID getSender() {
+        return this.sender;
+    }
+
+    public Instant getTimestamp() {
+        return this.timestamp;
+    }
+
+    public long getSalt() {
+        return this.salt;
     }
 
 }

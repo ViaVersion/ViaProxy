@@ -17,6 +17,8 @@
  */
 package net.raphimc.viaproxy.proxy.client2proxy;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.exceptions.AuthenticationException;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -218,7 +220,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
     }
 
-    private void handleLoginHello(C2SLoginHelloPacket1_7 packet) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private void handleLoginHello(C2SLoginHelloPacket1_7 packet) throws NoSuchAlgorithmException, InvalidKeySpecException, AuthenticationException {
         if (this.loginState != LoginState.FIRST_PACKET) throw CloseAndReturn.INSTANCE;
         this.loginState = LoginState.SENT_HELLO;
 
@@ -269,10 +271,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
         try {
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
-            this.proxyConnection.setGameProfile(AuthLibServices.sessionService.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, this.proxyConnection.getC2P().remoteAddress().getAddress()));
-            if (this.proxyConnection.getGameProfile() == null) {
+            final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
+            if (mojangProfile == null) {
                 Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid session");
                 this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
+            } else {
+                this.proxyConnection.setGameProfile(mojangProfile);
             }
             Logger.u_info("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
         } catch (Throwable e) {
