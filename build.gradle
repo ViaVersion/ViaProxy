@@ -114,7 +114,8 @@ jar {
     manifest {
         attributes(
                 "Main-Class": "net.raphimc.viaproxy.ViaProxy",
-                "Multi-Release": "true"
+                "Multi-Release": "true",
+                "Launcher-Agent-Class": "net.raphimc.viaproxy.ViaProxy"
         )
     }
 

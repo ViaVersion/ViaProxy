@@ -28,7 +28,9 @@ import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.classtransform.utils.loader.EnumLoaderPriority;
 import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
+import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.ClassLoaders;
+import net.lenni0451.reflect.Methods;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
@@ -46,15 +48,21 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.instrument.Instrumentation;
 
 public class ViaProxy {
 
     public static final String VERSION = "${version}";
 
+    private static Instrumentation instrumentation;
     public static SaveManager saveManager;
     public static NetServer currentProxyServer;
     public static ChannelGroup c2pChannels;
     public static ViaProxyUI ui;
+
+    public static void agentmain(final String args, final Instrumentation instrumentation) {
+        ViaProxy.instrumentation = instrumentation;
+    }
 
     public static void main(String[] args) throws Throwable {
         final IClassProvider classProvider = new GuavaClassPathProvider();
@@ -63,17 +71,27 @@ public class ViaProxy {
         transformerManager.addBytecodeTransformer(new Java17ToJava8(classProvider));
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.transformer.**");
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
-        final InjectionClassLoader injectionClassLoader = new InjectionClassLoader(transformerManager, ClassLoaders.getSystemClassPath());
-        injectionClassLoader.addProtectedPackage("com.sun.");
-        injectionClassLoader.setPriority(EnumLoaderPriority.PARENT_FIRST);
-        injectionClassLoader.executeMain(ViaProxy.class.getName(), "injectedMain", args);
+        if (instrumentation != null) {
+            transformerManager.hookInstrumentation(instrumentation);
+            injectedMain("Launcher Agent", args);
+            return;
+        }
+        try {
+            transformerManager.hookInstrumentation(Agents.getInstrumentation());
+            injectedMain("Runtime Agent", args);
+        } catch (Throwable t) {
+            final InjectionClassLoader injectionClassLoader = new InjectionClassLoader(transformerManager, ClassLoaders.getSystemClassPath());
+            injectionClassLoader.setPriority(EnumLoaderPriority.PARENT_FIRST);
+            Thread.currentThread().setContextClassLoader(injectionClassLoader);
+            Methods.invoke(null, Methods.getDeclaredMethod(injectionClassLoader.loadClass(ViaProxy.class.getName()), "injectedMain", String.class, String[].class), "Injection ClassLoader", args);
+        }
     }
 
-    public static void injectedMain(String[] args) throws InterruptedException {
+    public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException {
         Logger.setup();
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         ConsoleHandler.hookConsole();
-        Logger.LOGGER.info("Initializing ViaProxy v" + VERSION + "...");
+        Logger.LOGGER.info("Initializing ViaProxy {} v{} (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, injectionMethod);
         saveManager = new SaveManager();
         setNettyParameters();
         MCPipeline.useOptimizedPipeline();
