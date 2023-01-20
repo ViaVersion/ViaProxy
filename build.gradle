@@ -83,7 +83,7 @@ dependencies {
     include "com/mojang:authlib:3.16.29"
     include "net.lenni0451.classtransform:mixinstranslator:1.8.2"
     include "net.lenni0451.classtransform:mixinsdummy:1.8.2"
-    include "net.lenni0451.classtransform:additionalclassprovider:1.8.2"
+    include "net.lenni0451.classtransform:additionalclassprovider:1.8.3"
     include "net.lenni0451:Reflect:1.0.2"
     include "net.lenni0451:LambdaEvents:2.0.3"
     include "net.raphimc.netminecraft:all:2.2.3"
