@@ -26,7 +26,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.util.AttributeKey;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
@@ -59,7 +58,7 @@ public class ProxyConnection extends NetClient {
 
     public static final AttributeKey<ProxyConnection> PROXY_CONNECTION_ATTRIBUTE_KEY = AttributeKey.valueOf("proxy_connection");
 
-    private final SocketChannel c2p;
+    private final Channel c2p;
     private final AtomicInteger customPayloadId = new AtomicInteger(0);
     private final Map<Integer, CompletableFuture<ByteBuf>> customPayloadListener = new ConcurrentHashMap<>();
 
@@ -75,7 +74,7 @@ public class ProxyConnection extends NetClient {
     private Key storedSecretKey;
     private String classicMpPass;
 
-    public ProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, final SocketChannel c2p) {
+    public ProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, final Channel c2p) {
         super(handlerSupplier, channelInitializerSupplier);
         this.c2p = c2p;
     }
@@ -107,7 +106,7 @@ public class ProxyConnection extends NetClient {
         super.connect(serverAddress);
     }
 
-    public SocketChannel getC2P() {
+    public Channel getC2P() {
         return this.c2p;
     }
 
