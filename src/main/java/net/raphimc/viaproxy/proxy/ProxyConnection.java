@@ -75,7 +75,7 @@ public class ProxyConnection extends NetClient {
     private Key storedSecretKey;
     private String classicMpPass;
 
-    public ProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<SocketChannel>> channelInitializerSupplier, final SocketChannel c2p) {
+    public ProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, final SocketChannel c2p) {
         super(handlerSupplier, channelInitializerSupplier);
         this.c2p = c2p;
     }

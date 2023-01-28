@@ -17,8 +17,8 @@
  */
 package net.raphimc.viaproxy.proxy.client2proxy;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.socket.SocketChannel;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
@@ -35,17 +35,17 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
     }
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) {
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.PRE, socketChannel)).isCancelled()) {
-            socketChannel.close();
+    protected void initChannel(Channel channel) {
+        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.PRE, channel)).isCancelled()) {
+            channel.close();
             return;
         }
 
-        super.initChannel(socketChannel);
-        socketChannel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
+        super.initChannel(channel);
+        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
 
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, socketChannel)).isCancelled()) {
-            socketChannel.close();
+        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel)).isCancelled()) {
+            channel.close();
         }
     }
 

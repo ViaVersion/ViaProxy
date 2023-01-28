@@ -20,8 +20,8 @@ package net.raphimc.viaproxy.proxy.proxy2server;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.socket.SocketChannel;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
@@ -46,29 +46,29 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
     }
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) {
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, socketChannel)).isCancelled()) {
-            socketChannel.close();
+    protected void initChannel(Channel channel) {
+        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel)).isCancelled()) {
+            channel.close();
             return;
         }
 
-        final UserConnection user = new UserConnectionImpl(socketChannel, true);
+        final UserConnection user = new UserConnectionImpl(channel, true);
         new ProtocolPipelineImpl(user);
-        ProxyConnection.fromChannel(socketChannel).setUserConnection(user);
+        ProxyConnection.fromChannel(channel).setUserConnection(user);
 
-        super.initChannel(socketChannel);
-        socketChannel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(true));
-        socketChannel.pipeline().addBefore(MCPipeline.PACKET_CODEC_HANDLER_NAME, ViaPipeline.HANDLER_ENCODER_NAME, new ViaEncodeHandler(user));
-        socketChannel.pipeline().addBefore(MCPipeline.PACKET_CODEC_HANDLER_NAME, ViaPipeline.HANDLER_DECODER_NAME, new ViaProxyViaDecodeHandler(user));
+        super.initChannel(channel);
+        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(true));
+        channel.pipeline().addBefore(MCPipeline.PACKET_CODEC_HANDLER_NAME, ViaPipeline.HANDLER_ENCODER_NAME, new ViaEncodeHandler(user));
+        channel.pipeline().addBefore(MCPipeline.PACKET_CODEC_HANDLER_NAME, ViaPipeline.HANDLER_DECODER_NAME, new ViaProxyViaDecodeHandler(user));
 
-        if (ProxyConnection.fromChannel(socketChannel).getServerVersion().isOlderThanOrEqualTo(VersionEnum.r1_6_4)) {
+        if (ProxyConnection.fromChannel(channel).getServerVersion().isOlderThanOrEqualTo(VersionEnum.r1_6_4)) {
             user.getProtocolInfo().getPipeline().add(PreNettyBaseProtocol.INSTANCE);
-            socketChannel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, ViaPipeline.HANDLER_PRE_NETTY_ENCODER_NAME, new PreNettyEncoder(user));
-            socketChannel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, ViaPipeline.HANDLER_PRE_NETTY_DECODER_NAME, new PreNettyDecoder(user));
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, ViaPipeline.HANDLER_PRE_NETTY_ENCODER_NAME, new PreNettyEncoder(user));
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, ViaPipeline.HANDLER_PRE_NETTY_DECODER_NAME, new PreNettyDecoder(user));
         }
 
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, socketChannel)).isCancelled()) {
-            socketChannel.close();
+        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel)).isCancelled()) {
+            channel.close();
         }
     }
 
