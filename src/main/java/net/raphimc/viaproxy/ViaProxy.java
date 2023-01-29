@@ -36,6 +36,8 @@ import net.raphimc.netminecraft.netty.connection.NetServer;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.injection.Java17ToJava8;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
@@ -96,6 +98,8 @@ public class ViaProxy {
         setNettyParameters();
         MCPipeline.useOptimizedPipeline();
         c2pChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+        PluginManager.loadPlugins();
+
         Thread loaderThread = new Thread(new LoaderTask(), "ViaProtocolHack-Loader");
         Thread accountRefreshThread = new Thread(new AccountRefreshTask(saveManager), "AccountRefresh");
         Thread updateCheckThread = new Thread(new UpdatedCheckTask(hasUI), "UpdateCheck");
@@ -135,7 +139,7 @@ public class ViaProxy {
             throw new IllegalStateException("Proxy is already running");
         }
         try {
-            currentProxyServer = new NetServer(Client2ProxyHandler::new, Client2ProxyChannelInitializer::new);
+            currentProxyServer = new NetServer(() -> PluginManager.EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler())).getHandler(), Client2ProxyChannelInitializer::new);
             Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS + ":" + Options.BIND_PORT);
             currentProxyServer.bind(Options.BIND_ADDRESS, Options.BIND_PORT, false);
         } catch (Throwable e) {

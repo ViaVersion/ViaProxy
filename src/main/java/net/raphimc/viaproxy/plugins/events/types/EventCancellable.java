@@ -15,26 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.plugins.events;
+package net.raphimc.viaproxy.plugins.events.types;
 
-import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
+public abstract class EventCancellable {
 
-public class ConsoleCommandEvent extends EventCancellable {
+    private boolean cancelled = false;
 
-    private final String command;
-    private final String[] args;
-
-    public ConsoleCommandEvent(final String command, final String[] args) {
-        this.command = command;
-        this.args = args;
+    public boolean isCancelled() {
+        return this.cancelled;
     }
 
-    public String getCommand() {
-        return this.command;
-    }
-
-    public String[] getArgs() {
-        return this.args;
+    public void setCancelled(final boolean cancelled) {
+        this.cancelled = cancelled;
     }
 
 }

@@ -19,12 +19,17 @@ package net.raphimc.viaproxy.protocolhack;
 
 import net.raphimc.viaprotocolhack.ViaProtocolHack;
 import net.raphimc.viaprotocolhack.impl.platform.ViaLegacyPlatformImpl;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.ProtocolHackInitEvent;
 import net.raphimc.viaproxy.protocolhack.impl.*;
+
+import java.util.function.Supplier;
 
 public class ProtocolHack {
 
     public static void init() {
-        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, ViaProxyViaBackwardsPlatformImpl::new, ViaProxyViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new);
+        final Supplier<?>[] additionalPlatformSuppliers = PluginManager.EVENT_MANAGER.call(new ProtocolHackInitEvent(ViaAprilFoolsPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
+        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, ViaProxyViaBackwardsPlatformImpl::new, ViaProxyViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, additionalPlatformSuppliers);
     }
 
 }

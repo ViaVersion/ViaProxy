@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.tasks;
 
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.protocolhack.ProtocolHack;
 
 public class LoaderTask implements Runnable {
@@ -25,7 +24,6 @@ public class LoaderTask implements Runnable {
     @Override
     public void run() {
         ProtocolHack.init();
-        PluginManager.loadPlugins();
     }
 
 }

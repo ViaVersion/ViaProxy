@@ -17,24 +17,26 @@
  */
 package net.raphimc.viaproxy.plugins.events;
 
-import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
-public class ConsoleCommandEvent extends EventCancellable {
+public class ProtocolHackInitEvent {
 
-    private final String command;
-    private final String[] args;
+    private final List<Supplier<?>> additionalPlatformSuppliers = new ArrayList<>();
 
-    public ConsoleCommandEvent(final String command, final String[] args) {
-        this.command = command;
-        this.args = args;
+    public ProtocolHackInitEvent(final Supplier<?>... additionalPlatformSuppliers) {
+        for (final Supplier<?> platformSupplier : additionalPlatformSuppliers) {
+            this.registerPlatform(platformSupplier);
+        }
     }
 
-    public String getCommand() {
-        return this.command;
+    public void registerPlatform(final Supplier<?> platformSupplier) {
+        this.additionalPlatformSuppliers.add(platformSupplier);
     }
 
-    public String[] getArgs() {
-        return this.args;
+    public List<Supplier<?>> getPlatformSuppliers() {
+        return this.additionalPlatformSuppliers;
     }
 
 }

@@ -28,6 +28,8 @@ import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.provider
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
 import net.raphimc.viaprotocolhack.impl.viaversion.VPLoader;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
 import net.raphimc.viaproxy.protocolhack.providers.*;
 
 public class ViaProxyVPLoader extends VPLoader {
@@ -46,6 +48,8 @@ public class ViaProxyVPLoader extends VPLoader {
         Via.getManager().getProviders().use(ClassicWorldHeightProvider.class, new ViaProxyClassicWorldHeightProvider());
         Via.getManager().getProviders().use(ClassicCustomCommandProvider.class, new ViaProxyClassicCustomCommandProvider());
         Via.getManager().getProviders().use(ClassicMPPassProvider.class, new ViaProxyClassicMPPassProvider());
+
+        PluginManager.EVENT_MANAGER.call(new ViaLoadingEvent());
     }
 
 }

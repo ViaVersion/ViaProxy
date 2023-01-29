@@ -25,7 +25,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.socket.SocketChannel;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
@@ -42,6 +41,7 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
+import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.proxy.LoginState;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
@@ -87,7 +87,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         super.channelActive(ctx);
 
         RANDOM.nextBytes(this.verifyToken);
-        this.proxyConnection = new ProxyConnection(Proxy2ServerHandler::new, Proxy2ServerChannelInitializer::new, (SocketChannel) ctx.channel());
+        this.proxyConnection = new ProxyConnection(() -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler())).getHandler(), Proxy2ServerChannelInitializer::new, ctx.channel());
         ctx.channel().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
         ViaProxy.c2pChannels.add(ctx.channel());

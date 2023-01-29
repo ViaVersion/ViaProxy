@@ -18,15 +18,13 @@
 package net.raphimc.viaproxy.plugins.events;
 
 import io.netty.channel.Channel;
-import net.raphimc.viaproxy.plugins.events.types.ICancellable;
+import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 
-public class Client2ProxyChannelInitializeEvent implements ICancellable, ITyped {
+public class Client2ProxyChannelInitializeEvent extends EventCancellable implements ITyped {
 
     private final Type type;
     private final Channel channel;
-
-    private boolean cancelled;
 
     public Client2ProxyChannelInitializeEvent(final Type type, final Channel channel) {
         this.type = type;
@@ -37,16 +35,6 @@ public class Client2ProxyChannelInitializeEvent implements ICancellable, ITyped 
         return this.channel;
     }
 
-
-    @Override
-    public boolean isCancelled() {
-        return this.cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
 
     @Override
     public Type getType() {

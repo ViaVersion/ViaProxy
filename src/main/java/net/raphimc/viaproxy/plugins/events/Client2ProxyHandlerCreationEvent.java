@@ -17,24 +17,25 @@
  */
 package net.raphimc.viaproxy.plugins.events;
 
-import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
+import io.netty.channel.ChannelHandler;
 
-public class ConsoleCommandEvent extends EventCancellable {
+public class Client2ProxyHandlerCreationEvent {
 
-    private final String command;
-    private final String[] args;
+    /**
+     * The handler which will be used to handle Client<->Proxy packets
+     */
+    private ChannelHandler handler;
 
-    public ConsoleCommandEvent(final String command, final String[] args) {
-        this.command = command;
-        this.args = args;
+    public Client2ProxyHandlerCreationEvent(final ChannelHandler handler) {
+        this.handler = handler;
     }
 
-    public String getCommand() {
-        return this.command;
+    public void setHandler(final ChannelHandler handler) {
+        this.handler = handler;
     }
 
-    public String[] getArgs() {
-        return this.args;
+    public ChannelHandler getHandler() {
+        return this.handler;
     }
 
 }
