@@ -108,7 +108,9 @@ public class ViaProxy {
             loaderThread.start();
             accountRefreshThread.start();
             SwingUtilities.invokeLater(() -> ui = new ViaProxyUI());
-            updateCheckThread.start();
+            if (System.getProperty("skipUpdateCheck") == null) {
+                updateCheckThread.start();
+            }
             loaderThread.join();
             accountRefreshThread.join();
             while (ui == null) {
@@ -127,7 +129,9 @@ public class ViaProxy {
             System.exit(0);
         }
 
-        updateCheckThread.start();
+        if (System.getProperty("skipUpdateCheck") == null) {
+            updateCheckThread.start();
+        }
         loaderThread.start();
         loaderThread.join();
         Logger.LOGGER.info("ViaProxy started successfully!");
