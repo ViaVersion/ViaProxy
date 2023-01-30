@@ -21,6 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.vdurmont.semver4j.Semver;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.popups.DownloadPopup;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -62,7 +63,16 @@ public class UpdatedCheckTask implements Runnable {
 
             JsonObject object = JsonParser.parseString(builder.toString()).getAsJsonObject();
             String latestVersion = object.get("tag_name").getAsString().substring(1);
-            if (!VERSION.equals(latestVersion)) {
+            boolean updateAvailable;
+            try {
+                Semver versionSemver = new Semver(VERSION);
+                Semver latestVersionSemver = new Semver(latestVersion);
+                updateAvailable = latestVersionSemver.isGreaterThan(versionSemver);
+                if (versionSemver.isGreaterThan(latestVersionSemver)) Logger.LOGGER.warn("You are running a dev version of ViaProxy");
+            } catch (Throwable t) {
+                updateAvailable = !VERSION.equals(latestVersion);
+            }
+            if (updateAvailable) {
                 Logger.LOGGER.warn("You are running an outdated version of ViaProxy! Latest version: " + latestVersion);
                 if (this.hasUI) {
                     JsonArray assets = object.getAsJsonArray("assets");
