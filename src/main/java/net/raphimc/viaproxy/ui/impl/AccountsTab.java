@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import net.raphimc.mcauth.MinecraftAuth;
+import net.raphimc.mcauth.step.bedrock.StepMCChain;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
@@ -37,6 +38,7 @@ public class AccountsTab extends AUITab {
 
     private JList<String> accountsList;
     private JButton addMicrosoftAccountButton;
+    private JButton addBedrockAccountButton;
 
     private AddAccountPopup addAccountPopup;
     private Thread addThread;
@@ -160,7 +162,7 @@ public class AccountsTab extends AUITab {
         }
         {
             JButton addOfflineAccountButton = new JButton("Add Offline Account");
-            addOfflineAccountButton.setBounds(10, 300, 230, 20);
+            addOfflineAccountButton.setBounds(10, 300, 153, 20);
             addOfflineAccountButton.addActionListener(event -> {
                 String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
                 if (username != null && !username.trim().isEmpty()) {
@@ -173,7 +175,7 @@ public class AccountsTab extends AUITab {
         }
         {
             this.addMicrosoftAccountButton = new JButton("Add Microsoft Account");
-            this.addMicrosoftAccountButton.setBounds(245, 300, 230, 20);
+            this.addMicrosoftAccountButton.setBounds(168, 300, 153, 20);
             this.addMicrosoftAccountButton.addActionListener(event -> {
                 this.addMicrosoftAccountButton.setEnabled(false);
                 this.addThread = new Thread(() -> {
@@ -211,6 +213,46 @@ public class AccountsTab extends AUITab {
             });
             contentPane.add(this.addMicrosoftAccountButton);
         }
+        {
+            this.addBedrockAccountButton = new JButton("Add Bedrock Account");
+            this.addBedrockAccountButton.setBounds(326, 300, 149, 20);
+            this.addBedrockAccountButton.addActionListener(event -> {
+                this.addBedrockAccountButton.setEnabled(false);
+                this.addThread = new Thread(() -> {
+                    try {
+                        StepMCChain.MCChain chain = MinecraftAuth.requestBedrockLogin(msaDeviceCode -> {
+                            SwingUtilities.invokeLater(() -> {
+                                new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
+                                    this.closePopup();
+                                    this.addThread.interrupt();
+                                });
+                            });
+                        });
+                        SwingUtilities.invokeLater(() -> {
+                            this.closePopup();
+                            Account account = ViaProxy.saveManager.accountsSave.addAccount(chain);
+                            ViaProxy.saveManager.save();
+                            this.addAccount(account);
+                            this.frame.showInfo("The account " + chain.displayName() + " was added successfully.");
+                        });
+                    } catch (InterruptedException ignored) {
+                    } catch (TimeoutException e) {
+                        SwingUtilities.invokeLater(() -> {
+                            this.closePopup();
+                            this.frame.showError("The login request timed out.\nPlease login within 60 seconds.");
+                        });
+                    } catch (Throwable t) {
+                        SwingUtilities.invokeLater(() -> {
+                            this.closePopup();
+                            this.frame.showException(t);
+                        });
+                    }
+                }, "Add Account Thread");
+                this.addThread.setDaemon(true);
+                this.addThread.start();
+            });
+            contentPane.add(this.addBedrockAccountButton);
+        }
     }
 
     @Override
@@ -226,6 +268,7 @@ public class AccountsTab extends AUITab {
         this.addAccountPopup.dispose();
         this.addAccountPopup = null;
         this.addMicrosoftAccountButton.setEnabled(true);
+        this.addBedrockAccountButton.setEnabled(true);
     }
 
     private void addAccount(final Account account) {
