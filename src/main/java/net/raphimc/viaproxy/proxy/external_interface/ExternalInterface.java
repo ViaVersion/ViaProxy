@@ -36,6 +36,8 @@ import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_0;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_1;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_3;
@@ -111,6 +113,8 @@ public class ExternalInterface {
                 }
             }
         }
+
+        PluginManager.EVENT_MANAGER.call(new FillPlayerDataEvent(proxyConnection));
 
         proxyConnection.getLoginHelloPacket().name = proxyConnection.getGameProfile().getName();
         if (proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19_3) {
