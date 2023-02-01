@@ -18,14 +18,14 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.bedrock.StepMCChain;
-import net.raphimc.mcauth.step.java.StepMCProfile;
+import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
+import net.raphimc.viaproxy.util.TFunction;
 
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
@@ -33,6 +33,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AccountsTab extends AUITab {
 
@@ -178,38 +180,7 @@ public class AccountsTab extends AUITab {
             this.addMicrosoftAccountButton.setBounds(168, 300, 153, 20);
             this.addMicrosoftAccountButton.addActionListener(event -> {
                 this.addMicrosoftAccountButton.setEnabled(false);
-                this.addThread = new Thread(() -> {
-                    try {
-                        StepMCProfile.MCProfile profile = MinecraftAuth.requestJavaLogin(msaDeviceCode -> {
-                            SwingUtilities.invokeLater(() -> {
-                                new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
-                                    this.closePopup();
-                                    this.addThread.interrupt();
-                                });
-                            });
-                        });
-                        SwingUtilities.invokeLater(() -> {
-                            this.closePopup();
-                            Account account = ViaProxy.saveManager.accountsSave.addAccount(profile);
-                            ViaProxy.saveManager.save();
-                            this.addAccount(account);
-                            this.frame.showInfo("The account " + profile.name() + " was added successfully.");
-                        });
-                    } catch (InterruptedException ignored) {
-                    } catch (TimeoutException e) {
-                        SwingUtilities.invokeLater(() -> {
-                            this.closePopup();
-                            this.frame.showError("The login request timed out.\nPlease login within 60 seconds.");
-                        });
-                    } catch (Throwable t) {
-                        SwingUtilities.invokeLater(() -> {
-                            this.closePopup();
-                            this.frame.showException(t);
-                        });
-                    }
-                }, "Add Account Thread");
-                this.addThread.setDaemon(true);
-                this.addThread.start();
+                this.handleLogin(MinecraftAuth::requestJavaLogin, profile -> ViaProxy.saveManager.accountsSave.addAccount(profile));
             });
             contentPane.add(this.addMicrosoftAccountButton);
         }
@@ -218,38 +189,7 @@ public class AccountsTab extends AUITab {
             this.addBedrockAccountButton.setBounds(326, 300, 149, 20);
             this.addBedrockAccountButton.addActionListener(event -> {
                 this.addBedrockAccountButton.setEnabled(false);
-                this.addThread = new Thread(() -> {
-                    try {
-                        StepMCChain.MCChain chain = MinecraftAuth.requestBedrockLogin(msaDeviceCode -> {
-                            SwingUtilities.invokeLater(() -> {
-                                new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
-                                    this.closePopup();
-                                    this.addThread.interrupt();
-                                });
-                            });
-                        });
-                        SwingUtilities.invokeLater(() -> {
-                            this.closePopup();
-                            Account account = ViaProxy.saveManager.accountsSave.addAccount(chain);
-                            ViaProxy.saveManager.save();
-                            this.addAccount(account);
-                            this.frame.showInfo("The account " + chain.displayName() + " was added successfully.");
-                        });
-                    } catch (InterruptedException ignored) {
-                    } catch (TimeoutException e) {
-                        SwingUtilities.invokeLater(() -> {
-                            this.closePopup();
-                            this.frame.showError("The login request timed out.\nPlease login within 60 seconds.");
-                        });
-                    } catch (Throwable t) {
-                        SwingUtilities.invokeLater(() -> {
-                            this.closePopup();
-                            this.frame.showException(t);
-                        });
-                    }
-                }, "Add Account Thread");
-                this.addThread.setDaemon(true);
-                this.addThread.start();
+                this.handleLogin(MinecraftAuth::requestBedrockLogin, chain -> ViaProxy.saveManager.accountsSave.addAccount(chain));
             });
             contentPane.add(this.addBedrockAccountButton);
         }
@@ -323,6 +263,41 @@ public class AccountsTab extends AUITab {
         } else {
             throw new IllegalStateException("Account is null");
         }
+    }
+
+    private <T> void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, T> requestHandler, final Function<T, Account> addHandler) {
+        this.addThread = new Thread(() -> {
+            try {
+                T profile = requestHandler.apply(msaDeviceCode -> {
+                    SwingUtilities.invokeLater(() -> {
+                        new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
+                            this.closePopup();
+                            this.addThread.interrupt();
+                        });
+                    });
+                });
+                SwingUtilities.invokeLater(() -> {
+                    this.closePopup();
+                    Account account = addHandler.apply(profile);
+                    ViaProxy.saveManager.save();
+                    this.addAccount(account);
+                    this.frame.showInfo("The account " + account.getName() + " was added successfully.");
+                });
+            } catch (InterruptedException ignored) {
+            } catch (TimeoutException e) {
+                SwingUtilities.invokeLater(() -> {
+                    this.closePopup();
+                    this.frame.showError("The login request timed out.\nPlease login within 60 seconds.");
+                });
+            } catch (Throwable t) {
+                SwingUtilities.invokeLater(() -> {
+                    this.closePopup();
+                    this.frame.showException(t);
+                });
+            }
+        }, "Add Account Thread");
+        this.addThread.setDaemon(true);
+        this.addThread.start();
     }
 
 }
