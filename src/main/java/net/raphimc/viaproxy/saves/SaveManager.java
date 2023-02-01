@@ -18,9 +18,10 @@
 package net.raphimc.viaproxy.saves;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.lenni0451.reflect.stream.RStream;
-import net.raphimc.viaproxy.saves.impl.AccountsSave;
+import net.raphimc.viaproxy.saves.impl.NewAccountsSave;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -33,7 +34,7 @@ public class SaveManager {
     private static final File SAVE_FILE = new File("saves.json");
     private static final Gson GSON = new Gson();
 
-    public final AccountsSave accountsSave = new AccountsSave();
+    public final NewAccountsSave accountsSave = new NewAccountsSave();
     public final UISave uiSave = new UISave();
 
     public SaveManager() {
@@ -65,6 +66,8 @@ public class SaveManager {
                             Logger.LOGGER.error("Failed to load save " + save.getName(), e);
                         }
                     });
+
+            SaveMigrator.migrate(this, saveObject);
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to load saves from file", e);
         }
@@ -80,7 +83,10 @@ public class SaveManager {
                     .forEach(field -> {
                         final AbstractSave save = field.get();
                         try {
-                            saveObject.add(save.getName(), save.save());
+                            final JsonElement saveData = save.save();
+                            if (saveData != null) {
+                                saveObject.add(save.getName(), saveData);
+                            }
                         } catch (Throwable e) {
                             Logger.LOGGER.error("Failed to save save " + save.getName(), e);
                         }

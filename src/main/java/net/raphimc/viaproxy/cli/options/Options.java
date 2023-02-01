@@ -20,8 +20,8 @@ package net.raphimc.viaproxy.cli.options;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ public class Options {
     public static boolean BETACRAFT_AUTH;
 
     // GUI only config options
-    public static StepMCProfile.MCProfile MC_ACCOUNT;
+    public static Account MC_ACCOUNT;
 
     public static void parse(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();

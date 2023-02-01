@@ -40,6 +40,7 @@ import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_1;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_3;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
+import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.util.LocalSocketClient;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -82,11 +83,12 @@ public class ExternalInterface {
                 proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_19_3(name, expiresAt, publicKey, keySignature, uuid));
             }
         } else if (Options.MC_ACCOUNT != null) {
-            proxyConnection.setGameProfile(new GameProfile(Options.MC_ACCOUNT.id(), Options.MC_ACCOUNT.name()));
+            proxyConnection.setGameProfile(Options.MC_ACCOUNT.getGameProfile());
 
-            if (!Options.MC_ACCOUNT.prevResult().items().isEmpty() && proxyConnection.getServerVersion().isBetweenInclusive(VersionEnum.r1_19, VersionEnum.r1_19_3)) {
+            if (Options.MC_ACCOUNT instanceof MicrosoftAccount && proxyConnection.getServerVersion().isBetweenInclusive(VersionEnum.r1_19, VersionEnum.r1_19_3)) {
+                final MicrosoftAccount microsoftAccount = (MicrosoftAccount) Options.MC_ACCOUNT;
                 final UserConnection user = proxyConnection.getUserConnection();
-                final UserApiService userApiService = AuthLibServices.AUTHENTICATION_SERVICE.createUserApiService(Options.MC_ACCOUNT.prevResult().prevResult().access_token());
+                final UserApiService userApiService = AuthLibServices.AUTHENTICATION_SERVICE.createUserApiService(microsoftAccount.getMcProfile().prevResult().prevResult().access_token());
                 final KeyPairResponse keyPair = userApiService.getKeyPair();
                 if (keyPair != null) {
                     if (!Strings.isNullOrEmpty(keyPair.getPublicKey()) && keyPair.getPublicKeySignature() != null && keyPair.getPublicKeySignature().array().length != 0) {
@@ -128,9 +130,10 @@ public class ExternalInterface {
             }
         } else if (Options.LOCAL_SOCKET_AUTH) {
             new LocalSocketClient(48941).request("authenticate", serverIdHash);
-        } else if (Options.MC_ACCOUNT != null && !Options.MC_ACCOUNT.prevResult().items().isEmpty()) {
+        } else if (Options.MC_ACCOUNT instanceof MicrosoftAccount) {
+            final MicrosoftAccount microsoftAccount = (MicrosoftAccount) Options.MC_ACCOUNT;
             try {
-                AuthLibServices.SESSION_SERVICE.joinServer(new GameProfile(Options.MC_ACCOUNT.id(), Options.MC_ACCOUNT.name()), Options.MC_ACCOUNT.prevResult().prevResult().access_token(), serverIdHash);
+                AuthLibServices.SESSION_SERVICE.joinServer(Options.MC_ACCOUNT.getGameProfile(), microsoftAccount.getMcProfile().prevResult().prevResult().access_token(), serverIdHash);
             } catch (Throwable e) {
                 proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again later.");
             }
@@ -156,7 +159,7 @@ public class ExternalInterface {
                 packet.salt = Long.valueOf(response[1]);
                 packet.signature = Base64.getDecoder().decode(response[2]);
             }
-        } else if (Options.MC_ACCOUNT != null && !Options.MC_ACCOUNT.prevResult().items().isEmpty()) {
+        } else if (Options.MC_ACCOUNT instanceof MicrosoftAccount) {
             final UserConnection user = proxyConnection.getUserConnection();
             final ChatSession1_19_1 chatSession = user.get(ChatSession1_19_1.class);
             if (chatSession == null) return;

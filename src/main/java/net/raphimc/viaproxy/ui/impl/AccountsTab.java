@@ -21,6 +21,7 @@ import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
@@ -126,7 +127,7 @@ public class AccountsTab extends AUITab {
                             else this.markSelected(0);
                         }
 
-                        final StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+                        final Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
                         if (account != null) {
                             ViaProxy.saveManager.accountsSave.removeAccount(account);
                             ViaProxy.saveManager.save();
@@ -163,7 +164,7 @@ public class AccountsTab extends AUITab {
             addOfflineAccountButton.addActionListener(event -> {
                 String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
                 if (username != null && !username.trim().isEmpty()) {
-                    StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.addOfflineAccount(username);
+                    Account account = ViaProxy.saveManager.accountsSave.addAccount(username);
                     ViaProxy.saveManager.save();
                     this.addAccount(account);
                 }
@@ -187,9 +188,9 @@ public class AccountsTab extends AUITab {
                         });
                         SwingUtilities.invokeLater(() -> {
                             this.closePopup();
-                            ViaProxy.saveManager.accountsSave.addAccount(profile);
+                            Account account = ViaProxy.saveManager.accountsSave.addAccount(profile);
                             ViaProxy.saveManager.save();
-                            this.addAccount(profile);
+                            this.addAccount(account);
                             this.frame.showInfo("The account " + profile.name() + " was added successfully.");
                         });
                     } catch (InterruptedException ignored) {
@@ -227,10 +228,9 @@ public class AccountsTab extends AUITab {
         this.addMicrosoftAccountButton.setEnabled(true);
     }
 
-    private void addAccount(final StepMCProfile.MCProfile account) {
+    private void addAccount(final Account account) {
         DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
-        if (account.prevResult().items().isEmpty()) model.addElement(account.name() + " (Offline)");
-        else model.addElement(account.name() + " (Microsoft)");
+        model.addElement(account.getDisplayString());
     }
 
     public void markSelected(final int index) {
@@ -243,7 +243,7 @@ public class AccountsTab extends AUITab {
         for (int i = 0; i < model.getSize(); i++) model.setElementAt(model.getElementAt(i).replaceAll("<[^>]+>", ""), i);
         model.setElementAt("<html><span style=\"color:rgb(0, 180, 0)\"><b>" + model.getElementAt(index) + "</b></span></html>", index);
 
-        StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
         if (account != null) Options.MC_ACCOUNT = account;
         else throw new IllegalStateException("Account is null"); //Lists desynced
     }
@@ -255,7 +255,7 @@ public class AccountsTab extends AUITab {
         model.add(index - 1, name);
         this.accountsList.setSelectedIndex(index - 1);
 
-        StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
         if (account != null) {
             ViaProxy.saveManager.accountsSave.removeAccount(account);
             ViaProxy.saveManager.accountsSave.addAccount(index - 1, account);
@@ -272,7 +272,7 @@ public class AccountsTab extends AUITab {
         model.add(index + 1, name);
         this.accountsList.setSelectedIndex(index + 1);
 
-        StepMCProfile.MCProfile account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
         if (account != null) {
             ViaProxy.saveManager.accountsSave.removeAccount(account);
             ViaProxy.saveManager.accountsSave.addAccount(index + 1, account);
