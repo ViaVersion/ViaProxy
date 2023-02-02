@@ -39,7 +39,11 @@ public class PluginManager {
     private static final List<ViaProxyPlugin> PLUGINS = new ArrayList<>();
 
     public static void loadPlugins() {
-        if (!PLUGINS_DIR.exists() || !PLUGINS_DIR.isDirectory()) return;
+        if (!PLUGINS_DIR.exists() || !PLUGINS_DIR.isDirectory()) {
+            if (!PLUGINS_DIR.mkdirs()) {
+                return;
+            }
+        }
 
         File[] files = PLUGINS_DIR.listFiles();
         if (files == null) return;
