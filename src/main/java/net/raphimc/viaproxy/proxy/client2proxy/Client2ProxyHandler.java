@@ -142,13 +142,15 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         String address = packet.address.split("\0")[0];
         final VersionEnum clientVersion = VersionEnum.fromProtocolVersion(ProtocolVersion.getProtocol(packet.protocolVersion));
 
+        if (packet.intendedState != ConnectionState.STATUS && packet.intendedState != ConnectionState.LOGIN) {
+            throw CloseAndReturn.INSTANCE;
+        }
+
         this.proxyConnection.setClientVersion(clientVersion);
         this.proxyConnection.setConnectionState(packet.intendedState);
 
-        if ((ConnectionState.LOGIN.equals(packet.intendedState) || ConnectionState.STATUS.equals(packet.intendedState)) && clientVersion == VersionEnum.UNKNOWN) {
+        if (clientVersion == VersionEnum.UNKNOWN) {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
-        } else if (!ConnectionState.STATUS.equals(packet.intendedState)) {
-            throw CloseAndReturn.INSTANCE;
         }
 
         this.customPayloadPacketId = MCPackets.C2S_PLUGIN_MESSAGE.getId(clientVersion.getVersion());
