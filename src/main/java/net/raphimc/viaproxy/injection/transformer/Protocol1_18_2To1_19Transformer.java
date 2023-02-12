@@ -21,7 +21,7 @@ import com.google.common.primitives.Longs;
 import com.viaversion.viabackwards.api.BackwardsProtocol;
 import com.viaversion.viabackwards.protocol.protocol1_18_2to1_19.Protocol1_18_2To1_19;
 import com.viaversion.viaversion.api.protocol.packet.State;
-import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper;
+import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.protocols.base.ClientboundLoginPackets;
 import com.viaversion.viaversion.protocols.base.ServerboundLoginPackets;
@@ -51,9 +51,9 @@ public abstract class Protocol1_18_2To1_19Transformer extends BackwardsProtocol<
 
     @CInject(method = "registerPackets", target = @CTarget("RETURN"))
     private void allowSignatures(InjectionCallback ic) {
-        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.HELLO.getId(), ServerboundLoginPackets.HELLO.getId(), new PacketRemapper() {
+        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.HELLO.getId(), ServerboundLoginPackets.HELLO.getId(), new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.STRING); // Name
                 handler(wrapper -> {
                     final ChatSession1_19_0 chatSession = wrapper.user().get(ChatSession1_19_0.class);
@@ -61,9 +61,9 @@ public abstract class Protocol1_18_2To1_19Transformer extends BackwardsProtocol<
                 });
             }
         }, true);
-        this.registerClientbound(State.LOGIN, ClientboundLoginPackets.HELLO.getId(), ClientboundLoginPackets.HELLO.getId(), new PacketRemapper() {
+        this.registerClientbound(State.LOGIN, ClientboundLoginPackets.HELLO.getId(), ClientboundLoginPackets.HELLO.getId(), new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.STRING); // Server id
                 map(Type.BYTE_ARRAY_PRIMITIVE); // Public key
                 handler(wrapper -> {
@@ -71,9 +71,9 @@ public abstract class Protocol1_18_2To1_19Transformer extends BackwardsProtocol<
                 });
             }
         }, true);
-        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.ENCRYPTION_KEY.getId(), ServerboundLoginPackets.ENCRYPTION_KEY.getId(), new PacketRemapper() {
+        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.ENCRYPTION_KEY.getId(), ServerboundLoginPackets.ENCRYPTION_KEY.getId(), new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.BYTE_ARRAY_PRIMITIVE); // Public key
                 handler(wrapper -> {
                     final ChatSession1_19_0 chatSession = wrapper.user().get(ChatSession1_19_0.class);
@@ -95,9 +95,9 @@ public abstract class Protocol1_18_2To1_19Transformer extends BackwardsProtocol<
             }
         }, true);
 
-        this.registerServerbound(ServerboundPackets1_17.CHAT_MESSAGE, ServerboundPackets1_19.CHAT_MESSAGE, new PacketRemapper() {
+        this.registerServerbound(ServerboundPackets1_17.CHAT_MESSAGE, ServerboundPackets1_19.CHAT_MESSAGE, new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.STRING); // Message
                 handler(wrapper -> wrapper.write(Type.LONG, Instant.now().toEpochMilli())); // Timestamp
                 create(Type.LONG, 0L); // Salt

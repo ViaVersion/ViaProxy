@@ -67,7 +67,7 @@ dependencies {
     }
     include "com.viaversion:viarewind-core:2.0.3-SNAPSHOT"
     include "net.raphimc:ViaLegacy:2.2.4"
-    include "net.raphimc:ViaAprilFools:2.0.2"
+    include "net.raphimc:ViaAprilFools:2.0.3"
     include("net.raphimc:ViaProtocolHack:2.1.3") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }

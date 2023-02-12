@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.injection.mixins;
 import com.google.common.primitives.Longs;
 import com.viaversion.viaversion.api.protocol.AbstractProtocol;
 import com.viaversion.viaversion.api.protocol.packet.State;
-import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper;
+import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.types.BitSetType;
 import com.viaversion.viaversion.api.type.types.ByteArrayType;
@@ -63,9 +63,9 @@ public abstract class MixinProtocol1_19_3To1_19_1 extends AbstractProtocol<Clien
 
     @Inject(method = "registerPackets", at = @At("RETURN"))
     private void allowSignatures(CallbackInfo ci) {
-        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.HELLO.getId(), ServerboundLoginPackets.HELLO.getId(), new PacketRemapper() {
+        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.HELLO.getId(), ServerboundLoginPackets.HELLO.getId(), new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.STRING); // Name
                 handler(wrapper -> {
                     final ChatSession1_19_1 chatSession = wrapper.user().get(ChatSession1_19_1.class);
@@ -74,9 +74,9 @@ public abstract class MixinProtocol1_19_3To1_19_1 extends AbstractProtocol<Clien
                 map(Type.OPTIONAL_UUID); // Profile uuid
             }
         }, true);
-        this.registerClientbound(State.LOGIN, ClientboundLoginPackets.HELLO.getId(), ClientboundLoginPackets.HELLO.getId(), new PacketRemapper() {
+        this.registerClientbound(State.LOGIN, ClientboundLoginPackets.HELLO.getId(), ClientboundLoginPackets.HELLO.getId(), new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.STRING); // Server id
                 map(Type.BYTE_ARRAY_PRIMITIVE); // Public key
                 handler(wrapper -> {
@@ -84,9 +84,9 @@ public abstract class MixinProtocol1_19_3To1_19_1 extends AbstractProtocol<Clien
                 });
             }
         });
-        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.ENCRYPTION_KEY.getId(), ServerboundLoginPackets.ENCRYPTION_KEY.getId(), new PacketRemapper() {
+        this.registerServerbound(State.LOGIN, ServerboundLoginPackets.ENCRYPTION_KEY.getId(), ServerboundLoginPackets.ENCRYPTION_KEY.getId(), new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.BYTE_ARRAY_PRIMITIVE); // Public key
                 handler(wrapper -> {
                     final ChatSession1_19_1 chatSession = wrapper.user().get(ChatSession1_19_1.class);
@@ -108,9 +108,9 @@ public abstract class MixinProtocol1_19_3To1_19_1 extends AbstractProtocol<Clien
             }
         }, true);
 
-        this.registerServerbound(ServerboundPackets1_19_3.CHAT_MESSAGE, ServerboundPackets1_19_1.CHAT_MESSAGE, new PacketRemapper() {
+        this.registerServerbound(ServerboundPackets1_19_3.CHAT_MESSAGE, ServerboundPackets1_19_1.CHAT_MESSAGE, new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.STRING); // Message
                 map(Type.LONG); // Timestamp
                 map(Type.LONG); // Salt

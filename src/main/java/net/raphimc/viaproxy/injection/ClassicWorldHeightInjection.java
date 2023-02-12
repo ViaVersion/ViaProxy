@@ -21,7 +21,8 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.chunks.Chunk;
 import com.viaversion.viaversion.api.minecraft.chunks.ChunkSection;
-import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper;
+import com.viaversion.viaversion.api.protocol.remapper.PacketHandler;
+import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.CompoundTag;
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.IntTag;
@@ -40,85 +41,70 @@ import java.util.List;
 
 public class ClassicWorldHeightInjection {
 
-    public static PacketRemapper handleJoinGame(final Protocol1_17To1_16_4 protocol, final PacketRemapper parentRemapper) {
-        return new PacketRemapper() {
-            @Override
-            public void registerMap() {
-                handler(wrapper -> {
-                    parentRemapper.remap(wrapper);
-                    if (wrapper.isCancelled()) return;
+    public static PacketHandler handleJoinGame(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+        return wrapper -> {
+            parentHandler.handle(wrapper);
+            if (wrapper.isCancelled()) return;
 
-                    if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
-                        for (Tag dimension : wrapper.get(Type.NBT, 0).<CompoundTag>get("minecraft:dimension_type").<ListTag>get("value")) {
-                            changeDimensionTagHeight(wrapper.user(), ((CompoundTag) dimension).get("element"));
-                        }
-                        changeDimensionTagHeight(wrapper.user(), wrapper.get(Type.NBT, 1));
-                    }
-                });
+            if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
+                for (Tag dimension : wrapper.get(Type.NBT, 0).<CompoundTag>get("minecraft:dimension_type").<ListTag>get("value")) {
+                    changeDimensionTagHeight(wrapper.user(), ((CompoundTag) dimension).get("element"));
+                }
+                changeDimensionTagHeight(wrapper.user(), wrapper.get(Type.NBT, 1));
             }
         };
     }
 
-    public static PacketRemapper handleRespawn(final Protocol1_17To1_16_4 protocol, final PacketRemapper parentRemapper) {
-        return new PacketRemapper() {
-            @Override
-            public void registerMap() {
-                handler(wrapper -> {
-                    parentRemapper.remap(wrapper);
-                    if (wrapper.isCancelled()) return;
+    public static PacketHandler handleRespawn(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+        return wrapper -> {
+            parentHandler.handle(wrapper);
+            if (wrapper.isCancelled()) return;
 
-                    if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
-                        changeDimensionTagHeight(wrapper.user(), wrapper.get(Type.NBT, 0));
-                    }
-                });
+            if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
+                changeDimensionTagHeight(wrapper.user(), wrapper.get(Type.NBT, 0));
             }
         };
     }
 
-    public static PacketRemapper handleChunkData(final Protocol1_17To1_16_4 protocol, final PacketRemapper parentRemapper) {
-        return new PacketRemapper() {
-            @Override
-            public void registerMap() {
-                handler(wrapper -> {
-                    parentRemapper.remap(wrapper);
-                    if (wrapper.isCancelled()) return;
+    public static PacketHandler handleChunkData(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+        return wrapper -> {
+            parentHandler.handle(wrapper);
+            if (wrapper.isCancelled()) return;
 
-                    if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
-                        wrapper.resetReader();
-                        final Chunk chunk = wrapper.read(new Chunk1_17Type(16));
-                        wrapper.write(new Chunk1_17Type(chunk.getSections().length), chunk);
+            if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
+                wrapper.resetReader();
+                final Chunk chunk = wrapper.read(new Chunk1_17Type(16));
+                wrapper.write(new Chunk1_17Type(chunk.getSections().length), chunk);
 
-                        final ClassicWorldHeightProvider heightProvider = Via.getManager().getProviders().get(ClassicWorldHeightProvider.class);
-                        if (chunk.getSections().length < heightProvider.getMaxChunkSectionCount(wrapper.user())) { // Increase available sections to match new world height
-                            final ChunkSection[] newArray = new ChunkSection[heightProvider.getMaxChunkSectionCount(wrapper.user())];
-                            System.arraycopy(chunk.getSections(), 0, newArray, 0, chunk.getSections().length);
-                            chunk.setSections(newArray);
-                        }
+                final ClassicWorldHeightProvider heightProvider = Via.getManager().getProviders().get(ClassicWorldHeightProvider.class);
+                if (chunk.getSections().length < heightProvider.getMaxChunkSectionCount(wrapper.user())) { // Increase available sections to match new world height
+                    final ChunkSection[] newArray = new ChunkSection[heightProvider.getMaxChunkSectionCount(wrapper.user())];
+                    System.arraycopy(chunk.getSections(), 0, newArray, 0, chunk.getSections().length);
+                    chunk.setSections(newArray);
+                }
 
-                        final BitSet chunkMask = new BitSet();
-                        for (int i = 0; i < chunk.getSections().length; i++) {
-                            if (chunk.getSections()[i] != null) chunkMask.set(i);
-                        }
-                        chunk.setChunkMask(chunkMask);
+                final BitSet chunkMask = new BitSet();
+                for (int i = 0; i < chunk.getSections().length; i++) {
+                    if (chunk.getSections()[i] != null) chunkMask.set(i);
+                }
+                chunk.setChunkMask(chunkMask);
 
-                        final int[] newBiomeData = new int[chunk.getSections().length * 4 * 4 * 4];
-                        System.arraycopy(chunk.getBiomeData(), 0, newBiomeData, 0, chunk.getBiomeData().length);
-                        for (int i = 64; i < chunk.getSections().length * 4; i++) { // copy top layer of old biome data all the way to max world height
-                            System.arraycopy(chunk.getBiomeData(), chunk.getBiomeData().length - 16, newBiomeData, i * 16, 16);
-                        }
-                        chunk.setBiomeData(newBiomeData);
+                final int[] newBiomeData = new int[chunk.getSections().length * 4 * 4 * 4];
+                System.arraycopy(chunk.getBiomeData(), 0, newBiomeData, 0, chunk.getBiomeData().length);
+                for (int i = 64; i < chunk.getSections().length * 4; i++) { // copy top layer of old biome data all the way to max world height
+                    System.arraycopy(chunk.getBiomeData(), chunk.getBiomeData().length - 16, newBiomeData, i * 16, 16);
+                }
+                chunk.setBiomeData(newBiomeData);
 
-                        chunk.setHeightMap(new CompoundTag()); // rip heightmap :(
-                    }
-                });
+                chunk.setHeightMap(new CompoundTag()); // rip heightmap :(
             }
         };
     }
 
-    public static PacketRemapper handleUpdateLight(final Protocol1_17To1_16_4 protocol, final PacketRemapper parentRemapper) {
-        final PacketRemapper classicLightHandler = new PacketRemapper() {
+    public static PacketHandler handleUpdateLight(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+        final PacketHandler classicLightHandler = new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.VAR_INT); // x
                 map(Type.VAR_INT); // y
                 map(Type.BOOLEAN); // trust edges
@@ -174,16 +160,11 @@ public class ClassicWorldHeightInjection {
             }
         };
 
-        return new PacketRemapper() {
-            @Override
-            public void registerMap() {
-                handler(wrapper -> {
-                    if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
-                        classicLightHandler.remap(wrapper);
-                    } else {
-                        parentRemapper.remap(wrapper);
-                    }
-                });
+        return wrapper -> {
+            if (VersionEnum.fromUserConnection(wrapper.user()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
+                classicLightHandler.handle(wrapper);
+            } else {
+                parentHandler.handle(wrapper);
             }
         };
     }

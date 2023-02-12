@@ -22,7 +22,7 @@ import com.viaversion.viabackwards.protocol.protocol1_19_1to1_19_3.Protocol1_19_
 import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
 import com.viaversion.viaversion.api.protocol.packet.State;
-import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper;
+import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.types.BitSetType;
 import com.viaversion.viaversion.api.type.types.ByteArrayType;
@@ -49,9 +49,9 @@ public abstract class Protocol1_19_1To1_19_3Transformer extends BackwardsProtoco
 
     @CInject(method = "registerPackets", target = @CTarget("RETURN"))
     private void allowSignatures(InjectionCallback ic) {
-        this.registerClientbound(State.LOGIN, ClientboundLoginPackets.GAME_PROFILE.getId(), ClientboundLoginPackets.GAME_PROFILE.getId(), new PacketRemapper() {
+        this.registerClientbound(State.LOGIN, ClientboundLoginPackets.GAME_PROFILE.getId(), ClientboundLoginPackets.GAME_PROFILE.getId(), new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 handler(wrapper -> {
                     final ChatSession1_19_3 chatSession = wrapper.user().get(ChatSession1_19_3.class);
 
@@ -65,9 +65,9 @@ public abstract class Protocol1_19_1To1_19_3Transformer extends BackwardsProtoco
             }
         }, true);
 
-        this.registerServerbound(ServerboundPackets1_19_1.CHAT_MESSAGE, ServerboundPackets1_19_3.CHAT_MESSAGE, new PacketRemapper() {
+        this.registerServerbound(ServerboundPackets1_19_1.CHAT_MESSAGE, ServerboundPackets1_19_3.CHAT_MESSAGE, new PacketHandlers() {
             @Override
-            public void registerMap() {
+            public void register() {
                 map(Type.STRING); // Message
                 map(Type.LONG); // Timestamp
                 map(Type.LONG); // Salt

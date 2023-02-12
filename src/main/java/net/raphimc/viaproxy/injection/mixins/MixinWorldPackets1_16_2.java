@@ -17,19 +17,17 @@
  */
 package net.raphimc.viaproxy.injection.mixins;
 
-import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
+import com.viaversion.viaversion.protocols.protocol1_16_2to1_16_1.packets.WorldPackets;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(targets = "com.viaversion.viaversion.protocols.protocol1_14to1_13_2.packets.InventoryPackets$3$1", remap = false)
-public abstract class MixinInventoryPackets_3_1 {
+@Mixin(value = WorldPackets.class, remap = false)
+public abstract class MixinWorldPackets1_16_2 {
 
-    @SuppressWarnings({"UnresolvedMixinReference", "MixinAnnotationTarget"})
-    @Inject(method = "handle", at = @At(value = "FIELD", target = "Lcom/viaversion/viaversion/api/type/Type;BOOLEAN:Lcom/viaversion/viaversion/api/type/types/BooleanType;", ordinal = 2, shift = At.Shift.BEFORE))
-    private void removeExtraData(PacketWrapper wrapper, CallbackInfo ci) {
-        wrapper.clearInputBuffer();
+    @ModifyConstant(method = "lambda$register$1", constant = @Constant(intValue = 16))
+    private static int modifySectionCountToSupportClassicWorldHeight(int constant) {
+        return 64;
     }
 
 }
