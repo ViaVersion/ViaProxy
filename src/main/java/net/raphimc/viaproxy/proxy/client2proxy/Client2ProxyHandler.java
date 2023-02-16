@@ -56,6 +56,7 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
+import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -219,7 +220,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress(), serverAddress.getPort(), packet.intendedState)).await().addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             this.proxyConnection.setConnectionState(packet.intendedState);
         } catch (Throwable e) {
-            this.proxyConnection.kickClient("§cCould not connect to the backend server!\n§cTry again in a few seconds.");
+            if (e instanceof ConnectException) { // Trust me, this is not always false
+                this.proxyConnection.kickClient("§cCould not connect to the backend server!\n§cTry again in a few seconds.");
+            } else {
+                Logger.LOGGER.error("Error while connecting to the backend server", e);
+                this.proxyConnection.kickClient("§cAn error occurred while connecting to the backend server: " + e.getMessage() + "\n§cCheck the console for more information.");
+            }
         }
     }
 
