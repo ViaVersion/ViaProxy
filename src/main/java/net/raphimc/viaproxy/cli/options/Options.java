@@ -40,7 +40,7 @@ public class Options {
     public static int COMPRESSION_THRESHOLD = 256;
 
     public static String CONNECT_ADDRESS;
-    public static int CONNECT_PORT;
+    public static int CONNECT_PORT = 25565;
     public static VersionEnum PROTOCOL_VERSION;
 
     public static boolean OPENAUTHMOD_AUTH;
