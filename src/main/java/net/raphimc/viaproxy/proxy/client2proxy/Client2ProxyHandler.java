@@ -42,6 +42,7 @@ import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
+import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
 import net.raphimc.viaproxy.proxy.LoginState;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
@@ -202,8 +203,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
+        final ResolveSrvEvent resolveSrvEvent = PluginManager.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, connectIP, connectPort));
+        connectIP = resolveSrvEvent.getHost();
+        connectPort = resolveSrvEvent.getPort();
+
         final ServerAddress serverAddress;
-        if (serverVersion.isOlderThan(VersionEnum.r1_3_1tor1_3_2)) {
+        if (resolveSrvEvent.isCancelled() || serverVersion.isOlderThan(VersionEnum.r1_3_1tor1_3_2)) {
             serverAddress = new ServerAddress(connectIP, connectPort);
         } else {
             serverAddress = ServerAddress.fromSRV(connectIP + ":" + connectPort);

@@ -21,6 +21,8 @@ import com.google.common.net.HostAndPort;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
@@ -206,8 +208,8 @@ public class GeneralTab extends AUITab {
                     Options.BIND_PORT = bindPort;
                     Options.ONLINE_MODE = proxyOnlineMode;
                     Options.CONNECT_ADDRESS = hostAndPort.getHost();
-                    Options.CONNECT_PORT = hostAndPort.getPortOrDefault(25565);
                     Options.PROTOCOL_VERSION = serverVersion;
+                    Options.CONNECT_PORT = hostAndPort.getPortOrDefault(PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
                     Options.BETACRAFT_AUTH = betaCraftAuth;
 
                     if (authMethod != 1) {

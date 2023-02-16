@@ -21,6 +21,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -62,7 +64,7 @@ public class Options {
         final OptionSpec<Integer> nettyThreads = parser.acceptsAll(asList("netty_threads", "t"), "The amount of netty threads to use").withRequiredArg().ofType(Integer.class).defaultsTo(NETTY_THREADS);
         final OptionSpec<Integer> compressionThreshold = parser.acceptsAll(asList("compression_threshold", "ct", "c"), "The threshold for packet compression").withRequiredArg().ofType(Integer.class).defaultsTo(COMPRESSION_THRESHOLD);
         final OptionSpec<String> connectAddress = parser.acceptsAll(asList("connect_address", "target_ip", "ca", "a"), "The address of the target server").withRequiredArg().ofType(String.class).required();
-        final OptionSpec<Integer> connectPort = parser.acceptsAll(asList("connect_port", "target_port", "cp", "p"), "The port of the target server").withRequiredArg().ofType(Integer.class).defaultsTo(CONNECT_PORT);
+        final OptionSpec<Integer> connectPort = parser.acceptsAll(asList("connect_port", "target_port", "cp", "p"), "The port of the target server").withRequiredArg().ofType(Integer.class);
         final OptionSpec<VersionEnum> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new VersionEnumConverter()).required();
         final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Enable OpenAuthMod authentication");
         final OptionSpec<Void> localSocketAuth = parser.accepts("local_socket_auth", "Enable authentication over a local socket");
@@ -82,8 +84,12 @@ public class Options {
         ONLINE_MODE = options.has(onlineMode);
         NETTY_THREADS = options.valueOf(nettyThreads);
         CONNECT_ADDRESS = options.valueOf(connectAddress);
-        CONNECT_PORT = options.valueOf(connectPort);
         PROTOCOL_VERSION = options.valueOf(version);
+        if (options.has(connectPort)) {
+            CONNECT_PORT = options.valueOf(connectPort);
+        } else {
+            CONNECT_PORT = PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(PROTOCOL_VERSION, 25565)).getDefaultPort();
+        }
         COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
         OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
         LOCAL_SOCKET_AUTH = options.has(localSocketAuth);
