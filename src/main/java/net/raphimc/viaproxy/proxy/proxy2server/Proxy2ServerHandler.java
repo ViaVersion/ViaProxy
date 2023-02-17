@@ -18,14 +18,21 @@
 package net.raphimc.viaproxy.proxy.proxy2server;
 
 import com.mojang.authlib.GameProfile;
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.libs.gson.JsonElement;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.raphimc.netminecraft.constants.ConnectionState;
+import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.crypto.AESEncryption;
 import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.PacketTypes;
+import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
@@ -37,19 +44,25 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
 
     private ProxyConnection proxyConnection;
+
+    private int joinGamePacketId = -1;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
 
         this.proxyConnection = ProxyConnection.fromChannel(ctx.channel());
+
+        this.joinGamePacketId = MCPackets.S2C_JOIN_GAME.getId(this.proxyConnection.getClientVersion().getVersion());
     }
 
     @Override
@@ -75,6 +88,14 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
                 else break;
 
                 return;
+            case PLAY:
+                final UnknownPacket unknownPacket = (UnknownPacket) packet;
+                if (unknownPacket.packetId == this.joinGamePacketId) {
+                    this.proxyConnection.getC2P().writeAndFlush(packet).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    this.sendResourcePack();
+                    return;
+                }
+                break;
         }
 
         this.proxyConnection.getC2P().writeAndFlush(packet).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
@@ -131,6 +152,39 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
 
     private void handleLoginCompression(final S2CLoginCompressionPacket packet) {
         this.proxyConnection.getChannel().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(packet.compressionThreshold);
+    }
+
+    private void sendResourcePack() {
+        if (Options.RESOURCE_PACK_URL != null) {
+            this.proxyConnection.getChannel().eventLoop().schedule(() -> {
+                if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_8)) {
+                    final ByteBuf resourcePackPacket = Unpooled.buffer();
+                    PacketTypes.writeVarInt(resourcePackPacket, MCPackets.S2C_RESOURCE_PACK.getId(this.proxyConnection.getClientVersion().getVersion()));
+                    PacketTypes.writeString(resourcePackPacket, Options.RESOURCE_PACK_URL); // url
+                    PacketTypes.writeString(resourcePackPacket, ""); // hash
+                    if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_17)) {
+                        resourcePackPacket.writeBoolean(Via.getConfig().isForcedUse1_17ResourcePack()); // required
+                        final JsonElement promptMessage = Via.getConfig().get1_17ResourcePackPrompt();
+                        if (promptMessage != null) {
+                            resourcePackPacket.writeBoolean(true); // has message
+                            PacketTypes.writeString(resourcePackPacket, promptMessage.toString()); // message
+                        } else {
+                            resourcePackPacket.writeBoolean(false); // has message
+                        }
+                    }
+                    this.proxyConnection.getC2P().writeAndFlush(resourcePackPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                } else if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_7_2tor1_7_5)) {
+                    final byte[] data = Options.RESOURCE_PACK_URL.getBytes(StandardCharsets.UTF_8);
+
+                    final ByteBuf customPayloadPacket = Unpooled.buffer();
+                    PacketTypes.writeVarInt(customPayloadPacket, MCPackets.S2C_PLUGIN_MESSAGE.getId(this.proxyConnection.getClientVersion().getVersion()));
+                    PacketTypes.writeString(customPayloadPacket, "MC|RPack"); // channel
+                    customPayloadPacket.writeShort(data.length); // length
+                    customPayloadPacket.writeBytes(data); // data
+                    this.proxyConnection.getC2P().writeAndFlush(customPayloadPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                }
+            }, 250, TimeUnit.MILLISECONDS);
+        }
     }
 
 }

@@ -34,23 +34,23 @@ public class Options {
 
     public static String BIND_ADDRESS = "0.0.0.0";
     public static int BIND_PORT = 25568;
-
-    public static boolean SRV_MODE; // Example: lenni0451.net_25565_1.8.x.viaproxy.127.0.0.1.nip.io
-    public static boolean INTERNAL_SRV_MODE; // Example: ip\7port\7version\7mppass
-    public static boolean ONLINE_MODE;
-    public static int NETTY_THREADS = 0;
-    public static int COMPRESSION_THRESHOLD = 256;
-
     public static String CONNECT_ADDRESS;
     public static int CONNECT_PORT = 25565;
     public static VersionEnum PROTOCOL_VERSION;
-
+    public static boolean ONLINE_MODE;
     public static boolean OPENAUTHMOD_AUTH;
-    public static boolean LOCAL_SOCKET_AUTH;
     public static boolean BETACRAFT_AUTH;
 
     // GUI only config options
     public static Account MC_ACCOUNT;
+
+    // CLI only config options
+    public static int NETTY_THREADS = 0;
+    public static int COMPRESSION_THRESHOLD = 256;
+    public static boolean SRV_MODE; // Example: lenni0451.net_25565_1.8.x.viaproxy.127.0.0.1.nip.io
+    public static boolean INTERNAL_SRV_MODE; // Example: ip\7port\7version\7mppass
+    public static boolean LOCAL_SOCKET_AUTH;
+    public static String RESOURCE_PACK_URL;
 
     public static void parse(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -69,6 +69,7 @@ public class Options {
         final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Enable OpenAuthMod authentication");
         final OptionSpec<Void> localSocketAuth = parser.accepts("local_socket_auth", "Enable authentication over a local socket");
         final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication servers for classic");
+        final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which all connecting clients can optionally download").withRequiredArg().ofType(String.class);
 
         final OptionSet options = parser.parse(args);
         if (options.has(help)) {
@@ -94,6 +95,9 @@ public class Options {
         OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
         LOCAL_SOCKET_AUTH = options.has(localSocketAuth);
         BETACRAFT_AUTH = options.has(betaCraftAuth);
+        if (options.has(resourcePackUrl)) {
+            RESOURCE_PACK_URL = options.valueOf(resourcePackUrl);
+        }
     }
 
 }
