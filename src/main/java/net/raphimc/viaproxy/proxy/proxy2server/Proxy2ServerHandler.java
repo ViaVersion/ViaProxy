@@ -57,8 +57,8 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
     private int joinGamePacketId = -1;
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelRegistered(ctx);
 
         this.proxyConnection = ProxyConnection.fromChannel(ctx.channel());
 
