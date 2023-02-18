@@ -43,7 +43,7 @@ public class ExceptionUtil {
     }
 
     public static void handleNettyException(ChannelHandlerContext ctx, Throwable cause, ProxyConnection proxyConnection) {
-        if (!ctx.channel().isOpen() || !ctx.channel().isActive()) return;
+        if (!ctx.channel().isOpen()) return;
         if (cause instanceof ClosedChannelException) return;
         if (cause instanceof IOException) return;
         if (cause instanceof CloseAndReturn) {
