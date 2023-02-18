@@ -118,7 +118,7 @@ public class ProxyConnection extends NetClient {
         return this.serverVersion;
     }
 
-    public void setKeyForPreNettyEncryption(Key key) {
+    public void setKeyForPreNettyEncryption(final Key key) {
         this.storedSecretKey = key;
     }
 
@@ -126,7 +126,7 @@ public class ProxyConnection extends NetClient {
         this.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(this.storedSecretKey));
     }
 
-    public void setClientVersion(VersionEnum clientVersion) {
+    public void setClientVersion(final VersionEnum clientVersion) {
         this.clientVersion = clientVersion;
     }
 
@@ -134,7 +134,7 @@ public class ProxyConnection extends NetClient {
         return this.clientVersion;
     }
 
-    public void setGameProfile(GameProfile gameProfile) {
+    public void setGameProfile(final GameProfile gameProfile) {
         this.gameProfile = gameProfile;
     }
 
@@ -150,7 +150,7 @@ public class ProxyConnection extends NetClient {
         return this.loginHelloPacket;
     }
 
-    public void setUserConnection(UserConnection userConnection) {
+    public void setUserConnection(final UserConnection userConnection) {
         this.userConnection = userConnection;
     }
 
@@ -158,7 +158,7 @@ public class ProxyConnection extends NetClient {
         return this.userConnection;
     }
 
-    public void setConnectionState(ConnectionState connectionState) {
+    public void setConnectionState(final ConnectionState connectionState) {
         this.connectionState = connectionState;
         switch (this.connectionState) {
             case HANDSHAKING:
