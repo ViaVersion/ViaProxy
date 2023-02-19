@@ -92,6 +92,9 @@ public class AccountsTab extends AUITab {
                     if (SwingUtilities.isRightMouseButton(e)) {
                         int row = accountsList.locationToIndex(e.getPoint());
                         accountsList.setSelectedIndex(row);
+                    } else if (e.getClickCount() == 2) {
+                        int index = accountsList.getSelectedIndex();
+                        if (index != -1) markSelected(index);
                     }
                 }
             });
