@@ -36,8 +36,8 @@ public class ProtocolHack {
 
     public static void init() {
         patchConfigs();
-        final Supplier<?>[] additionalPlatformSuppliers = PluginManager.EVENT_MANAGER.call(new ProtocolHackInitEvent(ViaAprilFoolsPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
-        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, additionalPlatformSuppliers);
+        final Supplier<?>[] platformSuppliers = PluginManager.EVENT_MANAGER.call(new ProtocolHackInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
+        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, platformSuppliers);
     }
 
     private static void patchConfigs() {

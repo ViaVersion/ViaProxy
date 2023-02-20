@@ -25,14 +25,12 @@ import com.viaversion.viaversion.api.protocol.packet.State;
 import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.types.BitSetType;
-import com.viaversion.viaversion.api.type.types.ByteArrayType;
 import com.viaversion.viaversion.protocols.base.ClientboundLoginPackets;
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ClientboundPackets1_19_1;
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ServerboundPackets1_19_1;
 import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ClientboundPackets1_19_3;
 import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ServerboundPackets1_19_3;
 import net.lenni0451.classtransform.InjectionCallback;
-import net.lenni0451.classtransform.annotations.CShadow;
 import net.lenni0451.classtransform.annotations.CTarget;
 import net.lenni0451.classtransform.annotations.CTransformer;
 import net.lenni0451.classtransform.annotations.injection.CInject;
@@ -43,9 +41,6 @@ import java.util.BitSet;
 
 @CTransformer(Protocol1_19_1To1_19_3.class)
 public abstract class Protocol1_19_1To1_19_3Transformer extends BackwardsProtocol<ClientboundPackets1_19_3, ClientboundPackets1_19_1, ServerboundPackets1_19_3, ServerboundPackets1_19_1> {
-
-    @CShadow
-    private static ByteArrayType.OptionalByteArrayType OPTIONAL_SIGNATURE_BYTES_TYPE;
 
     @CInject(method = "registerPackets", target = @CTarget("RETURN"))
     private void allowSignatures(InjectionCallback ic) {
@@ -84,9 +79,9 @@ public abstract class Protocol1_19_1To1_19_3Transformer extends BackwardsProtoco
                         final long salt = wrapper.get(Type.LONG, 1);
 
                         final MessageMetadata metadata = new MessageMetadata(null, timestamp, salt);
-                        wrapper.write(OPTIONAL_SIGNATURE_BYTES_TYPE, chatSession.signChatMessage(metadata, message, new PlayerMessageSignature[0])); // Signature
+                        wrapper.write(Protocol1_19_1To1_19_3.OPTIONAL_SIGNATURE_BYTES_TYPE, chatSession.signChatMessage(metadata, message, new PlayerMessageSignature[0])); // Signature
                     } else {
-                        wrapper.write(OPTIONAL_SIGNATURE_BYTES_TYPE, null); // Signature
+                        wrapper.write(Protocol1_19_1To1_19_3.OPTIONAL_SIGNATURE_BYTES_TYPE, null); // Signature
                     }
 
                     wrapper.write(Type.VAR_INT, 0); // Offset
