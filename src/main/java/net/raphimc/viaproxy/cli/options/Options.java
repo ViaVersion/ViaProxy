@@ -23,6 +23,8 @@ import joptsimple.OptionSpec;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
+import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
+import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -68,6 +70,7 @@ public class Options {
         final OptionSpec<Void> localSocketAuth = parser.accepts("local_socket_auth", "Enable authentication over a local socket");
         final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication servers for classic");
         final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which all connecting clients can optionally download").withRequiredArg().ofType(String.class);
+        PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options = parser.parse(args);
         if (options.has(help)) {
@@ -95,6 +98,7 @@ public class Options {
         if (options.has(resourcePackUrl)) {
             RESOURCE_PACK_URL = options.valueOf(resourcePackUrl);
         }
+        PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
     }
 
 }
