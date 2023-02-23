@@ -151,7 +151,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.setClientVersion(clientVersion);
         this.proxyConnection.setConnectionState(packet.intendedState);
 
-        if (clientVersion == VersionEnum.UNKNOWN) {
+        if (clientVersion == VersionEnum.UNKNOWN || !VersionEnum.OFFICIAL_SUPPORTED_PROTOCOLS.contains(clientVersion)) {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
         }
 
