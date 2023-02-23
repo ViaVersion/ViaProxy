@@ -125,7 +125,7 @@ public class GeneralTab extends AUITab {
         }
         {
             this.betaCraftAuth = new JCheckBox("BetaCraft Auth (Classic)");
-            this.betaCraftAuth.setBounds(10, 250, 150, 20);
+            this.betaCraftAuth.setBounds(10, 250, 250, 20);
             ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
             contentPane.add(this.betaCraftAuth);
         }
