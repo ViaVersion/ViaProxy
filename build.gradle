@@ -101,6 +101,10 @@ blossom {
     replaceToken("\${version}", project.version, "src/main/java/net/raphimc/viaproxy/ViaProxy.java")
 }
 
+java {
+    withSourcesJar()
+}
+
 jar {
     dependsOn configurations.include
     from {
