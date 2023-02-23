@@ -45,7 +45,6 @@ public class Options {
     public static Account MC_ACCOUNT;
 
     // CLI only config options
-    public static int NETTY_THREADS = 0;
     public static int COMPRESSION_THRESHOLD = 256;
     public static boolean SRV_MODE; // Example: lenni0451.net_25565_1.8.x.viaproxy.127.0.0.1.nip.io
     public static boolean INTERNAL_SRV_MODE; // Example: ip\7port\7version\7mppass
@@ -61,7 +60,6 @@ public class Options {
         final OptionSpec<Void> srvMode = parser.acceptsAll(asList("srv_mode", "srv", "s"), "Enable srv mode");
         final OptionSpec<Void> iSrvMode = parser.acceptsAll(asList("internal_srv_mode", "isrv"), "Enable internal srv mode").availableUnless(srvMode);
         final OptionSpec<Void> onlineMode = parser.acceptsAll(asList("online_mode", "om", "o"), "Enable online mode");
-        final OptionSpec<Integer> nettyThreads = parser.acceptsAll(asList("netty_threads", "t"), "The amount of netty threads to use").withRequiredArg().ofType(Integer.class).defaultsTo(NETTY_THREADS);
         final OptionSpec<Integer> compressionThreshold = parser.acceptsAll(asList("compression_threshold", "ct", "c"), "The threshold for packet compression").withRequiredArg().ofType(Integer.class).defaultsTo(COMPRESSION_THRESHOLD);
         final OptionSpec<String> connectAddress = parser.acceptsAll(asList("connect_address", "target_ip", "ca", "a"), "The address of the target server").withRequiredArg().ofType(String.class).required();
         final OptionSpec<Integer> connectPort = parser.acceptsAll(asList("connect_port", "target_port", "cp", "p"), "The port of the target server").withRequiredArg().ofType(Integer.class);
@@ -83,7 +81,6 @@ public class Options {
         SRV_MODE = options.has(srvMode);
         INTERNAL_SRV_MODE = options.has(iSrvMode);
         ONLINE_MODE = options.has(onlineMode);
-        NETTY_THREADS = options.valueOf(nettyThreads);
         CONNECT_ADDRESS = options.valueOf(connectAddress);
         PROTOCOL_VERSION = options.valueOf(version);
         if (options.has(connectPort)) {

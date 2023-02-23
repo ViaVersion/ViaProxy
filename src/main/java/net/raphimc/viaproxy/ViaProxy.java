@@ -94,10 +94,8 @@ public class ViaProxy {
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         ConsoleHandler.hookConsole();
         Logger.LOGGER.info("Initializing ViaProxy {} v{} (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, injectionMethod);
+        loadNetty();
         saveManager = new SaveManager();
-        setNettyParameters();
-        MCPipeline.useOptimizedPipeline();
-        c2pChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
         PluginManager.loadPlugins();
 
         Thread loaderThread = new Thread(new LoaderTask(), "ViaProtocolHack-Loader");
@@ -167,14 +165,13 @@ public class ViaProxy {
         }
     }
 
-    private static void setNettyParameters() {
+    private static void loadNetty() {
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
         if (System.getProperty("io.netty.allocator.maxOrder") == null) {
             System.setProperty("io.netty.allocator.maxOrder", "9");
         }
-        if (Options.NETTY_THREADS > 0) {
-            System.setProperty("io.netty.eventLoopThreads", Integer.toString(Options.NETTY_THREADS));
-        }
+        MCPipeline.useOptimizedPipeline();
+        c2pChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     }
 
 }
