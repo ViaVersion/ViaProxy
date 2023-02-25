@@ -61,8 +61,10 @@ You will find 4 config files there:
 - vialegacy.yml (ViaLegacy)
 
 ### Developer Plugin API
-ViaProxy has a plugin API which allows you to create plugins for ViaProxy.
-You can find the documentation and examples [here](https://github.com/Lenni0451/NoLocalConnections).
+ViaProxy has a plugin API which allows you to create plugins for ViaProxy.  
+Documentation and examples:
+- [NoLocalConnections](https://github.com/Lenni0451/NoLocalConnections)
+- [ViaProxyMultiLaunch](https://github.com/Lenni0451/ViaProxyMultiLaunch)
 
 ## Contact
 If you encounter any issues, please report them on the
