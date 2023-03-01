@@ -134,6 +134,10 @@ public class ViaProxy {
         loaderThread.join();
         Logger.LOGGER.info("ViaProxy started successfully!");
         startProxy();
+
+        while (true) {
+            Thread.sleep(Integer.MAX_VALUE);
+        }
     }
 
     public static void startProxy() {
