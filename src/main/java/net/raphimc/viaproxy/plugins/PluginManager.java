@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,10 @@ public class PluginManager {
     private static final Yaml YAML = new Yaml();
     private static final File PLUGINS_DIR = new File("plugins");
     private static final List<ViaProxyPlugin> PLUGINS = new ArrayList<>();
+
+    public static List<ViaProxyPlugin> getPlugins() {
+        return Collections.unmodifiableList(PLUGINS);
+    }
 
     public static void loadPlugins() {
         if (!PLUGINS_DIR.exists() || !PLUGINS_DIR.isDirectory()) {
