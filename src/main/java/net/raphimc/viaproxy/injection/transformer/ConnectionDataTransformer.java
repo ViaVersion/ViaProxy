@@ -27,7 +27,7 @@ import org.objectweb.asm.tree.*;
 public abstract class ConnectionDataTransformer {
 
     @CASM("update")
-    public static void preventBlockChangeSpam1(MethodNode method) {
+    public static void preventBlockChangeSpam(MethodNode method) {
         LabelNode continueLabel = new LabelNode();
         InsnList checkCode = new InsnList();
         checkCode.add(new VarInsnNode(Opcodes.ILOAD, 7));
@@ -44,24 +44,6 @@ public abstract class ConnectionDataTransformer {
             } else if (continueLabel != null && insn.getOpcode() == Opcodes.IINC) {
                 method.instructions.insertBefore(insn, continueLabel);
                 continueLabel = null;
-            }
-        }
-    }
-
-    @CASM("updateBlock")
-    public static void preventBlockChangeSpam2(MethodNode method) {
-        LabelNode addLabel = new LabelNode();
-        InsnList checkCode = new InsnList();
-        checkCode.add(new VarInsnNode(Opcodes.ILOAD, 3));
-        checkCode.add(new VarInsnNode(Opcodes.ILOAD, 5));
-        checkCode.add(new JumpInsnNode(Opcodes.IF_ICMPNE, addLabel));
-        checkCode.add(new InsnNode(Opcodes.RETURN));
-        checkCode.add(addLabel);
-
-        for (AbstractInsnNode insn : method.instructions.toArray()) {
-            if (insn.getOpcode() == Opcodes.INVOKEINTERFACE) {
-                method.instructions.insertBefore(insn, checkCode);
-                break;
             }
         }
     }
