@@ -60,7 +60,7 @@ dependencies {
     compileOnly sourceSets.java17compat.output
 
     include "com.viaversion:viaversion:4.6.0-1.19.4-rc1-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.6.0-1.19.4-pre4-SNAPSHOT") {
+    include("com.viaversion:viabackwards-common:4.6.0-23w08a-SNAPSHOT") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
