@@ -22,12 +22,12 @@ import com.viaversion.viaversion.exception.CancelCodecException;
 import com.viaversion.viaversion.util.PipelineUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import net.raphimc.viaprotocolhack.netty.ViaDecodeHandler;
+import net.raphimc.viaprotocolhack.netty.VPHDecodeHandler;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.util.List;
 
-public class ViaProxyViaDecodeHandler extends ViaDecodeHandler {
+public class ViaProxyViaDecodeHandler extends VPHDecodeHandler {
 
     public ViaProxyViaDecodeHandler(final UserConnection info) {
         super(info);
