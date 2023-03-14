@@ -10,12 +10,12 @@ For a full user guide go to the [Usage for Players](#usage-for-players--gui-) se
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
 - Alpha (a1.0.15 - a1.2.6)
 - Beta (b1.0 - b1.8.1)
-- Release (1.0.0 - 1.19.3)
+- Release (1.0.0 - 1.19.4)
 - April Fools (3D Shareware, 20w14infinite)
 - Combat Snapshots (Combat Test 8c)
 
 ## Supported Client versions
-- Release (1.7.2 - 1.19.3)
+- Release (1.7.2 - 1.19.4)
 
 ViaProxy supports joining to any of the listed server version from any of the listed client versions.
 

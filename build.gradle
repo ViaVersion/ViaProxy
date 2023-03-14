@@ -59,13 +59,13 @@ repositories {
 dependencies {
     compileOnly sourceSets.java17compat.output
 
-    include "com.viaversion:viaversion:4.6.0-1.19.4-rc3-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.6.0-1.19.4-pre4-SNAPSHOT") {
+    include "com.viaversion:viaversion:4.6.0"
+    include("com.viaversion:viabackwards-common:4.6.0") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
     }
-    include "com.viaversion:viarewind-core:2.0.3-SNAPSHOT"
+    include "com.viaversion:viarewind-core:2.0.3"
     include "net.raphimc:ViaLegacy:2.2.8"
     include "net.raphimc:ViaAprilFools:2.0.6"
     include("net.raphimc:ViaProtocolHack:2.2.0") {
@@ -86,7 +86,7 @@ dependencies {
     include "net.lenni0451.classtransform:additionalclassprovider:1.8.4"
     include "net.lenni0451:Reflect:1.1.0"
     include "net.lenni0451:LambdaEvents:2.0.3"
-    include "net.raphimc.netminecraft:all:2.3.1"
+    include "net.raphimc.netminecraft:all:2.3.2"
     include("net.raphimc:MinecraftAuth:2.0.1") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
