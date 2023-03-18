@@ -22,6 +22,10 @@ import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.proxy.HttpProxyHandler;
+import io.netty.handler.proxy.ProxyHandler;
+import io.netty.handler.proxy.Socks4ProxyHandler;
+import io.netty.handler.proxy.Socks5ProxyHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
@@ -31,12 +35,16 @@ import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.baseprotoc
 import net.raphimc.viaprotocolhack.netty.VPHEncodeHandler;
 import net.raphimc.viaprotocolhack.netty.VPHPipeline;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.protocolhack.impl.ViaProxyViaDecodeHandler;
 import net.raphimc.viaproxy.proxy.ProxyConnection;
 
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.Locale;
 import java.util.function.Supplier;
 
 public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer {
@@ -67,9 +75,35 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
             channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, VPHPipeline.PRE_NETTY_DECODER_HANDLER_NAME, new PreNettyDecoder(user));
         }
 
+        if (Options.PROXY_URL != null) {
+            channel.pipeline().addFirst("viaproxy-proxy-handler", this.getProxyHandler());
+        }
+
         if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel)).isCancelled()) {
             channel.close();
         }
+    }
+
+    protected ProxyHandler getProxyHandler() {
+        final URI proxyUrl = Options.PROXY_URL;
+        final InetSocketAddress proxyAddress = new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort());
+        final String username = proxyUrl.getUserInfo() != null ? proxyUrl.getUserInfo().split(":")[0] : null;
+        final String password = proxyUrl.getUserInfo() != null && proxyUrl.getUserInfo().contains(":") ? proxyUrl.getUserInfo().split(":")[1] : null;
+
+        switch (proxyUrl.getScheme().toUpperCase(Locale.ROOT)) {
+            case "HTTP":
+            case "HTTPS":
+                if (username != null && password != null) return new HttpProxyHandler(proxyAddress, username, password);
+                else return new HttpProxyHandler(proxyAddress);
+            case "SOCKS4":
+                if (username != null) return new Socks4ProxyHandler(proxyAddress, username);
+                else return new Socks4ProxyHandler(proxyAddress);
+            case "SOCKS5":
+                if (username != null && password != null) return new Socks5ProxyHandler(proxyAddress, username, password);
+                else return new Socks5ProxyHandler(proxyAddress);
+        }
+
+        throw new IllegalArgumentException("Unknown proxy type: " + proxyUrl.getScheme());
     }
 
 }

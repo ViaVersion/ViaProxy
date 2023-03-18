@@ -29,6 +29,8 @@ import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static java.util.Arrays.asList;
 
@@ -51,7 +53,8 @@ public class Options {
     public static boolean SRV_MODE; // Example: lenni0451.net_25565_1.8.x.viaproxy.127.0.0.1.nip.io
     public static boolean INTERNAL_SRV_MODE; // Example: ip\7port\7version\7mppass
     public static boolean LOCAL_SOCKET_AUTH;
-    public static String RESOURCE_PACK_URL;
+    public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
+    public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
 
     public static void parse(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -70,6 +73,7 @@ public class Options {
         final OptionSpec<Void> localSocketAuth = parser.accepts("local_socket_auth", "Enable authentication over a local socket");
         final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication servers for classic");
         final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which all connecting clients can optionally download").withRequiredArg().ofType(String.class);
+        final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for TCP connections").withRequiredArg().ofType(String.class);
         PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options = parser.parse(args);
@@ -97,6 +101,15 @@ public class Options {
         BETACRAFT_AUTH = options.has(betaCraftAuth);
         if (options.has(resourcePackUrl)) {
             RESOURCE_PACK_URL = options.valueOf(resourcePackUrl);
+        }
+        if (options.has(proxyUrl)) {
+            try {
+                PROXY_URL = new URI(options.valueOf(proxyUrl));
+            } catch (URISyntaxException e) {
+                Logger.LOGGER.error("Invalid proxy url: " + options.valueOf(proxyUrl));
+                Logger.LOGGER.error("Proxy url format: type://address:port or type://username:password@address:port");
+                System.exit(1);
+            }
         }
         PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
     }
