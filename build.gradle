@@ -59,8 +59,8 @@ repositories {
 dependencies {
     compileOnly sourceSets.java17compat.output
 
-    include "com.viaversion:viaversion:4.6.2-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.6.2-SNAPSHOT") {
+    include "com.viaversion:viaversion:4.7.0-23w12a-SNAPSHOT"
+    include("com.viaversion:viabackwards-common:4.7.0-23w12a-SNAPSHOT") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
@@ -68,7 +68,7 @@ dependencies {
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
     include "net.raphimc:ViaLegacy:2.2.8"
     include "net.raphimc:ViaAprilFools:2.0.6"
-    include("net.raphimc:ViaProtocolHack:2.2.0") {
+    include("net.raphimc:ViaProtocolHack:2.2.2") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
