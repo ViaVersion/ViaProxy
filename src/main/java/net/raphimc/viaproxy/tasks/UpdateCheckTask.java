@@ -35,11 +35,11 @@ import java.net.URL;
 
 import static net.raphimc.viaproxy.ViaProxy.VERSION;
 
-public class UpdatedCheckTask implements Runnable {
+public class UpdateCheckTask implements Runnable {
 
     private final boolean hasUI;
 
-    public UpdatedCheckTask(final boolean hasUI) {
+    public UpdateCheckTask(final boolean hasUI) {
         this.hasUI = hasUI;
     }
 

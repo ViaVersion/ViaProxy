@@ -36,6 +36,7 @@ public class ViaProxyUI extends JFrame {
 
     private final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
+
     public final GeneralTab generalTab = new GeneralTab(this);
     public final AccountsTab accountsTab = new AccountsTab(this);
 
@@ -49,6 +50,8 @@ public class ViaProxyUI extends JFrame {
         this.initWindow();
         this.initTabs();
 
+        ToolTipManager.sharedInstance().setInitialDelay(100);
+        ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
         this.setVisible(true);
     }

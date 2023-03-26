@@ -24,6 +24,7 @@ import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.saves.impl.UISave;
+import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -32,6 +33,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URI;
 
 public class GeneralTab extends AUITab {
 
@@ -80,6 +82,10 @@ public class GeneralTab extends AUITab {
 
             this.serverAddress = new JTextField();
             this.serverAddress.setBounds(10, 70, 465, 20);
+            this.serverAddress.setToolTipText("Supported formats:\n" +
+                    "- hostname\n" +
+                    "- hostname:port\n" +
+                    "- ClassiCube Direct URL");
             ViaProxy.saveManager.uiSave.loadTextField("server_address", this.serverAddress);
             contentPane.add(this.serverAddress);
         }
@@ -126,6 +132,7 @@ public class GeneralTab extends AUITab {
         {
             this.betaCraftAuth = new JCheckBox("BetaCraft Auth (Classic)");
             this.betaCraftAuth.setBounds(10, 250, 250, 20);
+            this.betaCraftAuth.setToolTipText("Enabling BetaCraft Auth allows you to join Classic servers which have online mode enabled.");
             ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
             contentPane.add(this.betaCraftAuth);
         }
@@ -194,7 +201,7 @@ public class GeneralTab extends AUITab {
         this.stateButton.setText("Starting...");
 
         new Thread(() -> {
-            final String serverAddress = this.serverAddress.getText().trim();
+            String serverAddress = this.serverAddress.getText().trim();
             final VersionEnum serverVersion = (VersionEnum) this.serverVersion.getSelectedItem();
             final int bindPort = (int) this.bindPort.getValue();
             final int authMethod = this.authMethod.getSelectedIndex();
@@ -203,6 +210,25 @@ public class GeneralTab extends AUITab {
 
             try {
                 try {
+                    if (serverAddress.startsWith("mc://")) { // ClassiCube Direct URL
+                        final URI uri = new URI(serverAddress);
+                        serverAddress = uri.getHost() + ":" + uri.getPort();
+
+                        final String[] path = uri.getPath().substring(1).split("/");
+                        if (path.length < 2) {
+                            throw new IllegalArgumentException("Invalid ClassiCube Direct URL");
+                        }
+
+                        Options.MC_ACCOUNT = new OfflineAccount(path[0]);
+                        Options.CLASSIC_MP_PASS = path[1];
+                    } else { // Normal address
+                        if (authMethod != 1) {
+                            Options.MC_ACCOUNT = null;
+                        } else if (Options.MC_ACCOUNT == null) {
+                            this.frame.accountsTab.markSelected(0);
+                        }
+                    }
+
                     final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
 
                     Options.BIND_PORT = bindPort;
@@ -211,12 +237,6 @@ public class GeneralTab extends AUITab {
                     Options.PROTOCOL_VERSION = serverVersion;
                     Options.CONNECT_PORT = hostAndPort.getPortOrDefault(PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
                     Options.BETACRAFT_AUTH = betaCraftAuth;
-
-                    if (authMethod != 1) {
-                        Options.MC_ACCOUNT = null;
-                    } else if (Options.MC_ACCOUNT == null) {
-                        this.frame.accountsTab.markSelected(0);
-                    }
 
                     if (authMethod == 2) {
                         Options.OPENAUTHMOD_AUTH = true;

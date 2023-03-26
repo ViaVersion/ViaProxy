@@ -47,6 +47,7 @@ public class Options {
 
     // GUI only config options
     public static Account MC_ACCOUNT;
+    public static String CLASSIC_MP_PASS;
 
     // CLI only config options
     public static int COMPRESSION_THRESHOLD = 256;

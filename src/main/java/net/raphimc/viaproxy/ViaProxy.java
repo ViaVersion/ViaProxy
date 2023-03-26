@@ -44,7 +44,7 @@ import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.saves.SaveManager;
 import net.raphimc.viaproxy.tasks.AccountRefreshTask;
 import net.raphimc.viaproxy.tasks.LoaderTask;
-import net.raphimc.viaproxy.tasks.UpdatedCheckTask;
+import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -100,7 +100,7 @@ public class ViaProxy {
 
         Thread loaderThread = new Thread(new LoaderTask(), "ViaProtocolHack-Loader");
         Thread accountRefreshThread = new Thread(new AccountRefreshTask(saveManager), "AccountRefresh");
-        Thread updateCheckThread = new Thread(new UpdatedCheckTask(hasUI), "UpdateCheck");
+        Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
 
         if (hasUI) {
             loaderThread.start();
