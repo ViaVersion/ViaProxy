@@ -227,6 +227,7 @@ public class GeneralTab extends AUITab {
                         } else if (Options.MC_ACCOUNT == null) {
                             this.frame.accountsTab.markSelected(0);
                         }
+                        Options.CLASSIC_MP_PASS = null;
                     }
 
                     final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
