@@ -46,7 +46,7 @@ public class AdvancedTab extends AUITab {
             contentPane.add(bindPortLabel);
 
             this.bindPort = new JSpinner(new SpinnerNumberModel(25568, 1, 65535, 1));
-            this.bindPort.setBounds(10, 30, 465, 20);
+            this.bindPort.setBounds(10, 30, 465, 22);
             this.bindPort.setToolTipText(toolTipText);
             ViaProxy.saveManager.uiSave.loadSpinner("bind_port", this.bindPort);
             contentPane.add(this.bindPort);
@@ -63,7 +63,7 @@ public class AdvancedTab extends AUITab {
             contentPane.add(proxyLabel);
 
             this.proxy = new JTextField();
-            this.proxy.setBounds(10, 80, 465, 20);
+            this.proxy.setBounds(10, 80, 465, 22);
             this.proxy.setToolTipText(toolTipText);
             ViaProxy.saveManager.uiSave.loadTextField("proxy", this.proxy);
             contentPane.add(this.proxy);

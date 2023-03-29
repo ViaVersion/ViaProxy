@@ -86,7 +86,7 @@ public class GeneralTab extends AUITab {
             contentPane.add(addressLabel);
 
             this.serverAddress = new JTextField();
-            this.serverAddress.setBounds(10, 70, 465, 20);
+            this.serverAddress.setBounds(10, 70, 465, 22);
             this.serverAddress.setToolTipText(toolTipText);
             ViaProxy.saveManager.uiSave.loadTextField("server_address", this.serverAddress);
             contentPane.add(this.serverAddress);
@@ -97,7 +97,7 @@ public class GeneralTab extends AUITab {
             contentPane.add(serverVersionLabel);
 
             this.serverVersion = new JComboBox<>(VersionEnum.SORTED_VERSIONS.toArray(new VersionEnum[0]));
-            this.serverVersion.setBounds(10, 120, 465, 20);
+            this.serverVersion.setBounds(10, 120, 465, 22);
             this.serverVersion.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -126,7 +126,7 @@ public class GeneralTab extends AUITab {
             contentPane.add(authMethodLabel);
 
             this.authMethod = new JComboBox<>(new String[]{"Use no account", "Use selected account", "Use OpenAuthMod"});
-            this.authMethod.setBounds(10, 170, 465, 20);
+            this.authMethod.setBounds(10, 170, 465, 22);
             ViaProxy.saveManager.uiSave.loadComboBox("auth_method", this.authMethod);
             contentPane.add(this.authMethod);
         }

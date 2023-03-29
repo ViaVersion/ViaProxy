@@ -61,6 +61,10 @@ public class ViaProxyUI extends JFrame {
     private void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
+
+            final Font font = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getClassLoader().getResourceAsStream("assets/fonts/OpenSans-Regular.ttf")).deriveFont(Font.PLAIN, 12F);
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
+            UIManager.getLookAndFeelDefaults().put("defaultFont", font);
         } catch (Throwable t) {
             t.printStackTrace();
         }

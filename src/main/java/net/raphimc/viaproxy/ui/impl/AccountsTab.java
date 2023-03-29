@@ -57,12 +57,12 @@ public class AccountsTab extends AUITab {
             contentPane.add(infoLabel);
         }
         {
-            JLabel info2Label = new JLabel("You can select the account to use by right clicking it. By default the first one will be used.");
+            JLabel info2Label = new JLabel("You can select the account by right clicking it. By default the first one will be used.");
             info2Label.setBounds(10, 30, 500, 20);
             contentPane.add(info2Label);
         }
         {
-            JLabel infoLabel = new JLabel("<html>If you change your account frequently, you might want to install <a href=\"\">OpenAuthMod</a> on your</html>");
+            JLabel infoLabel = new JLabel("<html>If you change your account frequently, you can install <a href=\"\">OpenAuthMod</a> on your</html>");
             infoLabel.setBounds(10, 60, 500, 20);
             contentPane.add(infoLabel);
 
@@ -71,7 +71,7 @@ public class AccountsTab extends AUITab {
             contentPane.add(infoLabel2);
 
             JLabel clickRect = new JLabel();
-            clickRect.setBounds(353, 60, 80, 20);
+            clickRect.setBounds(305, 60, 90, 24);
             clickRect.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
@@ -82,7 +82,7 @@ public class AccountsTab extends AUITab {
         }
         {
             JScrollPane scrollPane = new JScrollPane();
-            scrollPane.setBounds(10, 105, 465, 135);
+            scrollPane.setBounds(10, 105, 465, 110);
             contentPane.add(scrollPane);
 
             DefaultListModel<String> model = new DefaultListModel<>();
@@ -165,9 +165,16 @@ public class AccountsTab extends AUITab {
             }
             this.accountsList.setComponentPopupMenu(contextMenu);
         }
+
+        final JPanel addButtons = new JPanel();
+        addButtons.setBorder(BorderFactory.createTitledBorder("Add Account"));
+        addButtons.setBounds(10, 220, 465, 50);
+        addButtons.setLayout(null);
+        contentPane.add(addButtons);
+
         {
-            JButton addOfflineAccountButton = new JButton("Add Offline Account");
-            addOfflineAccountButton.setBounds(10, 250, 153, 20);
+            JButton addOfflineAccountButton = new JButton("Offline Account");
+            addOfflineAccountButton.setBounds(10, 20, 145, 20);
             addOfflineAccountButton.addActionListener(event -> {
                 String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
                 if (username != null && !username.trim().isEmpty()) {
@@ -176,25 +183,25 @@ public class AccountsTab extends AUITab {
                     this.addAccount(account);
                 }
             });
-            contentPane.add(addOfflineAccountButton);
+            addButtons.add(addOfflineAccountButton);
         }
         {
-            this.addMicrosoftAccountButton = new JButton("Add Microsoft Account");
-            this.addMicrosoftAccountButton.setBounds(168, 250, 153, 20);
+            this.addMicrosoftAccountButton = new JButton("Microsoft Account");
+            this.addMicrosoftAccountButton.setBounds(160, 20, 145, 20);
             this.addMicrosoftAccountButton.addActionListener(event -> {
                 this.addMicrosoftAccountButton.setEnabled(false);
                 this.handleLogin(MinecraftAuth::requestJavaLogin, profile -> ViaProxy.saveManager.accountsSave.addAccount(profile));
             });
-            contentPane.add(this.addMicrosoftAccountButton);
+            addButtons.add(this.addMicrosoftAccountButton);
         }
         {
-            this.addBedrockAccountButton = new JButton("Add Bedrock Account");
-            this.addBedrockAccountButton.setBounds(326, 250, 149, 20);
+            this.addBedrockAccountButton = new JButton("Bedrock Account");
+            this.addBedrockAccountButton.setBounds(310, 20, 145, 20);
             this.addBedrockAccountButton.addActionListener(event -> {
                 this.addBedrockAccountButton.setEnabled(false);
                 this.handleLogin(MinecraftAuth::requestBedrockLogin, chain -> ViaProxy.saveManager.accountsSave.addAccount(chain));
             });
-            contentPane.add(this.addBedrockAccountButton);
+            addButtons.add(this.addBedrockAccountButton);
         }
     }
 
