@@ -21,6 +21,7 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.impl.AccountsTab;
+import net.raphimc.viaproxy.ui.impl.AdvancedTab;
 import net.raphimc.viaproxy.ui.impl.GeneralTab;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -38,6 +39,7 @@ public class ViaProxyUI extends JFrame {
     private final List<AUITab> tabs = new ArrayList<>();
 
     public final GeneralTab generalTab = new GeneralTab(this);
+    public final AdvancedTab advancedTab = new AdvancedTab(this);
     public final AccountsTab accountsTab = new AccountsTab(this);
 
     private ImageIcon icon;
@@ -78,7 +80,7 @@ public class ViaProxyUI extends JFrame {
                 for (AUITab tab : tabs) tab.onClose();
             }
         });
-        this.setSize(500, 403);
+        this.setSize(500, 353);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setContentPane(this.contentPane);
@@ -95,7 +97,7 @@ public class ViaProxyUI extends JFrame {
                     tab.add(this.contentPane);
                 });
 
-        this.contentPane.setEnabledAt(1, false);
+        this.contentPane.setEnabledAt(this.contentPane.indexOfTab(this.accountsTab.getName()), false);
     }
 
 

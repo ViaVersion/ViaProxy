@@ -34,15 +34,14 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class GeneralTab extends AUITab {
 
     private JTextField serverAddress;
     private JComboBox<VersionEnum> serverVersion;
-    private JSpinner bindPort;
     private JComboBox<String> authMethod;
     private JCheckBox betaCraftAuth;
-    private JCheckBox proxyOnlineMode;
     private JLabel stateLabel;
     private JButton stateButton;
 
@@ -76,16 +75,19 @@ public class GeneralTab extends AUITab {
             contentPane.add(discordLabel);
         }
         {
+            String toolTipText = "Supported formats:\n" +
+                    "- address\n" +
+                    "- address:port\n" +
+                    "- ClassiCube Direct URL";
+
             JLabel addressLabel = new JLabel("Server Address:");
             addressLabel.setBounds(10, 50, 100, 20);
+            addressLabel.setToolTipText(toolTipText);
             contentPane.add(addressLabel);
 
             this.serverAddress = new JTextField();
             this.serverAddress.setBounds(10, 70, 465, 20);
-            this.serverAddress.setToolTipText("Supported formats:\n" +
-                    "- hostname\n" +
-                    "- hostname:port\n" +
-                    "- ClassiCube Direct URL");
+            this.serverAddress.setToolTipText(toolTipText);
             ViaProxy.saveManager.uiSave.loadTextField("server_address", this.serverAddress);
             contentPane.add(this.serverAddress);
         }
@@ -106,52 +108,45 @@ public class GeneralTab extends AUITab {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
             });
+            this.serverVersion.addActionListener(e -> {
+                if (!(this.serverVersion.getSelectedItem() instanceof VersionEnum)) return;
+                if (((VersionEnum) this.serverVersion.getSelectedItem()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
+                    this.betaCraftAuth.setEnabled(true);
+                } else {
+                    this.betaCraftAuth.setEnabled(false);
+                    this.betaCraftAuth.setSelected(false);
+                }
+            });
             ViaProxy.saveManager.uiSave.loadComboBox("server_version", this.serverVersion);
             contentPane.add(this.serverVersion);
         }
         {
-            JLabel bindPortLabel = new JLabel("Local Port:");
-            bindPortLabel.setBounds(10, 150, 100, 20);
-            contentPane.add(bindPortLabel);
-
-            this.bindPort = new JSpinner(new SpinnerNumberModel(25568, 1, 65535, 1));
-            this.bindPort.setBounds(10, 170, 465, 20);
-            ViaProxy.saveManager.uiSave.loadSpinner("bind_port", this.bindPort);
-            contentPane.add(this.bindPort);
-        }
-        {
             JLabel authMethodLabel = new JLabel("Minecraft Account:");
-            authMethodLabel.setBounds(10, 200, 400, 20);
+            authMethodLabel.setBounds(10, 150, 400, 20);
             contentPane.add(authMethodLabel);
 
             this.authMethod = new JComboBox<>(new String[]{"Use no account", "Use selected account", "Use OpenAuthMod"});
-            this.authMethod.setBounds(10, 220, 465, 20);
+            this.authMethod.setBounds(10, 170, 465, 20);
             ViaProxy.saveManager.uiSave.loadComboBox("auth_method", this.authMethod);
             contentPane.add(this.authMethod);
         }
         {
             this.betaCraftAuth = new JCheckBox("BetaCraft Auth (Classic)");
-            this.betaCraftAuth.setBounds(10, 250, 250, 20);
+            this.betaCraftAuth.setBounds(10, 200, 250, 20);
             this.betaCraftAuth.setToolTipText("Enabling BetaCraft Auth allows you to join Classic servers which have online mode enabled.");
             ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
             contentPane.add(this.betaCraftAuth);
-        }
-        {
-            this.proxyOnlineMode = new JCheckBox("Proxy Online Mode");
-            this.proxyOnlineMode.setBounds(350, 250, 465, 20);
-            this.proxyOnlineMode.setToolTipText("Enabling Proxy Online Mode requires your client to have a valid account.\nProxy Online Mode allows your client to see skins on online mode servers and use the signed chat features.");
-            ViaProxy.saveManager.uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
-            contentPane.add(this.proxyOnlineMode);
+            this.serverVersion.actionPerformed(null);
         }
         {
             this.stateLabel = new JLabel();
-            this.stateLabel.setBounds(14, 280, 465, 20);
+            this.stateLabel.setBounds(14, 230, 465, 20);
             this.stateLabel.setVisible(false);
             contentPane.add(this.stateLabel);
         }
         {
             this.stateButton = new JButton("Loading ViaProxy...");
-            this.stateButton.setBounds(10, 300, 465, 20);
+            this.stateButton.setBounds(10, 250, 465, 20);
             this.stateButton.addActionListener(e -> {
                 if (this.stateButton.getText().equalsIgnoreCase("Start")) this.start();
                 else if (this.stateButton.getText().equalsIgnoreCase("Stop")) this.stop();
@@ -174,24 +169,24 @@ public class GeneralTab extends AUITab {
         UISave save = ViaProxy.saveManager.uiSave;
         save.put("server_address", this.serverAddress.getText());
         save.put("server_version", String.valueOf(this.serverVersion.getSelectedIndex()));
-        save.put("bind_port", String.valueOf(this.bindPort.getValue()));
         save.put("auth_method", String.valueOf(this.authMethod.getSelectedIndex()));
         save.put("betacraft_auth", String.valueOf(this.betaCraftAuth.isSelected()));
-        save.put("proxy_online_mode", String.valueOf(this.proxyOnlineMode.isSelected()));
         ViaProxy.saveManager.save();
     }
 
     private void setComponentsEnabled(final boolean state) {
         this.serverAddress.setEnabled(state);
         this.serverVersion.setEnabled(state);
-        this.bindPort.setEnabled(state);
+        ViaProxy.ui.advancedTab.bindPort.setEnabled(state);
         this.authMethod.setEnabled(state);
         this.betaCraftAuth.setEnabled(state);
-        this.proxyOnlineMode.setEnabled(state);
+        ViaProxy.ui.advancedTab.proxyOnlineMode.setEnabled(state);
+        ViaProxy.ui.advancedTab.proxy.setEnabled(state);
+        if (state) this.serverVersion.actionPerformed(null);
     }
 
     private void updateStateLabel() {
-        this.stateLabel.setText("ViaProxy is running! Connect with Minecraft 1.7+ to 127.0.0.1:" + this.bindPort.getValue());
+        this.stateLabel.setText("ViaProxy is running! Connect with Minecraft 1.7+ to 127.0.0.1:" + ViaProxy.ui.advancedTab.bindPort.getValue());
         this.stateLabel.setVisible(true);
     }
 
@@ -203,10 +198,11 @@ public class GeneralTab extends AUITab {
         new Thread(() -> {
             String serverAddress = this.serverAddress.getText().trim();
             final VersionEnum serverVersion = (VersionEnum) this.serverVersion.getSelectedItem();
-            final int bindPort = (int) this.bindPort.getValue();
+            final int bindPort = (int) ViaProxy.ui.advancedTab.bindPort.getValue();
             final int authMethod = this.authMethod.getSelectedIndex();
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();
-            final boolean proxyOnlineMode = this.proxyOnlineMode.isSelected();
+            final boolean proxyOnlineMode = ViaProxy.ui.advancedTab.proxyOnlineMode.isSelected();
+            final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText();
 
             try {
                 try {
@@ -216,7 +212,7 @@ public class GeneralTab extends AUITab {
 
                         final String[] path = uri.getPath().substring(1).split("/");
                         if (path.length < 2) {
-                            throw new IllegalArgumentException("Invalid ClassiCube Direct URL");
+                            throw new IllegalArgumentException("Invalid ClassiCube Direct URL!");
                         }
 
                         Options.MC_ACCOUNT = new OfflineAccount(path[0]);
@@ -230,23 +226,34 @@ public class GeneralTab extends AUITab {
                         Options.CLASSIC_MP_PASS = null;
                     }
 
-                    final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
+                    try {
+                        HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
+                        Options.CONNECT_ADDRESS = hostAndPort.getHost();
+                        Options.CONNECT_PORT = hostAndPort.getPortOrDefault(PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
+                    } catch (Throwable t) {
+                        throw new IllegalArgumentException("Invalid server address!");
+                    }
 
                     Options.BIND_PORT = bindPort;
                     Options.ONLINE_MODE = proxyOnlineMode;
-                    Options.CONNECT_ADDRESS = hostAndPort.getHost();
                     Options.PROTOCOL_VERSION = serverVersion;
-                    Options.CONNECT_PORT = hostAndPort.getPortOrDefault(PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
                     Options.BETACRAFT_AUTH = betaCraftAuth;
 
                     if (authMethod == 2) {
                         Options.OPENAUTHMOD_AUTH = true;
                     }
-                } catch (Throwable e) {
+                    if (!proxyUrl.isEmpty()) {
+                        try {
+                            Options.PROXY_URL = new URI(proxyUrl);
+                        } catch (URISyntaxException e) {
+                            throw new IllegalArgumentException("Invalid proxy URL!");
+                        }
+                    }
+                } catch (Throwable t) {
                     SwingUtilities.invokeLater(() -> {
-                        this.frame.showError("Invalid server address!");
+                        this.frame.showError(t.getMessage());
                     });
-                    throw e;
+                    throw t;
                 }
 
                 try {

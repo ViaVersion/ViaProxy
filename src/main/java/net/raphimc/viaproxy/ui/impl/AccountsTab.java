@@ -82,7 +82,7 @@ public class AccountsTab extends AUITab {
         }
         {
             JScrollPane scrollPane = new JScrollPane();
-            scrollPane.setBounds(10, 105, 465, 185);
+            scrollPane.setBounds(10, 105, 465, 135);
             contentPane.add(scrollPane);
 
             DefaultListModel<String> model = new DefaultListModel<>();
@@ -167,7 +167,7 @@ public class AccountsTab extends AUITab {
         }
         {
             JButton addOfflineAccountButton = new JButton("Add Offline Account");
-            addOfflineAccountButton.setBounds(10, 300, 153, 20);
+            addOfflineAccountButton.setBounds(10, 250, 153, 20);
             addOfflineAccountButton.addActionListener(event -> {
                 String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
                 if (username != null && !username.trim().isEmpty()) {
@@ -180,7 +180,7 @@ public class AccountsTab extends AUITab {
         }
         {
             this.addMicrosoftAccountButton = new JButton("Add Microsoft Account");
-            this.addMicrosoftAccountButton.setBounds(168, 300, 153, 20);
+            this.addMicrosoftAccountButton.setBounds(168, 250, 153, 20);
             this.addMicrosoftAccountButton.addActionListener(event -> {
                 this.addMicrosoftAccountButton.setEnabled(false);
                 this.handleLogin(MinecraftAuth::requestJavaLogin, profile -> ViaProxy.saveManager.accountsSave.addAccount(profile));
@@ -189,7 +189,7 @@ public class AccountsTab extends AUITab {
         }
         {
             this.addBedrockAccountButton = new JButton("Add Bedrock Account");
-            this.addBedrockAccountButton.setBounds(326, 300, 149, 20);
+            this.addBedrockAccountButton.setBounds(326, 250, 149, 20);
             this.addBedrockAccountButton.addActionListener(event -> {
                 this.addBedrockAccountButton.setEnabled(false);
                 this.handleLogin(MinecraftAuth::requestBedrockLogin, chain -> ViaProxy.saveManager.accountsSave.addAccount(chain));

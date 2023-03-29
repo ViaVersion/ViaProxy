@@ -34,6 +34,10 @@ public abstract class AUITab {
         this.init(this.contentPane);
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     public void add(final JTabbedPane tabbedPane) {
         tabbedPane.addTab(this.name, this.contentPane);
     }
