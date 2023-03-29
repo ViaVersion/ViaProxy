@@ -28,7 +28,6 @@ import com.viaversion.viaversion.libs.opennbt.tag.builtin.CompoundTag;
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.IntTag;
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.ListTag;
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.Tag;
-import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.Protocol1_17To1_16_4;
 import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.types.Chunk1_17Type;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.model.ClassicLevel;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicWorldHeightProvider;
@@ -41,7 +40,7 @@ import java.util.List;
 
 public class ClassicWorldHeightInjection {
 
-    public static PacketHandler handleJoinGame(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+    public static PacketHandler handleJoinGame(final PacketHandler parentHandler) {
         return wrapper -> {
             parentHandler.handle(wrapper);
             if (wrapper.isCancelled()) return;
@@ -55,7 +54,7 @@ public class ClassicWorldHeightInjection {
         };
     }
 
-    public static PacketHandler handleRespawn(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+    public static PacketHandler handleRespawn(final PacketHandler parentHandler) {
         return wrapper -> {
             parentHandler.handle(wrapper);
             if (wrapper.isCancelled()) return;
@@ -66,7 +65,7 @@ public class ClassicWorldHeightInjection {
         };
     }
 
-    public static PacketHandler handleChunkData(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+    public static PacketHandler handleChunkData(final PacketHandler parentHandler) {
         return wrapper -> {
             parentHandler.handle(wrapper);
             if (wrapper.isCancelled()) return;
@@ -101,7 +100,7 @@ public class ClassicWorldHeightInjection {
         };
     }
 
-    public static PacketHandler handleUpdateLight(final Protocol1_17To1_16_4 protocol, final PacketHandler parentHandler) {
+    public static PacketHandler handleUpdateLight(final PacketHandler parentHandler) {
         final PacketHandler classicLightHandler = new PacketHandlers() {
             @Override
             public void register() {

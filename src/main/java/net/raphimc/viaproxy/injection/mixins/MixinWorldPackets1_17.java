@@ -33,8 +33,8 @@ public abstract class MixinWorldPackets1_17 {
 
     @Redirect(method = "register", at = @At(value = "INVOKE", target = "Lcom/viaversion/viaversion/protocols/protocol1_17to1_16_4/Protocol1_17To1_16_4;registerClientbound(Lcom/viaversion/viaversion/api/protocol/packet/ClientboundPacketType;Lcom/viaversion/viaversion/api/protocol/remapper/PacketHandler;)V"))
     private static void handleClassicWorldHeight(Protocol1_17To1_16_4 instance, ClientboundPacketType packetType, PacketHandler packetHandler) {
-        if (packetType == ClientboundPackets1_16_2.CHUNK_DATA) packetHandler = ClassicWorldHeightInjection.handleChunkData(instance, packetHandler);
-        if (packetType == ClientboundPackets1_16_2.UPDATE_LIGHT) packetHandler = ClassicWorldHeightInjection.handleUpdateLight(instance, packetHandler);
+        if (packetType == ClientboundPackets1_16_2.CHUNK_DATA) packetHandler = ClassicWorldHeightInjection.handleChunkData(packetHandler);
+        if (packetType == ClientboundPackets1_16_2.UPDATE_LIGHT) packetHandler = ClassicWorldHeightInjection.handleUpdateLight(packetHandler);
 
         ((Protocol) instance).registerClientbound(packetType, packetHandler);
     }
