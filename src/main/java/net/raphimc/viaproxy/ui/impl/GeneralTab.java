@@ -202,6 +202,7 @@ public class GeneralTab extends AUITab {
             final int authMethod = this.authMethod.getSelectedIndex();
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();
             final boolean proxyOnlineMode = ViaProxy.ui.advancedTab.proxyOnlineMode.isSelected();
+            final boolean legacySkinLoading = ViaProxy.ui.advancedTab.legacySkinLoading.isSelected();
             final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText();
 
             try {
@@ -238,6 +239,7 @@ public class GeneralTab extends AUITab {
                     Options.ONLINE_MODE = proxyOnlineMode;
                     Options.PROTOCOL_VERSION = serverVersion;
                     Options.BETACRAFT_AUTH = betaCraftAuth;
+                    Options.LEGACY_SKIN_LOADING = legacySkinLoading;
 
                     if (authMethod == 2) {
                         Options.OPENAUTHMOD_AUTH = true;

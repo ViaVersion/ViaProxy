@@ -30,6 +30,7 @@ public class AdvancedTab extends AUITab {
     JSpinner bindPort;
     JTextField proxy;
     JCheckBox proxyOnlineMode;
+    JCheckBox legacySkinLoading;
 
     public AdvancedTab(final ViaProxyUI frame) {
         super(frame, "Advanced");
@@ -75,6 +76,13 @@ public class AdvancedTab extends AUITab {
                     "Proxy Online Mode allows your client to see skins on online mode servers and use the signed chat features.");
             ViaProxy.saveManager.uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
             contentPane.add(this.proxyOnlineMode);
+        }
+        {
+            this.legacySkinLoading = new JCheckBox("Legacy Skin Loading");
+            this.legacySkinLoading.setBounds(10, 140, 465, 20);
+            this.legacySkinLoading.setToolTipText("Enabling Legacy Skin Loading allows you to see skins on <= 1.6.4 servers");
+            ViaProxy.saveManager.uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
+            contentPane.add(this.legacySkinLoading);
         }
     }
 
