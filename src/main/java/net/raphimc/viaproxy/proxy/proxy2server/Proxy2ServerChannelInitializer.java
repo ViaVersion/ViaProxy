@@ -64,6 +64,10 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         new ProtocolPipelineImpl(user);
         ProxyConnection.fromChannel(channel).setUserConnection(user);
 
+        if (Options.PROXY_URL != null) {
+            channel.pipeline().addLast("viaproxy-proxy-handler", this.getProxyHandler());
+        }
+
         super.initChannel(channel);
         channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(true));
         channel.pipeline().addBefore(MCPipeline.PACKET_CODEC_HANDLER_NAME, VPHPipeline.ENCODER_HANDLER_NAME, new VPHEncodeHandler(user));
@@ -73,10 +77,6 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
             user.getProtocolInfo().getPipeline().add(PreNettyBaseProtocol.INSTANCE);
             channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, VPHPipeline.PRE_NETTY_ENCODER_HANDLER_NAME, new PreNettyEncoder(user));
             channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, VPHPipeline.PRE_NETTY_DECODER_HANDLER_NAME, new PreNettyDecoder(user));
-        }
-
-        if (Options.PROXY_URL != null) {
-            channel.pipeline().addFirst("viaproxy-proxy-handler", this.getProxyHandler());
         }
 
         if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel)).isCancelled()) {
