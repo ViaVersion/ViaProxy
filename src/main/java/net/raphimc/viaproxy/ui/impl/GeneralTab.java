@@ -182,7 +182,7 @@ public class GeneralTab extends AUITab {
         this.betaCraftAuth.setEnabled(state);
         ViaProxy.ui.advancedTab.proxyOnlineMode.setEnabled(state);
         ViaProxy.ui.advancedTab.proxy.setEnabled(state);
-        if (state) this.serverVersion.actionPerformed(null);
+        if (state) this.serverVersion.getActionListeners()[0].actionPerformed(null);
     }
 
     private void updateStateLabel() {
