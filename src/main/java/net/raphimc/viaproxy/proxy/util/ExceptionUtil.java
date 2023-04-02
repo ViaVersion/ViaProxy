@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.proxy.util;
 import com.viaversion.viaversion.exception.InformativeException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.EncoderException;
-import net.raphimc.viaproxy.proxy.ProxyConnection;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.IOException;

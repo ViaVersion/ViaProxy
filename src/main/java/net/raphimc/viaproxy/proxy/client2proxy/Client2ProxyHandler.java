@@ -23,6 +23,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.raphimc.netminecraft.constants.ConnectionState;
@@ -44,12 +45,14 @@ import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
 import net.raphimc.viaproxy.proxy.LoginState;
-import net.raphimc.viaproxy.proxy.ProxyConnection;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
 import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
+import net.raphimc.viaproxy.proxy.session.BedrockProxyConnection;
+import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.util.ArrayHelper;
@@ -67,6 +70,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
@@ -90,8 +94,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         super.channelActive(ctx);
 
         RANDOM.nextBytes(this.verifyToken);
-        this.proxyConnection = new ProxyConnection(() -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler())).getHandler(), Proxy2ServerChannelInitializer::new, ctx.channel());
-        ctx.channel().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
+        this.proxyConnection = new DummyProxyConnection(ctx.channel());
 
         ViaProxy.c2pChannels.add(ctx.channel());
     }
@@ -99,6 +102,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
+        if (this.proxyConnection instanceof DummyProxyConnection) return;
 
         try {
             this.proxyConnection.getChannel().close();
@@ -162,6 +166,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         String connectIP = Options.CONNECT_ADDRESS;
         int connectPort = Options.CONNECT_PORT;
         VersionEnum serverVersion = Options.PROTOCOL_VERSION;
+        String classicMpPass = null;
 
         if (Options.INTERNAL_SRV_MODE) {
             final ArrayHelper arrayHelper = ArrayHelper.instanceOf(address.split("\7"));
@@ -169,7 +174,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             connectPort = arrayHelper.getInteger(1);
             final String versionString = arrayHelper.get(2);
             if (arrayHelper.isIndexValid(3)) {
-                this.proxyConnection.setClassicMpPass(arrayHelper.getString(3));
+                classicMpPass = arrayHelper.getString(3);
             }
             for (VersionEnum v : VersionEnum.getAllVersions()) {
                 if (v.getName().equalsIgnoreCase(versionString)) {
@@ -209,7 +214,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         connectPort = resolveSrvEvent.getPort();
 
         final ServerAddress serverAddress;
-        if (resolveSrvEvent.isCancelled() || serverVersion.isOlderThan(VersionEnum.r1_3_1tor1_3_2)) {
+        if (resolveSrvEvent.isCancelled() || serverVersion.isOlderThan(VersionEnum.r1_3_1tor1_3_2) || serverVersion.equals(VersionEnum.bedrockLatest)) {
             serverAddress = new ServerAddress(connectIP, connectPort);
         } else {
             serverAddress = ServerAddress.fromSRV(connectIP + ":" + connectPort);
@@ -219,6 +224,17 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         if (PluginManager.EVENT_MANAGER.call(preConnectEvent).isCancelled()) {
             this.proxyConnection.kickClient(preConnectEvent.getCancelMessage());
         }
+
+        final Supplier<ChannelHandler> handlerSupplier = () -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler())).getHandler();
+        if (serverVersion.equals(VersionEnum.bedrockLatest)) {
+            this.proxyConnection = new BedrockProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
+        } else {
+            this.proxyConnection = new ProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
+        }
+        this.proxyConnection.getC2P().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
+        this.proxyConnection.setClientVersion(clientVersion);
+        this.proxyConnection.setConnectionState(packet.intendedState);
+        this.proxyConnection.setClassicMpPass(classicMpPass);
 
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
         try {

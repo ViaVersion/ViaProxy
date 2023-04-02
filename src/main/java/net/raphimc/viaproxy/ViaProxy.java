@@ -38,9 +38,10 @@ import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.injection.Java17ToJava8;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
-import net.raphimc.viaproxy.proxy.ProxyConnection;
+import net.raphimc.viaproxy.proxy.EventListener;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.SaveManager;
 import net.raphimc.viaproxy.tasks.AccountRefreshTask;
 import net.raphimc.viaproxy.tasks.LoaderTask;
@@ -97,6 +98,7 @@ public class ViaProxy {
         loadNetty();
         saveManager = new SaveManager();
         PluginManager.loadPlugins();
+        PluginManager.EVENT_MANAGER.register(EventListener.class);
 
         Thread loaderThread = new Thread(new LoaderTask(), "ViaProtocolHack-Loader");
         Thread accountRefreshThread = new Thread(new AccountRefreshTask(saveManager), "AccountRefresh");

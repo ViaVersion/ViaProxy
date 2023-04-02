@@ -17,30 +17,30 @@
  */
 package net.raphimc.viaproxy.protocolhack.impl;
 
-import com.viaversion.viaversion.api.Via;
-import net.raphimc.viaaprilfools.platform.ViaAprilFoolsPlatform;
-import net.raphimc.viaprotocolhack.util.JLoggerToSLF4J;
-import org.slf4j.LoggerFactory;
+import com.viaversion.viaversion.api.connection.UserConnection;
+import net.raphimc.netminecraft.constants.MCPipeline;
+import net.raphimc.viaprotocolhack.netty.VPHPipeline;
+import net.raphimc.viaprotocolhack.util.VersionEnum;
 
-import java.io.File;
-import java.util.logging.Logger;
+public class ViaProxyVPHPipeline extends VPHPipeline {
 
-public class ViaAprilFoolsPlatformImpl implements ViaAprilFoolsPlatform {
-
-    private static final Logger LOGGER = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaAprilFools"));
-
-    public ViaAprilFoolsPlatformImpl() {
-        this.init(this.getDataFolder());
+    public ViaProxyVPHPipeline(UserConnection user, VersionEnum version) {
+        super(user, version);
     }
 
     @Override
-    public Logger getLogger() {
-        return LOGGER;
+    protected String compressionCodecName() {
+        return MCPipeline.COMPRESSION_HANDLER_NAME;
     }
 
     @Override
-    public File getDataFolder() {
-        return Via.getPlatform().getDataFolder();
+    protected String packetCodecName() {
+        return MCPipeline.PACKET_CODEC_HANDLER_NAME;
+    }
+
+    @Override
+    protected String lengthCodecName() {
+        return MCPipeline.SIZER_HANDLER_NAME;
     }
 
 }

@@ -18,12 +18,9 @@
 package net.raphimc.viaproxy.protocolhack;
 
 import net.raphimc.viaprotocolhack.ViaProtocolHack;
-import net.raphimc.viaprotocolhack.impl.platform.ViaBackwardsPlatformImpl;
-import net.raphimc.viaprotocolhack.impl.platform.ViaLegacyPlatformImpl;
-import net.raphimc.viaprotocolhack.impl.platform.ViaRewindPlatformImpl;
+import net.raphimc.viaprotocolhack.impl.platform.*;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.ProtocolHackInitEvent;
-import net.raphimc.viaproxy.protocolhack.impl.ViaAprilFoolsPlatformImpl;
 import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVPLoader;
 import net.raphimc.viaproxy.protocolhack.impl.ViaProxyViaVersionPlatformImpl;
 
@@ -36,7 +33,7 @@ public class ProtocolHack {
 
     public static void init() {
         patchConfigs();
-        final Supplier<?>[] platformSuppliers = PluginManager.EVENT_MANAGER.call(new ProtocolHackInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
+        final Supplier<?>[] platformSuppliers = PluginManager.EVENT_MANAGER.call(new ProtocolHackInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
         ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, platformSuppliers);
     }
 

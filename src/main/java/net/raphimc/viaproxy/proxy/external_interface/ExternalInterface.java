@@ -29,11 +29,13 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.raphimc.mcauth.step.bedrock.StepMCChain;
 import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
+import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
@@ -41,7 +43,8 @@ import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_0;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_1;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_3;
-import net.raphimc.viaproxy.proxy.ProxyConnection;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.util.LocalSocketClient;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -86,10 +89,10 @@ public class ExternalInterface {
             }
         } else if (Options.MC_ACCOUNT != null) {
             proxyConnection.setGameProfile(Options.MC_ACCOUNT.getGameProfile());
+            final UserConnection user = proxyConnection.getUserConnection();
 
             if (Options.MC_ACCOUNT instanceof MicrosoftAccount && proxyConnection.getServerVersion().isBetweenInclusive(VersionEnum.r1_19, VersionEnum.r1_19_3)) {
                 final MicrosoftAccount microsoftAccount = (MicrosoftAccount) Options.MC_ACCOUNT;
-                final UserConnection user = proxyConnection.getUserConnection();
                 final UserApiService userApiService = AuthLibServices.AUTHENTICATION_SERVICE.createUserApiService(microsoftAccount.getMcProfile().prevResult().prevResult().access_token());
                 final KeyPairResponse keyPair = userApiService.getKeyPair();
                 if (keyPair != null) {
@@ -111,6 +114,10 @@ public class ExternalInterface {
                         throw new InsecurePublicKeyException.MissingException();
                     }
                 }
+            } else if (Options.MC_ACCOUNT instanceof BedrockAccount && proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
+                final BedrockAccount bedrockAccount = (BedrockAccount) Options.MC_ACCOUNT;
+                final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
+                user.put(new AuthChainData(user, mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey()));
             }
         }
 

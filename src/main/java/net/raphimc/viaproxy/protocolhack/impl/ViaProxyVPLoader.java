@@ -21,6 +21,7 @@ import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.HandItemProvider;
+import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicCustomCommandProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicMPPassProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicWorldHeightProvider;
@@ -38,10 +39,12 @@ public class ViaProxyVPLoader extends VPHLoader {
     public void load() {
         super.load();
 
+        // ViaVersion
         Via.getManager().getProviders().use(CompressionProvider.class, new ViaProxyCompressionProvider());
         Via.getManager().getProviders().use(HandItemProvider.class, new ViaProxyHandItemProvider());
         Via.getManager().getProviders().use(VersionProvider.class, new ViaProxyVersionProvider());
 
+        // ViaLegacy
         Via.getManager().getProviders().use(GameProfileFetcher.class, new ViaProxyGameProfileFetcher());
         Via.getManager().getProviders().use(EncryptionProvider.class, new ViaProxyEncryptionProvider());
         Via.getManager().getProviders().use(OldAuthProvider.class, new ViaProxyOldAuthProvider());
@@ -49,6 +52,10 @@ public class ViaProxyVPLoader extends VPHLoader {
         Via.getManager().getProviders().use(ClassicCustomCommandProvider.class, new ViaProxyClassicCustomCommandProvider());
         Via.getManager().getProviders().use(ClassicMPPassProvider.class, new ViaProxyClassicMPPassProvider());
 
+        // ViaBedrock
+        Via.getManager().getProviders().use(NettyPipelineProvider.class, new ViaProxyNettyPipelineProvider());
+
+        // ViaProxy plugins
         PluginManager.EVENT_MANAGER.call(new ViaLoadingEvent());
     }
 

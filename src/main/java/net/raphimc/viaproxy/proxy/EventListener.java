@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.proxy;
 
-import com.viaversion.viaversion.api.connection.UserConnection;
-import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicWorldHeightProvider;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
-import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 
-public class ViaProxyClassicWorldHeightProvider extends ClassicWorldHeightProvider {
+public class EventListener {
 
-    @Override
-    public short getMaxChunkSectionCount(UserConnection user) {
-        if (ProxyConnection.fromUserConnection(user).getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_17)) {
-            return 64;
+    @EventHandler
+    public static void onGetDefaultPort(final GetDefaultPortEvent event) {
+        if (event.getServerVersion().equals(VersionEnum.bedrockLatest)) {
+            event.setDefaultPort(19132);
         }
-        return 16;
     }
 
 }

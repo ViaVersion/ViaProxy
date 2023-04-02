@@ -25,7 +25,7 @@ import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.provide
 import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.HandshakeStorage;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.proxy.ProxyConnection;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.net.InetAddress;
 import java.net.URL;

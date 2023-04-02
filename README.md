@@ -3,7 +3,7 @@ Standalone proxy which allows players to join EVERY minecraft server version (Cl
 
 To download the latest version, go to the [Releases section](#executable-jar-file) and download the latest version.  
 Using it is very simple, just run the jar file, and it will start a user interface where everything can be configured.  
-For a full user guide go to the [Usage for Players](#usage-for-players--gui-) section or the [Usage for Server Owners](#usage-for-server-owners--cli-) section.
+For a full user guide go to the [Usage for Players](#usage-for-players-gui) section or the [Usage for Server Owners](#usage-for-server-owners-cli) section.
 
 ## Supported Server versions
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
@@ -12,6 +12,7 @@ For a full user guide go to the [Usage for Players](#usage-for-players--gui-) se
 - Release (1.0.0 - 1.19.4)
 - April Fools (3D Shareware, 20w14infinite)
 - Combat Snapshots (Combat Test 8c)
+- Bedrock Edition 1.19.70 (In development)
 
 ## Supported Client versions
 - Release (1.7.2 - 1.19.4)
@@ -53,11 +54,12 @@ Here is an example command to allow players to join on yourserverip:25568 and co
 
 ### Configuring the protocol translation
 To change the protocol translation settings/features you can look into the ViaProtocolHack folder.
-You will find 4 config files there:
+You will find 5 config files there:
 - viaversion.yml (ViaVersion)
 - config.yml (ViaBackwards)
 - viarewind.yml (ViaRewind)
 - vialegacy.yml (ViaLegacy)
+- viabedrock.yml (ViaBedrock)
 
 ### Developer Plugin API
 ViaProxy has a plugin API which allows you to create plugins for ViaProxy.  

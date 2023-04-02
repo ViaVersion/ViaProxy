@@ -38,6 +38,18 @@ repositories {
         url "https://maven.lenni0451.net/releases"
     }
     maven {
+        name = "Lenni0451 Snapshots"
+        url "https://maven.lenni0451.net/snapshots"
+    }
+    maven {
+        name = "OpenCollab Releases"
+        url = "https://repo.opencollab.dev/maven-releases/"
+    }
+    maven {
+        name = "OpenCollab Snapshots"
+        url = "https://repo.opencollab.dev/maven-snapshots/"
+    }
+    maven {
         name = "ViaVersion"
         url "https://repo.viaversion.com"
     }
@@ -66,9 +78,15 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.2.10"
+    include "net.raphimc:ViaLegacy:2.2.11"
     include "net.raphimc:ViaAprilFools:2.0.6"
-    include("net.raphimc:ViaProtocolHack:2.2.2") {
+    include("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
+        exclude group: "io.netty", module: "netty-codec-http"
+        exclude group: "com.vdurmont", module: "semver4j"
+        exclude group: "io.jsonwebtoken", module: "jjwt-impl"
+        exclude group: "io.jsonwebtoken", module: "jjwt-gson"
+    }
+    include("net.raphimc:ViaProtocolHack:2.2.3") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
@@ -95,6 +113,12 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include "com.vdurmont:semver4j:3.1.0"
+    include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
+        exclude group: "io.netty", module: "netty-common"
+        exclude group: "io.netty", module: "netty-buffer"
+        exclude group: "io.netty", module: "netty-codec"
+        exclude group: "io.netty", module: "netty-transport"
+    }
 }
 
 blossom {

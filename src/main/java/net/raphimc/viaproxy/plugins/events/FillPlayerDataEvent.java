@@ -17,7 +17,7 @@
  */
 package net.raphimc.viaproxy.plugins.events;
 
-import net.raphimc.viaproxy.proxy.ProxyConnection;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 public class FillPlayerDataEvent {
 
