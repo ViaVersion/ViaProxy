@@ -73,7 +73,7 @@ public class DummyProxyConnection extends ProxyConnection {
 
     @Override
     public GameProfile getGameProfile() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
