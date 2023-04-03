@@ -113,7 +113,7 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include "com.vdurmont:semver4j:3.1.0"
-    include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
+    include("org.cloudburstmc.netty:netty-transport-raknet:4.1.51.Final") {
         exclude group: "io.netty", module: "netty-common"
         exclude group: "io.netty", module: "netty-buffer"
         exclude group: "io.netty", module: "netty-codec"
