@@ -22,6 +22,7 @@ import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
@@ -29,11 +30,11 @@ import io.netty.handler.proxy.Socks5ProxyHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
+import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVPHPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.net.InetSocketAddress;
@@ -53,13 +54,17 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
             channel.close();
             return;
         }
+        final ProxyConnection proxyConnection = ProxyConnection.fromChannel(channel);
 
         final UserConnection user = new UserConnectionImpl(channel, true);
         new ProtocolPipelineImpl(user);
-        ProxyConnection.fromChannel(channel).setUserConnection(user);
+        proxyConnection.setUserConnection(user);
 
-        if (Options.PROXY_URL != null) {
+        if (Options.PROXY_URL != null && !proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
             channel.pipeline().addLast("viaproxy-proxy-handler", this.getProxyHandler());
+        }
+        if (Options.HAPROXY_PROTOCOL) {
+            channel.pipeline().addLast("viaproxy-haproxy-encoder", HAProxyMessageEncoder.INSTANCE);
         }
 
         super.initChannel(channel);

@@ -26,6 +26,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.haproxy.*;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
@@ -61,6 +62,8 @@ import net.raphimc.viaproxy.util.logging.Logger;
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
 import java.net.ConnectException;
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
 import java.nio.channels.UnresolvedAddressException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -69,6 +72,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -239,8 +243,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
         try {
             this.proxyConnection.connectToServer(serverAddress, serverVersion);
-            this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress(), serverAddress.getPort(), packet.intendedState)).await().addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-            this.proxyConnection.setConnectionState(packet.intendedState);
         } catch (Throwable e) {
             if (e instanceof ConnectException || e instanceof UnresolvedAddressException) { // Trust me, this is not always false
                 this.proxyConnection.kickClient("§cCould not connect to the backend server!\n§cTry again in a few seconds.");
@@ -249,6 +251,19 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                 this.proxyConnection.kickClient("§cAn error occurred while connecting to the backend server: " + e.getMessage() + "\n§cCheck the console for more information.");
             }
         }
+
+        if (Options.HAPROXY_PROTOCOL) {
+            final InetSocketAddress sourceAddress = (InetSocketAddress) this.proxyConnection.getC2P().remoteAddress();
+            final InetSocketAddress targetAddress = (InetSocketAddress) this.proxyConnection.getChannel().remoteAddress();
+            final HAProxyProxiedProtocol protocol = sourceAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
+            final HAProxyTLV tlv = new HAProxyTLV((byte) 0xE0, Unpooled.buffer().writeInt(clientVersion.getOriginalVersion()));
+
+            final HAProxyMessage haProxyMessage = new HAProxyMessage(HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, protocol, sourceAddress.getAddress().getHostAddress(), targetAddress.getAddress().getHostAddress(), sourceAddress.getPort(), targetAddress.getPort(), Collections.singletonList(tlv));
+            this.proxyConnection.getChannel().writeAndFlush(haProxyMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        }
+
+        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress(), serverAddress.getPort(), packet.intendedState)).await().addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        this.proxyConnection.setConnectionState(packet.intendedState);
     }
 
     private void handleLoginHello(C2SLoginHelloPacket1_7 packet) throws NoSuchAlgorithmException, InvalidKeySpecException, AuthenticationException {

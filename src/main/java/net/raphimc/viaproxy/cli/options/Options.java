@@ -44,6 +44,7 @@ public class Options {
     public static boolean ONLINE_MODE;
     public static boolean OPENAUTHMOD_AUTH;
     public static boolean BETACRAFT_AUTH;
+    public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
 
     // GUI only config options
     public static Account MC_ACCOUNT;
@@ -56,7 +57,7 @@ public class Options {
     public static boolean INTERNAL_SRV_MODE; // Example: ip\7port\7version\7mppass
     public static boolean LOCAL_SOCKET_AUTH;
     public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
-    public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
+    public static boolean HAPROXY_PROTOCOL;
 
     public static void parse(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -76,6 +77,7 @@ public class Options {
         final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication servers for classic");
         final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which all connecting clients can optionally download").withRequiredArg().ofType(String.class);
         final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for TCP connections").withRequiredArg().ofType(String.class);
+        final OptionSpec<Void> haProxyProtocol = parser.acceptsAll(asList("haproxy-protocol", "haproxy"), "Send HAProxy protocol messages to the backend server");
         PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options = parser.parse(args);
@@ -113,6 +115,7 @@ public class Options {
                 System.exit(1);
             }
         }
+        HAPROXY_PROTOCOL = options.has(haProxyProtocol);
         PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
     }
 
