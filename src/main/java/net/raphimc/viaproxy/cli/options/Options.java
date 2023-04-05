@@ -58,6 +58,7 @@ public class Options {
     public static boolean LOCAL_SOCKET_AUTH;
     public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
     public static boolean HAPROXY_PROTOCOL;
+    public static boolean LEGACY_CLIENT_PASSTHROUGH;
 
     public static void parse(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -78,6 +79,7 @@ public class Options {
         final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which all connecting clients can optionally download").withRequiredArg().ofType(String.class);
         final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for TCP connections").withRequiredArg().ofType(String.class);
         final OptionSpec<Void> haProxyProtocol = parser.acceptsAll(asList("haproxy-protocol", "haproxy"), "Send HAProxy protocol messages to the backend server");
+        final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server instead of being kicked");
         PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options = parser.parse(args);
@@ -116,6 +118,7 @@ public class Options {
             }
         }
         HAPROXY_PROTOCOL = options.has(haProxyProtocol);
+        LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
         PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
     }
 

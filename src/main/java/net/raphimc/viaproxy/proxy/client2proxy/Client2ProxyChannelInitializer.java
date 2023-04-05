@@ -22,6 +22,7 @@ import io.netty.channel.ChannelHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
+import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
@@ -41,6 +42,9 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
             return;
         }
 
+        if (Options.LEGACY_CLIENT_PASSTHROUGH) {
+            channel.pipeline().addLast("legacy-passthrough-handler", new LegacyClientPassthroughHandler());
+        }
         super.initChannel(channel);
         channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
 

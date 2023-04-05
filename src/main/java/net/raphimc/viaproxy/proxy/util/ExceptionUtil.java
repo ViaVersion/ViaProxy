@@ -52,7 +52,9 @@ public class ExceptionUtil {
         }
         Logger.LOGGER.error("Caught unhandled netty exception", cause);
         try {
-            proxyConnection.kickClient("§cAn unhandled error occurred in your connection and it has been closed.\n§aError details for report:§f" + ExceptionUtil.prettyPrint(cause));
+            if (proxyConnection != null) {
+                proxyConnection.kickClient("§cAn unhandled error occurred in your connection and it has been closed.\n§aError details for report:§f" + ExceptionUtil.prettyPrint(cause));
+            }
         } catch (Throwable ignored) {
         }
         ctx.channel().close();

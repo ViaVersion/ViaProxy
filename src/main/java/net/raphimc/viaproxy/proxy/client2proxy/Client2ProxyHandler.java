@@ -121,14 +121,14 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         switch (this.proxyConnection.getConnectionState()) {
             case HANDSHAKING:
                 if (packet instanceof C2SHandshakePacket) this.handleHandshake((C2SHandshakePacket) packet);
-                else break;
+                else throw new IllegalStateException("Unexpected packet in HANDSHAKING state");
 
                 return;
             case LOGIN:
                 if (packet instanceof C2SLoginHelloPacket1_7) this.handleLoginHello((C2SLoginHelloPacket1_7) packet);
                 else if (packet instanceof C2SLoginKeyPacket1_7) this.handleLoginKey((C2SLoginKeyPacket1_7) packet);
                 else if (packet instanceof C2SLoginCustomPayloadPacket) this.handleLoginCustomPayload((C2SLoginCustomPayloadPacket) packet);
-                else break;
+                else throw new IllegalStateException("Unexpected packet in LOGIN state");
 
                 return;
             case PLAY:
