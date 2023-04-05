@@ -252,7 +252,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
-        if (Options.HAPROXY_PROTOCOL) {
+        if (Options.SERVER_HAPROXY_PROTOCOL) {
             final InetSocketAddress sourceAddress = (InetSocketAddress) this.proxyConnection.getC2P().remoteAddress();
             final InetSocketAddress targetAddress = (InetSocketAddress) this.proxyConnection.getChannel().remoteAddress();
             final HAProxyProxiedProtocol protocol = sourceAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;

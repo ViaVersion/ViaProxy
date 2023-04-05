@@ -57,7 +57,7 @@ public class Options {
     public static boolean INTERNAL_SRV_MODE; // Example: ip\7port\7version\7mppass
     public static boolean LOCAL_SOCKET_AUTH;
     public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
-    public static boolean HAPROXY_PROTOCOL;
+    public static boolean SERVER_HAPROXY_PROTOCOL;
     public static boolean LEGACY_CLIENT_PASSTHROUGH;
 
     public static void parse(final String[] args) throws IOException {
@@ -75,11 +75,11 @@ public class Options {
         final OptionSpec<VersionEnum> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new VersionEnumConverter()).required();
         final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Enable OpenAuthMod authentication");
         final OptionSpec<Void> localSocketAuth = parser.accepts("local_socket_auth", "Enable authentication over a local socket");
-        final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication servers for classic");
-        final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which all connecting clients can optionally download").withRequiredArg().ofType(String.class);
-        final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for TCP connections").withRequiredArg().ofType(String.class);
-        final OptionSpec<Void> haProxyProtocol = parser.acceptsAll(asList("haproxy-protocol", "haproxy"), "Send HAProxy protocol messages to the backend server");
-        final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server instead of being kicked");
+        final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication for classic servers");
+        final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which clients can optionally download").withRequiredArg().ofType(String.class);
+        final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for backend TCP connections").withRequiredArg().ofType(String.class);
+        final OptionSpec<Void> serverHaProxyProtocol = parser.acceptsAll(asList("server-haproxy-protocol", "server-haproxy"), "Send HAProxy protocol messages to the backend server");
+        final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server");
         PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options = parser.parse(args);
@@ -117,7 +117,7 @@ public class Options {
                 System.exit(1);
             }
         }
-        HAPROXY_PROTOCOL = options.has(haProxyProtocol);
+        SERVER_HAPROXY_PROTOCOL = options.has(serverHaProxyProtocol);
         LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
         PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
     }

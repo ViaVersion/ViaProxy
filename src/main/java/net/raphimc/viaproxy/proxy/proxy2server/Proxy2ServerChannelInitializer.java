@@ -64,7 +64,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         if (Options.PROXY_URL != null && !proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
             channel.pipeline().addLast("viaproxy-proxy-handler", this.getProxyHandler());
         }
-        if (Options.HAPROXY_PROTOCOL) {
+        if (Options.SERVER_HAPROXY_PROTOCOL) {
             channel.pipeline().addLast("viaproxy-haproxy-encoder", HAProxyMessageEncoder.INSTANCE);
         }
 
