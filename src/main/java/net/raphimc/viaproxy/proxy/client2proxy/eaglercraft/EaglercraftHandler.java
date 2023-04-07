@@ -29,7 +29,11 @@ import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.packet.PacketTypes;
+import net.raphimc.vialegacy.protocols.release.protocol1_6_1to1_5_2.ServerboundPackets1_5_2;
+import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.types.Types1_6_4;
+import net.raphimc.viaprotocolhack.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.nio.charset.StandardCharsets;
@@ -53,7 +57,8 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
 
     private HostAndPort host;
     private State state = State.PRE_HANDSHAKE;
-    private int protocolVersion;
+    private VersionEnum version;
+    private int pluginMessageId;
     private String username;
 
     @Override
@@ -73,7 +78,7 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, WebSocketFrame in, List<Object> out) {
+    protected void decode(ChannelHandlerContext ctx, WebSocketFrame in, List<Object> out) throws Exception {
         if (in instanceof BinaryWebSocketFrame) {
             final ByteBuf data = in.content();
 
@@ -81,7 +86,11 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
                 case PRE_HANDSHAKE:
                     if (data.readableBytes() >= 2) { // Check for legacy client
                         if (data.getByte(0) == (byte) 2 && data.getByte(1) == (byte) 69) {
-                            throw new IllegalStateException("Your client is not yet supported");
+                            data.setByte(1, 61); // 1.5.2 protocol id
+                            this.state = State.LOGIN_COMPLETE;
+                            this.version = VersionEnum.r1_5_2;
+                            out.add(data.retain());
+                            break;
                         }
                     }
                     this.state = State.HANDSHAKE;
@@ -132,11 +141,16 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
                             throw new IllegalArgumentException("Too much data in packet: " + data.readableBytes() + " bytes");
                         }
 
-                        this.state = State.HANDSHAKE_COMPLETE;
-                        this.protocolVersion = minecraftVersion;
                         Logger.LOGGER.info("Eaglercraft client connected: " + clientBrand + " " + clientVersionString);
                         final String serverBrand = "ViaProxy";
                         final String serverVersionString = ViaProxy.VERSION;
+                        this.state = State.HANDSHAKE_COMPLETE;
+                        this.version = VersionEnum.fromProtocolId(minecraftVersion);
+                        if (this.version.equals(VersionEnum.UNKNOWN)) {
+                            Logger.LOGGER.error("Unsupported protocol version: " + minecraftVersion);
+                            ctx.close();
+                            return;
+                        }
 
                         final ByteBuf response = ctx.alloc().buffer();
                         response.writeByte(SERVER_VERSION); // packet id
@@ -193,18 +207,23 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
                         }
                         this.state = State.LOGIN_COMPLETE;
 
-                        final int handshakeId = MCPackets.C2S_HANDSHAKE.getId(this.protocolVersion);
-                        final int loginHelloId = MCPackets.C2S_LOGIN_HELLO.getId(this.protocolVersion);
+                        final int handshakeId = MCPackets.C2S_HANDSHAKE.getId(this.version.getVersion());
+                        final int loginHelloId = MCPackets.C2S_LOGIN_HELLO.getId(this.version.getVersion());
+                        this.pluginMessageId = MCPackets.C2S_PLUGIN_MESSAGE.getId(this.version.getVersion());
 
-                        if (handshakeId == -1 || loginHelloId == -1) {
-                            Logger.LOGGER.error("Unsupported protocol version: " + this.protocolVersion);
+                        if (handshakeId == -1 || loginHelloId == -1 || this.pluginMessageId == -1) {
+                            Logger.LOGGER.error("Unsupported protocol version: " + this.version.getVersion());
                             ctx.close();
                             return;
                         }
 
+                        if (ctx.pipeline().get(Client2ProxyChannelInitializer.LEGACY_PASSTHROUGH_HANDLER_NAME) != null) {
+                            ctx.pipeline().remove(Client2ProxyChannelInitializer.LEGACY_PASSTHROUGH_HANDLER_NAME);
+                        }
+
                         final ByteBuf handshake = ctx.alloc().buffer();
                         PacketTypes.writeVarInt(handshake, handshakeId); // packet id
-                        PacketTypes.writeVarInt(handshake, this.protocolVersion); // protocol version
+                        PacketTypes.writeVarInt(handshake, this.version.getVersion()); // protocol version
                         PacketTypes.writeString(handshake, this.host.getHost()); // address
                         handshake.writeShort(this.host.getPort()); // port
                         PacketTypes.writeVarInt(handshake, ConnectionState.LOGIN.getId()); // next state
@@ -223,7 +242,25 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
                     }
                     break;
                 case LOGIN_COMPLETE:
-                    out.add(data.retain());
+                    if (this.version.equals(VersionEnum.r1_5_2)) {
+                        packetId = data.readUnsignedByte();
+                        if (packetId == ServerboundPackets1_5_2.SHARED_KEY.getId()) {
+                            ctx.channel().writeAndFlush(new BinaryWebSocketFrame(data.readerIndex(0).retain()));
+                            break;
+                        } else if (packetId == ServerboundPackets1_5_2.PLUGIN_MESSAGE.getId()) {
+                            if (Types1_6_4.STRING.read(data).startsWith("EAG|")) {
+                                break;
+                            }
+                        }
+                    } else if (this.version.isNewerThanOrEqualTo(VersionEnum.r1_7_2tor1_7_5)) {
+                        packetId = PacketTypes.readVarInt(data);
+                        if (packetId == this.pluginMessageId) {
+                            if (PacketTypes.readString(data, Short.MAX_VALUE).startsWith("EAG|")) {
+                                break;
+                            }
+                        }
+                    }
+                    out.add(data.readerIndex(0).retain());
                     break;
                 default:
                     throw new IllegalStateException("Unexpected binary frame in state " + this.state);

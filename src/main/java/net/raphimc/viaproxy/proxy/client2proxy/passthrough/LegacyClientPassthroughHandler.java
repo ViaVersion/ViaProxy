@@ -59,8 +59,8 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
         if (!msg.isReadable()) return;
 
         if (this.p2sConnection == null) {
-            final int length = msg.getUnsignedByte(0);
-            if (length == 0/*classic*/ || length == 1/*a1.0.15*/ || length == 2/*<= 1.6.4*/ || length == 254/*<= 1.6.4 (ping)*/) {
+            final int lengthOrPacketId = msg.getUnsignedByte(0);
+            if (lengthOrPacketId == 0/*classic*/ || lengthOrPacketId == 1/*a1.0.15*/ || lengthOrPacketId == 2/*<= 1.6.4*/ || lengthOrPacketId == 254/*<= 1.6.4 (ping)*/) {
                 while (ctx.pipeline().last() != this) {
                     ctx.pipeline().removeLast();
                 }
