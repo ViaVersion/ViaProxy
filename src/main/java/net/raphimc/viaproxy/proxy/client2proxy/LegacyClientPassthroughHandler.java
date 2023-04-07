@@ -26,10 +26,13 @@ import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    private Channel c2pChannel;
-    private NetClient p2sConnection;
+    protected Channel c2pChannel;
+    protected NetClient p2sConnection;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -73,8 +76,44 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
         this.p2sConnection.getChannel().writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
-    private void connectToServer() {
-        this.p2sConnection = new NetClient(() -> new SimpleChannelInboundHandler<ByteBuf>() {
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        ExceptionUtil.handleNettyException(ctx, cause, null);
+    }
+
+    protected void connectToServer() {
+        this.p2sConnection = new NetClient(this.getHandlerSupplier(), this.getChannelInitializerSupplier()) {
+            @Override
+            public void initialize(Bootstrap bootstrap) {
+                bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
+                super.initialize(bootstrap);
+            }
+        };
+
+        try {
+            this.p2sConnection.connect(this.getServerAddress());
+        } catch (Throwable e) {
+            Logger.LOGGER.error("Failed to connect to target server", e);
+            this.p2sConnection = null;
+            this.c2pChannel.close();
+        }
+    }
+
+    protected ServerAddress getServerAddress() {
+        return new ServerAddress(Options.CONNECT_ADDRESS, Options.CONNECT_PORT);
+    }
+
+    protected Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> getChannelInitializerSupplier() {
+        return s -> new ChannelInitializer<Channel>() {
+            @Override
+            protected void initChannel(Channel channel) {
+                channel.pipeline().addLast(s.get());
+            }
+        };
+    }
+
+    protected Supplier<ChannelHandler> getHandlerSupplier() {
+        return () -> new SimpleChannelInboundHandler<ByteBuf>() {
             @Override
             public void channelInactive(ChannelHandlerContext ctx) throws Exception {
                 super.channelInactive(ctx);
@@ -94,31 +133,7 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
             public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                 ExceptionUtil.handleNettyException(ctx, cause, null);
             }
-        }, s -> new ChannelInitializer<Channel>() {
-            @Override
-            protected void initChannel(Channel channel) {
-                channel.pipeline().addLast(s.get());
-            }
-        }) {
-            @Override
-            public void initialize(Bootstrap bootstrap) {
-                bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
-                super.initialize(bootstrap);
-            }
         };
-
-        try {
-            this.p2sConnection.connect(new ServerAddress(Options.CONNECT_ADDRESS, Options.CONNECT_PORT));
-        } catch (Throwable e) {
-            Logger.LOGGER.error("Failed to connect to target server", e);
-            this.p2sConnection = null;
-            this.c2pChannel.close();
-        }
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ExceptionUtil.handleNettyException(ctx, cause, null);
     }
 
 }
