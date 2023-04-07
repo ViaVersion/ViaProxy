@@ -137,7 +137,7 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
 
     private void handleLoginSuccess(final S2CLoginSuccessPacket1_7 packet) throws Exception {
         if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_8)) {
-            if (Options.COMPRESSION_THRESHOLD > -1) {
+            if (Options.COMPRESSION_THRESHOLD > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
                 this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(Options.COMPRESSION_THRESHOLD)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
                 this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(Options.COMPRESSION_THRESHOLD);
             }

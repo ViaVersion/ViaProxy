@@ -45,6 +45,9 @@ import java.util.function.Supplier;
 
 public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer {
 
+    public static final String VIAPROXY_PROXY_HANDLER_NAME = "viaproxy-proxy-handler";
+    public static final String VIAPROXY_HAPROXY_ENCODER_NAME = "viaproxy-haproxy-encoder";
+
     public Proxy2ServerChannelInitializer(final Supplier<ChannelHandler> handlerSupplier) {
         super(handlerSupplier);
     }
@@ -62,10 +65,10 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         proxyConnection.setUserConnection(user);
 
         if (Options.PROXY_URL != null && !proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
-            channel.pipeline().addLast("viaproxy-proxy-handler", this.getProxyHandler());
+            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, this.getProxyHandler());
         }
         if (Options.SERVER_HAPROXY_PROTOCOL) {
-            channel.pipeline().addLast("viaproxy-haproxy-encoder", HAProxyMessageEncoder.INSTANCE);
+            channel.pipeline().addLast(VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
         }
 
         super.initChannel(channel);
