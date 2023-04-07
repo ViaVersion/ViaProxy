@@ -81,7 +81,7 @@ public class Options {
         final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for backend TCP connections").withRequiredArg().ofType(String.class);
         final OptionSpec<Void> serverHaProxyProtocol = parser.acceptsAll(asList("server-haproxy-protocol", "server-haproxy"), "Send HAProxy protocol messages to the backend server");
         final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server (No protocol translation)");
-        final OptionSpec<Void> allowEaglerCraftClients = parser.acceptsAll(asList("allow_eaglercraft_clients", "allow_eaglercraft"), "Allow EaglerCraft clients to connect to ViaProxy");
+        final OptionSpec<Void> allowEaglerCraftClients = parser.acceptsAll(asList("allow_eaglercraft_clients", "allow_eaglercraft"), "Allow Eaglercraft clients to connect to ViaProxy");
         PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options = parser.parse(args);

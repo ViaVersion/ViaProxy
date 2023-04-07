@@ -67,10 +67,13 @@ public class EaglercraftInitialHandler extends ByteToMessageDecoder {
                 ctx.pipeline().addBefore(Client2ProxyChannelInitializer.EAGLERCRAFT_INITIAL_HANDLER_NAME, Client2ProxyChannelInitializer.WEBSOCKET_HANDLER_NAME, new WebSocketServerProtocolHandler("/", null, true));
                 ctx.pipeline().addBefore(Client2ProxyChannelInitializer.EAGLERCRAFT_INITIAL_HANDLER_NAME, Client2ProxyChannelInitializer.WEBSOCKET_ACTIVE_NOTIFIER_NAME, new WebSocketActiveNotifier());
                 ctx.pipeline().addBefore(Client2ProxyChannelInitializer.EAGLERCRAFT_INITIAL_HANDLER_NAME, Client2ProxyChannelInitializer.EAGLERCRAFT_HANDLER_NAME, new EaglercraftHandler());
+
+                ctx.pipeline().fireChannelRead(in.readBytes(in.readableBytes()));
+            } else {
+                out.add(in.readBytes(in.readableBytes()));
             }
 
             ctx.pipeline().remove(this);
-            ctx.pipeline().fireChannelRead(in.retain());
         }
     }
 
