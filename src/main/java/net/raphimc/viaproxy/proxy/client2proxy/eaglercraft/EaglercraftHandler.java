@@ -76,7 +76,7 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ctx.attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(-2); // Disable automatic compression in Proxy2ServerHandler
+        ctx.channel().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(-2); // Disable automatic compression in Proxy2ServerHandler
         ctx.pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
         super.channelActive(ctx);
     }
