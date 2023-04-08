@@ -31,6 +31,7 @@ public class AdvancedTab extends AUITab {
     JTextField proxy;
     JCheckBox proxyOnlineMode;
     JCheckBox legacySkinLoading;
+    JCheckBox eaglercraftSupport;
 
     public AdvancedTab(final ViaProxyUI frame) {
         super(frame, "Advanced");
@@ -83,6 +84,13 @@ public class AdvancedTab extends AUITab {
             this.legacySkinLoading.setToolTipText("Enabling Legacy Skin Loading allows you to see skins on <= 1.6.4 servers");
             ViaProxy.saveManager.uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
             contentPane.add(this.legacySkinLoading);
+        }
+        {
+            this.eaglercraftSupport = new JCheckBox("Eaglercraft Support");
+            this.eaglercraftSupport.setBounds(10, 170, 465, 20);
+            this.eaglercraftSupport.setToolTipText("Enabling Eaglercraft Support allows Eaglercraft clients to connect to ViaProxy");
+            ViaProxy.saveManager.uiSave.loadCheckBox("eaglercraft_support", this.eaglercraftSupport);
+            contentPane.add(this.eaglercraftSupport);
         }
     }
 
