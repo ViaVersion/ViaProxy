@@ -95,6 +95,7 @@ public class ViaProxy {
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         ConsoleHandler.hookConsole();
         Logger.LOGGER.info("Initializing ViaProxy {} v{} (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, injectionMethod);
+        Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
         loadNetty();
         saveManager = new SaveManager();
         PluginManager.loadPlugins();
