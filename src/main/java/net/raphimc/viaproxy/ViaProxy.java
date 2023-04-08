@@ -96,6 +96,16 @@ public class ViaProxy {
         ConsoleHandler.hookConsole();
         Logger.LOGGER.info("Initializing ViaProxy {} v{} (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, injectionMethod);
         Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
+        Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
+
+        if (Runtime.getRuntime().maxMemory() < 512 * 1024 * 1024) {
+            Logger.LOGGER.fatal("ViaProxy is not able to run with less than 512MB of RAM.");
+            if (hasUI) {
+                JOptionPane.showMessageDialog(null, "ViaProxy is not able to run with less than 512MB of RAM.", "Critical Error", JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
+            }
+        }
+
         loadNetty();
         saveManager = new SaveManager();
         PluginManager.loadPlugins();
