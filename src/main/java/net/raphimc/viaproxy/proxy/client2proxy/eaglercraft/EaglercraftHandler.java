@@ -18,6 +18,13 @@
 package net.raphimc.viaproxy.proxy.client2proxy.eaglercraft;
 
 import com.google.common.net.HostAndPort;
+import com.viaversion.viaversion.libs.gson.JsonArray;
+import com.viaversion.viaversion.libs.gson.JsonObject;
+import com.viaversion.viaversion.libs.gson.JsonParser;
+import com.viaversion.viaversion.protocols.base.ClientboundStatusPackets;
+import com.viaversion.viaversion.protocols.base.ServerboundHandshakePackets;
+import com.viaversion.viaversion.protocols.base.ServerboundLoginPackets;
+import com.viaversion.viaversion.protocols.base.ServerboundStatusPackets;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -25,6 +32,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import net.lenni0451.mcstructs.text.serializer.TextComponentSerializer;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
@@ -36,8 +44,13 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.util.logging.Logger;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,12 +82,69 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
-        if (this.state != State.LOGIN_COMPLETE) {
+    protected void encode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws IOException {
+        if (this.state == State.STATUS) {
+            final int packetId = PacketTypes.readVarInt(in);
+            if (packetId != ClientboundStatusPackets.STATUS_RESPONSE.getId()) {
+                throw new IllegalStateException("Unexpected packet id " + packetId);
+            }
+            final JsonObject root = JsonParser.parseString(PacketTypes.readString(in, Short.MAX_VALUE)).getAsJsonObject();
+
+            final JsonObject response = new JsonObject();
+            response.addProperty("name", "ViaProxy");
+            response.addProperty("brand", "ViaProxy");
+            if (root.has("version")) {
+                response.add("vers", root.getAsJsonObject("version").get("name"));
+            } else {
+                response.addProperty("vers", "Unknown");
+            }
+            response.addProperty("cracked", true);
+            response.addProperty("secure", false);
+            response.addProperty("time", System.currentTimeMillis());
+            response.addProperty("uuid", UUID.randomUUID().toString());
+            response.addProperty("type", "motd");
+
+            final JsonObject data = new JsonObject();
+            data.addProperty("cache", false);
+            final JsonArray motd = new JsonArray();
+            if (root.has("description")) {
+                final String[] motdLines = TextComponentSerializer.V1_8.deserialize(root.get("description").toString()).asLegacyFormatString().split("\n");
+                for (String motdLine : motdLines) {
+                    motd.add(motdLine);
+                }
+            }
+            data.add("motd", motd);
+            data.addProperty("icon", root.has("favicon"));
+            if (root.has("players")) {
+                final JsonObject javaPlayers = root.getAsJsonObject("players");
+                data.add("online", javaPlayers.get("online"));
+                data.add("max", javaPlayers.get("max"));
+                final JsonArray players = new JsonArray();
+                if (javaPlayers.has("sample")) {
+                    javaPlayers.getAsJsonArray("sample").forEach(player -> players.add(TextComponentSerializer.V1_8.deserialize(player.getAsJsonObject().get("name").getAsString()).asLegacyFormatString()));
+                }
+                data.add("players", players);
+            }
+            response.add("data", data);
+            out.add(new TextWebSocketFrame(response.toString()));
+
+            if (root.has("favicon")) {
+                final BufferedImage icon = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(root.get("favicon").getAsString().substring(22).replace("\n", "").getBytes(StandardCharsets.UTF_8))));
+                final int[] pixels = icon.getRGB(0, 0, 64, 64, null, 0, 64);
+                final byte[] iconPixels = new byte[64 * 64 * 4];
+                for (int i = 0; i < 64 * 64; ++i) {
+                    iconPixels[i * 4] = (byte) ((pixels[i] >> 16) & 0xFF);
+                    iconPixels[i * 4 + 1] = (byte) ((pixels[i] >> 8) & 0xFF);
+                    iconPixels[i * 4 + 2] = (byte) (pixels[i] & 0xFF);
+                    iconPixels[i * 4 + 3] = (byte) ((pixels[i] >> 24) & 0xFF);
+                }
+                out.add(new BinaryWebSocketFrame(ctx.alloc().buffer().writeBytes(iconPixels)));
+            }
+        } else if (this.state == State.LOGIN_COMPLETE) {
+            out.add(new BinaryWebSocketFrame(in.retain()));
+        } else {
             throw new IllegalStateException("Cannot send packets before login is completed");
         }
-
-        out.add(new BinaryWebSocketFrame(in.retain()));
     }
 
     @Override
@@ -207,11 +277,9 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
                         }
                         this.state = State.LOGIN_COMPLETE;
 
-                        final int handshakeId = MCPackets.C2S_HANDSHAKE.getId(this.version.getVersion());
-                        final int loginHelloId = MCPackets.C2S_LOGIN_HELLO.getId(this.version.getVersion());
                         this.pluginMessageId = MCPackets.C2S_PLUGIN_MESSAGE.getId(this.version.getVersion());
 
-                        if (handshakeId == -1 || loginHelloId == -1 || this.pluginMessageId == -1) {
+                        if (this.pluginMessageId == -1) {
                             Logger.LOGGER.error("Unsupported protocol version: " + this.version.getVersion());
                             ctx.close();
                             return;
@@ -221,16 +289,10 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
                             ctx.pipeline().remove(Client2ProxyChannelInitializer.LEGACY_PASSTHROUGH_HANDLER_NAME);
                         }
 
-                        final ByteBuf handshake = ctx.alloc().buffer();
-                        PacketTypes.writeVarInt(handshake, handshakeId); // packet id
-                        PacketTypes.writeVarInt(handshake, this.version.getVersion()); // protocol version
-                        PacketTypes.writeString(handshake, this.host.getHost()); // address
-                        handshake.writeShort(this.host.getPort()); // port
-                        PacketTypes.writeVarInt(handshake, ConnectionState.LOGIN.getId()); // next state
-                        out.add(handshake);
+                        out.add(this.writeHandshake(ctx.alloc().buffer(), ConnectionState.LOGIN));
 
                         final ByteBuf loginHello = ctx.alloc().buffer();
-                        PacketTypes.writeVarInt(loginHello, loginHelloId); // packet id
+                        PacketTypes.writeVarInt(loginHello, ServerboundLoginPackets.HELLO.getId()); // packet id
                         PacketTypes.writeString(loginHello, this.username); // username
                         out.add(loginHello);
 
@@ -267,11 +329,21 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
             }
         } else if (in instanceof TextWebSocketFrame) {
             final String text = ((TextWebSocketFrame) in).text();
-            ctx.close();
-
             if (this.state != State.PRE_HANDSHAKE) {
                 throw new IllegalStateException("Unexpected text frame in state " + this.state);
             }
+            if (!text.equalsIgnoreCase("accept: motd")) {
+                ctx.close();
+                return;
+            }
+            this.state = State.STATUS;
+            this.version = VersionEnum.r1_8;
+
+            out.add(this.writeHandshake(ctx.alloc().buffer(), ConnectionState.STATUS));
+
+            final ByteBuf statusRequest = ctx.alloc().buffer();
+            PacketTypes.writeVarInt(statusRequest, ServerboundStatusPackets.STATUS_REQUEST.getId()); // packet id
+            out.add(statusRequest);
         } else {
             throw new UnsupportedOperationException("Unsupported frame type: " + in.getClass().getName());
         }
@@ -292,7 +364,17 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
         super.userEventTriggered(ctx, evt);
     }
 
+    private ByteBuf writeHandshake(final ByteBuf byteBuf, final ConnectionState state) {
+        PacketTypes.writeVarInt(byteBuf, ServerboundHandshakePackets.CLIENT_INTENTION.getId()); // packet id
+        PacketTypes.writeVarInt(byteBuf, this.version.getVersion()); // protocol version
+        PacketTypes.writeString(byteBuf, this.host.getHost()); // address
+        byteBuf.writeShort(this.host.getPort()); // port
+        PacketTypes.writeVarInt(byteBuf, state.getId()); // next state
+        return byteBuf;
+    }
+
     public enum State {
+        STATUS,
         PRE_HANDSHAKE,
         HANDSHAKE,
         HANDSHAKE_COMPLETE,
