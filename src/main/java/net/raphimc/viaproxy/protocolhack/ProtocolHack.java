@@ -21,7 +21,7 @@ import net.raphimc.viaprotocolhack.ViaProtocolHack;
 import net.raphimc.viaprotocolhack.impl.platform.*;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.ProtocolHackInitEvent;
-import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVPLoader;
+import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVPHLoader;
 import net.raphimc.viaproxy.protocolhack.impl.ViaProxyViaVersionPlatformImpl;
 
 import java.io.File;
@@ -34,7 +34,7 @@ public class ProtocolHack {
     public static void init() {
         patchConfigs();
         final Supplier<?>[] platformSuppliers = PluginManager.EVENT_MANAGER.call(new ProtocolHackInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
-        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPLoader(), null, null, platformSuppliers);
+        ViaProtocolHack.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVPHLoader(), null, null, platformSuppliers);
     }
 
     private static void patchConfigs() {

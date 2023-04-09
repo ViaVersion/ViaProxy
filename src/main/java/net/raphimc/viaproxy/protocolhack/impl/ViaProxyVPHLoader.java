@@ -33,7 +33,7 @@ import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
 import net.raphimc.viaproxy.protocolhack.providers.*;
 
-public class ViaProxyVPLoader extends VPHLoader {
+public class ViaProxyVPHLoader extends VPHLoader {
 
     @Override
     public void load() {
