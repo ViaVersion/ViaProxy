@@ -98,13 +98,18 @@ public class ViaProxy {
         Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
         Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
 
-        if (Runtime.getRuntime().maxMemory() < 512 * 1024 * 1024) {
-            Logger.LOGGER.fatal("ViaProxy is not able to run with less than 512MB of RAM.");
-            if (hasUI) {
-                JOptionPane.showMessageDialog(null, "ViaProxy is not able to run with less than 512MB of RAM.", "Critical Error", JOptionPane.ERROR_MESSAGE);
-            }
-            if (System.getProperty("ignoreSystemRequirements") == null) {
+        if (System.getProperty("ignoreSystemRequirements") == null) {
+            if (Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
+                Logger.LOGGER.fatal("ViaProxy is not able to run with less than 256MB of RAM.");
+                if (hasUI) {
+                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run with less than 256MB of RAM.", "ViaProxy", JOptionPane.ERROR_MESSAGE);
+                }
                 System.exit(1);
+            } else if (Runtime.getRuntime().maxMemory() < 512 * 1024 * 1024) {
+                Logger.LOGGER.warn("ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.");
+                if (hasUI) {
+                    JOptionPane.showMessageDialog(null, "ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.", "ViaProxy", JOptionPane.WARNING_MESSAGE);
+                }
             }
         }
 
