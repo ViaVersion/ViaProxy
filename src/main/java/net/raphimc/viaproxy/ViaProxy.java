@@ -103,7 +103,9 @@ public class ViaProxy {
             if (hasUI) {
                 JOptionPane.showMessageDialog(null, "ViaProxy is not able to run with less than 512MB of RAM.", "Critical Error", JOptionPane.ERROR_MESSAGE);
             }
-            System.exit(1);
+            if (System.getProperty("ignoreSystemRequirements") == null) {
+                System.exit(1);
+            }
         }
 
         loadNetty();
