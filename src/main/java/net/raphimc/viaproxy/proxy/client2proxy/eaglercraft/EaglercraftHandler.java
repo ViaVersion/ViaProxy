@@ -339,6 +339,10 @@ public class EaglercraftHandler extends MessageToMessageCodec<WebSocketFrame, By
             this.state = State.STATUS;
             this.version = VersionEnum.r1_8;
 
+            if (ctx.pipeline().get(Client2ProxyChannelInitializer.LEGACY_PASSTHROUGH_HANDLER_NAME) != null) {
+                ctx.pipeline().remove(Client2ProxyChannelInitializer.LEGACY_PASSTHROUGH_HANDLER_NAME);
+            }
+
             out.add(this.writeHandshake(ctx.alloc().buffer(), ConnectionState.STATUS));
 
             final ByteBuf statusRequest = ctx.alloc().buffer();
