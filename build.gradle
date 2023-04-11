@@ -78,7 +78,7 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.2.11"
+    include "net.raphimc:ViaLegacy:2.2.12"
     include "net.raphimc:ViaAprilFools:2.0.6"
     include("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
@@ -108,9 +108,6 @@ dependencies {
     include("net.raphimc:MinecraftAuth:2.0.1") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
-    }
-    include("net.lenni0451.mcstructs:all:2.2.3") {
-        exclude group: "com.google.code.gson", module: "gson"
     }
     include "com.vdurmont:semver4j:3.1.0"
     include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
