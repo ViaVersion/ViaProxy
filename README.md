@@ -1,5 +1,5 @@
 # ViaProxy
-Standalone proxy which allows players to join EVERY minecraft server version (Classic, Alpha, Beta, Release, Bedrock)
+Standalone proxy which allows players to join EVERY Minecraft server version (Classic, Alpha, Beta, Release, Bedrock)
 
 To download the latest version, go to the [Releases section](#executable-jar-file) and download the latest version.  
 Using it is very simple, just run the jar file, and it will start a user interface where everything can be configured.  
@@ -40,7 +40,7 @@ You can also find instructions how to implement it into your build script there.
 3. Run the jar file
 4. Fill in the required fields like server address and version
 5. Click on "Start"
-6. Join with your minecraft client on the displayed address
+6. Join with your Minecraft client on the displayed address
 7. Have fun!
 
 ## Usage for Server owners (CLI)
