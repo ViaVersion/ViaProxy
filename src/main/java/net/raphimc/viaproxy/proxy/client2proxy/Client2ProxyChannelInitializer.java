@@ -55,11 +55,11 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
             return;
         }
 
-        if (Options.ALLOW_EAGLERCRAFT_CLIENTS) {
-            channel.pipeline().addLast(EAGLERCRAFT_INITIAL_HANDLER_NAME, new EaglercraftInitialHandler());
-        }
         if (Options.LEGACY_CLIENT_PASSTHROUGH) {
             channel.pipeline().addLast(LEGACY_PASSTHROUGH_HANDLER_NAME, new LegacyClientPassthroughHandler());
+        }
+        if (Options.ALLOW_EAGLERCRAFT_CLIENTS) {
+            channel.pipeline().addLast(EAGLERCRAFT_INITIAL_HANDLER_NAME, new EaglercraftInitialHandler());
         }
 
         super.initChannel(channel);
