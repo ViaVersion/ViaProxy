@@ -52,11 +52,8 @@ public class EaglercraftInitialHandler extends ByteToMessageDecoder {
         if (!ctx.channel().isOpen()) return;
         if (!in.isReadable()) return;
 
-        if (in.readableBytes() >= 3) {
-            final byte[] data = new byte[3];
-            in.getBytes(0, data);
-            final String method = new String(data, StandardCharsets.UTF_8);
-            if (method.equals("GET")) { // Websocket request
+        if (in.readableBytes() >= 3 || in.getByte(0) != 'G') {
+            if (in.readableBytes() >= 3 && in.getCharSequence(0, 3, StandardCharsets.UTF_8).equals("GET")) { // Websocket request
                 if (sslContext != null) {
                     ctx.pipeline().addBefore(Client2ProxyChannelInitializer.EAGLERCRAFT_INITIAL_HANDLER_NAME, Client2ProxyChannelInitializer.WEBSOCKET_SSL_HANDLER_NAME, sslContext.newHandler(ctx.alloc()));
                 }
