@@ -88,7 +88,9 @@ dependencies {
     }
     include("net.raphimc:ViaProtocolHack:2.2.3") {
         exclude group: "org.slf4j", module: "slf4j-api"
+        exclude group: "org.yaml", module: "snakeyaml"
     }
+    include "org.yaml:snakeyaml:1.33" // Geyser does not run with 2.0
 
     include "com.google.code.gson:gson:2.10.1"
     include "com.formdev:flatlaf:3.1.1"

@@ -16,6 +16,7 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 
 ## Supported Client versions
 - Release (1.7.2 - 1.19.4)
+- Bedrock Edition (Needs the [Geyser plugin](https://github.com/RaphiMC/ViaProxyGeyserPlugin))
 - Classic, Alpha, Beta, Release 1.0 - 1.6.4 (Only passthrough)
 - Eaglercraft (1.5.2 / 1.8)
 
