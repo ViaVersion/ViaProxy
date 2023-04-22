@@ -38,6 +38,8 @@ import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.injection.Java17ToJava8;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
+import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
+import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
 import net.raphimc.viaproxy.proxy.EventListener;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
@@ -165,6 +167,9 @@ public class ViaProxy {
             throw new IllegalStateException("Proxy is already running");
         }
         try {
+            Logger.LOGGER.info("Starting proxy server");
+            PluginManager.EVENT_MANAGER.call(new ProxyStartEvent());
+
             currentProxyServer = new NetServer(() -> PluginManager.EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler())).getHandler(), Client2ProxyChannelInitializer::new);
             Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS + ":" + Options.BIND_PORT);
             currentProxyServer.bind(Options.BIND_ADDRESS, Options.BIND_PORT, false);
@@ -177,6 +182,8 @@ public class ViaProxy {
     public static void stopProxy() {
         if (currentProxyServer != null) {
             Logger.LOGGER.info("Stopping proxy server");
+            PluginManager.EVENT_MANAGER.call(new ProxyStopEvent());
+
             currentProxyServer.getChannel().close();
             currentProxyServer = null;
 
