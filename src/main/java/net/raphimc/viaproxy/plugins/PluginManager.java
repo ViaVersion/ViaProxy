@@ -34,9 +34,9 @@ import java.util.Map;
 public class PluginManager {
 
     public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator());
+    public static final File PLUGINS_DIR = new File("plugins");
 
     private static final Yaml YAML = new Yaml();
-    private static final File PLUGINS_DIR = new File("plugins");
     private static final List<ViaProxyPlugin> PLUGINS = new ArrayList<>();
 
     public static List<ViaProxyPlugin> getPlugins() {
