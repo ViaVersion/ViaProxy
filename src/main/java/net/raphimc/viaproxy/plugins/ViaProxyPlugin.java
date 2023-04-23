@@ -17,8 +17,14 @@
  */
 package net.raphimc.viaproxy.plugins;
 
+import net.lenni0451.classtransform.TransformerManager;
+import net.lenni0451.classtransform.utils.tree.IClassProvider;
+
 public abstract class ViaProxyPlugin {
 
     public abstract void onEnable();
+
+    public void registerTransformers(final TransformerManager transformerManager, final IClassProvider classProvider) {
+    }
 
 }
