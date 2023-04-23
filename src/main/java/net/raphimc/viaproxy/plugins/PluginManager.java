@@ -64,7 +64,7 @@ public class PluginManager {
     }
 
     private static void loadAndScanJar(final File file) throws Throwable {
-        URLClassLoader loader = new URLClassLoader(new URL[]{new URL("jar:file:" + file.getAbsolutePath() + "!/")}, PluginManager.class.getClassLoader());
+        URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, PluginManager.class.getClassLoader());
         InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
         if (viaproxyYml == null) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
         Map<String, Object> yaml = YAML.load(viaproxyYml);
