@@ -143,11 +143,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
                         }
                     } else if (min.name.equals("copyOf")) {
-                        // TODO: Fix
-                        /*list.add(new TypeInsnNode(Opcodes.NEW, "java/util/ArrayList"));
-                        list.add(new InsnNode(Opcodes.DUP));
-                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V"));*/
-                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/google/common/collect/ImmutableList", "copyOf", "(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"));
                     }
 
                     if (list.size() != 0) {
@@ -188,11 +184,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableSet", "(Ljava/util/Set;)Ljava/util/Set;"));
                         }
                     } else if (min.name.equals("copyOf")) {
-                        // TODO: Fix
-                        /*list.add(new TypeInsnNode(Opcodes.NEW, "java/util/HashSet"));
-                        list.add(new InsnNode(Opcodes.DUP));
-                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/HashSet", "<init>", "(Ljava/util/Collection;)V"));*/
-                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableSet", "(Ljava/util/Set;)Ljava/util/Set;"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/google/common/collect/ImmutableSet", "copyOf", "(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableSet;"));
                     }
 
 
@@ -216,11 +208,30 @@ public class Java17ToJava8 implements IBytecodeTransformer {
 
                     if (min.name.equals("of")) {
                         final Type[] args = Type.getArgumentTypes(min.desc);
-                        if (args.length == 0) {
+                        if (args.length != 1 || args[0].getSort() != Type.ARRAY) {
+                            int freeVarIndex = ASMUtils.getFreeVarIndex(method);
+
+                            int argCount = args.length;
+                            if (argCount % 2 != 0) {
+                                throw new RuntimeException("Map.of() requires an even number of arguments");
+                            }
+
                             list.add(new TypeInsnNode(Opcodes.NEW, "java/util/HashMap"));
                             list.add(new InsnNode(Opcodes.DUP));
                             list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/HashMap", "<init>", "()V"));
+                            list.add(new VarInsnNode(Opcodes.ASTORE, freeVarIndex));
+                            for (int i = 0; i < argCount / 2; i++) {
+                                list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
+                                list.add(new InsnNode(Opcodes.DUP_X2));
+                                list.add(new InsnNode(Opcodes.POP));
+                                list.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"));
+                                list.add(new InsnNode(Opcodes.POP));
+                            }
+                            list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableMap", "(Ljava/util/Map;)Ljava/util/Map;"));
                         }
+                    } else if (min.name.equals("copyOf")) {
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/google/common/collect/ImmutableMap", "copyOf", "(Ljava/util/Map;)Lcom/google/common/collect/ImmutableMap;"));
                     }
 
                     if (list.size() != 0) {
