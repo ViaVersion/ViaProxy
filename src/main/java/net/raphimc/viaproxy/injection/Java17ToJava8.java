@@ -143,7 +143,11 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
                         }
                     } else if (min.name.equals("copyOf")) {
-                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/google/common/collect/ImmutableList", "copyOf", "(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"));
+                        list.add(new TypeInsnNode(Opcodes.NEW, "java/util/ArrayList"));
+                        list.add(new InsnNode(Opcodes.DUP_X1));
+                        list.add(new InsnNode(Opcodes.SWAP));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
                     }
 
                     if (list.size() != 0) {
@@ -184,7 +188,11 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableSet", "(Ljava/util/Set;)Ljava/util/Set;"));
                         }
                     } else if (min.name.equals("copyOf")) {
-                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/google/common/collect/ImmutableSet", "copyOf", "(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableSet;"));
+                        list.add(new TypeInsnNode(Opcodes.NEW, "java/util/HashSet"));
+                        list.add(new InsnNode(Opcodes.DUP_X1));
+                        list.add(new InsnNode(Opcodes.SWAP));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/HashSet", "<init>", "(Ljava/util/Collection;)V"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableSet", "(Ljava/util/Set;)Ljava/util/Set;"));
                     }
 
 
@@ -231,7 +239,11 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableMap", "(Ljava/util/Map;)Ljava/util/Map;"));
                         }
                     } else if (min.name.equals("copyOf")) {
-                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/google/common/collect/ImmutableMap", "copyOf", "(Ljava/util/Map;)Lcom/google/common/collect/ImmutableMap;"));
+                        list.add(new TypeInsnNode(Opcodes.NEW, "java/util/HashMap"));
+                        list.add(new InsnNode(Opcodes.DUP_X1));
+                        list.add(new InsnNode(Opcodes.SWAP));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/HashMap", "<init>", "(Ljava/util/Map;)V"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableMap", "(Ljava/util/Map;)Ljava/util/Map;"));
                     }
 
                     if (list.size() != 0) {
