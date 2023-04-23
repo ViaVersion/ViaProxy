@@ -24,6 +24,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,17 +34,32 @@ public class Java17ToJava8 implements IBytecodeTransformer {
     private static final char BSM_ARG_CONSTANT = '\u0002';
 
     private final IClassProvider classProvider;
+    private final int nativeClassVersion;
+    private final List<String> whitelistedPackages = new ArrayList<>();
 
     public Java17ToJava8(final IClassProvider classProvider) {
         this.classProvider = classProvider;
+
+        final String classVersion = System.getProperty("java.class.version");
+        final String[] versions = classVersion.split("\\.");
+        final int majorVersion = Integer.parseInt(versions[0]);
+        final int minorVersion = Integer.parseInt(versions[1]);
+        this.nativeClassVersion = minorVersion << 16 | majorVersion;
+    }
+
+    public Java17ToJava8 addWhitelistedPackage(final String packageName) {
+        this.whitelistedPackages.add(packageName);
+        return this;
     }
 
     @Override
     public byte[] transform(String className, byte[] bytecode) {
-        if (!className.startsWith("com.mojang") && !className.startsWith("org.geysermc")) return null;
+        for (String whitelistedPackage : this.whitelistedPackages) {
+            if (!className.startsWith(whitelistedPackage)) return null;
+        }
 
-        ClassNode classNode = ASMUtils.fromBytes(bytecode);
-        if (classNode.version <= Opcodes.V1_8) return null;
+        final ClassNode classNode = ASMUtils.fromBytes(bytecode);
+        if (classNode.version <= this.nativeClassVersion) return null;
 
         classNode.version = Opcodes.V1_8;
         this.makePublic(classNode);
