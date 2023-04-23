@@ -17,15 +17,21 @@
  */
 package net.raphimc.viaproxy.plugins;
 
+import com.vdurmont.semver4j.Semver;
+import net.lenni0451.classtransform.TransformerManager;
+import net.lenni0451.classtransform.additionalclassprovider.GuavaClassPathProvider;
+import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
+import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
+import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.util.URLClassProvider;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +43,7 @@ public class PluginManager {
     public static final File PLUGINS_DIR = new File("plugins");
 
     private static final Yaml YAML = new Yaml();
+    private static final IClassProvider ROOT_CLASS_PROVIDER = new GuavaClassPathProvider();
     private static final List<ViaProxyPlugin> PLUGINS = new ArrayList<>();
 
     public static List<ViaProxyPlugin> getPlugins() {
@@ -64,7 +71,10 @@ public class PluginManager {
     }
 
     private static void loadAndScanJar(final File file) throws Throwable {
-        URLClassLoader loader = new URLClassLoader(new URL[]{new URL("jar:file:" + file.getAbsolutePath() + "!/")}, PluginManager.class.getClassLoader());
+        URL url = file.toURI().toURL();
+        URLClassProvider classProvider = new URLClassProvider(ROOT_CLASS_PROVIDER, url);
+        TransformerManager transformerManager = new TransformerManager(classProvider);
+        InjectionClassLoader loader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
         InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
         if (viaproxyYml == null) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
         Map<String, Object> yaml = YAML.load(viaproxyYml);
@@ -72,6 +82,10 @@ public class PluginManager {
         if (!yaml.containsKey("author")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a author attribute in the viaproxy.yml");
         if (!yaml.containsKey("version")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a version attribute in the viaproxy.yml");
         if (!yaml.containsKey("main")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a main attribute in the viaproxy.yml");
+        Semver minVersion = new Semver(yaml.getOrDefault("minVersion", "0.0.0").toString());
+        if (!ViaProxy.VERSION.equals("${version}") && minVersion.isLowerThan(new Semver(ViaProxy.VERSION))) {
+            throw new IllegalStateException("Plugin '" + file.getName() + "' requires a newer version of ViaProxy (v" + minVersion + ")");
+        }
 
         String main = (String) yaml.get("main");
 
@@ -83,6 +97,7 @@ public class PluginManager {
         ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
         PLUGINS.add(plugin);
 
+        plugin.registerTransformers(transformerManager, classProvider);
         plugin.onEnable();
         Logger.LOGGER.info("Successfully loaded plugin '" + yaml.get("name") + "' by " + yaml.get("author") + " (v" + yaml.get("version") + ")");
     }
