@@ -42,7 +42,7 @@ public class URLClassProvider implements IClassProvider {
     public byte[] getClass(String name) {
         for (URL url : this.urls) {
             try (InputStream is = new URL("jar:" + url + "!/" + ASMUtils.slash(name) + ".class").openStream()) {
-                IOUtils.toByteArray(is);
+                return IOUtils.toByteArray(is);
             } catch (Throwable ignored) {
             }
         }
