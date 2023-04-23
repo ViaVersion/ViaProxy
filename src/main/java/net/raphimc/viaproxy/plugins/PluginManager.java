@@ -72,8 +72,7 @@ public class PluginManager {
 
     private static void loadAndScanJar(final File file) throws Throwable {
         URL url = file.toURI().toURL();
-        URLClassProvider classProvider = new URLClassProvider(ROOT_CLASS_PROVIDER, url);
-        TransformerManager transformerManager = new TransformerManager(classProvider);
+        TransformerManager transformerManager = new TransformerManager(new URLClassProvider(ROOT_CLASS_PROVIDER, url));
         InjectionClassLoader loader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
         InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
         if (viaproxyYml == null) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
@@ -97,7 +96,7 @@ public class PluginManager {
         ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
         PLUGINS.add(plugin);
 
-        plugin.registerTransformers(transformerManager, classProvider);
+        plugin.registerTransformers(transformerManager);
         plugin.onEnable();
         Logger.LOGGER.info("Successfully loaded plugin '" + yaml.get("name") + "' by " + yaml.get("author") + " (v" + yaml.get("version") + ")");
     }

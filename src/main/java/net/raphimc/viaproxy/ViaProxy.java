@@ -73,7 +73,7 @@ public class ViaProxy {
         final IClassProvider classProvider = new GuavaClassPathProvider();
         final TransformerManager transformerManager = new TransformerManager(classProvider);
         transformerManager.addTransformerPreprocessor(new MixinsTranslator());
-        transformerManager.addBytecodeTransformer(new Java17ToJava8(classProvider).addWhitelistedPackage("com.mojang"));
+        transformerManager.addBytecodeTransformer(new Java17ToJava8(transformerManager).addWhitelistedPackage("com.mojang"));
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.transformer.**");
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
         if (instrumentation != null) {

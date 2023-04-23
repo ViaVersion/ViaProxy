@@ -17,9 +17,9 @@
  */
 package net.raphimc.viaproxy.injection;
 
+import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.transformer.IBytecodeTransformer;
 import net.lenni0451.classtransform.utils.ASMUtils;
-import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -33,12 +33,12 @@ public class Java17ToJava8 implements IBytecodeTransformer {
     private static final char STACK_ARG_CONSTANT = '\u0001';
     private static final char BSM_ARG_CONSTANT = '\u0002';
 
-    private final IClassProvider classProvider;
+    final TransformerManager transformerManager;
     private final int nativeClassVersion;
     private final List<String> whitelistedPackages = new ArrayList<>();
 
-    public Java17ToJava8(final IClassProvider classProvider) {
-        this.classProvider = classProvider;
+    public Java17ToJava8(final TransformerManager transformerManager) {
+        this.transformerManager = transformerManager;
 
         final String classVersion = System.getProperty("java.class.version");
         final String[] versions = classVersion.split("\\.");
@@ -53,7 +53,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
     }
 
     @Override
-    public byte[] transform(String className, byte[] bytecode) {
+    public byte[] transform(String className, byte[] bytecode, boolean calculateStackMapFrames) {
         for (String whitelistedPackage : this.whitelistedPackages) {
             if (!className.startsWith(whitelistedPackage)) return null;
         }
@@ -71,7 +71,11 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         this.convertMiscMethods(classNode);
         this.removeRecords(classNode);
 
-        return ASMUtils.toBytes(classNode, this.classProvider);
+        if (calculateStackMapFrames) {
+            return ASMUtils.toBytes(classNode, this.transformerManager.getClassTree(), this.transformerManager.getClassProvider());
+        } else {
+            return ASMUtils.toStacklessBytes(classNode);
+        }
     }
 
     private void makePublic(final ClassNode classNode) {
@@ -194,7 +198,6 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                         list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/HashSet", "<init>", "(Ljava/util/Collection;)V"));
                         list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableSet", "(Ljava/util/Set;)Ljava/util/Set;"));
                     }
-
 
                     if (list.size() != 0) {
                         method.instructions.insertBefore(insn, list);
