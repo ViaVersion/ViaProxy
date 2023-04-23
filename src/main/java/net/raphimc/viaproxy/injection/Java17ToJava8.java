@@ -40,7 +40,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
 
     @Override
     public byte[] transform(String className, byte[] bytecode) {
-        if (!className.startsWith("com.mojang")) return null;
+        if (!className.startsWith("com.mojang") && !className.startsWith("org.geysermc")) return null;
 
         ClassNode classNode = ASMUtils.fromBytes(bytecode);
         if (classNode.version <= Opcodes.V1_8) return null;
@@ -48,7 +48,11 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         classNode.version = Opcodes.V1_8;
         this.makePublic(classNode);
         this.convertStringConcatFactory(classNode);
-        this.convertCollections(classNode);
+        this.convertListMethods(classNode);
+        this.convertSetMethods(classNode);
+        this.convertMapMethods(classNode);
+        this.convertStreamMethods(classNode);
+        this.convertMiscMethods(classNode);
         this.removeRecords(classNode);
 
         return ASMUtils.toBytes(classNode, this.classProvider);
@@ -94,15 +98,62 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         }
     }
 
-    private void convertCollections(final ClassNode node) {
+    private void convertListMethods(final ClassNode node) {
         for (MethodNode method : node.methods) {
             for (AbstractInsnNode insn : method.instructions.toArray()) {
                 if (insn.getOpcode() == Opcodes.INVOKESTATIC) {
-                    MethodInsnNode min = (MethodInsnNode) insn;
+                    final MethodInsnNode min = (MethodInsnNode) insn;
+                    if (!min.owner.equals("java/util/List")) continue;
 
-                    Type[] args = Type.getArgumentTypes(min.desc);
-                    InsnList list = new InsnList();
-                    if (min.owner.equals("java/util/Set") && min.name.equals("of")) {
+                    final InsnList list = new InsnList();
+
+                    if (min.name.equals("of")) {
+                        final Type[] args = Type.getArgumentTypes(min.desc);
+                        if (args.length != 1 || args[0].getSort() != Type.ARRAY) {
+                            int freeVarIndex = ASMUtils.getFreeVarIndex(method);
+
+                            int argCount = args.length;
+                            list.add(new TypeInsnNode(Opcodes.NEW, "java/util/ArrayList"));
+                            list.add(new InsnNode(Opcodes.DUP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/ArrayList", "<init>", "()V"));
+                            list.add(new VarInsnNode(Opcodes.ASTORE, freeVarIndex));
+                            for (int i = 0; i < argCount; i++) {
+                                list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
+                                list.add(new InsnNode(Opcodes.SWAP));
+                                list.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z"));
+                                list.add(new InsnNode(Opcodes.POP));
+                            }
+                            list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
+                        }
+                    } else if (min.name.equals("copyOf")) {
+                        // TODO: Fix
+                        /*list.add(new TypeInsnNode(Opcodes.NEW, "java/util/ArrayList"));
+                        list.add(new InsnNode(Opcodes.DUP));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V"));*/
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
+                    }
+
+                    if (list.size() != 0) {
+                        method.instructions.insertBefore(insn, list);
+                        method.instructions.remove(insn);
+                    }
+                }
+            }
+        }
+    }
+
+    private void convertSetMethods(final ClassNode node) {
+        for (MethodNode method : node.methods) {
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn.getOpcode() == Opcodes.INVOKESTATIC) {
+                    final MethodInsnNode min = (MethodInsnNode) insn;
+                    if (!min.owner.equals("java/util/Set")) continue;
+
+                    final InsnList list = new InsnList();
+
+                    if (min.name.equals("of")) {
+                        final Type[] args = Type.getArgumentTypes(min.desc);
                         if (args.length != 1 || args[0].getSort() != Type.ARRAY) {
                             int freeVarIndex = ASMUtils.getFreeVarIndex(method);
 
@@ -120,13 +171,100 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                             list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableSet", "(Ljava/util/Set;)Ljava/util/Set;"));
                         }
-                    } else if (min.owner.equals("java/util/Map") && min.name.equals("of")) {
+                    } else if (min.name.equals("copyOf")) {
+                        // TODO: Fix
+                        /*list.add(new TypeInsnNode(Opcodes.NEW, "java/util/HashSet"));
+                        list.add(new InsnNode(Opcodes.DUP));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/HashSet", "<init>", "(Ljava/util/Collection;)V"));*/
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableSet", "(Ljava/util/Set;)Ljava/util/Set;"));
+                    }
+
+
+                    if (list.size() != 0) {
+                        method.instructions.insertBefore(insn, list);
+                        method.instructions.remove(insn);
+                    }
+                }
+            }
+        }
+    }
+
+    private void convertMapMethods(final ClassNode node) {
+        for (MethodNode method : node.methods) {
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn.getOpcode() == Opcodes.INVOKESTATIC) {
+                    final MethodInsnNode min = (MethodInsnNode) insn;
+                    if (!min.owner.equals("java/util/Map")) continue;
+
+                    final InsnList list = new InsnList();
+
+                    if (min.name.equals("of")) {
+                        final Type[] args = Type.getArgumentTypes(min.desc);
                         if (args.length == 0) {
                             list.add(new TypeInsnNode(Opcodes.NEW, "java/util/HashMap"));
                             list.add(new InsnNode(Opcodes.DUP));
                             list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/HashMap", "<init>", "()V"));
                         }
                     }
+
+                    if (list.size() != 0) {
+                        method.instructions.insertBefore(insn, list);
+                        method.instructions.remove(insn);
+                    }
+                }
+            }
+        }
+    }
+
+    private void convertStreamMethods(final ClassNode node) {
+        for (MethodNode method : node.methods) {
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn.getOpcode() == Opcodes.INVOKEINTERFACE) {
+                    final MethodInsnNode min = (MethodInsnNode) insn;
+                    if (!min.owner.equals("java/util/stream/Stream")) continue;
+
+                    final InsnList list = new InsnList();
+
+                    if (min.name.equals("toList")) {
+                        int freeVarIndex = ASMUtils.getFreeVarIndex(method);
+                        list.add(new VarInsnNode(Opcodes.ASTORE, freeVarIndex));
+
+                        list.add(new TypeInsnNode(Opcodes.NEW, "java/util/ArrayList"));
+                        list.add(new InsnNode(Opcodes.DUP));
+                        list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
+                        list.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/stream/Stream", "toArray", "()[Ljava/lang/Object;"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Arrays", "asList", "([Ljava/lang/Object;)Ljava/util/List;"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V"));
+                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
+                    }
+
+                    if (list.size() != 0) {
+                        method.instructions.insertBefore(insn, list);
+                        method.instructions.remove(insn);
+                    }
+                }
+            }
+        }
+    }
+
+    private void convertMiscMethods(final ClassNode node) {
+        for (MethodNode method : node.methods) {
+            for (AbstractInsnNode insn : method.instructions.toArray()) {
+                if (insn instanceof MethodInsnNode) {
+                    final MethodInsnNode min = (MethodInsnNode) insn;
+                    final InsnList list = new InsnList();
+
+                    if (min.owner.equals("java/lang/String")) {
+                        if (min.name.equals("isBlank") && min.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "trim", "()Ljava/lang/String;"));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "isEmpty", "()Z"));
+                        }
+                    } else if (min.owner.equals("java/io/InputStream")) {
+                        if (min.name.equals("readAllBytes") && min.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+                            list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/apache/commons/io/IOUtils", "toByteArray", "(Ljava/io/InputStream;)[B"));
+                        }
+                    }
+
                     if (list.size() != 0) {
                         method.instructions.insertBefore(insn, list);
                         method.instructions.remove(insn);
