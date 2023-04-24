@@ -305,6 +305,94 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                         if (min.name.equals("readAllBytes") && min.getOpcode() == Opcodes.INVOKEVIRTUAL) {
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/apache/commons/io/IOUtils", "toByteArray", "(Ljava/io/InputStream;)[B"));
                         }
+                    } else if (min.owner.equals("java/nio/file/FileSystems")) {
+                        if (min.name.equals("newFileSystem") && min.desc.equals("(Ljava/nio/file/Path;Ljava/util/Map;Ljava/lang/ClassLoader;)Ljava/nio/file/FileSystem;")) {
+                            list.add(new InsnNode(Opcodes.DUP2_X1));
+                            list.add(new InsnNode(Opcodes.POP2));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/nio/file/Path", "toUri", "()Ljava/net/URI;"));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/net/URI", "toString", "()Ljava/lang/String;"));
+                            list.add(new TypeInsnNode(Opcodes.NEW, "java/lang/StringBuilder"));
+                            list.add(new InsnNode(Opcodes.DUP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V"));
+                            list.add(new LdcInsnNode("jar:"));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;"));
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;"));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;"));
+                            list.add(new TypeInsnNode(Opcodes.NEW, "java/net/URI"));
+                            list.add(new InsnNode(Opcodes.DUP_X1));
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/net/URI", "<init>", "(Ljava/lang/String;)V"));
+                            list.add(new InsnNode(Opcodes.DUP_X2));
+                            list.add(new InsnNode(Opcodes.POP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/nio/file/FileSystems", "newFileSystem", "(Ljava/net/URI;Ljava/util/Map;Ljava/lang/ClassLoader;)Ljava/nio/file/FileSystem;"));
+                        }
+                    } else if (min.owner.equals("java/util/Objects")) {
+                        if (min.name.equals("requireNonNullElse")) {
+                            LabelNode elseJump = new LabelNode();
+                            LabelNode endJump = new LabelNode();
+
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new InsnNode(Opcodes.DUP));
+                            list.add(new JumpInsnNode(Opcodes.IFNULL, elseJump));
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new InsnNode(Opcodes.POP));
+                            list.add(new JumpInsnNode(Opcodes.GOTO, endJump));
+                            list.add(elseJump);
+                            list.add(new InsnNode(Opcodes.POP));
+                            list.add(new LdcInsnNode("defaultObj"));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Objects", "requireNonNull", "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;"));
+                            list.add(endJump);
+                        }
+                    } else if (min.owner.equals("java/nio/file/Files")) {
+                        if (min.name.equals("readString")) {
+                            if (min.desc.equals("(Ljava/nio/file/Path;)Ljava/lang/String;")) {
+                                list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/nio/file/Files", "readAllBytes", "(Ljava/nio/file/Path;)[B"));
+                                list.add(new FieldInsnNode(Opcodes.GETSTATIC, "java/nio/charset/StandardCharsets", "UTF_8", "Ljava/nio/charset/Charset;"));
+                            } else if (min.desc.equals("(Ljava/nio/file/Path;Ljava/nio/charset/Charset;)Ljava/lang/String;")) {
+                                list.add(new InsnNode(Opcodes.SWAP));
+                                list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/nio/file/Files", "readAllBytes", "(Ljava/nio/file/Path;)[B"));
+                                list.add(new InsnNode(Opcodes.SWAP));
+                            }
+                            list.add(new TypeInsnNode(Opcodes.NEW, "java/lang/String"));
+                            list.add(new InsnNode(Opcodes.DUP_X2));
+                            list.add(new InsnNode(Opcodes.DUP_X2));
+                            list.add(new InsnNode(Opcodes.POP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/lang/String", "<init>", "([BLjava/nio/charset/Charset;)V"));
+                        }
+                    } else if (min.owner.equals("java/util/regex/Matcher")) {
+                        if (min.name.equals("appendReplacement") && min.desc.equals("(Ljava/lang/StringBuilder;Ljava/lang/String;)Ljava/util/regex/Matcher;")) {
+                            int stringBufferIndex = ASMUtils.getFreeVarIndex(method);
+                            list.add(new TypeInsnNode(Opcodes.NEW, "java/lang/StringBuffer"));
+                            list.add(new InsnNode(Opcodes.DUP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/lang/StringBuffer", "<init>", "()V"));
+                            list.add(new VarInsnNode(Opcodes.ASTORE, stringBufferIndex));
+
+                            list.add(new InsnNode(Opcodes.DUP2_X1));
+                            list.add(new InsnNode(Opcodes.POP2));
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new VarInsnNode(Opcodes.ALOAD, stringBufferIndex));
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, min.owner, min.name, "(Ljava/lang/StringBuffer;Ljava/lang/String;)Ljava/util/regex/Matcher;"));
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new VarInsnNode(Opcodes.ALOAD, stringBufferIndex));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/StringBuffer;)Ljava/lang/StringBuilder;"));
+                            list.add(new InsnNode(Opcodes.POP));
+                        } else if (min.name.equals("appendTail") && min.desc.equals("(Ljava/lang/StringBuilder;)Ljava/lang/StringBuilder;")) {
+                            int stringBufferIndex = ASMUtils.getFreeVarIndex(method);
+                            list.add(new TypeInsnNode(Opcodes.NEW, "java/lang/StringBuffer"));
+                            list.add(new InsnNode(Opcodes.DUP));
+                            list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/lang/StringBuffer", "<init>", "()V"));
+                            list.add(new VarInsnNode(Opcodes.ASTORE, stringBufferIndex));
+
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new VarInsnNode(Opcodes.ALOAD, stringBufferIndex));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, min.owner, min.name, "(Ljava/lang/StringBuffer;)Ljava/lang/StringBuffer;"));
+                            list.add(new InsnNode(Opcodes.SWAP));
+                            list.add(new VarInsnNode(Opcodes.ALOAD, stringBufferIndex));
+                            list.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/StringBuffer;)Ljava/lang/StringBuilder;"));
+                            list.add(new InsnNode(Opcodes.POP));
+                        }
                     }
 
                     if (list.size() != 0) {
