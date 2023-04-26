@@ -71,8 +71,8 @@ repositories {
 dependencies {
     compileOnly sourceSets.java17compat.output
 
-    include "com.viaversion:viaversion:4.7.0-23w14a-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.7.0-23w14a-SNAPSHOT") {
+    include "com.viaversion:viaversion:4.7.0-23w17a-SNAPSHOT"
+    include("com.viaversion:viabackwards-common:4.7.0-23w17a-SNAPSHOT") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
@@ -86,7 +86,7 @@ dependencies {
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
         exclude group: "io.jsonwebtoken", module: "jjwt-gson"
     }
-    include("net.raphimc:ViaProtocolHack:2.2.3") {
+    include("net.raphimc:ViaProtocolHack:2.2.4") {
         exclude group: "org.slf4j", module: "slf4j-api"
         exclude group: "org.yaml", module: "snakeyaml"
     }
