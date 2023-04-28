@@ -47,11 +47,18 @@ public class ConsoleHandler {
                 System.out.println("GC Done");
             } else if (command.equalsIgnoreCase("via")) {
                 Via.getManager().getCommandHandler().onCommand(new UserCommandSender(new UserConnectionImpl(null, true)), args.getAsArray());
+            } else if (command.equalsIgnoreCase("threaddump")) {
+                System.out.println("Thread Dump:");
+                for (Thread thread : Thread.getAllStackTraces().keySet()) {
+                    System.out.println("Thread: " + thread.getName() + " | State: " + thread.getState());
+                    for (StackTraceElement element : thread.getStackTrace()) System.out.println("    " + element.toString());
+                }
             } else {
                 if (PluginManager.EVENT_MANAGER.call(new ConsoleCommandEvent(command, args.getAsArray())).isCancelled()) continue;
                 System.out.println("Invalid Command!");
                 System.out.println(" via | Run a viaversion command");
                 System.out.println(" gc | Run the garbage collector");
+                System.out.println(" threaddump | Print the stacktrace of all running threads");
             }
         }
     }
