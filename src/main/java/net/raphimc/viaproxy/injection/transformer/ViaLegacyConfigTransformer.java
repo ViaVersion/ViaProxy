@@ -28,7 +28,14 @@ import net.raphimc.viaproxy.cli.options.Options;
 public abstract class ViaLegacyConfigTransformer {
 
     @CInject(method = "isLegacySkinLoading", target = @CTarget("HEAD"), cancellable = true)
-    private void makeGUIConfigurable(final InjectionCallback ic) {
+    private void makeGUIConfigurable1(final InjectionCallback ic) {
+        if (Options.LEGACY_SKIN_LOADING != null) {
+            ic.setReturnValue(Options.LEGACY_SKIN_LOADING);
+        }
+    }
+
+    @CInject(method = "isLegacySkullLoading", target = @CTarget("HEAD"), cancellable = true)
+    private void makeGUIConfigurable2(final InjectionCallback ic) {
         if (Options.LEGACY_SKIN_LOADING != null) {
             ic.setReturnValue(Options.LEGACY_SKIN_LOADING);
         }
