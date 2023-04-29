@@ -33,13 +33,8 @@ import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.viaprotocolhack.netty.VPHPipeline;
 import net.raphimc.viaprotocolhack.netty.viabedrock.PingEncapsulationCodec;
 import net.raphimc.viaprotocolhack.util.VersionEnum;
-import net.raphimc.viaproxy.protocolhack.viaproxy.raknet_fix.FixedUnconnectedPingEncoder;
-import net.raphimc.viaproxy.protocolhack.viaproxy.raknet_fix.FixedUnconnectedPongDecoder;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
-import org.cloudburstmc.netty.channel.raknet.RakClientChannel;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
-import org.cloudburstmc.netty.handler.codec.raknet.common.UnconnectedPingEncoder;
-import org.cloudburstmc.netty.handler.codec.raknet.common.UnconnectedPongDecoder;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadLocalRandom;
@@ -93,12 +88,6 @@ public class BedrockProxyConnection extends ProxyConnection {
             this.initialize(new Bootstrap());
         }
         this.getChannel().bind(new InetSocketAddress(0)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).syncUninterruptibly();
-        final RakClientChannel channel = (RakClientChannel) this.getChannel();
-
-        { // Temporary fix for the ping encoder
-            channel.parent().pipeline().replace(UnconnectedPingEncoder.NAME, UnconnectedPingEncoder.NAME, new FixedUnconnectedPingEncoder(channel));
-            channel.parent().pipeline().replace(UnconnectedPongDecoder.NAME, UnconnectedPongDecoder.NAME, new FixedUnconnectedPongDecoder(channel));
-        }
 
         this.getChannel().pipeline().replace(VPHPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(serverAddress.toSocketAddress()));
         this.getChannel().pipeline().remove(VPHPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
