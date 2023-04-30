@@ -138,26 +138,26 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
     private void handleLoginSuccess(final S2CLoginSuccessPacket1_7 packet) {
         if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_8)) {
             if (Options.COMPRESSION_THRESHOLD > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
+                this.proxyConnection.getChannel().config().setAutoRead(false);
                 this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(Options.COMPRESSION_THRESHOLD)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
                     if (f.isSuccess()) {
                         this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(Options.COMPRESSION_THRESHOLD);
                         this.proxyConnection.getChannel().config().setAutoRead(true);
                     }
                 });
-                this.proxyConnection.getChannel().config().setAutoRead(false);
             }
         }
 
         this.proxyConnection.setGameProfile(new GameProfile(packet.uuid, packet.name));
-
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Connected successfully! Switching to PLAY state");
+
+        this.proxyConnection.getChannel().config().setAutoRead(false);
         this.proxyConnection.getC2P().writeAndFlush(packet).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
             if (f.isSuccess()) {
                 this.proxyConnection.setConnectionState(ConnectionState.PLAY);
                 this.proxyConnection.getChannel().config().setAutoRead(true);
             }
         });
-        this.proxyConnection.getChannel().config().setAutoRead(false);
     }
 
     private void handleLoginCompression(final S2CLoginCompressionPacket packet) {
