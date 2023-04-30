@@ -237,7 +237,7 @@ public class ProxyConnection extends NetClient {
         return this.classicMpPass;
     }
 
-    public void kickClient(final String message) throws InterruptedException, CloseAndReturn {
+    public void kickClient(final String message) throws CloseAndReturn {
         Logger.u_err("kick", this.c2p.remoteAddress(), this.getGameProfile(), message.replaceAll("§.", ""));
 
         final ChannelFuture future;
@@ -254,7 +254,7 @@ public class ProxyConnection extends NetClient {
             future = this.c2p.newSucceededFuture();
         }
 
-        future.await().channel().close();
+        future.channel().close();
         throw CloseAndReturn.INSTANCE;
     }
 

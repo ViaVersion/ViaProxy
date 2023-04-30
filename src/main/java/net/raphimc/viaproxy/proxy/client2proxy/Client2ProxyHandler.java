@@ -262,7 +262,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.getChannel().writeAndFlush(haProxyMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
 
-        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress(), serverAddress.getPort(), packet.intendedState)).await().addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress(), serverAddress.getPort(), packet.intendedState)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
         this.proxyConnection.setConnectionState(packet.intendedState);
     }
 
