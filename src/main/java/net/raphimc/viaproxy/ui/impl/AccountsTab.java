@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.ui.impl;
 
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
@@ -26,6 +27,7 @@ import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
 import net.raphimc.viaproxy.util.TFunction;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
@@ -190,7 +192,11 @@ public class AccountsTab extends AUITab {
             this.addMicrosoftAccountButton.setBounds(160, 20, 145, 20);
             this.addMicrosoftAccountButton.addActionListener(event -> {
                 this.addMicrosoftAccountButton.setEnabled(false);
-                this.handleLogin(MinecraftAuth::requestJavaLogin, profile -> ViaProxy.saveManager.accountsSave.addAccount(profile));
+                this.handleLogin(msaDeviceCodeConsumer -> {
+                    try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+                        return MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer));
+                    }
+                }, profile -> ViaProxy.saveManager.accountsSave.addAccount(profile));
             });
             addButtons.add(this.addMicrosoftAccountButton);
         }
@@ -199,7 +205,11 @@ public class AccountsTab extends AUITab {
             this.addBedrockAccountButton.setBounds(310, 20, 145, 20);
             this.addBedrockAccountButton.addActionListener(event -> {
                 this.addBedrockAccountButton.setEnabled(false);
-                this.handleLogin(MinecraftAuth::requestBedrockLogin, chain -> ViaProxy.saveManager.accountsSave.addAccount(chain));
+                this.handleLogin(msaDeviceCodeConsumer -> {
+                    try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+                        return MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer));
+                    }
+                }, chain -> ViaProxy.saveManager.accountsSave.addAccount(chain));
             });
             addButtons.add(this.addBedrockAccountButton);
         }

@@ -29,7 +29,7 @@ public class MicrosoftAccount extends Account {
     private StepMCProfile.MCProfile mcProfile;
 
     public MicrosoftAccount(final JsonObject jsonObject) throws Throwable {
-        this.mcProfile = MinecraftAuth.Java.Title.MC_PROFILE.fromJson(jsonObject);
+        this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(jsonObject);
     }
 
     public MicrosoftAccount(final StepMCProfile.MCProfile mcProfile) {
@@ -62,7 +62,7 @@ public class MicrosoftAccount extends Account {
 
     @Override
     public void refresh(CloseableHttpClient httpClient) throws Exception {
-        this.mcProfile = MinecraftAuth.Java.Title.MC_PROFILE.refresh(httpClient, this.mcProfile);
+        this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcProfile);
     }
 
 }

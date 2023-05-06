@@ -32,7 +32,7 @@ public class SaveMigrator {
                     if (object.has("is_offline_mode_account") && object.get("is_offline_mode_account").getAsBoolean()) {
                         saveManager.accountsSave.addAccount(object.get("name").getAsString());
                     } else {
-                        saveManager.accountsSave.addAccount(MinecraftAuth.Java.Title.MC_PROFILE.fromJson(object));
+                        saveManager.accountsSave.addAccount(MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(object));
                     }
                 }
             }

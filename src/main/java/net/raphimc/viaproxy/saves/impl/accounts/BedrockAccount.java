@@ -29,7 +29,7 @@ public class BedrockAccount extends Account {
     private StepMCChain.MCChain mcChain;
 
     public BedrockAccount(final JsonObject jsonObject) throws Throwable {
-        this.mcChain = MinecraftAuth.Bedrock.Title.MC_CHAIN.fromJson(jsonObject);
+        this.mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.fromJson(jsonObject);
     }
 
     public BedrockAccount(final StepMCChain.MCChain mcChain) {
@@ -62,7 +62,7 @@ public class BedrockAccount extends Account {
 
     @Override
     public void refresh(CloseableHttpClient httpClient) throws Exception {
-        this.mcChain = MinecraftAuth.Bedrock.Title.MC_CHAIN.refresh(httpClient, this.mcChain);
+        this.mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcChain);
     }
 
 }
