@@ -26,21 +26,11 @@ import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.proxy.client2proxy.eaglercraft.EaglercraftInitialHandler;
 import net.raphimc.viaproxy.proxy.client2proxy.passthrough.LegacyClientPassthroughHandler;
 
 import java.util.function.Supplier;
 
 public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer {
-
-    public static final String EAGLERCRAFT_INITIAL_HANDLER_NAME = "eaglercraft-initial-handler";
-    public static final String WEBSOCKET_SSL_HANDLER_NAME = "ws-ssl-handler";
-    public static final String WEBSOCKET_HTTP_CODEC_NAME = "ws-http-codec";
-    public static final String WEBSOCKET_HTTP_AGGREGATOR_NAME = "ws-http-aggregator";
-    public static final String WEBSOCKET_COMPRESSION_NAME = "ws-compression";
-    public static final String WEBSOCKET_HANDLER_NAME = "ws-handler";
-    public static final String WEBSOCKET_ACTIVE_NOTIFIER_NAME = "ws-active-notifier";
-    public static final String EAGLERCRAFT_HANDLER_NAME = "eaglercraft-handler";
 
     public static final String LEGACY_PASSTHROUGH_HANDLER_NAME = "legacy-passthrough-handler";
 
@@ -55,9 +45,6 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
             return;
         }
 
-        if (Options.ALLOW_EAGLERCRAFT_CLIENTS) {
-            channel.pipeline().addLast(EAGLERCRAFT_INITIAL_HANDLER_NAME, new EaglercraftInitialHandler());
-        }
         if (Options.LEGACY_CLIENT_PASSTHROUGH) {
             channel.pipeline().addLast(LEGACY_PASSTHROUGH_HANDLER_NAME, new LegacyClientPassthroughHandler());
         }

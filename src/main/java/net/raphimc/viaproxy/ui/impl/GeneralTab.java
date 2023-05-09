@@ -203,7 +203,6 @@ public class GeneralTab extends AUITab {
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();
             final boolean proxyOnlineMode = ViaProxy.ui.advancedTab.proxyOnlineMode.isSelected();
             final boolean legacySkinLoading = ViaProxy.ui.advancedTab.legacySkinLoading.isSelected();
-            final boolean eaglercraftSupport = ViaProxy.ui.advancedTab.eaglercraftSupport.isSelected();
             final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText();
 
             try {
@@ -241,7 +240,6 @@ public class GeneralTab extends AUITab {
                     Options.PROTOCOL_VERSION = serverVersion;
                     Options.BETACRAFT_AUTH = betaCraftAuth;
                     Options.LEGACY_SKIN_LOADING = legacySkinLoading;
-                    Options.ALLOW_EAGLERCRAFT_CLIENTS = eaglercraftSupport;
 
                     if (authMethod == 2) {
                         Options.OPENAUTHMOD_AUTH = true;

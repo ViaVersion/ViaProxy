@@ -18,7 +18,6 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 - Release (1.7.2 - 1.19.4)
 - Bedrock Edition (Needs the [Geyser plugin](https://github.com/RaphiMC/ViaProxyGeyserPlugin))
 - Classic, Alpha, Beta, Release 1.0 - 1.6.4 (Only passthrough)
-- Eaglercraft (1.5.2 / 1.8)
 
 ViaProxy supports joining to any of the listed server version from any of the listed client versions.
 
@@ -69,6 +68,7 @@ ViaProxy has a plugin API which allows you to create plugins for ViaProxy.
 Documentation and examples:
 - [NoLocalConnections](https://github.com/Lenni0451/NoLocalConnections)
 - [ViaProxyMultiLaunch](https://github.com/Lenni0451/ViaProxyMultiLaunch)
+- [ViaProxyGeyserPlugin](https://github.com/RaphiMC/ViaProxyGeyserPlugin)
 
 ## Contact
 If you encounter any issues, please report them on the
