@@ -178,6 +178,13 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                                 list.add(new InsnNode(Opcodes.POP));
                             }
                             list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
+                            list.add(new InsnNode(Opcodes.DUP));
+                            list.add(new MethodInsnNode(
+                                Opcodes.INVOKESTATIC,
+                                "java/util/Collections",
+                                "reverse",
+                                "(Ljava/util/List;)V"
+                            ));
                             list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
                         }
                     } else if (min.name.equals("copyOf")) {
