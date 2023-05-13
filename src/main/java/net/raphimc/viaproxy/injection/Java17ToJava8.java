@@ -38,6 +38,8 @@ public class Java17ToJava8 implements IBytecodeTransformer {
     private static final char STACK_ARG_CONSTANT = '\u0001';
     private static final char BSM_ARG_CONSTANT = '\u0002';
 
+    private static final String TRANSFERTO_DESC = "(Ljava/io/InputStream;Ljava/io/OutputStream;)J";
+
     private static final String EQUALS_DESC = "(Ljava/lang/Object;)Z";
     private static final String HASHCODE_DESC = "()I";
     private static final String TOSTRING_DESC = "()Ljava/lang/String;";
@@ -322,6 +324,15 @@ public class Java17ToJava8 implements IBytecodeTransformer {
     }
 
     private void convertMiscMethods(final ClassNode node) {
+        boolean needsTransferTo = false;
+        String transferToName;
+        {
+            int i = 0;
+            do {
+                transferToName = "transferTo$" + i;
+            } while (ASMUtils.getMethod(node, transferToName, TRANSFERTO_DESC) != null);
+        }
+
         for (MethodNode method : node.methods) {
             for (AbstractInsnNode insn : method.instructions.toArray()) {
                 if (insn instanceof MethodInsnNode) {
@@ -335,7 +346,36 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                         }
                     } else if (min.owner.equals("java/io/InputStream")) {
                         if (min.name.equals("readAllBytes") && min.getOpcode() == Opcodes.INVOKEVIRTUAL) {
-                            list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/apache/commons/io/IOUtils", "toByteArray", "(Ljava/io/InputStream;)[B"));
+                            needsTransferTo = true;
+                            list.add(new TypeInsnNode(Opcodes.NEW, "java/io/ByteArrayOutputStream"));
+                            list.add(new InsnNode(Opcodes.DUP));
+                            list.add(new MethodInsnNode(
+                                Opcodes.INVOKESPECIAL,
+                                "java/io/ByteArrayOutputStream",
+                                "<init>",
+                                "()V"
+                            ));
+                            list.add(new InsnNode(Opcodes.DUP_X1));
+                            list.add(new MethodInsnNode(
+                                Opcodes.INVOKESTATIC,
+                                node.name,
+                                transferToName,
+                                TRANSFERTO_DESC
+                            ));
+                            list.add(new InsnNode(Opcodes.POP2));
+                            list.add(new MethodInsnNode(
+                                Opcodes.INVOKEVIRTUAL,
+                                "java/io/ByteArrayOutputStream",
+                                "toByteArray",
+                                "()[B"
+                            ));
+                        } else if (min.name.equals("transferTo") && min.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+                            needsTransferTo = true;
+                            list.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+                                node.name,
+                                transferToName,
+                                TRANSFERTO_DESC
+                            ));
                         }
                     } else if (min.owner.equals("java/nio/file/FileSystems")) {
                         if (min.name.equals("newFileSystem") && min.desc.equals("(Ljava/nio/file/Path;Ljava/util/Map;Ljava/lang/ClassLoader;)Ljava/nio/file/FileSystem;")) {
@@ -433,6 +473,85 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                     }
                 }
             }
+        }
+
+        if (needsTransferTo) {
+            // I compiled this by hand btw
+            final MethodVisitor transferTo = node.visitMethod(
+                Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
+                transferToName, TRANSFERTO_DESC, null, new String[] {"java/io/IOException"}
+            );
+            transferTo.visitCode();
+
+            // Objects.requireNonNull(out, "out");
+            transferTo.visitVarInsn(Opcodes.ALOAD, 1);
+            transferTo.visitLdcInsn("out");
+            transferTo.visitMethodInsn(
+                Opcodes.INVOKESTATIC,
+                "java/util/Objects",
+                "requireNonNull",
+                "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;",
+                false
+            );
+            transferTo.visitInsn(Opcodes.POP);
+
+            // long transferred = 0;
+            transferTo.visitInsn(Opcodes.LCONST_0);
+            transferTo.visitVarInsn(Opcodes.LSTORE, 2);
+
+            // byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            transferTo.visitIntInsn(Opcodes.SIPUSH, 8192);
+            transferTo.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BYTE);
+            transferTo.visitVarInsn(Opcodes.ASTORE, 4);
+
+            // while ((read = this.read(buffer, 0, DEFAULT_BUFFER_SIZE)) >= 0) {
+            final Label whileStart = new Label();
+            final Label whileEnd = new Label();
+            transferTo.visitLabel(whileStart);
+            transferTo.visitVarInsn(Opcodes.ALOAD, 0);
+            transferTo.visitVarInsn(Opcodes.ALOAD, 4);
+            transferTo.visitInsn(Opcodes.ICONST_0);
+            transferTo.visitIntInsn(Opcodes.SIPUSH, 8192);
+            transferTo.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                "java/io/InputStream",
+                "read",
+                "([BII)I",
+                false
+            );
+            transferTo.visitInsn(Opcodes.DUP);
+            transferTo.visitVarInsn(Opcodes.ISTORE, 5);
+            transferTo.visitJumpInsn(Opcodes.IFLT, whileEnd);
+
+            // out.write(buffer, 0, read);
+            transferTo.visitVarInsn(Opcodes.ALOAD, 1);
+            transferTo.visitVarInsn(Opcodes.ALOAD, 4);
+            transferTo.visitInsn(Opcodes.ICONST_0);
+            transferTo.visitVarInsn(Opcodes.ILOAD, 5);
+            transferTo.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                "java/io/OutputStream",
+                "write",
+                "([BII)V",
+                false
+            );
+
+            // transferred += read;
+            transferTo.visitVarInsn(Opcodes.LLOAD, 2);
+            transferTo.visitVarInsn(Opcodes.ILOAD, 5);
+            transferTo.visitInsn(Opcodes.I2L);
+            transferTo.visitInsn(Opcodes.LADD);
+            transferTo.visitVarInsn(Opcodes.LSTORE, 2);
+
+            // }
+            transferTo.visitJumpInsn(Opcodes.GOTO, whileStart);
+            transferTo.visitLabel(whileEnd);
+
+            // return transferred;
+            transferTo.visitVarInsn(Opcodes.LLOAD, 2);
+            transferTo.visitInsn(Opcodes.LRETURN);
+
+            transferTo.visitEnd();
         }
     }
 
