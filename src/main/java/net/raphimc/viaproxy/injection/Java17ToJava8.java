@@ -20,12 +20,16 @@ package net.raphimc.viaproxy.injection;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.transformer.IBytecodeTransformer;
 import net.lenni0451.classtransform.utils.ASMUtils;
-import net.raphimc.viaproxy.util.logging.Logger;
+import net.lenni0451.classtransform.utils.tree.BasicClassProvider;
+import net.lenni0451.classtransform.utils.tree.ClassTree;
+import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -33,7 +37,9 @@ import java.util.*;
 
 public class Java17ToJava8 implements IBytecodeTransformer {
 
-    private static final boolean DEBUG_DUMP = Boolean.getBoolean("viaproxy.debug.dump17to8");
+    private static final Logger LOGGER = LoggerFactory.getLogger(Java17ToJava8.class);
+
+    private static final boolean DEBUG_DUMP = Boolean.getBoolean("j17to8.dump");
 
     private static final char STACK_ARG_CONSTANT = '\u0001';
     private static final char BSM_ARG_CONSTANT = '\u0002';
@@ -57,12 +63,14 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         PRIMITIVE_WRAPPERS.put("D", Type.getInternalName(Double.class));
     }
 
-    private final TransformerManager transformerManager;
+    private final ClassTree classTree;
+    private final IClassProvider classProvider;
     private final int nativeClassVersion;
     private final List<String> whitelistedPackages = new ArrayList<>();
 
-    public Java17ToJava8(final TransformerManager transformerManager) {
-        this.transformerManager = transformerManager;
+    public Java17ToJava8(final ClassTree classTree, final IClassProvider classProvider) {
+        this.classTree = classTree;
+        this.classProvider = classProvider;
 
         final String classVersion = System.getProperty("java.class.version");
         final String[] versions = classVersion.split("\\.");
@@ -71,13 +79,25 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         this.nativeClassVersion = minorVersion << 16 | majorVersion;
     }
 
+    public Java17ToJava8(final TransformerManager transformerManager) {
+        this(transformerManager.getClassTree(), transformerManager.getClassProvider());
+    }
+
+    public Java17ToJava8(final IClassProvider classProvider) {
+        this(new ClassTree(), classProvider);
+    }
+
+    public Java17ToJava8(final ClassLoader loader) {
+        this(new BasicClassProvider(loader));
+    }
+
     public Java17ToJava8 addWhitelistedPackage(final String packageName) {
         this.whitelistedPackages.add(packageName);
         return this;
     }
 
     @Override
-    public byte[] transform(String className, byte[] bytecode, boolean calculateStackMapFrames) {
+    public byte[] transform(final String className, final byte[] bytecode, final boolean calculateStackMapFrames) {
         if (!whitelistedPackages.isEmpty()) {
             int dotIndex = className.lastIndexOf('.');
             if (dotIndex == -1 && !whitelistedPackages.contains("")) return null;
@@ -93,7 +113,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         if (classNode.version <= this.nativeClassVersion) return null;
 
         classNode.version = Opcodes.V1_8;
-        this.makePublic(classNode);
+        this.makePackagePrivate(classNode);
         this.convertStringConcatFactory(classNode);
         this.convertListMethods(classNode);
         this.convertSetMethods(classNode);
@@ -103,14 +123,14 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         this.convertRecords(classNode);
 
         if (calculateStackMapFrames) {
-            final byte[] result = ASMUtils.toBytes(classNode, this.transformerManager.getClassTree(), this.transformerManager.getClassProvider());
+            final byte[] result = ASMUtils.toBytes(classNode, classTree, classProvider);
             if (DEBUG_DUMP) {
                 try {
                     final File file = new File("vp_17to8_dump", classNode.name + ".class");
                     file.getParentFile().mkdirs();
                     Files.write(file.toPath(), result);
                 } catch (Throwable e) {
-                    Logger.LOGGER.error("Failed to dump class {}", className, e);
+                    LOGGER.error("Failed to dump class {}", className, e);
                 }
             }
             return result;
@@ -119,10 +139,14 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         }
     }
 
-    private void makePublic(final ClassNode classNode) {
-        classNode.access = ASMUtils.setAccess(classNode.access, Opcodes.ACC_PUBLIC);
-        for (MethodNode methodNode : classNode.methods) methodNode.access = ASMUtils.setAccess(methodNode.access, Opcodes.ACC_PUBLIC);
-        for (FieldNode fieldNode : classNode.fields) fieldNode.access = ASMUtils.setAccess(fieldNode.access, Opcodes.ACC_PUBLIC);
+    private void makePackagePrivate(final ClassNode classNode) {
+        if (classNode.nestHostClass == null) return;
+        for (final MethodNode methodNode : classNode.methods) {
+            methodNode.access &= ~Opcodes.ACC_PRIVATE;
+        }
+        for (final FieldNode fieldNode : classNode.fields) {
+            fieldNode.access &= ~Opcodes.ACC_PRIVATE;
+        }
     }
 
     private void convertStringConcatFactory(final ClassNode node) {
