@@ -36,7 +36,7 @@ import java.util.*;
 
 public class Java17ToJava8 implements IBytecodeTransformer {
 
-    private static final boolean DEBUG_DUMP = Boolean.getBoolean("viaproxy.debug.dump17to8");
+    private static final boolean DEBUG_DUMP = Boolean.getBoolean("j17to8.dump");
 
     private static final char STACK_ARG_CONSTANT = '\u0001';
     private static final char BSM_ARG_CONSTANT = '\u0002';
