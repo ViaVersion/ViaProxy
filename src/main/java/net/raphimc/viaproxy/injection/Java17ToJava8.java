@@ -309,16 +309,25 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                     final InsnList list = new InsnList();
 
                     if (min.name.equals("toList")) {
-                        int freeVarIndex = ASMUtils.getFreeVarIndex(method);
-                        list.add(new VarInsnNode(Opcodes.ASTORE, freeVarIndex));
-
-                        list.add(new TypeInsnNode(Opcodes.NEW, "java/util/ArrayList"));
-                        list.add(new InsnNode(Opcodes.DUP));
-                        list.add(new VarInsnNode(Opcodes.ALOAD, freeVarIndex));
-                        list.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/stream/Stream", "toArray", "()[Ljava/lang/Object;"));
-                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Arrays", "asList", "([Ljava/lang/Object;)Ljava/util/List;"));
-                        list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V"));
-                        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Collections", "unmodifiableList", "(Ljava/util/List;)Ljava/util/List;"));
+                        list.add(new MethodInsnNode(
+                            Opcodes.INVOKESTATIC,
+                            "java/util/stream/Collectors",
+                            "toList",
+                            "()Ljava/util/stream/Collector;"
+                        ));
+                        list.add(new MethodInsnNode(
+                            Opcodes.INVOKEINTERFACE,
+                            "java/util/stream/Stream",
+                            "collect",
+                            "(Ljava/util/stream/Collector;)Ljava/lang/Object;"
+                        ));
+                        list.add(new TypeInsnNode(Opcodes.CHECKCAST, "java/util/List"));
+                        list.add(new MethodInsnNode(
+                            Opcodes.INVOKESTATIC,
+                            "java/util/Collections",
+                            "unmodifiableList",
+                            "(Ljava/util/List;)Ljava/util/List;")
+                        );
                     }
 
                     if (list.size() != 0) {
