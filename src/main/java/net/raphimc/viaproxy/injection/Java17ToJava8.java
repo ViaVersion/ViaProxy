@@ -113,7 +113,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         if (classNode.version <= this.nativeClassVersion) return null;
 
         classNode.version = Opcodes.V1_8;
-        this.makePublic(classNode);
+        this.makePackagePrivate(classNode);
         this.convertStringConcatFactory(classNode);
         this.convertListMethods(classNode);
         this.convertSetMethods(classNode);
@@ -139,10 +139,14 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         }
     }
 
-    private void makePublic(final ClassNode classNode) {
-        classNode.access = ASMUtils.setAccess(classNode.access, Opcodes.ACC_PUBLIC);
-        for (MethodNode methodNode : classNode.methods) methodNode.access = ASMUtils.setAccess(methodNode.access, Opcodes.ACC_PUBLIC);
-        for (FieldNode fieldNode : classNode.fields) fieldNode.access = ASMUtils.setAccess(fieldNode.access, Opcodes.ACC_PUBLIC);
+    private void makePackagePrivate(final ClassNode classNode) {
+        if (classNode.nestHostClass == null) return;
+        for (final MethodNode methodNode : classNode.methods) {
+            methodNode.access &= ~Opcodes.ACC_PRIVATE;
+        }
+        for (final FieldNode fieldNode : classNode.fields) {
+            fieldNode.access &= ~Opcodes.ACC_PRIVATE;
+        }
     }
 
     private void convertStringConcatFactory(final ClassNode node) {
