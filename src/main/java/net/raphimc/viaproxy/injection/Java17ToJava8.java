@@ -20,6 +20,9 @@ package net.raphimc.viaproxy.injection;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.transformer.IBytecodeTransformer;
 import net.lenni0451.classtransform.utils.ASMUtils;
+import net.lenni0451.classtransform.utils.tree.BasicClassProvider;
+import net.lenni0451.classtransform.utils.tree.ClassTree;
+import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -57,12 +60,14 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         PRIMITIVE_WRAPPERS.put("D", Type.getInternalName(Double.class));
     }
 
-    private final TransformerManager transformerManager;
+    private final ClassTree classTree;
+    private final IClassProvider classProvider;
     private final int nativeClassVersion;
     private final List<String> whitelistedPackages = new ArrayList<>();
 
-    public Java17ToJava8(final TransformerManager transformerManager) {
-        this.transformerManager = transformerManager;
+    public Java17ToJava8(final ClassTree classTree, final IClassProvider classProvider) {
+        this.classTree = classTree;
+        this.classProvider = classProvider;
 
         final String classVersion = System.getProperty("java.class.version");
         final String[] versions = classVersion.split("\\.");
@@ -71,13 +76,25 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         this.nativeClassVersion = minorVersion << 16 | majorVersion;
     }
 
+    public Java17ToJava8(final TransformerManager transformerManager) {
+        this(transformerManager.getClassTree(), transformerManager.getClassProvider());
+    }
+
+    public Java17ToJava8(final IClassProvider classProvider) {
+        this(new ClassTree(), classProvider);
+    }
+
+    public Java17ToJava8(final ClassLoader loader) {
+        this(new BasicClassProvider(loader));
+    }
+
     public Java17ToJava8 addWhitelistedPackage(final String packageName) {
         this.whitelistedPackages.add(packageName);
         return this;
     }
 
     @Override
-    public byte[] transform(String className, byte[] bytecode, boolean calculateStackMapFrames) {
+    public byte[] transform(final String className, final byte[] bytecode, final boolean calculateStackMapFrames) {
         if (!whitelistedPackages.isEmpty()) {
             int dotIndex = className.lastIndexOf('.');
             if (dotIndex == -1 && !whitelistedPackages.contains("")) return null;
@@ -103,7 +120,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
         this.convertRecords(classNode);
 
         if (calculateStackMapFrames) {
-            final byte[] result = ASMUtils.toBytes(classNode, this.transformerManager.getClassTree(), this.transformerManager.getClassProvider());
+            final byte[] result = ASMUtils.toBytes(classNode, classTree, classProvider);
             if (DEBUG_DUMP) {
                 try {
                     final File file = new File("vp_17to8_dump", classNode.name + ".class");
