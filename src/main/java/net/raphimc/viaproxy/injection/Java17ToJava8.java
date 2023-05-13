@@ -78,8 +78,15 @@ public class Java17ToJava8 implements IBytecodeTransformer {
 
     @Override
     public byte[] transform(String className, byte[] bytecode, boolean calculateStackMapFrames) {
-        for (String whitelistedPackage : this.whitelistedPackages) {
-            if (!className.startsWith(whitelistedPackage)) return null;
+        if (!whitelistedPackages.isEmpty()) {
+            int dotIndex = className.lastIndexOf('.');
+            if (dotIndex == -1 && !whitelistedPackages.contains("")) return null;
+            String pkg = className.substring(0, dotIndex);
+            while (!whitelistedPackages.contains(pkg)) {
+                dotIndex = pkg.lastIndexOf('.');
+                if (dotIndex == -1) return null;
+                pkg = pkg.substring(0, dotIndex);
+            }
         }
 
         final ClassNode classNode = ASMUtils.fromBytes(bytecode);
