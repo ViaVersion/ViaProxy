@@ -23,18 +23,21 @@ import net.lenni0451.classtransform.utils.ASMUtils;
 import net.lenni0451.classtransform.utils.tree.BasicClassProvider;
 import net.lenni0451.classtransform.utils.tree.ClassTree;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
-import net.raphimc.viaproxy.util.logging.Logger;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
 
 public class Java17ToJava8 implements IBytecodeTransformer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Java17ToJava8.class);
 
     private static final boolean DEBUG_DUMP = Boolean.getBoolean("j17to8.dump");
 
@@ -127,7 +130,7 @@ public class Java17ToJava8 implements IBytecodeTransformer {
                     file.getParentFile().mkdirs();
                     Files.write(file.toPath(), result);
                 } catch (Throwable e) {
-                    Logger.LOGGER.error("Failed to dump class {}", className, e);
+                    LOGGER.error("Failed to dump class {}", className, e);
                 }
             }
             return result;
