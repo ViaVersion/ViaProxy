@@ -53,6 +53,7 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 
 public class ViaProxy {
@@ -92,7 +93,7 @@ public class ViaProxy {
         }
     }
 
-    public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException {
+    public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException {
         Logger.setup();
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         ConsoleHandler.hookConsole();
@@ -142,12 +143,7 @@ public class ViaProxy {
             return;
         }
 
-        try {
-            Options.parse(args);
-        } catch (Throwable t) {
-            Logger.LOGGER.fatal("[" + t.getClass().getSimpleName() + "] " + t.getMessage());
-            System.exit(0);
-        }
+        Options.parse(args);
 
         if (System.getProperty("skipUpdateCheck") == null) {
             updateCheckThread.start();

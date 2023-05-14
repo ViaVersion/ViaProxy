@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.cli.options;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -82,11 +83,20 @@ public class Options {
         final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server (No protocol translation)");
         PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
-        final OptionSet options = parser.parse(args);
+        final OptionSet options;
+        try {
+            options = parser.parse(args);
+        } catch (OptionException e) {
+            Logger.LOGGER.error("Error parsing options: " + e.getMessage());
+            parser.formatHelpWith(new BetterHelpFormatter());
+            parser.printHelpOn(Logger.SYSOUT);
+            System.exit(1);
+            return;
+        }
         if (options.has(help)) {
             parser.formatHelpWith(new BetterHelpFormatter());
             parser.printHelpOn(Logger.SYSOUT);
-            System.exit(0);
+            System.exit(1);
         }
 
         BIND_ADDRESS = options.valueOf(bindAddress);
