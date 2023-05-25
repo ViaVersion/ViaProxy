@@ -203,7 +203,7 @@ public class GeneralTab extends AUITab {
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();
             final boolean proxyOnlineMode = ViaProxy.ui.advancedTab.proxyOnlineMode.isSelected();
             final boolean legacySkinLoading = ViaProxy.ui.advancedTab.legacySkinLoading.isSelected();
-            final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText();
+            final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText().trim();
 
             try {
                 try {
