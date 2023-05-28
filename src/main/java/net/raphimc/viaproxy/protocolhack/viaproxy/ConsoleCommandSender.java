@@ -19,7 +19,6 @@ package net.raphimc.viaproxy.protocolhack.viaproxy;
 
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.command.ViaCommandSender;
-import net.raphimc.viaproxy.cli.ConsoleFormatter;
 
 import java.util.UUID;
 
@@ -34,7 +33,7 @@ public class ConsoleCommandSender implements ViaCommandSender {
 
     @Override
     public void sendMessage(String msg) {
-        Via.getPlatform().getLogger().info(ConsoleFormatter.convert(msg));
+        Via.getPlatform().sendMessage(null, msg);
     }
 
     @Override
