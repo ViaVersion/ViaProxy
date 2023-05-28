@@ -159,8 +159,8 @@ jar {
 publishing {
     repositories {
         maven {
-            name = "reposilite"
-            url = "https://maven.lenni0451.net/releases"
+            name = "ViaVersion"
+            url = "https://repo.viaversion.com/"
             credentials(PasswordCredentials)
             authentication {
                 basic(BasicAuthentication)
