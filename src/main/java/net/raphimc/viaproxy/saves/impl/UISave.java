@@ -52,6 +52,10 @@ public class UISave extends AbstractSave {
         this.values.put(key, value);
     }
 
+    public String get(final String key) {
+        return this.values.get(key);
+    }
+
     public void loadTextField(final String key, final JTextField textField) {
         try {
             String value = this.values.get(key);

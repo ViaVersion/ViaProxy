@@ -191,6 +191,24 @@ public class GeneralTab extends AUITab {
     }
 
     private void start() {
+        Object selectedItem = this.serverVersion.getSelectedItem();
+        if (!(selectedItem instanceof VersionEnum)) {
+            this.frame.showError("Please select a server version!");
+            return;
+        }
+        if (ViaProxy.saveManager.uiSave.get("notice.ban_warning") == null) {
+            ViaProxy.saveManager.uiSave.put("notice.ban_warning", "true");
+            ViaProxy.saveManager.save();
+
+            this.frame.showWarning("<html>ViaProxy may trigger anti-cheats, due to block, item, movement and other differences between versions. <b>USE AT OWN RISK!</b></html>");
+        }
+        if (VersionEnum.bedrockLatest.equals(selectedItem) && ViaProxy.saveManager.uiSave.get("notice.bedrock_warning") == null) {
+            ViaProxy.saveManager.uiSave.put("notice.bedrock_warning", "true");
+            ViaProxy.saveManager.save();
+
+            this.frame.showWarning("<html>ViaBedrock is currently in very early development and not ready for general use. <b>CONTINUE AT YOUR OWN RISK!</b></html>");
+        }
+
         this.setComponentsEnabled(false);
         this.stateButton.setEnabled(false);
         this.stateButton.setText("Starting...");
