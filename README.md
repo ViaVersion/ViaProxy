@@ -27,11 +27,36 @@ ViaProxy supports joining to any of the listed server version from any of the li
 
 ## Releases
 ### Executable Jar File
-If you want the executable jar file you can download a stable release from [GitHub](https://github.com/RaphiMC/ViaProxy/releases/latest) or the latest dev version from this [Jenkins](https://build.lenni0451.net/job/ViaProxy/).
+If you want the executable jar file you can download a stable release from [GitHub](https://github.com/RaphiMC/ViaProxy/releases/latest) or the latest dev version from this [Jenkins](https://ci.viaversion.com/view/All/job/ViaProxy/).
 
 ### Gradle/Maven
-To use ViaProxy with Gradle/Maven you can use this [Maven server](https://maven.lenni0451.net/#/releases/net/raphimc/ViaProxy) or [Jitpack](https://jitpack.io/#RaphiMC/ViaProxy).  
-You can also find instructions how to implement it into your build script there.
+To use ViaProxy with Gradle/Maven you can use the ViaVersion maven server:
+```groovy
+repositories {
+    maven { url "https://repo.viaversion.com" }
+}
+
+dependencies {
+    implementation("net.raphimc:ViaProxy:3.0.19-SNAPSHOT") // Get latest version from releases
+}
+```
+
+```xml
+<repositories>
+    <repository>
+        <id>viaversion</id>
+        <url>https://repo.viaversion.com</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>net.raphimc</groupId>
+        <artifactId>ViaProxy</artifactId>
+        <version>3.0.19-SNAPSHOT</version> <!-- Get latest version from releases -->
+    </dependency>
+</dependencies>
+```
 
 ## Usage for Players (GUI)
 ![ViaProxy GUI](https://i.imgur.com/iN7cmSB.png)
