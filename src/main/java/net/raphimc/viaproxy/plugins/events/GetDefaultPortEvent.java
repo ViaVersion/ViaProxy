@@ -17,7 +17,7 @@
  */
 package net.raphimc.viaproxy.plugins.events;
 
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 
 public class GetDefaultPortEvent {
 

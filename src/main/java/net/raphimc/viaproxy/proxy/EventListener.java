@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.proxy;
 
 import net.lenni0451.lambdaevents.EventHandler;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 
 public class EventListener {

@@ -17,7 +17,7 @@
  */
 package net.raphimc.viaproxy.protocolhack.impl;
 
-import net.raphimc.viaprotocolhack.impl.platform.ViaLegacyPlatformImpl;
+import net.raphimc.vialoader.impl.platform.ViaLegacyPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 
 public class ViaProxyViaLegacyPlatformImpl extends ViaLegacyPlatformImpl {

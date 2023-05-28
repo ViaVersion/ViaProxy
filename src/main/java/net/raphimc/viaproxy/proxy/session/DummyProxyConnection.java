@@ -25,7 +25,7 @@ import io.netty.channel.Channel;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
 import net.raphimc.netminecraft.util.ServerAddress;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 
 import java.security.Key;
 import java.util.concurrent.CompletableFuture;

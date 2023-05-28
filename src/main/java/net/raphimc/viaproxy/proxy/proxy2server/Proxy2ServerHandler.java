@@ -35,7 +35,7 @@ import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;

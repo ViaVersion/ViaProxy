@@ -30,9 +30,9 @@ import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.util.LazyLoadBase;
 import net.raphimc.netminecraft.util.ServerAddress;
-import net.raphimc.viaprotocolhack.netty.VPHPipeline;
-import net.raphimc.viaprotocolhack.netty.viabedrock.PingEncapsulationCodec;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.netty.VLPipeline;
+import net.raphimc.vialoader.netty.viabedrock.PingEncapsulationCodec;
+import net.raphimc.vialoader.util.VersionEnum;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 
@@ -89,8 +89,8 @@ public class BedrockProxyConnection extends ProxyConnection {
         }
         this.getChannel().bind(new InetSocketAddress(0)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).syncUninterruptibly();
 
-        this.getChannel().pipeline().replace(VPHPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(serverAddress.toSocketAddress()));
-        this.getChannel().pipeline().remove(VPHPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
+        this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(serverAddress.toSocketAddress()));
+        this.getChannel().pipeline().remove(VLPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
         this.getChannel().pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
     }
 

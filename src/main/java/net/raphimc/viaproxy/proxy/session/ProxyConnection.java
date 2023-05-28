@@ -39,7 +39,7 @@ import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.netminecraft.util.ServerAddress;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.util.logging.Logger;

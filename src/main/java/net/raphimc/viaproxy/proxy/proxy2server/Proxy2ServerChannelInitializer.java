@@ -30,12 +30,12 @@ import io.netty.handler.proxy.Socks5ProxyHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVPHPipeline;
+import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.net.InetSocketAddress;
@@ -73,7 +73,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
         super.initChannel(channel);
         channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(true));
-        channel.pipeline().addLast(new ViaProxyVPHPipeline(user, proxyConnection.getServerVersion()));
+        channel.pipeline().addLast(new ViaProxyVLPipeline(user, proxyConnection.getServerVersion()));
 
         if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel)).isCancelled()) {
             channel.close();

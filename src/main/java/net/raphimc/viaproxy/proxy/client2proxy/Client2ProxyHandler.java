@@ -38,7 +38,7 @@ import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.netminecraft.util.ServerAddress;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;

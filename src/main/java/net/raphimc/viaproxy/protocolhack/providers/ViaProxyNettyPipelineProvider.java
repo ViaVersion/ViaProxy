@@ -24,7 +24,7 @@ import net.raphimc.viabedrock.netty.AesEncryption;
 import net.raphimc.viabedrock.netty.SnappyCompression;
 import net.raphimc.viabedrock.netty.ZLibCompression;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
-import net.raphimc.viaprotocolhack.netty.VPHPipeline;
+import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import javax.crypto.SecretKey;
@@ -60,7 +60,7 @@ public class ViaProxyNettyPipelineProvider extends NettyPipelineProvider {
 
         try {
             channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
-            channel.pipeline().addAfter(VPHPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryption(key));
+            channel.pipeline().addAfter(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryption(key));
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

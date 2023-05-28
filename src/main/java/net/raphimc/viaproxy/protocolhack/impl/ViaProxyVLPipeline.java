@@ -19,12 +19,12 @@ package net.raphimc.viaproxy.protocolhack.impl;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.viaprotocolhack.netty.VPHPipeline;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.netty.VLPipeline;
+import net.raphimc.vialoader.util.VersionEnum;
 
-public class ViaProxyVPHPipeline extends VPHPipeline {
+public class ViaProxyVLPipeline extends VLPipeline {
 
-    public ViaProxyVPHPipeline(UserConnection user, VersionEnum version) {
+    public ViaProxyVLPipeline(UserConnection user, VersionEnum version) {
         super(user, version);
     }
 

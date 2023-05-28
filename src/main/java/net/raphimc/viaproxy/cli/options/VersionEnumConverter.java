@@ -19,7 +19,7 @@ package net.raphimc.viaproxy.cli.options;
 
 import joptsimple.ValueConversionException;
 import joptsimple.ValueConverter;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 
 public class VersionEnumConverter implements ValueConverter<VersionEnum> {
 

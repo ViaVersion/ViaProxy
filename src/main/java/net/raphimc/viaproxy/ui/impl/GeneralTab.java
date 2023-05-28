@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import com.google.common.net.HostAndPort;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;

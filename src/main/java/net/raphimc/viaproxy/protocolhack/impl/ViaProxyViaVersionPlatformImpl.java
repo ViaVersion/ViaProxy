@@ -17,7 +17,7 @@
  */
 package net.raphimc.viaproxy.protocolhack.impl;
 
-import net.raphimc.viaprotocolhack.impl.platform.ViaVersionPlatformImpl;
+import net.raphimc.vialoader.impl.platform.ViaVersionPlatformImpl;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
 
 import java.util.UUID;

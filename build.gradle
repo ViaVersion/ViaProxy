@@ -78,15 +78,14 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.2.16"
-    include "net.raphimc:ViaAprilFools:2.0.6"
+    include "net.raphimc:ViaLegacy:2.2.17-SNAPSHOT"
+    include "net.raphimc:ViaAprilFools:2.0.7-SNAPSHOT"
     include("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
-        exclude group: "com.vdurmont", module: "semver4j"
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
         exclude group: "io.jsonwebtoken", module: "jjwt-gson"
     }
-    include("net.raphimc:ViaProtocolHack:2.2.4") {
+    include("net.raphimc:ViaLoader:2.2.5-SNAPSHOT") {
         exclude group: "org.slf4j", module: "slf4j-api"
         exclude group: "org.yaml", module: "snakeyaml"
     }
@@ -115,7 +114,6 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-api"
         exclude group: "org.ow2.asm", module: "asm-commons"
     }
-    include "com.vdurmont:semver4j:3.1.0"
     include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-common"
         exclude group: "io.netty", module: "netty-buffer"

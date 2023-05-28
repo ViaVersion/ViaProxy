@@ -19,7 +19,7 @@ package net.raphimc.viaproxy.plugins.events;
 
 import io.netty.channel.Channel;
 import net.raphimc.netminecraft.util.ServerAddress;
-import net.raphimc.viaprotocolhack.util.VersionEnum;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
 
 public class PreConnectEvent extends EventCancellable {
