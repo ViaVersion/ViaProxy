@@ -18,11 +18,10 @@
 package net.raphimc.viaproxy.cli;
 
 import com.viaversion.viaversion.api.Via;
-import com.viaversion.viaversion.connection.UserConnectionImpl;
 import net.lenni0451.classtransform.utils.log.Logger;
-import net.raphimc.viaprotocolhack.commands.UserCommandSender;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.ConsoleCommandEvent;
+import net.raphimc.viaproxy.protocolhack.viaproxy.ConsoleCommandSender;
 import net.raphimc.viaproxy.util.ArrayHelper;
 
 import java.io.BufferedReader;
@@ -50,7 +49,7 @@ public class ConsoleHandler {
                         System.gc();
                         System.out.println("GC Done");
                     } else if (command.equalsIgnoreCase("via")) {
-                        Via.getManager().getCommandHandler().onCommand(new UserCommandSender(new UserConnectionImpl(null, true)), args.getAsArray());
+                        Via.getManager().getCommandHandler().onCommand(new ConsoleCommandSender(), args.getAsArray());
                     } else if (command.equalsIgnoreCase("threaddump")) {
                         System.out.println("Thread Dump:");
                         for (Thread thread : Thread.getAllStackTraces().keySet()) {
