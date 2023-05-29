@@ -42,7 +42,7 @@ public class ProtocolHack {
     }
 
     private static void patchConfigs() {
-        final File configFolder = new File("ViaProtocolHack");
+        final File configFolder = new File("ViaLoader");
 
         final File viaVersionConfig = new File(configFolder, "viaversion.yml");
         final Map<String, Object> viaVersionPatches = new HashMap<>();

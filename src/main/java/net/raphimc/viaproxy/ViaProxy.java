@@ -121,7 +121,7 @@ public class ViaProxy {
         PluginManager.loadPlugins();
         PluginManager.EVENT_MANAGER.register(EventListener.class);
 
-        Thread loaderThread = new Thread(new LoaderTask(), "ViaProtocolHack-Loader");
+        Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
         Thread accountRefreshThread = new Thread(new AccountRefreshTask(saveManager), "AccountRefresh");
         Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
 
