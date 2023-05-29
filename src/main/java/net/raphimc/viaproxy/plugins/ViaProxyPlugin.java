@@ -19,11 +19,31 @@ package net.raphimc.viaproxy.plugins;
 
 import net.lenni0451.classtransform.TransformerManager;
 
+import java.util.Map;
+
 public abstract class ViaProxyPlugin {
+
+    private Map<String, Object> viaProxyYaml;
+
+    final void init(final Map<String, Object> viaProxyYaml) {
+        this.viaProxyYaml = viaProxyYaml;
+    }
 
     public abstract void onEnable();
 
     public void registerTransformers(final TransformerManager transformerManager) {
+    }
+
+    public final String getName() {
+        return (String) this.viaProxyYaml.get("name");
+    }
+
+    public final String getAuthor() {
+        return (String) this.viaProxyYaml.get("author");
+    }
+
+    public final String getVersion() {
+        return (String) this.viaProxyYaml.get("version");
     }
 
 }

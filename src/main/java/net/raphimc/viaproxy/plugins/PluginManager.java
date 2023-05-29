@@ -57,7 +57,7 @@ public class PluginManager {
             }
         }
 
-        File[] files = PLUGINS_DIR.listFiles();
+        final File[] files = PLUGINS_DIR.listFiles();
         if (files == null) return;
 
         for (File file : files) {
@@ -71,34 +71,35 @@ public class PluginManager {
     }
 
     private static void loadAndScanJar(final File file) throws Throwable {
-        URL url = file.toURI().toURL();
-        TransformerManager transformerManager = new TransformerManager(new URLClassProvider(ROOT_CLASS_PROVIDER, url));
-        InjectionClassLoader loader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
-        InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
+        final URL url = file.toURI().toURL();
+        final TransformerManager transformerManager = new TransformerManager(new URLClassProvider(ROOT_CLASS_PROVIDER, url));
+        final InjectionClassLoader loader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
+        final InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
         if (viaproxyYml == null) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
-        Map<String, Object> yaml = YAML.load(viaproxyYml);
+        final Map<String, Object> yaml = YAML.load(viaproxyYml);
         if (!yaml.containsKey("name")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a name attribute in the viaproxy.yml");
         if (!yaml.containsKey("author")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a author attribute in the viaproxy.yml");
         if (!yaml.containsKey("version")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a version attribute in the viaproxy.yml");
         if (!yaml.containsKey("main")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a main attribute in the viaproxy.yml");
-        Semver minVersion = new Semver(yaml.getOrDefault("min-version", "0.0.0").toString());
+        final Semver minVersion = new Semver(yaml.getOrDefault("min-version", "0.0.0").toString());
         if (!ViaProxy.VERSION.equals("${version}") && minVersion.isGreaterThan(ViaProxy.VERSION)) {
             throw new IllegalStateException("Plugin '" + file.getName() + "' requires a newer version of ViaProxy (v" + minVersion + ")");
         }
 
-        String main = (String) yaml.get("main");
+        final String main = (String) yaml.get("main");
 
-        Class<?> mainClass = loader.loadClass(main);
+        final Class<?> mainClass = loader.loadClass(main);
         if (!ViaProxyPlugin.class.isAssignableFrom(mainClass)) {
             throw new IllegalStateException("Class '" + mainClass.getName() + "' from '" + file.getName() + "' does not extend ViaProxyPlugin");
         }
-        Object instance = mainClass.newInstance();
-        ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
-        PLUGINS.add(plugin);
+        final Object instance = mainClass.newInstance();
+        final ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
 
+        plugin.init(yaml);
         plugin.registerTransformers(transformerManager);
         plugin.onEnable();
-        Logger.LOGGER.info("Successfully loaded plugin '" + yaml.get("name") + "' by " + yaml.get("author") + " (v" + yaml.get("version") + ")");
+        Logger.LOGGER.info("Successfully loaded plugin '" + plugin.getName() + "' by " + plugin.getAuthor() + " (v" + plugin.getVersion() + ")");
+        PLUGINS.add(plugin);
     }
 
 }
