@@ -71,7 +71,7 @@ repositories {
 dependencies {
     compileOnly sourceSets.java17compat.output
 
-    include "com.viaversion:viaversion:4.7.0-1.20-pre6-SNAPSHOT"
+    include "com.viaversion:viaversion:4.7.0-1.20-pre7-SNAPSHOT"
     include("com.viaversion:viabackwards-common:4.7.0-1.20-pre5-SNAPSHOT") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
