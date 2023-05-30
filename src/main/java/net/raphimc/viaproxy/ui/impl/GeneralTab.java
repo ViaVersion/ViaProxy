@@ -69,7 +69,7 @@ public class GeneralTab extends AUITab {
             discordLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    frame.openURL("https://viaproxy.raphimc.net");
+                    frame.openURL("https://discord.gg/viaversion");
                 }
             });
             contentPane.add(discordLabel);
