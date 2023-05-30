@@ -49,6 +49,7 @@ import net.raphimc.viaproxy.tasks.AccountRefreshTask;
 import net.raphimc.viaproxy.tasks.LoaderTask;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -116,6 +117,7 @@ public class ViaProxy {
             }
         }
 
+        ClassLoaderPriorityUtil.loadOverridingJars();
         loadNetty();
         saveManager = new SaveManager();
         PluginManager.loadPlugins();
