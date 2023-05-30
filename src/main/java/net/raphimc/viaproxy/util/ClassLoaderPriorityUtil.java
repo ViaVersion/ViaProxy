@@ -17,13 +17,10 @@
  */
 package net.raphimc.viaproxy.util;
 
-import net.lenni0451.reflect.Classes;
-import net.lenni0451.reflect.stream.RStream;
+import net.lenni0451.reflect.ClassLoaders;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.File;
-import java.net.URL;
-import java.util.List;
 
 public class ClassLoaderPriorityUtil {
 
@@ -33,39 +30,11 @@ public class ClassLoaderPriorityUtil {
             for (File file : jarsFolder.listFiles()) {
                 try {
                     if (file.getName().endsWith(".jar")) {
-                        loadWithHighestPriority(file.toURI().toURL());
+                        ClassLoaders.loadToFront(file.toURI().toURL());
                         Logger.LOGGER.info("Loaded overriding jar " + file.getName());
                     }
                 } catch (Throwable e) {
                     Logger.LOGGER.error("Failed to load overriding jar " + file.getName(), e);
-                }
-            }
-        }
-    }
-
-    private static void loadWithHighestPriority(final URL url) {
-        // First add the URl into the classpath
-        final Object ucp = RStream.of(Thread.currentThread().getContextClassLoader()).withSuper().fields().by("ucp").get();
-        RStream.of(ucp).methods().by("addURL", URL.class).invokeArgs(url);
-
-        // Then move the URL to the front of the classpath, so it gets loaded first
-        final List<Object> ucpPath = RStream.of(ucp).fields().by("path").get();
-        ucpPath.add(0, ucpPath.remove(ucpPath.size() - 1));
-
-        // Force the ClassLoader to populate the whole list of Loaders (Its lazy loaded by default)
-        if (ClassLoaderPriorityUtil.class.getClassLoader().getResourceAsStream("I_HOPE_THIS_FILE_NEVER_EXISTS_" + System.nanoTime()) != null) {
-            throw new IllegalStateException("The file that should never exist exists! Please report this to the ViaProxy developers!");
-        }
-
-        // Move the loader for that URL to the front of the list
-        final Class<?> jarLoaderClazz = Classes.forName(ucp.getClass().getName() + "$JarLoader");
-        final List<Object> loaders = RStream.of(ucp).fields().by("loaders").get();
-        for (Object loader : loaders) {
-            if (jarLoaderClazz.equals(loader.getClass())) {
-                final URL loaderUrl = RStream.of(loader).fields().filter(URL.class).by(0).get();
-                if (url.equals(loaderUrl)) {
-                    loaders.add(0, loaders.remove(loaders.size() - 1));
-                    break;
                 }
             }
         }
