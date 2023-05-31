@@ -117,7 +117,9 @@ public class ExternalInterface {
             } else if (Options.MC_ACCOUNT instanceof BedrockAccount && proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
                 final BedrockAccount bedrockAccount = (BedrockAccount) Options.MC_ACCOUNT;
                 final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
-                user.put(new AuthChainData(user, mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey()));
+                final UUID deviceId = mcChain.prevResult().initialXblSession().prevResult2().id();
+                final String playFabId = bedrockAccount.getPlayFabToken().playFabId();
+                user.put(new AuthChainData(user, mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey(), deviceId, playFabId));
             }
         }
 

@@ -52,6 +52,8 @@ public class SaveManager {
             final JsonObject saveObject = GSON.fromJson(reader, JsonObject.class);
             reader.close();
 
+            SaveMigrator.migrate(saveObject);
+
             RStream
                     .of(this)
                     .fields()
@@ -66,8 +68,6 @@ public class SaveManager {
                             Logger.LOGGER.error("Failed to load save " + save.getName(), e);
                         }
                     });
-
-            SaveMigrator.migrate(this, saveObject);
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to load saves from file", e);
         }

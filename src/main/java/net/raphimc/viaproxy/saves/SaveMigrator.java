@@ -17,22 +17,26 @@
  */
 package net.raphimc.viaproxy.saves;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.raphimc.mcauth.MinecraftAuth;
+import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 public class SaveMigrator {
 
-    public static void migrate(final SaveManager saveManager, final JsonObject jsonObject) {
+    public static void migrate(final JsonObject jsonObject) {
         try {
-            if (jsonObject.has("accounts")) {
-                for (JsonElement element : jsonObject.getAsJsonArray("accounts")) {
-                    final JsonObject object = element.getAsJsonObject();
-                    if (object.has("is_offline_mode_account") && object.get("is_offline_mode_account").getAsBoolean()) {
-                        saveManager.accountsSave.addAccount(object.get("name").getAsString());
-                    } else {
-                        saveManager.accountsSave.addAccount(MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(object));
+            if (jsonObject.has("new_accounts")) {
+                final JsonArray accountsArray = jsonObject.getAsJsonArray("new_accounts");
+                for (int i = 0; i < accountsArray.size(); i++) {
+                    final JsonObject object = accountsArray.get(i).getAsJsonObject();
+                    final String type = object.get("account_type").getAsString();
+                    if (BedrockAccount.class.getName().equals(type) && !object.has("mc_chain")) {
+                        final JsonObject newObject = new JsonObject();
+                        object.remove("account_type");
+                        newObject.add("mc_chain", object);
+                        newObject.addProperty("account_type", type);
+                        accountsArray.set(i, newObject);
                     }
                 }
             }
