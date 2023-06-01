@@ -18,11 +18,14 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import net.raphimc.mcauth.MinecraftAuth;
+import net.raphimc.mcauth.step.bedrock.StepMCChain;
+import net.raphimc.mcauth.step.bedrock.playfab.StepPlayFabToken;
 import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
+import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
@@ -207,9 +210,12 @@ public class AccountsTab extends AUITab {
                 this.addBedrockAccountButton.setEnabled(false);
                 this.handleLogin(msaDeviceCodeConsumer -> {
                     try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                        return MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer));
+                        final StepMCChain.MCChain mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer));
+                        final StepPlayFabToken.PlayFabToken playFabToken = MinecraftAuth.BEDROCK_PLAY_FAB_TOKEN.getFromInput(httpClient, mcChain.prevResult().fullXblSession());
+
+                        return new BedrockAccount(mcChain, playFabToken);
                     }
-                }, chain -> ViaProxy.saveManager.accountsSave.addAccount(chain));
+                }, account -> ViaProxy.saveManager.accountsSave.addAccount(account));
             });
             addButtons.add(this.addBedrockAccountButton);
         }

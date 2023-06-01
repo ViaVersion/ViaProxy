@@ -37,8 +37,9 @@ public class BedrockAccount extends Account {
         }
     }
 
-    public BedrockAccount(final StepMCChain.MCChain mcChain) {
+    public BedrockAccount(final StepMCChain.MCChain mcChain, final StepPlayFabToken.PlayFabToken playFabToken) {
         this.mcChain = mcChain;
+        this.playFabToken = playFabToken;
     }
 
     @Override
