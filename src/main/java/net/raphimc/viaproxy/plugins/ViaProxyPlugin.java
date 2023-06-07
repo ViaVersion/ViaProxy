@@ -43,7 +43,7 @@ public abstract class ViaProxyPlugin {
     }
 
     public final String getVersion() {
-        return (String) this.viaProxyYaml.get("version");
+        return String.valueOf(this.viaProxyYaml.get("version"));
     }
 
 }
