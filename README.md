@@ -9,13 +9,13 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
 - Alpha (a1.0.15 - a1.2.6)
 - Beta (b1.0 - b1.8.1)
-- Release (1.0.0 - 1.19.4)
+- Release (1.0.0 - 1.20)
 - April Fools (3D Shareware, 20w14infinite)
 - Combat Snapshots (Combat Test 8c)
-- Bedrock Edition 1.19.80 (In development)
+- Bedrock Edition 1.20.0 (In development)
 
 ## Supported Client versions
-- Release (1.7.2 - 1.19.4)
+- Release (1.7.2 - 1.20)
 - Bedrock Edition (Needs the [Geyser plugin](https://github.com/RaphiMC/ViaProxyGeyserPlugin))
 - Classic, Alpha, Beta, Release 1.0 - 1.6.4 (Only passthrough)
 
@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    implementation("net.raphimc:ViaProxy:3.0.19-SNAPSHOT") // Get latest version from releases
+    implementation("net.raphimc:ViaProxy:3.0.19") // Get latest version from releases
 }
 ```
 
@@ -53,7 +53,7 @@ dependencies {
     <dependency>
         <groupId>net.raphimc</groupId>
         <artifactId>ViaProxy</artifactId>
-        <version>3.0.19-SNAPSHOT</version> <!-- Get latest version from releases -->
+        <version>3.0.19</version> <!-- Get latest version from releases -->
     </dependency>
 </dependencies>
 ```

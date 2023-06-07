@@ -71,15 +71,15 @@ repositories {
 dependencies {
     compileOnly sourceSets.java17compat.output
 
-    include "com.viaversion:viaversion:4.7.0-1.20-rc1-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.7.0-1.20-rc1-SNAPSHOT") {
+    include "com.viaversion:viaversion:4.7.0"
+    include("com.viaversion:viabackwards-common:4.7.0") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.2.17-SNAPSHOT"
-    include "net.raphimc:ViaAprilFools:2.0.8-SNAPSHOT"
+    include "net.raphimc:ViaLegacy:2.2.17"
+    include "net.raphimc:ViaAprilFools:2.0.7"
     include("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
@@ -105,7 +105,7 @@ dependencies {
     include "net.lenni0451.classtransform:additionalclassprovider:1.9.1"
     include "net.lenni0451:Reflect:1.2.0"
     include "net.lenni0451:LambdaEvents:2.0.3"
-    include "net.raphimc.netminecraft:all:2.3.3"
+    include "net.raphimc.netminecraft:all:2.3.4"
     include("net.raphimc:MinecraftAuth:2.1.4-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
