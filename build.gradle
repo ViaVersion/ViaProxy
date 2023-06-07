@@ -79,7 +79,7 @@ dependencies {
     }
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
     include "net.raphimc:ViaLegacy:2.2.17-SNAPSHOT"
-    include "net.raphimc:ViaAprilFools:2.0.7-SNAPSHOT"
+    include "net.raphimc:ViaAprilFools:2.0.8-SNAPSHOT"
     include("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
