@@ -24,6 +24,7 @@ import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
+import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.util.URLClassProvider;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -50,6 +51,16 @@ public class PluginManager {
         return Collections.unmodifiableList(PLUGINS);
     }
 
+    public static ViaProxyPlugin getPlugin(String name) {
+        for (ViaProxyPlugin plugin : PLUGINS) {
+            if (plugin.getName().equalsIgnoreCase(name)) {
+                return plugin;
+            }
+        }
+
+        return null;
+    }
+
     public static void loadPlugins() {
         if (!PLUGINS_DIR.exists() || !PLUGINS_DIR.isDirectory()) {
             if (!PLUGINS_DIR.mkdirs()) {
@@ -64,8 +75,14 @@ public class PluginManager {
             if (!file.getName().toLowerCase().endsWith(".jar")) continue;
             try {
                 loadAndScanJar(file);
-            } catch (Throwable t) {
-                new Exception("Unable to load plugin '" + file.getName() + "'", t).printStackTrace();
+            } catch (Throwable e) {
+                Logger.LOGGER.error("Unable to load plugin '" + file.getName() + "'", e);
+            }
+        }
+
+        for (ViaProxyPlugin plugin : PLUGINS) {
+            if (!plugin.isEnabled()) {
+                enablePlugin(plugin);
             }
         }
     }
@@ -95,11 +112,37 @@ public class PluginManager {
         final Object instance = mainClass.newInstance();
         final ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
 
-        plugin.init(yaml);
+        plugin.init(loader, yaml);
         plugin.registerTransformers(transformerManager);
-        plugin.onEnable();
-        Logger.LOGGER.info("Successfully loaded plugin '" + plugin.getName() + "' by " + plugin.getAuthor() + " (v" + plugin.getVersion() + ")");
+
+        if (plugin.getDepends().size() > 1) {
+            throw new IllegalStateException("Plugin '" + file.getName() + "' has more than one dependency. This is not supported yet.");
+        }
+
+        Logger.LOGGER.info("Loaded plugin '" + plugin.getName() + "' by " + plugin.getAuthor() + " (v" + plugin.getVersion() + ")");
         PLUGINS.add(plugin);
+    }
+
+    private static void enablePlugin(final ViaProxyPlugin plugin) {
+        for (String depend : plugin.getDepends()) {
+            final ViaProxyPlugin dependPlugin = getPlugin(depend);
+            if (dependPlugin == null) {
+                Logger.LOGGER.error("Plugin '" + plugin.getName() + "' depends on '" + depend + "' which is not loaded");
+                return;
+            }
+            if (!dependPlugin.isEnabled()) {
+                enablePlugin(dependPlugin);
+            }
+
+            RStream.of(plugin.getClassLoader()).fields().by("parent").set(dependPlugin.getClassLoader());
+        }
+
+        try {
+            plugin.enable();
+            Logger.LOGGER.info("Enabled plugin '" + plugin.getName() + "'");
+        } catch (Throwable e) {
+            Logger.LOGGER.error("Failed to enable plugin '" + plugin.getName() + "'", e);
+        }
     }
 
 }
