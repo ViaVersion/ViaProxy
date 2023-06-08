@@ -18,19 +18,27 @@
 package net.raphimc.viaproxy.cli;
 
 import com.viaversion.viaversion.api.Via;
-import net.lenni0451.classtransform.utils.log.Logger;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.ConsoleCommandEvent;
 import net.raphimc.viaproxy.protocolhack.viaproxy.ConsoleCommandSender;
 import net.raphimc.viaproxy.util.ArrayHelper;
+import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
 public class ConsoleHandler {
 
     public static void hookConsole() {
+        try { // Best way I could find to check if a console is attached to System.in
+            System.in.available();
+        } catch (IOException e) {
+            Logger.LOGGER.info("Console input is not available. CLI commands are disabled.");
+            return;
+        }
+
         new Thread(ConsoleHandler::listen, "Console-Handler").start();
     }
 
