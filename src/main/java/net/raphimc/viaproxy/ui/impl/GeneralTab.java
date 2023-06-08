@@ -31,6 +31,8 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
@@ -109,6 +111,7 @@ public class GeneralTab extends AUITab {
                 }
             });
             this.serverVersion.addActionListener(e -> {
+                if (this.betaCraftAuth == null) return; // This is called when the JComboBox is created (before betaCraftAuth is set)
                 if (!(this.serverVersion.getSelectedItem() instanceof VersionEnum)) return;
                 if (((VersionEnum) this.serverVersion.getSelectedItem()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
                     this.betaCraftAuth.setEnabled(true);
@@ -136,7 +139,11 @@ public class GeneralTab extends AUITab {
             this.betaCraftAuth.setToolTipText("Enabling BetaCraft Auth allows you to join Classic servers which have online mode enabled.");
             ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
             contentPane.add(this.betaCraftAuth);
-            this.serverVersion.actionPerformed(null);
+            // Simulate user action on serverVersion to update betaCraftAuth
+            final ActionEvent fakeAction = new ActionEvent(this.serverVersion, ActionEvent.ACTION_PERFORMED, "");
+            for (ActionListener listener : this.serverVersion.getActionListeners()) {
+                listener.actionPerformed(fakeAction);
+            }
         }
         {
             this.stateLabel = new JLabel();
