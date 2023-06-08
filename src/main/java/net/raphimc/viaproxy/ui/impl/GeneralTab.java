@@ -258,16 +258,16 @@ public class GeneralTab extends AUITab {
                     Options.PROTOCOL_VERSION = serverVersion;
                     Options.BETACRAFT_AUTH = betaCraftAuth;
                     Options.LEGACY_SKIN_LOADING = legacySkinLoading;
+                    Options.OPENAUTHMOD_AUTH = authMethod == 2;
 
-                    if (authMethod == 2) {
-                        Options.OPENAUTHMOD_AUTH = true;
-                    }
                     if (!proxyUrl.isEmpty()) {
                         try {
                             Options.PROXY_URL = new URI(proxyUrl);
                         } catch (URISyntaxException e) {
                             throw new IllegalArgumentException("Invalid proxy URL!");
                         }
+                    } else {
+                        Options.PROXY_URL = null;
                     }
                 } catch (Throwable t) {
                     SwingUtilities.invokeLater(() -> {
