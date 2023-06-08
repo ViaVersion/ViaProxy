@@ -80,12 +80,12 @@ dependencies {
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
     include "net.raphimc:ViaLegacy:2.2.17"
     include "net.raphimc:ViaAprilFools:2.0.7"
-    include("net.raphimc:ViaBedrock:0.0.1-SNAPSHOT") {
+    include("net.raphimc:ViaBedrock:0.0.2-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
         exclude group: "io.jsonwebtoken", module: "jjwt-gson"
     }
-    include("net.raphimc:ViaLoader:2.2.5-SNAPSHOT") {
+    include("net.raphimc:ViaLoader:2.2.5") {
         exclude group: "org.slf4j", module: "slf4j-api"
         exclude group: "org.yaml", module: "snakeyaml"
     }
