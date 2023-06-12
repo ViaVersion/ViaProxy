@@ -72,7 +72,7 @@ dependencies {
     compileOnly sourceSets.java17compat.output
 
     include "com.viaversion:viaversion:4.7.1-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.7.0") {
+    include("com.viaversion:viabackwards-common:4.7.1-SNAPSHOT") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
