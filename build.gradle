@@ -85,7 +85,7 @@ dependencies {
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
         exclude group: "io.jsonwebtoken", module: "jjwt-gson"
     }
-    include("net.raphimc:ViaLoader:2.2.6") {
+    include("net.raphimc:ViaLoader:2.2.7-SNAPSHOT") {
         exclude group: "org.slf4j", module: "slf4j-api"
         exclude group: "org.yaml", module: "snakeyaml"
     }
