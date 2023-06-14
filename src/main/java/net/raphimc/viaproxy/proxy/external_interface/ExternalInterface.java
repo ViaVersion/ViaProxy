@@ -116,7 +116,9 @@ public class ExternalInterface {
 
                     user.put(new ChatSession1_19_3(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                     user.put(new ChatSession1_19_1(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
-                    user.put(new ChatSession1_19_0(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keyPair.getLegacyPublicKeySignature().array())));
+                    if (keyPair.getLegacyPublicKeySignature() != null && keyPair.getLegacyPublicKeySignature().array().length != 0) {
+                        user.put(new ChatSession1_19_0(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keyPair.getLegacyPublicKeySignature().array())));
+                    }
                 } else if (Options.MC_ACCOUNT instanceof BedrockAccount && proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
                     final BedrockAccount bedrockAccount = (BedrockAccount) Options.MC_ACCOUNT;
                     final StepMCChain.MCChain mcChain;
