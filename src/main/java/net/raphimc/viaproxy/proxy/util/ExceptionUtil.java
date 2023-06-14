@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.proxy.util;
 
 import com.viaversion.viaversion.exception.InformativeException;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -26,8 +27,6 @@ import net.raphimc.viaproxy.util.logging.Logger;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.channels.ClosedChannelException;
-import java.util.Iterator;
-import java.util.Map;
 
 public class ExceptionUtil {
 
@@ -61,42 +60,18 @@ public class ExceptionUtil {
     }
 
     public static String prettyPrint(Throwable t) {
-        StringBuilder msg = new StringBuilder();
+        final StringBuilder msg = new StringBuilder();
         if (t instanceof EncoderException) t = t.getCause();
+        if (t instanceof DecoderException) t = t.getCause();
         while (t != null) {
-            String exceptionMessage = t.getMessage();
-            if (t instanceof InformativeException) {
-                exceptionMessage = getMessageFor((InformativeException) t);
-            }
             msg.append("\n");
-            msg.append("§c").append(t.getClass().getSimpleName()).append("§7: §f").append(exceptionMessage);
+            msg.append("§c").append(t.getClass().getSimpleName()).append("§7: §f").append(t.getMessage());
             t = t.getCause();
             if (t != null) {
                 msg.append(" §9Caused by");
             }
         }
         return msg.toString();
-    }
-
-    private static String getMessageFor(final InformativeException e) {
-        Map<String, Object> info = null;
-        try {
-            info = (Map<String, Object>) infoField.get(e);
-        } catch (Throwable ignored) {
-        }
-        if (info != null) {
-            final StringBuilder builder = new StringBuilder();
-            boolean first = true;
-            for (Iterator<Map.Entry<String, Object>> var3 = info.entrySet().iterator(); var3.hasNext(); first = false) {
-                Map.Entry<String, Object> entry = var3.next();
-                if (!first) {
-                    builder.append(", ");
-                }
-                builder.append(entry.getKey()).append(": ").append(entry.getValue());
-            }
-            return builder.toString();
-        }
-        return "Unable to get source info";
     }
 
 }

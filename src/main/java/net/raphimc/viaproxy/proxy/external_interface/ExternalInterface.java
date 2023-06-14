@@ -30,6 +30,7 @@ import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.raphimc.mcauth.step.bedrock.StepMCChain;
+import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
@@ -48,6 +49,7 @@ import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.util.LocalSocketClient;
 import net.raphimc.viaproxy.util.logging.Logger;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -70,60 +72,68 @@ public class ExternalInterface {
             proxyConnection.setGameProfile(new GameProfile(null, loginHello.name));
         }
 
-        if (Options.LOCAL_SOCKET_AUTH) {
-            String[] response = new LocalSocketClient(48941).request("getusername");
-            if (response != null && response[0].equals("success")) {
-                proxyConnection.setGameProfile(new GameProfile(null, response[1]));
-            }
-
-            response = new LocalSocketClient(48941).request("get_public_key_data");
-            if (response != null && response[0].equals("success")) {
-                final String name = proxyConnection.getGameProfile().getName();
-                final UUID uuid = UUIDTypeAdapter.fromString(response[1]);
-                final PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(response[2])));
-                final byte[] keySignature = Base64.getDecoder().decode(response[3]);
-                final Instant expiresAt = Instant.ofEpochMilli(Long.parseLong(response[4]));
-
-                proxyConnection.setGameProfile(new GameProfile(uuid, name));
-                proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_19_3(name, expiresAt, publicKey, keySignature, uuid));
-            }
-        } else if (Options.MC_ACCOUNT != null) {
-            proxyConnection.setGameProfile(Options.MC_ACCOUNT.getGameProfile());
-            final UserConnection user = proxyConnection.getUserConnection();
-
-            if (Options.MC_ACCOUNT instanceof MicrosoftAccount && proxyConnection.getServerVersion().isBetweenInclusive(VersionEnum.r1_19, VersionEnum.r1_19_3)) {
-                final MicrosoftAccount microsoftAccount = (MicrosoftAccount) Options.MC_ACCOUNT;
-                final UserApiService userApiService = AuthLibServices.AUTHENTICATION_SERVICE.createUserApiService(microsoftAccount.getMcProfile().prevResult().prevResult().access_token());
-                final KeyPairResponse keyPair = userApiService.getKeyPair();
-                if (keyPair != null) {
-                    if (!Strings.isNullOrEmpty(keyPair.getPublicKey()) && keyPair.getPublicKeySignature() != null && keyPair.getPublicKeySignature().array().length != 0) {
-                        final Instant expiresAt = Instant.parse(keyPair.getExpiresAt());
-                        final long expiresAtMillis = expiresAt.toEpochMilli();
-                        final PublicKey publicKey = CryptUtil.decodeRsaPublicKeyPem(keyPair.getPublicKey());
-                        final byte[] publicKeyBytes = publicKey.getEncoded();
-                        final byte[] keySignature = keyPair.getPublicKeySignature().array();
-                        final PrivateKey privateKey = CryptUtil.decodeRsaPrivateKeyPem(keyPair.getPrivateKey());
-                        final UUID uuid = proxyConnection.getGameProfile().getId();
-
-                        proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_19_3(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, keySignature, proxyConnection.getGameProfile().getId()));
-
-                        user.put(new ChatSession1_19_3(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
-                        user.put(new ChatSession1_19_1(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
-                        user.put(new ChatSession1_19_0(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keyPair.getLegacyPublicKeySignature().array())));
-                    } else {
-                        throw new InsecurePublicKeyException.MissingException();
-                    }
+        try {
+            if (Options.LOCAL_SOCKET_AUTH) {
+                String[] response = new LocalSocketClient(48941).request("getusername");
+                if (response != null && response[0].equals("success")) {
+                    proxyConnection.setGameProfile(new GameProfile(null, response[1]));
                 }
-            } else if (Options.MC_ACCOUNT instanceof BedrockAccount && proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
-                final BedrockAccount bedrockAccount = (BedrockAccount) Options.MC_ACCOUNT;
-                final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
-                final UUID deviceId = mcChain.prevResult().initialXblSession().prevResult2().id();
-                final String playFabId = bedrockAccount.getPlayFabToken().playFabId();
-                user.put(new AuthChainData(user, mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey(), deviceId, playFabId));
-            }
-        }
 
-        PluginManager.EVENT_MANAGER.call(new FillPlayerDataEvent(proxyConnection));
+                response = new LocalSocketClient(48941).request("get_public_key_data");
+                if (response != null && response[0].equals("success")) {
+                    final String name = proxyConnection.getGameProfile().getName();
+                    final UUID uuid = UUIDTypeAdapter.fromString(response[1]);
+                    final PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(response[2])));
+                    final byte[] keySignature = Base64.getDecoder().decode(response[3]);
+                    final Instant expiresAt = Instant.ofEpochMilli(Long.parseLong(response[4]));
+
+                    proxyConnection.setGameProfile(new GameProfile(uuid, name));
+                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_19_3(name, expiresAt, publicKey, keySignature, uuid));
+                }
+            } else if (Options.MC_ACCOUNT != null) {
+                proxyConnection.setGameProfile(Options.MC_ACCOUNT.getGameProfile());
+                final UserConnection user = proxyConnection.getUserConnection();
+
+                if (Options.MC_ACCOUNT instanceof MicrosoftAccount && proxyConnection.getServerVersion().isBetweenInclusive(VersionEnum.r1_19, VersionEnum.r1_19_3)) {
+                    final MicrosoftAccount microsoftAccount = (MicrosoftAccount) Options.MC_ACCOUNT;
+                    final UserApiService userApiService = AuthLibServices.AUTHENTICATION_SERVICE.createUserApiService(microsoftAccount.getMcProfile().prevResult().prevResult().access_token());
+                    final KeyPairResponse keyPair = userApiService.getKeyPair();
+                    if (keyPair == null) {
+                        throw new InsecurePublicKeyException.MissingException();
+                    } else if (Strings.isNullOrEmpty(keyPair.getPublicKey()) || keyPair.getPublicKeySignature() == null || keyPair.getPublicKeySignature().array().length == 0) {
+                        throw new InsecurePublicKeyException.InvalidException("Invalid public key data");
+                    }
+
+                    final Instant expiresAt = Instant.parse(keyPair.getExpiresAt());
+                    final long expiresAtMillis = expiresAt.toEpochMilli();
+                    final PublicKey publicKey = CryptUtil.decodeRsaPublicKeyPem(keyPair.getPublicKey());
+                    final byte[] publicKeyBytes = publicKey.getEncoded();
+                    final byte[] keySignature = keyPair.getPublicKeySignature().array();
+                    final PrivateKey privateKey = CryptUtil.decodeRsaPrivateKeyPem(keyPair.getPrivateKey());
+                    final UUID uuid = proxyConnection.getGameProfile().getId();
+
+                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_19_3(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, keySignature, proxyConnection.getGameProfile().getId()));
+
+                    user.put(new ChatSession1_19_3(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
+                    user.put(new ChatSession1_19_1(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
+                    user.put(new ChatSession1_19_0(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keyPair.getLegacyPublicKeySignature().array())));
+                } else if (Options.MC_ACCOUNT instanceof BedrockAccount && proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
+                    final BedrockAccount bedrockAccount = (BedrockAccount) Options.MC_ACCOUNT;
+                    final StepMCChain.MCChain mcChain;
+                    try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+                        mcChain = new StepMCChain(null).applyStep(httpClient, bedrockAccount.getMcChain().prevResult());
+                    }
+
+                    final UUID deviceId = mcChain.prevResult().initialXblSession().prevResult2().id();
+                    final String playFabId = bedrockAccount.getPlayFabToken().playFabId();
+                    user.put(new AuthChainData(user, mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey(), deviceId, playFabId));
+                }
+            }
+
+            PluginManager.EVENT_MANAGER.call(new FillPlayerDataEvent(proxyConnection));
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to fill player data. This might be caused by outdated account tokens. Please restart the proxy and try again.", e);
+        }
 
         proxyConnection.getLoginHelloPacket().name = proxyConnection.getGameProfile().getName();
         if (proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19_3) {

@@ -112,7 +112,7 @@ public class AdvancedTab extends AUITab {
                                 ViaProxy.ui.openURL(url);
                                 final StringSelection stringSelection = new StringSelection(url);
                                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
-                                ViaProxy.ui.showInfo("Copied ViaVersion dump link to clipboard");
+                                ViaProxy.ui.showInfo("Copied ViaVersion dump link to clipboard.");
                             } else {
                                 ViaProxy.ui.showError(msg.replaceAll("§.", ""));
                             }
