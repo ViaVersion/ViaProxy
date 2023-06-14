@@ -122,7 +122,7 @@ public class AccountsTab extends AUITab {
             JPopupMenu contextMenu = new JPopupMenu();
             {
                 JMenuItem selectItem = new JMenuItem("Select account");
-                selectItem.addActionListener(e -> {
+                selectItem.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) this.markSelected(index);
                 });
@@ -130,7 +130,7 @@ public class AccountsTab extends AUITab {
             }
             {
                 JMenuItem removeItem = new JMenuItem("Remove");
-                removeItem.addActionListener(e -> {
+                removeItem.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) {
                         String removedName = model.remove(index);
@@ -154,7 +154,7 @@ public class AccountsTab extends AUITab {
             }
             {
                 JMenuItem moveUp = new JMenuItem("Move up ↑");
-                moveUp.addActionListener(e -> {
+                moveUp.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) this.moveUp(index);
                 });
@@ -162,7 +162,7 @@ public class AccountsTab extends AUITab {
             }
             {
                 JMenuItem moveDown = new JMenuItem("Move down ↓");
-                moveDown.addActionListener(e -> {
+                moveDown.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) this.moveDown(index);
                 });

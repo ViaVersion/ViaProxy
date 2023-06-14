@@ -83,7 +83,7 @@ public class DownloadPopup extends JDialog {
         {
             JButton cancelButton = new JButton("Cancel");
             cancelButton.setBounds(10, 40, 365, 20);
-            cancelButton.addActionListener(e -> this.close(false));
+            cancelButton.addActionListener(event -> this.close(false));
             contentPane.add(cancelButton);
         }
         this.start();

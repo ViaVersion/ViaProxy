@@ -17,20 +17,32 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import com.viaversion.viaversion.api.Via;
+import gs.mclo.api.MclogsClient;
+import gs.mclo.api.response.UploadLogResponse;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.protocolhack.viaproxy.ConsoleCommandSender;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.util.logging.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class AdvancedTab extends AUITab {
-
 
     JSpinner bindPort;
     JTextField proxy;
     JCheckBox proxyOnlineMode;
     JCheckBox legacySkinLoading;
+    JButton viaVersionDumpButton;
+    JButton uploadLogsButton;
 
     public AdvancedTab(final ViaProxyUI frame) {
         super(frame, "Advanced");
@@ -84,6 +96,77 @@ public class AdvancedTab extends AUITab {
             ViaProxy.saveManager.uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
             contentPane.add(this.legacySkinLoading);
         }
+        {
+            this.viaVersionDumpButton = new JButton("Create ViaVersion dump");
+            this.viaVersionDumpButton.setBounds(10, 250, 225, 20);
+            this.viaVersionDumpButton.addActionListener(event -> {
+                try {
+                    this.viaVersionDumpButton.setEnabled(false);
+                    Via.getManager().getCommandHandler().getSubCommand("dump").execute(new ConsoleCommandSender() {
+                        private static final String DUMP_LINK_HOST = "https://dump.viaversion.com";
+
+                        @Override
+                        public void sendMessage(String msg) {
+                            if (msg.contains(DUMP_LINK_HOST)) {
+                                final String url = msg.substring(msg.indexOf(DUMP_LINK_HOST));
+                                ViaProxy.ui.openURL(url);
+                                final StringSelection stringSelection = new StringSelection(url);
+                                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
+                                ViaProxy.ui.showInfo("Copied ViaVersion dump link to clipboard");
+                            } else {
+                                ViaProxy.ui.showError(msg.replaceAll("§.", ""));
+                            }
+                        }
+                    }, new String[0]);
+                } catch (Throwable e) {
+                    Logger.LOGGER.error("Failed to create ViaVersion dump", e);
+                    ViaProxy.ui.showError("The ViaVersion dump could not be created.");
+                } finally {
+                    this.viaVersionDumpButton.setEnabled(true);
+                }
+            });
+            this.viaVersionDumpButton.setEnabled(false);
+            contentPane.add(this.viaVersionDumpButton);
+        }
+        {
+            this.uploadLogsButton = new JButton("Upload latest.log");
+            this.uploadLogsButton.setBounds(249, 250, 225, 20);
+            this.uploadLogsButton.addActionListener(event -> {
+                final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
+                final RollingRandomAccessFileAppender fileAppender = (RollingRandomAccessFileAppender) logger.getAppenders().get("LatestFile");
+                fileAppender.getManager().flush();
+                final File logFile = new File(fileAppender.getFileName());
+
+                try {
+                    this.uploadLogsButton.setEnabled(false);
+                    final MclogsClient mclogsClient = new MclogsClient("ViaProxy", ViaProxy.VERSION);
+                    final UploadLogResponse apiResponse = mclogsClient.uploadLog(logFile.toPath());
+                    if (apiResponse.isSuccess()) {
+                        ViaProxy.ui.openURL(apiResponse.getUrl());
+                        final StringSelection selection = new StringSelection(apiResponse.getUrl());
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+                        ViaProxy.ui.showInfo("<html>Uploaded log file to <a href=\"\">" + apiResponse.getUrl() + "</a> (copied to clipboard)</html>");
+                    } else {
+                        ViaProxy.ui.showError("The log file could not be uploaded: " + apiResponse.getError());
+                    }
+                } catch (FileNotFoundException e) {
+                    ViaProxy.ui.showError("The log file could not be found.");
+                } catch (Throwable e) {
+                    Logger.LOGGER.error("Failed to upload log file", e);
+                    ViaProxy.ui.showError("The log file could not be uploaded.");
+                } finally {
+                    this.uploadLogsButton.setEnabled(true);
+                }
+            });
+            contentPane.add(this.uploadLogsButton);
+        }
+    }
+
+    @Override
+    public void setReady() {
+        SwingUtilities.invokeLater(() -> {
+            this.viaVersionDumpButton.setEnabled(true);
+        });
     }
 
     @Override

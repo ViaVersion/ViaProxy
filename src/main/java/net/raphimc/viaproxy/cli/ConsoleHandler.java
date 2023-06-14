@@ -56,7 +56,7 @@ public class ConsoleHandler {
                     if (command.equalsIgnoreCase("gc")) {
                         System.gc();
                         System.out.println("GC Done");
-                    } else if (command.equalsIgnoreCase("via")) {
+                    } else if (command.equalsIgnoreCase("via") || command.equalsIgnoreCase("viaversion")) {
                         Via.getManager().getCommandHandler().onCommand(new ConsoleCommandSender(), args.getAsArray());
                     } else if (command.equalsIgnoreCase("threaddump")) {
                         System.out.println("Thread Dump:");

@@ -110,7 +110,7 @@ public class GeneralTab extends AUITab {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
             });
-            this.serverVersion.addActionListener(e -> {
+            this.serverVersion.addActionListener(event -> {
                 if (this.betaCraftAuth == null) return; // This is called when the JComboBox is created (before betaCraftAuth is set)
                 if (!(this.serverVersion.getSelectedItem() instanceof VersionEnum)) return;
                 if (((VersionEnum) this.serverVersion.getSelectedItem()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
@@ -154,7 +154,7 @@ public class GeneralTab extends AUITab {
         {
             this.stateButton = new JButton("Loading ViaProxy...");
             this.stateButton.setBounds(10, 250, 465, 20);
-            this.stateButton.addActionListener(e -> {
+            this.stateButton.addActionListener(event -> {
                 if (this.stateButton.getText().equalsIgnoreCase("Start")) this.start();
                 else if (this.stateButton.getText().equalsIgnoreCase("Stop")) this.stop();
             });

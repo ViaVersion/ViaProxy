@@ -120,6 +120,7 @@ dependencies {
         exclude group: "io.netty", module: "netty-codec"
         exclude group: "io.netty", module: "netty-transport"
     }
+    include "gs.mclo:api:3.0.1"
 }
 
 blossom {

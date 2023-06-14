@@ -94,7 +94,7 @@ public class AddAccountPopup extends JDialog {
         {
             JButton copyCodeButton = new JButton("Copy Code");
             copyCodeButton.setBounds(this.getWidth() / 2 - 130 / 2, 130, 100, 20);
-            copyCodeButton.addActionListener(e -> {
+            copyCodeButton.addActionListener(event -> {
                 StringSelection selection = new StringSelection(this.deviceCode.userCode());
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
             });
