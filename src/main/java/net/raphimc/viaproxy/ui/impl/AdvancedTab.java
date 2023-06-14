@@ -17,11 +17,10 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
-import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.util.DumpUtil;
 import gs.mclo.api.MclogsClient;
 import gs.mclo.api.response.UploadLogResponse;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.protocolhack.viaproxy.ConsoleCommandSender;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
@@ -100,30 +99,19 @@ public class AdvancedTab extends AUITab {
             this.viaVersionDumpButton = new JButton("Create ViaVersion dump");
             this.viaVersionDumpButton.setBounds(10, 250, 225, 20);
             this.viaVersionDumpButton.addActionListener(event -> {
-                try {
-                    this.viaVersionDumpButton.setEnabled(false);
-                    Via.getManager().getCommandHandler().getSubCommand("dump").execute(new ConsoleCommandSender() {
-                        private static final String DUMP_LINK_HOST = "https://dump.viaversion.com";
-
-                        @Override
-                        public void sendMessage(String msg) {
-                            if (msg.contains(DUMP_LINK_HOST)) {
-                                final String url = msg.substring(msg.indexOf(DUMP_LINK_HOST));
-                                ViaProxy.ui.openURL(url);
-                                final StringSelection stringSelection = new StringSelection(url);
-                                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
-                                ViaProxy.ui.showInfo("Copied ViaVersion dump link to clipboard.");
-                            } else {
-                                ViaProxy.ui.showError(msg.replaceAll("§.", ""));
-                            }
-                        }
-                    }, new String[0]);
-                } catch (Throwable e) {
-                    Logger.LOGGER.error("Failed to create ViaVersion dump", e);
-                    ViaProxy.ui.showError("The ViaVersion dump could not be created.");
-                } finally {
-                    this.viaVersionDumpButton.setEnabled(true);
-                }
+                this.viaVersionDumpButton.setEnabled(false);
+                DumpUtil.postDump(null).whenComplete((url, e) -> {
+                    if (e != null) {
+                        Logger.LOGGER.error("Failed to create ViaVersion dump", e);
+                        SwingUtilities.invokeLater(() -> ViaProxy.ui.showError(e.getMessage()));
+                    } else {
+                        ViaProxy.ui.openURL(url);
+                        final StringSelection stringSelection = new StringSelection(url);
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
+                        SwingUtilities.invokeLater(() -> ViaProxy.ui.showInfo("Copied ViaVersion dump link to clipboard."));
+                    }
+                    SwingUtilities.invokeLater(() -> this.viaVersionDumpButton.setEnabled(true));
+                });
             });
             this.viaVersionDumpButton.setEnabled(false);
             contentPane.add(this.viaVersionDumpButton);
