@@ -86,7 +86,7 @@ public class BedrockAccount extends Account {
 
     @Override
     public void refreshRuntimeData(CloseableHttpClient httpClient) throws Throwable {
-        this.mcChain = new StepMCChain(null).applyStep(httpClient, this.mcChain.prevResult()); // Force refresh, because some servers check the issuedAt field
+        this.refresh(httpClient);
         try {
             if (this.playFabToken == null) {
                 throw new NullPointerException();
