@@ -40,6 +40,7 @@ public class AdvancedTab extends AUITab {
     JTextField proxy;
     JCheckBox proxyOnlineMode;
     JCheckBox legacySkinLoading;
+    JCheckBox chatSigning;
     JButton viaVersionDumpButton;
     JButton uploadLogsButton;
 
@@ -94,6 +95,14 @@ public class AdvancedTab extends AUITab {
             this.legacySkinLoading.setToolTipText("Enabling Legacy Skin Loading allows you to see skins on <= 1.6.4 servers");
             ViaProxy.saveManager.uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
             contentPane.add(this.legacySkinLoading);
+        }
+        {
+            this.chatSigning = new JCheckBox("Chat signing");
+            this.chatSigning.setBounds(10, 170, 465, 20);
+            this.chatSigning.setToolTipText("Enables sending signed chat messages on >= 1.19 servers");
+            this.chatSigning.setSelected(true);
+            ViaProxy.saveManager.uiSave.loadCheckBox("chat_signing", this.chatSigning);
+            contentPane.add(this.chatSigning);
         }
         {
             this.viaVersionDumpButton = new JButton("Create ViaVersion dump");
@@ -163,6 +172,8 @@ public class AdvancedTab extends AUITab {
         save.put("bind_port", String.valueOf(this.bindPort.getValue()));
         save.put("proxy", this.proxy.getText());
         save.put("proxy_online_mode", String.valueOf(this.proxyOnlineMode.isSelected()));
+        save.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
+        save.put("chat_signing", String.valueOf(this.chatSigning.isSelected()));
         ViaProxy.saveManager.save();
     }
 

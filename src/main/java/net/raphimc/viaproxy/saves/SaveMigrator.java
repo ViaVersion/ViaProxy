@@ -20,6 +20,7 @@ package net.raphimc.viaproxy.saves;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
+import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 public class SaveMigrator {
@@ -35,6 +36,13 @@ public class SaveMigrator {
                         final JsonObject newObject = new JsonObject();
                         object.remove("account_type");
                         newObject.add("mc_chain", object);
+                        newObject.addProperty("account_type", type);
+                        accountsArray.set(i, newObject);
+                    }
+                    if (MicrosoftAccount.class.getName().equals(type) && !object.has("mc_profile")) {
+                        final JsonObject newObject = new JsonObject();
+                        object.remove("account_type");
+                        newObject.add("mc_profile", object);
                         newObject.addProperty("account_type", type);
                         accountsArray.set(i, newObject);
                     }

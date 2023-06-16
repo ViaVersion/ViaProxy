@@ -189,6 +189,8 @@ public class GeneralTab extends AUITab {
         this.betaCraftAuth.setEnabled(state);
         ViaProxy.ui.advancedTab.proxyOnlineMode.setEnabled(state);
         ViaProxy.ui.advancedTab.proxy.setEnabled(state);
+        ViaProxy.ui.advancedTab.legacySkinLoading.setEnabled(state);
+        ViaProxy.ui.advancedTab.chatSigning.setEnabled(state);
         if (state) this.serverVersion.getActionListeners()[0].actionPerformed(null);
     }
 
@@ -229,6 +231,7 @@ public class GeneralTab extends AUITab {
             final boolean proxyOnlineMode = ViaProxy.ui.advancedTab.proxyOnlineMode.isSelected();
             final boolean legacySkinLoading = ViaProxy.ui.advancedTab.legacySkinLoading.isSelected();
             final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText().trim();
+            final boolean chatSigning = ViaProxy.ui.advancedTab.chatSigning.isSelected();
 
             try {
                 try {
@@ -266,6 +269,7 @@ public class GeneralTab extends AUITab {
                     Options.BETACRAFT_AUTH = betaCraftAuth;
                     Options.LEGACY_SKIN_LOADING = legacySkinLoading;
                     Options.OPENAUTHMOD_AUTH = authMethod == 2;
+                    Options.CHAT_SIGNING = chatSigning;
 
                     if (!proxyUrl.isEmpty()) {
                         try {

@@ -20,6 +20,8 @@ package net.raphimc.viaproxy.saves.impl.accounts;
 import com.google.gson.JsonObject;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.java.StepMCProfile;
+import net.raphimc.mcauth.step.java.StepPlayerCertificates;
+import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.UUID;
@@ -27,9 +29,17 @@ import java.util.UUID;
 public class MicrosoftAccount extends Account {
 
     private StepMCProfile.MCProfile mcProfile;
+    private StepPlayerCertificates.PlayerCertificates playerCertificates;
 
     public MicrosoftAccount(final JsonObject jsonObject) throws Throwable {
-        this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(jsonObject);
+        this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(jsonObject.getAsJsonObject("mc_profile"));
+        if (jsonObject.has("player_certificates")) {
+            try {
+                this.playerCertificates = MinecraftAuth.JAVA_PLAYER_CERTIFICATES.fromJson(jsonObject.getAsJsonObject("player_certificates"));
+            } catch (Throwable e) {
+                Logger.LOGGER.warn("Failed to load player certificates for Microsoft account. They will be regenerated.", e);
+            }
+        }
     }
 
     public MicrosoftAccount(final StepMCProfile.MCProfile mcProfile) {
@@ -38,7 +48,12 @@ public class MicrosoftAccount extends Account {
 
     @Override
     public JsonObject toJson() {
-        return this.mcProfile.toJson();
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.add("mc_profile", this.mcProfile.toJson());
+        if (this.playerCertificates != null) {
+            jsonObject.add("player_certificates", this.playerCertificates.toJson());
+        }
+        return jsonObject;
     }
 
     @Override
@@ -55,6 +70,10 @@ public class MicrosoftAccount extends Account {
         return this.mcProfile;
     }
 
+    public StepPlayerCertificates.PlayerCertificates getPlayerCertificates() {
+        return this.playerCertificates;
+    }
+
     @Override
     public String getDisplayString() {
         return this.getName() + " (Microsoft)";
@@ -63,6 +82,19 @@ public class MicrosoftAccount extends Account {
     @Override
     public void refresh(CloseableHttpClient httpClient) throws Exception {
         this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcProfile);
+    }
+
+    @Override
+    public void refreshRuntimeData(CloseableHttpClient httpClient) throws Throwable {
+        try {
+            if (this.playerCertificates == null) {
+                throw new NullPointerException();
+            }
+            this.playerCertificates = MinecraftAuth.JAVA_PLAYER_CERTIFICATES.refresh(httpClient, this.playerCertificates);
+        } catch (Throwable e) {
+            this.playerCertificates = null;
+            this.playerCertificates = MinecraftAuth.JAVA_PLAYER_CERTIFICATES.getFromInput(httpClient, this.mcProfile.prevResult().prevResult());
+        }
     }
 
 }

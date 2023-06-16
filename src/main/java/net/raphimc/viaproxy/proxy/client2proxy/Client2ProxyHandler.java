@@ -18,7 +18,6 @@
 package net.raphimc.viaproxy.proxy.client2proxy;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.exceptions.AuthenticationException;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -68,8 +67,6 @@ import java.nio.channels.UnresolvedAddressException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
@@ -266,7 +263,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.setConnectionState(packet.intendedState);
     }
 
-    private void handleLoginHello(C2SLoginHelloPacket1_7 packet) throws NoSuchAlgorithmException, InvalidKeySpecException, AuthenticationException {
+    private void handleLoginHello(C2SLoginHelloPacket1_7 packet) {
         if (this.loginState != LoginState.FIRST_PACKET) throw CloseAndReturn.INSTANCE;
         this.loginState = LoginState.SENT_HELLO;
 
@@ -277,16 +274,22 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
-        ExternalInterface.fillPlayerData(packet, this.proxyConnection);
+        proxyConnection.setLoginHelloPacket(packet);
+        if (packet instanceof C2SLoginHelloPacket1_19_3) {
+            proxyConnection.setGameProfile(new GameProfile(((C2SLoginHelloPacket1_19_3) packet).uuid, packet.name));
+        } else {
+            proxyConnection.setGameProfile(new GameProfile(null, packet.name));
+        }
 
         if (Options.ONLINE_MODE) {
             this.proxyConnection.getC2P().writeAndFlush(new S2CLoginKeyPacket1_8("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         } else {
+            ExternalInterface.fillPlayerData(this.proxyConnection);
             this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
     }
 
-    private void handleLoginKey(final C2SLoginKeyPacket1_7 packet) throws GeneralSecurityException, InterruptedException {
+    private void handleLoginKey(final C2SLoginKeyPacket1_7 packet) throws GeneralSecurityException {
         if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(packet.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
             final ByteBuf byteBuf = Unpooled.wrappedBuffer(packet.encryptedSecretKey);
             this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);
@@ -329,6 +332,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
         }
 
+        ExternalInterface.fillPlayerData(this.proxyConnection);
         this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 

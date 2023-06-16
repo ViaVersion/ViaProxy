@@ -42,4 +42,6 @@ public abstract class Account {
 
     public abstract void refresh(final CloseableHttpClient httpClient) throws Throwable;
 
+    public abstract void refreshRuntimeData(final CloseableHttpClient httpClient) throws Throwable;
+
 }

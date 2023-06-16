@@ -57,41 +57,49 @@ public class UISave extends AbstractSave {
     }
 
     public void loadTextField(final String key, final JTextField textField) {
-        try {
-            String value = this.values.get(key);
-            if (value != null) textField.setText(value);
-        } catch (Throwable ignored) {
+        if (this.values.containsKey(key)) {
+            try {
+                String value = this.values.get(key);
+                if (value != null) textField.setText(value);
+            } catch (Throwable ignored) {
+            }
         }
     }
 
     public void loadComboBox(final String key, final JComboBox<?> comboBox) {
-        try {
-            int index = Integer.parseInt(this.values.get(key));
-            if (index >= 0 && index < comboBox.getItemCount()) comboBox.setSelectedIndex(index);
-        } catch (Throwable ignored) {
+        if (this.values.containsKey(key)) {
+            try {
+                int index = Integer.parseInt(this.values.get(key));
+                if (index >= 0 && index < comboBox.getItemCount()) comboBox.setSelectedIndex(index);
+            } catch (Throwable ignored) {
+            }
         }
     }
 
     public void loadSpinner(final String key, final JSpinner spinner) {
-        try {
-            Integer value = Integer.valueOf(this.values.get(key));
-            if (spinner.getModel() instanceof SpinnerNumberModel) {
-                SpinnerNumberModel model = (SpinnerNumberModel) spinner.getModel();
-                Comparable<Integer> minimum = (Comparable<Integer>) model.getMinimum();
-                Comparable<Integer> maximum = (Comparable<Integer>) model.getMaximum();
-                if (minimum.compareTo(value) <= 0 && maximum.compareTo(value) >= 0) spinner.setValue(value);
-            } else {
-                spinner.setValue(value);
+        if (this.values.containsKey(key)) {
+            try {
+                Integer value = Integer.valueOf(this.values.get(key));
+                if (spinner.getModel() instanceof SpinnerNumberModel) {
+                    SpinnerNumberModel model = (SpinnerNumberModel) spinner.getModel();
+                    Comparable<Integer> minimum = (Comparable<Integer>) model.getMinimum();
+                    Comparable<Integer> maximum = (Comparable<Integer>) model.getMaximum();
+                    if (minimum.compareTo(value) <= 0 && maximum.compareTo(value) >= 0) spinner.setValue(value);
+                } else {
+                    spinner.setValue(value);
+                }
+            } catch (Throwable ignored) {
             }
-        } catch (Throwable ignored) {
         }
     }
 
     public void loadCheckBox(final String key, final JCheckBox checkBox) {
-        try {
-            boolean value = Boolean.parseBoolean(this.values.get(key));
-            checkBox.setSelected(value);
-        } catch (Throwable ignored) {
+        if (this.values.containsKey(key)) {
+            try {
+                boolean value = Boolean.parseBoolean(this.values.get(key));
+                checkBox.setSelected(value);
+            } catch (Throwable ignored) {
+            }
         }
     }
 

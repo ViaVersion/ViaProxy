@@ -18,14 +18,13 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.bedrock.StepMCChain;
-import net.raphimc.mcauth.step.bedrock.playfab.StepPlayFabToken;
 import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
+import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
@@ -39,7 +38,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class AccountsTab extends AUITab {
 
@@ -197,9 +195,9 @@ public class AccountsTab extends AUITab {
                 this.addMicrosoftAccountButton.setEnabled(false);
                 this.handleLogin(msaDeviceCodeConsumer -> {
                     try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                        return MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer));
+                        return new MicrosoftAccount(MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
                     }
-                }, profile -> ViaProxy.saveManager.accountsSave.addAccount(profile));
+                });
             });
             addButtons.add(this.addMicrosoftAccountButton);
         }
@@ -210,12 +208,9 @@ public class AccountsTab extends AUITab {
                 this.addBedrockAccountButton.setEnabled(false);
                 this.handleLogin(msaDeviceCodeConsumer -> {
                     try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                        final StepMCChain.MCChain mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer));
-                        final StepPlayFabToken.PlayFabToken playFabToken = MinecraftAuth.BEDROCK_PLAY_FAB_TOKEN.getFromInput(httpClient, mcChain.prevResult().fullXblSession());
-
-                        return new BedrockAccount(mcChain, playFabToken);
+                        return new BedrockAccount(MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
                     }
-                }, account -> ViaProxy.saveManager.accountsSave.addAccount(account));
+                });
             });
             addButtons.add(this.addBedrockAccountButton);
         }
@@ -291,10 +286,10 @@ public class AccountsTab extends AUITab {
         }
     }
 
-    private <T> void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, T> requestHandler, final Function<T, Account> addHandler) {
+    private void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, Account> requestHandler) {
         this.addThread = new Thread(() -> {
             try {
-                T profile = requestHandler.apply(msaDeviceCode -> {
+                final Account account = requestHandler.apply(msaDeviceCode -> {
                     SwingUtilities.invokeLater(() -> {
                         new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
                             this.closePopup();
@@ -304,7 +299,7 @@ public class AccountsTab extends AUITab {
                 });
                 SwingUtilities.invokeLater(() -> {
                     this.closePopup();
-                    Account account = addHandler.apply(profile);
+                    ViaProxy.saveManager.accountsSave.addAccount(account);
                     ViaProxy.saveManager.save();
                     this.addAccount(account);
                     this.frame.showInfo("The account " + account.getName() + " was added successfully.");

@@ -254,7 +254,7 @@ public class ProxyConnection extends NetClient {
             future = this.c2p.newSucceededFuture();
         }
 
-        future.channel().close();
+        future.addListener(ChannelFutureListener.CLOSE);
         throw CloseAndReturn.INSTANCE;
     }
 

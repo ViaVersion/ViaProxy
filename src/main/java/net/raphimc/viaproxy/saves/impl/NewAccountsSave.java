@@ -20,11 +20,9 @@ package net.raphimc.viaproxy.saves.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.raphimc.mcauth.step.java.StepMCProfile;
 import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
-import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -62,16 +60,6 @@ public class NewAccountsSave extends AbstractSave {
             array.add(jsonObject);
         }
         return array;
-    }
-
-    public Account addAccount(final StepMCProfile.MCProfile mcProfile) {
-        if (mcProfile.prevResult().items().isEmpty()) {
-            return this.addAccount(mcProfile.name());
-        } else {
-            final Account account = new MicrosoftAccount(mcProfile);
-            this.accounts.add(account);
-            return account;
-        }
     }
 
     public Account addAccount(final String username) {

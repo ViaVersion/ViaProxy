@@ -51,12 +51,12 @@ public class Options {
     public static Account MC_ACCOUNT;
     public static String CLASSIC_MP_PASS;
     public static Boolean LEGACY_SKIN_LOADING;
+    public static boolean CHAT_SIGNING;
 
     // CLI only config options
     public static int COMPRESSION_THRESHOLD = 256;
     public static boolean SRV_MODE; // Example: lenni0451.net_25565_1.8.x.viaproxy.127.0.0.1.nip.io
     public static boolean INTERNAL_SRV_MODE; // Example: ip\7port\7version\7mppass
-    public static boolean LOCAL_SOCKET_AUTH;
     public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
     public static boolean SERVER_HAPROXY_PROTOCOL;
     public static boolean LEGACY_CLIENT_PASSTHROUGH;
@@ -75,7 +75,6 @@ public class Options {
         final OptionSpec<Integer> connectPort = parser.acceptsAll(asList("connect_port", "target_port", "cp", "p"), "The port of the target server").withRequiredArg().ofType(Integer.class);
         final OptionSpec<VersionEnum> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new VersionEnumConverter()).required();
         final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Enable OpenAuthMod authentication");
-        final OptionSpec<Void> localSocketAuth = parser.accepts("local_socket_auth", "Enable authentication over a local socket");
         final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication for classic servers");
         final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which clients can optionally download").withRequiredArg().ofType(String.class);
         final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for backend TCP connections").withRequiredArg().ofType(String.class);
@@ -113,7 +112,6 @@ public class Options {
         }
         COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
         OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
-        LOCAL_SOCKET_AUTH = options.has(localSocketAuth);
         BETACRAFT_AUTH = options.has(betaCraftAuth);
         if (options.has(resourcePackUrl)) {
             RESOURCE_PACK_URL = options.valueOf(resourcePackUrl);
