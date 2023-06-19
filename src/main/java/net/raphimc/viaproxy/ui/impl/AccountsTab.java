@@ -32,6 +32,7 @@ import net.raphimc.viaproxy.util.TFunction;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -41,7 +42,7 @@ import java.util.function.Consumer;
 
 public class AccountsTab extends AUITab {
 
-    private JList<String> accountsList;
+    private JList<Account> accountsList;
     private JButton addMicrosoftAccountButton;
     private JButton addBedrockAccountButton;
 
@@ -88,7 +89,7 @@ public class AccountsTab extends AUITab {
             scrollPane.setBounds(10, 105, 465, 110);
             contentPane.add(scrollPane);
 
-            DefaultListModel<String> model = new DefaultListModel<>();
+            DefaultListModel<Account> model = new DefaultListModel<>();
             this.accountsList = new JList<>(model);
             this.accountsList.addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent e) {
@@ -115,6 +116,19 @@ public class AccountsTab extends AUITab {
                     }
                 }
             });
+            this.accountsList.setCellRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                    DefaultListCellRenderer component = (DefaultListCellRenderer) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                    Account account = (Account) value;
+                    if (Options.MC_ACCOUNT == account) {
+                        component.setText("<html><span style=\"color:rgb(0, 180, 0)\"><b>" + account.getDisplayString() + "</b></span></html>");
+                    } else {
+                        component.setText(account.getDisplayString());
+                    }
+                    return component;
+                }
+            });
             scrollPane.setViewportView(this.accountsList);
 
             JPopupMenu contextMenu = new JPopupMenu();
@@ -131,18 +145,12 @@ public class AccountsTab extends AUITab {
                 removeItem.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) {
-                        String removedName = model.remove(index);
-                        if (removedName.contains("<")) {
+                        Account removed = model.remove(index);
+                        ViaProxy.saveManager.accountsSave.removeAccount(removed);
+                        ViaProxy.saveManager.save();
+                        if (Options.MC_ACCOUNT == removed) {
                             if (model.isEmpty()) this.markSelected(-1);
                             else this.markSelected(0);
-                        }
-
-                        final Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
-                        if (account != null) {
-                            ViaProxy.saveManager.accountsSave.removeAccount(account);
-                            ViaProxy.saveManager.save();
-                        } else {
-                            throw new IllegalStateException("Account is null");
                         }
                     }
                     if (index < model.getSize()) this.accountsList.setSelectedIndex(index);
@@ -219,7 +227,7 @@ public class AccountsTab extends AUITab {
     @Override
     public void setReady() {
         ViaProxy.saveManager.accountsSave.getAccounts().forEach(this::addAccount);
-        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        DefaultListModel<Account> model = (DefaultListModel<Account>) this.accountsList.getModel();
         if (!model.isEmpty()) this.markSelected(0);
     }
 
@@ -233,8 +241,8 @@ public class AccountsTab extends AUITab {
     }
 
     private void addAccount(final Account account) {
-        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
-        model.addElement(account.getDisplayString());
+        DefaultListModel<Account> model = (DefaultListModel<Account>) this.accountsList.getModel();
+        model.addElement(account);
     }
 
     public void markSelected(final int index) {
@@ -243,47 +251,36 @@ public class AccountsTab extends AUITab {
             return;
         }
 
-        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
-        for (int i = 0; i < model.getSize(); i++) model.setElementAt(model.getElementAt(i).replaceAll("<[^>]+>", ""), i);
-        model.setElementAt("<html><span style=\"color:rgb(0, 180, 0)\"><b>" + model.getElementAt(index) + "</b></span></html>", index);
-
-        Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
-        if (account != null) Options.MC_ACCOUNT = account;
-        else throw new IllegalStateException("Account is null"); //Lists desynced
+        Options.MC_ACCOUNT = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        accountsList.repaint();
     }
 
     private void moveUp(final int index) {
-        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        DefaultListModel<Account> model = (DefaultListModel<Account>) this.accountsList.getModel();
+        if (model.getSize() == 0) return;
         if (index == 0) return;
-        String name = model.remove(index);
-        model.add(index - 1, name);
+
+        Account account = model.remove(index);
+        model.add(index - 1, account);
         this.accountsList.setSelectedIndex(index - 1);
 
-        Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
-        if (account != null) {
-            ViaProxy.saveManager.accountsSave.removeAccount(account);
-            ViaProxy.saveManager.accountsSave.addAccount(index - 1, account);
-            ViaProxy.saveManager.save();
-        } else {
-            throw new IllegalStateException("Account is null");
-        }
+        ViaProxy.saveManager.accountsSave.removeAccount(account);
+        ViaProxy.saveManager.accountsSave.addAccount(index - 1, account);
+        ViaProxy.saveManager.save();
     }
 
     private void moveDown(final int index) {
-        DefaultListModel<String> model = (DefaultListModel<String>) this.accountsList.getModel();
+        DefaultListModel<Account> model = (DefaultListModel<Account>) this.accountsList.getModel();
+        if (model.getSize() == 0) return;
         if (index == model.getSize() - 1) return;
-        String name = model.remove(index);
-        model.add(index + 1, name);
+
+        Account account = model.remove(index);
+        model.add(index + 1, account);
         this.accountsList.setSelectedIndex(index + 1);
 
-        Account account = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
-        if (account != null) {
-            ViaProxy.saveManager.accountsSave.removeAccount(account);
-            ViaProxy.saveManager.accountsSave.addAccount(index + 1, account);
-            ViaProxy.saveManager.save();
-        } else {
-            throw new IllegalStateException("Account is null");
-        }
+        ViaProxy.saveManager.accountsSave.removeAccount(account);
+        ViaProxy.saveManager.accountsSave.addAccount(index + 1, account);
+        ViaProxy.saveManager.save();
     }
 
     private void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, Account> requestHandler) {
