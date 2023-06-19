@@ -24,7 +24,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.raphimc.mcauth.step.bedrock.StepMCChain;
 import net.raphimc.mcauth.step.java.StepPlayerCertificates;
-import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
@@ -41,7 +40,6 @@ import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.util.logging.Logger;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -59,12 +57,7 @@ public class ExternalInterface {
         Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Filling player data");
         try {
             if (Options.MC_ACCOUNT != null) {
-                synchronized (ViaProxy.saveManager.accountsSave) {
-                    try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                        Options.MC_ACCOUNT.refresh(httpClient);
-                    }
-                    ViaProxy.saveManager.save();
-                }
+                ViaProxy.saveManager.accountsSave.ensureRefreshed(Options.MC_ACCOUNT);
 
                 proxyConnection.setGameProfile(Options.MC_ACCOUNT.getGameProfile());
                 final UserConnection user = proxyConnection.getUserConnection();
@@ -127,8 +120,7 @@ public class ExternalInterface {
             try {
                 AuthLibServices.SESSION_SERVICE.joinServer(Options.MC_ACCOUNT.getGameProfile(), microsoftAccount.getMcProfile().prevResult().prevResult().access_token(), serverIdHash);
             } catch (Throwable e) {
-                e.printStackTrace();
-                proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again later.");
+                proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
             }
         } else {
             proxyConnection.kickClient("§cThis server is in online mode and requires a valid authentication mode.");

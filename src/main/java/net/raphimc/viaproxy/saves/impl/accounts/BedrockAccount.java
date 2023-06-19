@@ -31,7 +31,7 @@ public class BedrockAccount extends Account {
     private StepMCChain.MCChain mcChain;
     private StepPlayFabToken.PlayFabToken playFabToken;
 
-    public BedrockAccount(final JsonObject jsonObject) throws Throwable {
+    public BedrockAccount(final JsonObject jsonObject) throws Exception {
         this.mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.fromJson(jsonObject.getAsJsonObject("mc_chain"));
         if (jsonObject.has("play_fab_token")) {
             try {
@@ -80,7 +80,9 @@ public class BedrockAccount extends Account {
     }
 
     @Override
-    public void refresh(CloseableHttpClient httpClient) throws Exception {
+    public boolean refresh(CloseableHttpClient httpClient) throws Exception {
+        if (!super.refresh(httpClient)) return false;
+
         this.mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcChain);
 
         try {
@@ -92,6 +94,8 @@ public class BedrockAccount extends Account {
             this.playFabToken = null;
             this.playFabToken = MinecraftAuth.BEDROCK_PLAY_FAB_TOKEN.getFromInput(httpClient, this.mcChain.prevResult().fullXblSession());
         }
+
+        return true;
     }
 
 }
