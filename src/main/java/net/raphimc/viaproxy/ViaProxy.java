@@ -45,7 +45,6 @@ import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.SaveManager;
-import net.raphimc.viaproxy.tasks.AccountRefreshTask;
 import net.raphimc.viaproxy.tasks.LoaderTask;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
@@ -124,18 +123,15 @@ public class ViaProxy {
         PluginManager.EVENT_MANAGER.register(EventListener.class);
 
         Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
-        Thread accountRefreshThread = new Thread(new AccountRefreshTask(saveManager), "AccountRefresh");
         Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
 
         if (hasUI) {
             loaderThread.start();
-            accountRefreshThread.start();
             SwingUtilities.invokeLater(() -> ui = new ViaProxyUI());
             if (System.getProperty("skipUpdateCheck") == null) {
                 updateCheckThread.start();
             }
             loaderThread.join();
-            accountRefreshThread.join();
             while (ui == null) {
                 Logger.LOGGER.info("Waiting for UI to be initialized...");
                 Thread.sleep(1000);

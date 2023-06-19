@@ -65,8 +65,4 @@ public class OfflineAccount extends Account {
     public void refresh(CloseableHttpClient httpClient) {
     }
 
-    @Override
-    public void refreshRuntimeData(CloseableHttpClient httpClient) {
-    }
-
 }

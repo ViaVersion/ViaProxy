@@ -20,12 +20,9 @@ package net.raphimc.viaproxy.saves.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.raphimc.mcauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
-import net.raphimc.viaproxy.util.logging.Logger;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,17 +77,6 @@ public class NewAccountsSave extends AbstractSave {
 
     public void removeAccount(final Account account) {
         this.accounts.remove(account);
-    }
-
-    public void refreshAccounts() {
-        for (Account account : new ArrayList<>(this.accounts)) {
-            try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                account.refresh(httpClient);
-            } catch (Throwable e) {
-                this.accounts.remove(account);
-                Logger.LOGGER.error("Failed to refresh account " + account.getName() + ", removing it from the list.", e);
-            }
-        }
     }
 
     public List<Account> getAccounts() {

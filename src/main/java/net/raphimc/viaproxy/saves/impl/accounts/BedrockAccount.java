@@ -82,11 +82,7 @@ public class BedrockAccount extends Account {
     @Override
     public void refresh(CloseableHttpClient httpClient) throws Exception {
         this.mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcChain);
-    }
 
-    @Override
-    public void refreshRuntimeData(CloseableHttpClient httpClient) throws Throwable {
-        this.refresh(httpClient);
         try {
             if (this.playFabToken == null) {
                 throw new NullPointerException();

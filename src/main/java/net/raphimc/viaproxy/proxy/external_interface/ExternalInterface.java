@@ -59,17 +59,19 @@ public class ExternalInterface {
         Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Filling player data");
         try {
             if (Options.MC_ACCOUNT != null) {
+                synchronized (ViaProxy.saveManager.accountsSave) {
+                    try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+                        Options.MC_ACCOUNT.refresh(httpClient);
+                    }
+                    ViaProxy.saveManager.save();
+                }
+
                 proxyConnection.setGameProfile(Options.MC_ACCOUNT.getGameProfile());
                 final UserConnection user = proxyConnection.getUserConnection();
 
                 if (Options.CHAT_SIGNING && proxyConnection.getServerVersion().isNewerThanOrEqualTo(VersionEnum.r1_19) && Options.MC_ACCOUNT instanceof MicrosoftAccount) {
                     final MicrosoftAccount microsoftAccount = (MicrosoftAccount) Options.MC_ACCOUNT;
-                    synchronized (ViaProxy.saveManager.accountsSave) {
-                        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                            microsoftAccount.refreshRuntimeData(httpClient);
-                        }
-                        ViaProxy.saveManager.accountsSave.save();
-                    }
+
                     final StepPlayerCertificates.PlayerCertificates playerCertificates = microsoftAccount.getPlayerCertificates();
                     final Instant expiresAt = Instant.ofEpochMilli(playerCertificates.expireTimeMs());
                     final long expiresAtMillis = playerCertificates.expireTimeMs();
@@ -90,12 +92,6 @@ public class ExternalInterface {
                     user.put(new ChatSession1_19_3(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                 } else if (proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest) && Options.MC_ACCOUNT instanceof BedrockAccount) {
                     final BedrockAccount bedrockAccount = (BedrockAccount) Options.MC_ACCOUNT;
-                    synchronized (ViaProxy.saveManager.accountsSave) {
-                        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                            bedrockAccount.refreshRuntimeData(httpClient);
-                        }
-                        ViaProxy.saveManager.accountsSave.save();
-                    }
                     final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
 
                     final UUID deviceId = mcChain.prevResult().initialXblSession().prevResult2().id();
@@ -107,7 +103,7 @@ public class ExternalInterface {
             PluginManager.EVENT_MANAGER.call(new FillPlayerDataEvent(proxyConnection));
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to fill player data", e);
-            proxyConnection.kickClient("§cFailed to fill player data. This might be caused by outdated account tokens. Please restart ViaProxy and try again.");
+            proxyConnection.kickClient("§cFailed to fill player data. This might be caused by outdated account tokens or rate limits. Wait a couple of seconds and try again. If the problem persists, remove and re-add your account.");
         }
 
         proxyConnection.getLoginHelloPacket().name = proxyConnection.getGameProfile().getName();
@@ -131,6 +127,7 @@ public class ExternalInterface {
             try {
                 AuthLibServices.SESSION_SERVICE.joinServer(Options.MC_ACCOUNT.getGameProfile(), microsoftAccount.getMcProfile().prevResult().prevResult().access_token(), serverIdHash);
             } catch (Throwable e) {
+                e.printStackTrace();
                 proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again later.");
             }
         } else {
@@ -150,7 +147,7 @@ public class ExternalInterface {
             } catch (TimeoutException e) {
                 proxyConnection.kickClient("§cAuthentication cancelled! You need to install OpenAuthMod in order to join this server.");
             }
-        } else if (Options.CHAT_SIGNING && Options.MC_ACCOUNT instanceof MicrosoftAccount) {
+        } else if (Options.CHAT_SIGNING) {
             final UserConnection user = proxyConnection.getUserConnection();
             if (user.has(ChatSession1_19_0.class)) {
                 final long salt = ThreadLocalRandom.current().nextLong();

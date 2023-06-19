@@ -82,10 +82,7 @@ public class MicrosoftAccount extends Account {
     @Override
     public void refresh(CloseableHttpClient httpClient) throws Exception {
         this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcProfile);
-    }
 
-    @Override
-    public void refreshRuntimeData(CloseableHttpClient httpClient) throws Throwable {
         try {
             if (this.playerCertificates == null) {
                 throw new NullPointerException();
