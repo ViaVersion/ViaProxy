@@ -62,7 +62,8 @@ public class OfflineAccount extends Account {
     }
 
     @Override
-    public void refresh(CloseableHttpClient httpClient) {
+    public boolean refresh(CloseableHttpClient httpClient) {
+        return false;
     }
 
 }

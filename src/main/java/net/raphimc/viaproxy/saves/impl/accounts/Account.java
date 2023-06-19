@@ -25,10 +25,12 @@ import java.util.UUID;
 
 public abstract class Account {
 
+    private long lastRefresh = 0L;
+
     public Account() {
     }
 
-    public abstract JsonObject toJson() throws Throwable;
+    public abstract JsonObject toJson();
 
     public abstract String getName();
 
@@ -40,6 +42,12 @@ public abstract class Account {
 
     public abstract String getDisplayString();
 
-    public abstract void refresh(final CloseableHttpClient httpClient) throws Throwable;
+    public boolean refresh(final CloseableHttpClient httpClient) throws Exception {
+        if (System.currentTimeMillis() - this.lastRefresh < 10_000L) {
+            return false;
+        }
+        this.lastRefresh = System.currentTimeMillis();
+        return true;
+    }
 
 }
