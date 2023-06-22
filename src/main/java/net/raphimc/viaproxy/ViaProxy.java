@@ -84,13 +84,14 @@ public class ViaProxy {
         }
         try {
             transformerManager.hookInstrumentation(Agents.getInstrumentation());
-            injectedMain("Runtime Agent", args);
         } catch (Throwable t) {
             final InjectionClassLoader injectionClassLoader = new InjectionClassLoader(transformerManager, ClassLoaders.getSystemClassPath());
             injectionClassLoader.setPriority(EnumLoaderPriority.PARENT_FIRST);
             Thread.currentThread().setContextClassLoader(injectionClassLoader);
             Methods.invoke(null, Methods.getDeclaredMethod(injectionClassLoader.loadClass(ViaProxy.class.getName()), "injectedMain", String.class, String[].class), "Injection ClassLoader", args);
+            return;
         }
+        injectedMain("Runtime Agent", args);
     }
 
     public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException {

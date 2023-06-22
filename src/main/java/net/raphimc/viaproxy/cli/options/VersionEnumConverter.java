@@ -28,6 +28,10 @@ public class VersionEnumConverter implements ValueConverter<VersionEnum> {
         for (VersionEnum version : VersionEnum.getAllVersions()) {
             if (version.getName().equalsIgnoreCase(s)) return version;
         }
+        for (VersionEnum version : VersionEnum.getAllVersions()) {
+            if (version.getProtocol().getIncludedVersions().contains(s)) return version;
+        }
+
         throw new ValueConversionException("Unable to find version '" + s + "'");
     }
 

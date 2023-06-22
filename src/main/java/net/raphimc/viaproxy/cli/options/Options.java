@@ -85,49 +85,49 @@ public class Options {
         final OptionSet options;
         try {
             options = parser.parse(args);
+
+            if (options.has(help)) {
+                parser.formatHelpWith(new BetterHelpFormatter());
+                parser.printHelpOn(Logger.SYSOUT);
+                System.exit(1);
+            }
+
+            BIND_ADDRESS = options.valueOf(bindAddress);
+            BIND_PORT = options.valueOf(bindPort);
+            SRV_MODE = options.has(srvMode);
+            INTERNAL_SRV_MODE = options.has(iSrvMode);
+            ONLINE_MODE = options.has(onlineMode);
+            CONNECT_ADDRESS = options.valueOf(connectAddress);
+            PROTOCOL_VERSION = options.valueOf(version);
+            if (options.has(connectPort)) {
+                CONNECT_PORT = options.valueOf(connectPort);
+            } else {
+                CONNECT_PORT = PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(PROTOCOL_VERSION, 25565)).getDefaultPort();
+            }
+            COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
+            OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
+            BETACRAFT_AUTH = options.has(betaCraftAuth);
+            if (options.has(resourcePackUrl)) {
+                RESOURCE_PACK_URL = options.valueOf(resourcePackUrl);
+            }
+            if (options.has(proxyUrl)) {
+                try {
+                    PROXY_URL = new URI(options.valueOf(proxyUrl));
+                } catch (URISyntaxException e) {
+                    Logger.LOGGER.error("Invalid proxy url: " + options.valueOf(proxyUrl));
+                    Logger.LOGGER.error("Proxy url format: type://address:port or type://username:password@address:port");
+                    System.exit(1);
+                }
+            }
+            SERVER_HAPROXY_PROTOCOL = options.has(serverHaProxyProtocol);
+            LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
+            PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
         } catch (OptionException e) {
             Logger.LOGGER.error("Error parsing options: " + e.getMessage());
             parser.formatHelpWith(new BetterHelpFormatter());
             parser.printHelpOn(Logger.SYSOUT);
             System.exit(1);
-            return;
         }
-        if (options.has(help)) {
-            parser.formatHelpWith(new BetterHelpFormatter());
-            parser.printHelpOn(Logger.SYSOUT);
-            System.exit(1);
-        }
-
-        BIND_ADDRESS = options.valueOf(bindAddress);
-        BIND_PORT = options.valueOf(bindPort);
-        SRV_MODE = options.has(srvMode);
-        INTERNAL_SRV_MODE = options.has(iSrvMode);
-        ONLINE_MODE = options.has(onlineMode);
-        CONNECT_ADDRESS = options.valueOf(connectAddress);
-        PROTOCOL_VERSION = options.valueOf(version);
-        if (options.has(connectPort)) {
-            CONNECT_PORT = options.valueOf(connectPort);
-        } else {
-            CONNECT_PORT = PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(PROTOCOL_VERSION, 25565)).getDefaultPort();
-        }
-        COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
-        OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
-        BETACRAFT_AUTH = options.has(betaCraftAuth);
-        if (options.has(resourcePackUrl)) {
-            RESOURCE_PACK_URL = options.valueOf(resourcePackUrl);
-        }
-        if (options.has(proxyUrl)) {
-            try {
-                PROXY_URL = new URI(options.valueOf(proxyUrl));
-            } catch (URISyntaxException e) {
-                Logger.LOGGER.error("Invalid proxy url: " + options.valueOf(proxyUrl));
-                Logger.LOGGER.error("Proxy url format: type://address:port or type://username:password@address:port");
-                System.exit(1);
-            }
-        }
-        SERVER_HAPROXY_PROTOCOL = options.has(serverHaProxyProtocol);
-        LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
-        PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
     }
 
 }
