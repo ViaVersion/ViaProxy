@@ -34,6 +34,7 @@ import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
+import net.raphimc.netminecraft.packet.impl.status.S2CPingResponsePacket;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
@@ -88,6 +89,12 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
                 else break;
 
                 return;
+            case STATUS:
+                if (packet instanceof S2CPingResponsePacket) {
+                    this.proxyConnection.getC2P().writeAndFlush(packet).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, ChannelFutureListener.CLOSE);
+                    return;
+                }
+                break;
             case PLAY:
                 final UnknownPacket unknownPacket = (UnknownPacket) packet;
                 if (unknownPacket.packetId == this.joinGamePacketId) {
