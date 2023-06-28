@@ -147,7 +147,9 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     }
 
     private void handleHandshake(final C2SHandshakePacket packet) throws InterruptedException {
-        String address = packet.address.split("\0")[0];
+        final String[] splitHandshakeAddress = packet.address.split("\0", 2);
+        String address = splitHandshakeAddress[0];
+        String handshakeExtraPayload = splitHandshakeAddress.length > 1 ? ('\0' + splitHandshakeAddress[1]) : "";
         final VersionEnum clientVersion = VersionEnum.fromProtocolVersion(ProtocolVersion.getProtocol(packet.protocolVersion));
 
         if (packet.intendedState != ConnectionState.STATUS && packet.intendedState != ConnectionState.LOGIN) {
@@ -259,7 +261,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.getChannel().writeAndFlush(haProxyMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
 
-        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress(), serverAddress.getPort(), packet.intendedState)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
+        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress() + handshakeExtraPayload, serverAddress.getPort(), packet.intendedState)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
         this.proxyConnection.setConnectionState(packet.intendedState);
     }
 
