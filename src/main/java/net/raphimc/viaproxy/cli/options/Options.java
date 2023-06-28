@@ -60,6 +60,7 @@ public class Options {
     public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
     public static boolean SERVER_HAPROXY_PROTOCOL;
     public static boolean LEGACY_CLIENT_PASSTHROUGH;
+    public static boolean PLAYER_INFO_FORWARDING;
 
     public static void parse(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -80,6 +81,7 @@ public class Options {
         final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for backend TCP connections").withRequiredArg().ofType(String.class);
         final OptionSpec<Void> serverHaProxyProtocol = parser.acceptsAll(asList("server-haproxy-protocol", "server-haproxy"), "Send HAProxy protocol messages to the backend server");
         final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server (No protocol translation)");
+        final OptionSpec<Void> playerInfoForwarding = parser.acceptsAll(asList("player_info_forwarding", "pif"), "Enabled BungeeCord player info forwarding");
         PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options;
@@ -121,6 +123,7 @@ public class Options {
             }
             SERVER_HAPROXY_PROTOCOL = options.has(serverHaProxyProtocol);
             LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
+            PLAYER_INFO_FORWARDING = options.has(playerInfoForwarding);
             PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
         } catch (OptionException e) {
             Logger.LOGGER.error("Error parsing options: " + e.getMessage());

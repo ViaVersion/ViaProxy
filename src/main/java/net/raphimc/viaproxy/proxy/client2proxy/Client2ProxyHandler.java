@@ -147,9 +147,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     }
 
     private void handleHandshake(final C2SHandshakePacket packet) throws InterruptedException {
-        final String[] splitHandshakeAddress = packet.address.split("\0", 2);
-        String address = splitHandshakeAddress[0];
-        String handshakeExtraPayload = splitHandshakeAddress.length > 1 ? ('\0' + splitHandshakeAddress[1]) : "";
         final VersionEnum clientVersion = VersionEnum.fromProtocolVersion(ProtocolVersion.getProtocol(packet.protocolVersion));
 
         if (packet.intendedState != ConnectionState.STATUS && packet.intendedState != ConnectionState.LOGIN) {
@@ -166,13 +163,31 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.customPayloadPacketId = MCPackets.C2S_PLUGIN_MESSAGE.getId(clientVersion.getVersion());
         this.chatSessionUpdatePacketId = MCPackets.C2S_CHAT_SESSION_UPDATE.getId(clientVersion.getVersion());
 
+        String[] handshakeParts = new String[]{packet.address};
+        if (Options.PLAYER_INFO_FORWARDING) {
+            handshakeParts = new String[3];
+            final String[] receivedParts = packet.address.split("\0");
+            for (int i = 0; i < receivedParts.length && i < handshakeParts.length; i++) {
+                handshakeParts[i] = receivedParts[i];
+            }
+            if (handshakeParts[0] == null) {
+                this.proxyConnection.kickClient("§cMissing hostname in handshake. Ensure that your proxy has player info forwarding enabled.");
+            }
+            if (handshakeParts[1] == null) {
+                this.proxyConnection.kickClient("§cMissing player IP in handshake. Ensure that your proxy has player info forwarding enabled.");
+            }
+            if (handshakeParts[2] == null) {
+                this.proxyConnection.kickClient("§cMissing player UUID in handshake. Ensure that your proxy has player info forwarding enabled.");
+            }
+        }
+
         String connectIP = Options.CONNECT_ADDRESS;
         int connectPort = Options.CONNECT_PORT;
         VersionEnum serverVersion = Options.PROTOCOL_VERSION;
         String classicMpPass = null;
 
         if (Options.INTERNAL_SRV_MODE) {
-            final ArrayHelper arrayHelper = ArrayHelper.instanceOf(address.split("\7"));
+            final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
             connectIP = arrayHelper.get(0);
             connectPort = arrayHelper.getInteger(1);
             final String versionString = arrayHelper.get(2);
@@ -188,12 +203,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             if (serverVersion == null) throw CloseAndReturn.INSTANCE;
         } else if (Options.SRV_MODE) {
             try {
-                if (address.toLowerCase().contains(".viaproxy.")) {
-                    address = address.substring(0, address.toLowerCase().lastIndexOf(".viaproxy."));
+                if (handshakeParts[0].toLowerCase().contains(".viaproxy.")) {
+                    handshakeParts[0] = handshakeParts[0].substring(0, handshakeParts[0].toLowerCase().lastIndexOf(".viaproxy."));
                 } else {
                     throw CloseAndReturn.INSTANCE;
                 }
-                final ArrayHelper arrayHelper = ArrayHelper.instanceOf(address.split(Pattern.quote("_")));
+                final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split(Pattern.quote("_")));
                 if (arrayHelper.getLength() < 3) {
                     throw CloseAndReturn.INSTANCE;
                 }
@@ -261,7 +276,8 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.getChannel().writeAndFlush(haProxyMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
 
-        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), serverAddress.getAddress() + handshakeExtraPayload, serverAddress.getPort(), packet.intendedState)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
+        handshakeParts[0] = serverAddress.getAddress();
+        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
         this.proxyConnection.setConnectionState(packet.intendedState);
     }
 
