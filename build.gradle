@@ -91,7 +91,7 @@ dependencies {
 
     include "com.google.code.gson:gson:2.10.1"
     include "com.formdev:flatlaf:3.1.1"
-    include "com.google.guava:guava:32.0.1-jre"
+    include "com.google.guava:guava:32.1.0-jre"
     include "org.apache.commons:commons-lang3:3.12.0"
     include "commons-io:commons-io:2.13.0"
     include "net.sf.jopt-simple:jopt-simple:5.0.4"
