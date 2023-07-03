@@ -44,6 +44,7 @@ import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
+import net.raphimc.viaproxy.protocolhack.viaproxy.ViaBedrockTransferHolder;
 import net.raphimc.viaproxy.proxy.LoginState;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
 import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
@@ -76,12 +77,8 @@ import java.util.regex.Pattern;
 
 public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
-    private static final KeyPair KEY_PAIR;
+    private static final KeyPair KEY_PAIR = CryptUtil.generateKeyPair();
     private static final Random RANDOM = new Random();
-
-    static {
-        KEY_PAIR = CryptUtil.generateKeyPair();
-    }
 
     private ProxyConnection proxyConnection;
     private LoginState loginState = LoginState.FIRST_PACKET;
@@ -225,6 +222,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             } catch (CloseAndReturn e) {
                 this.proxyConnection.kickClient("§cWrong SRV syntax! §6Please use:\n§7ip_port_version.viaproxy.hostname");
             }
+        }
+
+        if (serverVersion.equals(VersionEnum.bedrockLatest) && packet.intendedState == ConnectionState.LOGIN && ViaBedrockTransferHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
+            final InetSocketAddress newAddress = ViaBedrockTransferHolder.removeTempRedirect(this.proxyConnection.getC2P());
+            connectIP = newAddress.getHostString();
+            connectPort = newAddress.getPort();
         }
 
         final ResolveSrvEvent resolveSrvEvent = PluginManager.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, connectIP, connectPort));
