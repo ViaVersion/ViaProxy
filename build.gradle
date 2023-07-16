@@ -54,6 +54,10 @@ repositories {
         name = "ViaVersion"
         url "https://repo.viaversion.com"
     }
+    maven {
+        name = "Minecraft Libraries"
+        url "https://libraries.minecraft.net"
+    }
     ivy { // This workaround is needed as gradle does not allow to include Java 17 dependencies in a Java 8 project
         name = "Mojang"
         url "https://libraries.minecraft.net"
