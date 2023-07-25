@@ -27,7 +27,7 @@ ViaProxy supports joining to any of the listed server version from any of the li
 
 ## Releases
 ### Executable Jar File
-If you want the executable jar file you can download a stable release from [GitHub](https://github.com/RaphiMC/ViaProxy/releases/latest) or the latest dev version from this [Jenkins](https://ci.viaversion.com/view/All/job/ViaProxy/).
+If you want the executable jar file you can download a stable release from [GitHub](https://github.com/ViaVersion/ViaProxy/releases/latest) or the latest dev version from this [Jenkins](https://ci.viaversion.com/view/All/job/ViaProxy/).
 
 ### Gradle/Maven
 To use ViaProxy with Gradle/Maven you can use the ViaVersion maven server:
@@ -97,6 +97,6 @@ Documentation and examples:
 
 ## Contact
 If you encounter any issues, please report them on the
-[issue tracker](https://github.com/RaphiMC/ViaProxy/issues).  
+[issue tracker](https://github.com/ViaVersion/ViaProxy/issues).  
 If you just want to talk or need help using ViaProxy feel free to join the ViaVersion
 [Discord](https://discord.gg/viaversion).
