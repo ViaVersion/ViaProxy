@@ -21,12 +21,7 @@ public class CloseAndReturn extends RuntimeException {
 
     public static final CloseAndReturn INSTANCE = new CloseAndReturn();
 
-    CloseAndReturn() {
-    }
-
-    @Override
-    public String toString() {
-        return "";
+    private CloseAndReturn() {
     }
 
     @Override
