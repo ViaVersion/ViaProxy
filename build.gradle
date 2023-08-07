@@ -103,7 +103,7 @@ dependencies {
     include "org.apache.logging.log4j:log4j-core:2.20.0"
     include "org.apache.logging.log4j:log4j-slf4j-impl:2.20.0"
     include "com/mojang:authlib:3.16.29"
-    include "net.lenni0451.classtransform:mixinstranslator:1.9.1"
+    include "net.lenni0451.classtransform:mixinstranslator:1.10.0"
     include "net.lenni0451.classtransform:mixinsdummy:1.9.1"
     include "net.lenni0451.classtransform:additionalclassprovider:1.9.1"
     include "net.lenni0451:Reflect:1.2.2"
