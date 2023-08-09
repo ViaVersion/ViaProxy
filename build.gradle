@@ -109,7 +109,7 @@ dependencies {
     include "net.lenni0451:Reflect:1.2.2"
     include "net.lenni0451:LambdaEvents:2.2.0"
     include "net.raphimc.netminecraft:all:2.3.4"
-    include("net.raphimc:MinecraftAuth:2.1.4-SNAPSHOT") {
+    include("net.raphimc:MinecraftAuth:2.1.5-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }
