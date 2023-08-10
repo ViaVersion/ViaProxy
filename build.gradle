@@ -83,7 +83,7 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-core:2.0.4-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.2.18-SNAPSHOT"
+    include "net.raphimc:ViaLegacy:2.2.19-SNAPSHOT"
     include "net.raphimc:ViaAprilFools:2.0.7"
     include("net.raphimc:ViaBedrock:0.0.2-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
