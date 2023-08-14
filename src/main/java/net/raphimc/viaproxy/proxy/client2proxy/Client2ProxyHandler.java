@@ -295,11 +295,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
-        proxyConnection.setLoginHelloPacket(packet);
+        this.proxyConnection.setLoginHelloPacket(packet);
         if (packet instanceof C2SLoginHelloPacket1_19_3) {
-            proxyConnection.setGameProfile(new GameProfile(((C2SLoginHelloPacket1_19_3) packet).uuid, packet.name));
+            this.proxyConnection.setGameProfile(new GameProfile(((C2SLoginHelloPacket1_19_3) packet).uuid, packet.name));
         } else {
-            proxyConnection.setGameProfile(new GameProfile(null, packet.name));
+            this.proxyConnection.setGameProfile(new GameProfile(null, packet.name));
         }
 
         if (Options.ONLINE_MODE) {

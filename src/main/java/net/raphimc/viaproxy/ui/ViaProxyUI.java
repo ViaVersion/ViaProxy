@@ -82,7 +82,7 @@ public class ViaProxyUI extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                for (AUITab tab : tabs) tab.onClose();
+                for (AUITab tab : ViaProxyUI.this.tabs) tab.onClose();
             }
         });
         this.setSize(500, 353);

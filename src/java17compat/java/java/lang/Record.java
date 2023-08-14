@@ -18,7 +18,7 @@
 package java.lang;
 
 /**
- * Dummy class to make IntelliJ able to access records in Java 8 code
+ * Dummy class to make IntelliJ able to access records in Java 8 code.
  */
 public abstract class Record {
 
