@@ -44,7 +44,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket) {
+        if (packet instanceof UnknownPacket && this.proxyConnection.getConnectionState() == ConnectionState.PLAY) {
             final UnknownPacket unknownPacket = (UnknownPacket) packet;
             if (unknownPacket.packetId == this.configurationAcknowledgedId) {
                 listeners.add(f -> {
@@ -79,7 +79,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket) {
+        if (packet instanceof UnknownPacket && this.proxyConnection.getConnectionState() == ConnectionState.PLAY) {
             final UnknownPacket unknownPacket = (UnknownPacket) packet;
             if (unknownPacket.packetId == this.startConfigurationId) {
                 this.proxyConnection.getChannel().config().setAutoRead(false);

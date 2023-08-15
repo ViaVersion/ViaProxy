@@ -20,6 +20,7 @@ package net.raphimc.viaproxy.proxy.packethandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.PacketTypes;
@@ -45,7 +46,7 @@ public class CustomPayloadPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket) {
+        if (packet instanceof UnknownPacket && this.proxyConnection.getConnectionState() == ConnectionState.PLAY) {
             final UnknownPacket unknownPacket = (UnknownPacket) packet;
             if (unknownPacket.packetId == this.customPayloadId) {
                 final ByteBuf data = Unpooled.wrappedBuffer(unknownPacket.data);
