@@ -41,12 +41,15 @@ import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
+import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,6 +62,8 @@ public class ProxyConnection extends NetClient {
     public static final AttributeKey<ProxyConnection> PROXY_CONNECTION_ATTRIBUTE_KEY = AttributeKey.valueOf("proxy_connection");
 
     private final Channel c2p;
+    private final List<PacketHandler> packetHandlers = new ArrayList<>();
+
     private final AtomicInteger customPayloadId = new AtomicInteger(0);
     private final Map<Integer, CompletableFuture<ByteBuf>> customPayloadListener = new ConcurrentHashMap<>();
 
@@ -108,6 +113,10 @@ public class ProxyConnection extends NetClient {
 
     public Channel getC2P() {
         return this.c2p;
+    }
+
+    public List<PacketHandler> getPacketHandlers() {
+        return this.packetHandlers;
     }
 
     public ServerAddress getServerAddress() {
@@ -176,6 +185,11 @@ public class ProxyConnection extends NetClient {
                     this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getLoginRegistry(true, this.clientVersion.getVersion()));
                 this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getLoginRegistry(false, this.clientVersion.getVersion()));
                 break;
+            case CONFIGURATION:
+                if (this.getChannel() != null)
+                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getConfigurationRegistry(true, this.clientVersion.getVersion()));
+                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getConfigurationRegistry(false, this.clientVersion.getVersion()));
+                break;
             case PLAY:
                 if (this.getChannel() != null)
                     this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getPlayRegistry(true, this.clientVersion.getVersion()));
@@ -241,15 +255,20 @@ public class ProxyConnection extends NetClient {
         Logger.u_err("kick", this.c2p.remoteAddress(), this.getGameProfile(), message.replaceAll("§.", ""));
 
         final ChannelFuture future;
-        if (this.connectionState == ConnectionState.LOGIN) {
+        if (this.connectionState == ConnectionState.STATUS) {
+            future = this.c2p.writeAndFlush(new S2CStatusResponsePacket("{\"players\":{\"max\":0,\"online\":0},\"description\":" + new JsonPrimitive(message) + ",\"version\":{\"protocol\":-1,\"name\":\"ViaProxy\"}}"));
+        } else if (this.connectionState == ConnectionState.LOGIN) {
             future = this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(messageToJson(message)));
+        } else if (this.connectionState == ConnectionState.CONFIGURATION) {
+            final ByteBuf disconnectPacket = Unpooled.buffer();
+            PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_CONFIG_DISCONNECT.getId(this.clientVersion.getVersion()));
+            PacketTypes.writeString(disconnectPacket, messageToJson(message));
+            future = this.c2p.writeAndFlush(disconnectPacket);
         } else if (this.connectionState == ConnectionState.PLAY) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_DISCONNECT.getId(this.clientVersion.getVersion()));
             PacketTypes.writeString(disconnectPacket, messageToJson(message));
             future = this.c2p.writeAndFlush(disconnectPacket);
-        } else if (this.connectionState == ConnectionState.STATUS) {
-            future = this.c2p.writeAndFlush(new S2CStatusResponsePacket("{\"players\":{\"max\":0,\"online\":0},\"description\":" + new JsonPrimitive(message) + ",\"version\":{\"protocol\":-1,\"name\":\"ViaProxy\"}}"));
         } else {
             future = this.c2p.newSucceededFuture();
         }

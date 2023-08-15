@@ -17,9 +17,8 @@
  */
 package net.raphimc.viaproxy.proxy.client2proxy;
 
-import com.mojang.authlib.GameProfile;
+import com.google.common.collect.Lists;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -27,28 +26,19 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.haproxy.*;
 import net.raphimc.netminecraft.constants.ConnectionState;
-import net.raphimc.netminecraft.constants.MCPackets;
-import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.netminecraft.netty.crypto.AESEncryption;
-import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.IPacket;
-import net.raphimc.netminecraft.packet.PacketTypes;
-import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
-import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.ConnectEvent;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
 import net.raphimc.viaproxy.protocolhack.viaproxy.ViaBedrockTransferHolder;
-import net.raphimc.viaproxy.proxy.LoginState;
-import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
-import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
-import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
+import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.session.BedrockProxyConnection;
@@ -59,41 +49,24 @@ import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.logging.Logger;
 
-import javax.crypto.SecretKey;
-import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.nio.channels.UnresolvedAddressException;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Random;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
-    private static final KeyPair KEY_PAIR = CryptUtil.generateKeyPair();
-    private static final Random RANDOM = new Random();
-
     private ProxyConnection proxyConnection;
-    private LoginState loginState = LoginState.FIRST_PACKET;
-
-    private final byte[] verifyToken = new byte[4];
-    private int customPayloadPacketId = -1;
-    private int chatSessionUpdatePacketId = -1;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
 
-        RANDOM.nextBytes(this.verifyToken);
         this.proxyConnection = new DummyProxyConnection(ctx.channel());
-
         ViaProxy.c2pChannels.add(ctx.channel());
     }
 
@@ -112,30 +85,19 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     protected void channelRead0(ChannelHandlerContext ctx, IPacket packet) throws Exception {
         if (this.proxyConnection.isClosed()) return;
 
-        switch (this.proxyConnection.getConnectionState()) {
-            case HANDSHAKING:
-                if (packet instanceof C2SHandshakePacket) this.handleHandshake((C2SHandshakePacket) packet);
-                else throw new IllegalStateException("Unexpected packet in HANDSHAKING state");
-
-                return;
-            case LOGIN:
-                if (packet instanceof C2SLoginHelloPacket1_7) this.handleLoginHello((C2SLoginHelloPacket1_7) packet);
-                else if (packet instanceof C2SLoginKeyPacket1_7) this.handleLoginKey((C2SLoginKeyPacket1_7) packet);
-                else if (packet instanceof C2SLoginCustomPayloadPacket) this.handleLoginCustomPayload((C2SLoginCustomPayloadPacket) packet);
-                else throw new IllegalStateException("Unexpected packet in LOGIN state");
-
-                return;
-            case PLAY:
-                final UnknownPacket unknownPacket = (UnknownPacket) packet;
-                if (unknownPacket.packetId == this.customPayloadPacketId) {
-                    if (this.handlePlayCustomPayload(Unpooled.wrappedBuffer(unknownPacket.data))) return;
-                } else if (unknownPacket.packetId == this.chatSessionUpdatePacketId && this.proxyConnection.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).get() == null) {
-                    return;
-                }
-                break;
+        if (this.proxyConnection.getConnectionState() == ConnectionState.HANDSHAKING) {
+            if (packet instanceof C2SHandshakePacket) this.handleHandshake((C2SHandshakePacket) packet);
+            else throw new IllegalStateException("Unexpected packet in HANDSHAKING state");
+            return;
         }
 
-        this.proxyConnection.getChannel().writeAndFlush(packet).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        final List<ChannelFutureListener> listeners = Lists.newArrayList(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        for (PacketHandler packetHandler : this.proxyConnection.getPacketHandlers()) {
+            if (!packetHandler.handleC2P(packet, listeners)) {
+                return;
+            }
+        }
+        this.proxyConnection.getChannel().writeAndFlush(packet).addListeners(listeners.toArray(new ChannelFutureListener[0]));
     }
 
     @Override
@@ -156,9 +118,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         if (clientVersion == VersionEnum.UNKNOWN || !VersionEnum.OFFICIAL_SUPPORTED_PROTOCOLS.contains(clientVersion)) {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
         }
-
-        this.customPayloadPacketId = MCPackets.C2S_PLUGIN_MESSAGE.getId(clientVersion.getVersion());
-        this.chatSessionUpdatePacketId = MCPackets.C2S_CHAT_SESSION_UPDATE.getId(clientVersion.getVersion());
 
         String[] handshakeParts = new String[]{packet.address};
         if (Options.PLAYER_INFO_FORWARDING) {
@@ -256,9 +215,16 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.setClientVersion(clientVersion);
         this.proxyConnection.setConnectionState(packet.intendedState);
         this.proxyConnection.setClassicMpPass(classicMpPass);
+        this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
+        this.proxyConnection.getPacketHandlers().add(new CustomPayloadPacketHandler(this.proxyConnection));
+        this.proxyConnection.getPacketHandlers().add(new LoginPacketHandler(this.proxyConnection));
+        this.proxyConnection.getPacketHandlers().add(new ConfigurationPacketHandler(this.proxyConnection));
+        this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
+        this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
 
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
         try {
+            PluginManager.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
             this.proxyConnection.connectToServer(serverAddress, serverVersion);
         } catch (Throwable e) {
             if (e instanceof ConnectException || e instanceof UnresolvedAddressException) { // Trust me, this is not always false
@@ -282,93 +248,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         handshakeParts[0] = serverAddress.getAddress();
         this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
         this.proxyConnection.setConnectionState(packet.intendedState);
-    }
-
-    private void handleLoginHello(C2SLoginHelloPacket1_7 packet) {
-        if (this.loginState != LoginState.FIRST_PACKET) throw CloseAndReturn.INSTANCE;
-        this.loginState = LoginState.SENT_HELLO;
-
-        if (packet instanceof C2SLoginHelloPacket1_19) {
-            final C2SLoginHelloPacket1_19 packet1_19 = (C2SLoginHelloPacket1_19) packet;
-            if (packet1_19.expiresAt != null && packet1_19.expiresAt.isBefore(Instant.now())) {
-                throw new IllegalStateException("Expired public key");
-            }
-        }
-
-        proxyConnection.setLoginHelloPacket(packet);
-        if (packet instanceof C2SLoginHelloPacket1_19_3) {
-            proxyConnection.setGameProfile(new GameProfile(((C2SLoginHelloPacket1_19_3) packet).uuid, packet.name));
-        } else {
-            proxyConnection.setGameProfile(new GameProfile(null, packet.name));
-        }
-
-        if (Options.ONLINE_MODE) {
-            this.proxyConnection.getC2P().writeAndFlush(new S2CLoginKeyPacket1_8("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-        } else {
-            ExternalInterface.fillPlayerData(this.proxyConnection);
-            this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-        }
-    }
-
-    private void handleLoginKey(final C2SLoginKeyPacket1_7 packet) throws GeneralSecurityException {
-        if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(packet.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
-            final ByteBuf byteBuf = Unpooled.wrappedBuffer(packet.encryptedSecretKey);
-            this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);
-            return;
-        }
-
-        if (this.loginState != LoginState.SENT_HELLO) throw CloseAndReturn.INSTANCE;
-        this.loginState = LoginState.SENT_KEY;
-
-        if (packet.encryptedNonce != null) {
-            if (!Arrays.equals(this.verifyToken, CryptUtil.decryptData(KEY_PAIR.getPrivate(), packet.encryptedNonce))) {
-                Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid verify token");
-                this.proxyConnection.kickClient("§cInvalid verify token!");
-            }
-        } else {
-            final C2SLoginKeyPacket1_19 keyPacket = (C2SLoginKeyPacket1_19) packet;
-            final C2SLoginHelloPacket1_19 helloPacket = (C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket();
-            if (helloPacket.key == null || !CryptUtil.verifySignedNonce(helloPacket.key, this.verifyToken, keyPacket.salt, keyPacket.signature)) {
-                Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid verify token");
-                this.proxyConnection.kickClient("§cInvalid verify token!");
-            }
-        }
-
-        final SecretKey secretKey = CryptUtil.decryptSecretKey(KEY_PAIR.getPrivate(), packet.encryptedSecretKey);
-        this.proxyConnection.getC2P().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(secretKey));
-
-        final String userName = this.proxyConnection.getGameProfile().getName();
-
-        try {
-            final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
-            final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
-            if (mojangProfile == null) {
-                Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid session");
-                this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
-            } else {
-                this.proxyConnection.setGameProfile(mojangProfile);
-            }
-            Logger.u_info("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
-        } catch (Throwable e) {
-            throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
-        }
-
-        ExternalInterface.fillPlayerData(this.proxyConnection);
-        this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-    }
-
-    private void handleLoginCustomPayload(final C2SLoginCustomPayloadPacket packet) {
-        if (packet.response == null || !this.proxyConnection.handleCustomPayload(packet.queryId, Unpooled.wrappedBuffer(packet.response))) {
-            this.proxyConnection.getChannel().writeAndFlush(packet).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-        }
-    }
-
-    private boolean handlePlayCustomPayload(final ByteBuf packet) {
-        final String channel = PacketTypes.readString(packet, Short.MAX_VALUE); // channel
-        if (channel.equals(OpenAuthModConstants.DATA_CHANNEL)) {
-            return this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(packet), packet);
-        }
-        return false;
     }
 
 }

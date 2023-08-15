@@ -26,6 +26,7 @@ import net.raphimc.mcauth.step.bedrock.StepMCChain;
 import net.raphimc.mcauth.step.java.StepPlayerCertificates;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_20_2;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.vialoader.util.VersionEnum;
@@ -78,7 +79,7 @@ public class ExternalInterface {
                     if (proxyConnection.getClientVersion().equals(VersionEnum.r1_19)) {
                         loginHelloKeySignature = playerCertificates.legacyPublicKeySignature();
                     }
-                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_19_3(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
+                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_20_2(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
 
                     user.put(new ChatSession1_19_0(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.legacyPublicKeySignature())));
                     user.put(new ChatSession1_19_1(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
