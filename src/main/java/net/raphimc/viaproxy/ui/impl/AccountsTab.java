@@ -94,24 +94,24 @@ public class AccountsTab extends AUITab {
             this.accountsList.addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent e) {
                     if (SwingUtilities.isRightMouseButton(e)) {
-                        int row = accountsList.locationToIndex(e.getPoint());
-                        accountsList.setSelectedIndex(row);
+                        int row = AccountsTab.this.accountsList.locationToIndex(e.getPoint());
+                        AccountsTab.this.accountsList.setSelectedIndex(row);
                     } else if (e.getClickCount() == 2) {
-                        int index = accountsList.getSelectedIndex();
-                        if (index != -1) markSelected(index);
+                        int index = AccountsTab.this.accountsList.getSelectedIndex();
+                        if (index != -1) AccountsTab.this.markSelected(index);
                     }
                 }
             });
             this.accountsList.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    int index = accountsList.getSelectedIndex();
+                    int index = AccountsTab.this.accountsList.getSelectedIndex();
                     if (index == -1) return;
                     if (e.getKeyCode() == KeyEvent.VK_UP) {
-                        moveUp(index);
+                        AccountsTab.this.moveUp(index);
                         e.consume();
                     } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                        moveDown(index);
+                        AccountsTab.this.moveDown(index);
                         e.consume();
                     }
                 }
@@ -252,7 +252,7 @@ public class AccountsTab extends AUITab {
         }
 
         Options.MC_ACCOUNT = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
-        accountsList.repaint();
+        this.accountsList.repaint();
     }
 
     private void moveUp(final int index) {

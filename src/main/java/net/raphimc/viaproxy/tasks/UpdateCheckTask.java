@@ -79,7 +79,7 @@ public class UpdateCheckTask implements Runnable {
                     boolean found = false;
                     for (JsonElement asset : assets) {
                         JsonObject assetObject = asset.getAsJsonObject();
-                        if (isViaProxyJar(object, assetObject)) {
+                        if (this.isViaProxyJar(object, assetObject)) {
                             found = true;
                             SwingUtilities.invokeLater(() -> this.showUpdateQuestion(assetObject.get("name").getAsString(), assetObject.get("browser_download_url").getAsString(), latestVersion));
                             break;

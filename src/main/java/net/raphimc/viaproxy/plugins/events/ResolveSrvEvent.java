@@ -37,7 +37,7 @@ public class ResolveSrvEvent extends EventCancellable {
     }
 
     public String getHost() {
-        return host;
+        return this.host;
     }
 
     public void setHost(final String host) {
@@ -45,7 +45,7 @@ public class ResolveSrvEvent extends EventCancellable {
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     public void setPort(final int port) {

@@ -31,7 +31,7 @@ public class ViaProxyTransferProvider extends TransferProvider {
     public void connectToServer(UserConnection user, InetSocketAddress newAddress) {
         ViaBedrockTransferHolder.addTempRedirect(user.getChannel(), newAddress);
         try {
-            ProxyConnection.fromUserConnection(user).kickClient("§aThe server transferred you to another server §7(§e"+ newAddress.getHostName() + ":" + newAddress.getPort() + "§7)§a. Please reconnect to ViaProxy.");
+            ProxyConnection.fromUserConnection(user).kickClient("§aThe server transferred you to another server §7(§e" + newAddress.getHostName() + ":" + newAddress.getPort() + "§7)§a. Please reconnect to ViaProxy.");
         } catch (CloseAndReturn ignored) {
         }
     }

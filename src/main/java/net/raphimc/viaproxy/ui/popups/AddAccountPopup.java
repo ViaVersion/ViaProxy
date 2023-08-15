@@ -51,7 +51,7 @@ public class AddAccountPopup extends JDialog {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (!externalClose) closeListener.run();
+                if (!AddAccountPopup.this.externalClose) closeListener.run();
             }
         });
         this.setTitle("Add Account");
@@ -74,7 +74,7 @@ public class AddAccountPopup extends JDialog {
             urlLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    parent.openURL(deviceCode.verificationUri());
+                    AddAccountPopup.this.parent.openURL(AddAccountPopup.this.deviceCode.verificationUri());
                 }
             });
             contentPane.add(urlLabel);

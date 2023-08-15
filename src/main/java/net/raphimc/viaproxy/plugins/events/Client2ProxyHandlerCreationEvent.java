@@ -22,7 +22,7 @@ import io.netty.channel.ChannelHandler;
 public class Client2ProxyHandlerCreationEvent {
 
     /**
-     * The handler which will be used to handle Client<->Proxy packets
+     * The handler which will be used to handle Client<->Proxy packets.
      */
     private ChannelHandler handler;
 
