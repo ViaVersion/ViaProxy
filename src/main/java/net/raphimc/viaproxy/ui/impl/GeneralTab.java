@@ -209,13 +209,13 @@ public class GeneralTab extends AUITab {
             ViaProxy.saveManager.uiSave.put("notice.ban_warning", "true");
             ViaProxy.saveManager.save();
 
-            this.frame.showWarning("<html>ViaProxy may trigger anti-cheats, due to block, item, movement and other differences between versions. <b>USE AT OWN RISK!</b></html>");
+            this.frame.showWarning("<html><div style='text-align: center;'>ViaProxy may trigger anti-cheats, due to block, item, movement and other differences between versions.<br><b>USE AT YOUR OWN RISK!</b></div></html>");
         }
         if (VersionEnum.bedrockLatest.equals(selectedItem) && ViaProxy.saveManager.uiSave.get("notice.bedrock_warning") == null) {
             ViaProxy.saveManager.uiSave.put("notice.bedrock_warning", "true");
             ViaProxy.saveManager.save();
 
-            this.frame.showWarning("<html>ViaBedrock is currently in very early development and not ready for general use. <b>CONTINUE AT YOUR OWN RISK!</b></html>");
+            this.frame.showWarning("<html><div style='text-align: center;'>ViaBedrock is currently in very early development and not ready for general use.<br><b>CONTINUE AT YOUR OWN RISK!</b></div></html>");
         }
 
         this.setComponentsEnabled(false);
