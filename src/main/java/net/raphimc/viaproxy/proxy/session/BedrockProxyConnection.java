@@ -74,7 +74,7 @@ public class BedrockProxyConnection extends ProxyConnection {
 
     @Override
     public void connectToServer(ServerAddress serverAddress, VersionEnum targetVersion) {
-        if (this.getConnectionState() == ConnectionState.STATUS) {
+        if (this.getC2pConnectionState() == ConnectionState.STATUS) {
             RStream.of(this).withSuper().fields().by("serverAddress").set(serverAddress);
             RStream.of(this).withSuper().fields().by("serverVersion").set(targetVersion);
             this.ping(serverAddress);

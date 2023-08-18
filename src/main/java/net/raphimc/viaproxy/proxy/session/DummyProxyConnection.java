@@ -97,8 +97,13 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public ConnectionState getConnectionState() {
+    public ConnectionState getC2pConnectionState() {
         return ConnectionState.HANDSHAKING;
+    }
+
+    @Override
+    public ConnectionState getP2sConnectionState() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

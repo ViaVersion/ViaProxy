@@ -67,7 +67,7 @@ public class LoginPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException {
-        if (packet instanceof UnknownPacket && this.proxyConnection.getConnectionState() == ConnectionState.PLAY) {
+        if (packet instanceof UnknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
             final UnknownPacket unknownPacket = (UnknownPacket) packet;
             if (unknownPacket.packetId == this.chatSessionUpdateId && this.proxyConnection.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).get() == null) {
                 return false;
@@ -202,7 +202,8 @@ public class LoginPacketHandler extends PacketHandler {
             this.proxyConnection.getChannel().config().setAutoRead(false);
             listeners.add(f -> {
                 if (f.isSuccess() && nextState != ConnectionState.CONFIGURATION) {
-                    this.proxyConnection.setConnectionState(nextState);
+                    this.proxyConnection.setC2pConnectionState(nextState);
+                    this.proxyConnection.setP2sConnectionState(nextState);
                     this.proxyConnection.getChannel().config().setAutoRead(true);
                 }
             });

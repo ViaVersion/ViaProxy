@@ -44,31 +44,32 @@ public class ConfigurationPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket && this.proxyConnection.getConnectionState() == ConnectionState.PLAY) {
+        if (packet instanceof UnknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
             final UnknownPacket unknownPacket = (UnknownPacket) packet;
             if (unknownPacket.packetId == this.configurationAcknowledgedId) {
+                this.proxyConnection.setC2pConnectionState(ConnectionState.CONFIGURATION);
                 listeners.add(f -> {
                     if (f.isSuccess()) {
                         Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Switching to CONFIGURATION state");
-                        this.proxyConnection.setConnectionState(ConnectionState.CONFIGURATION);
+                        this.proxyConnection.setP2sConnectionState(ConnectionState.CONFIGURATION);
                         this.proxyConnection.getChannel().config().setAutoRead(true);
                     }
                 });
             }
         } else if (packet instanceof C2SLoginStartConfiguration1_20_2) {
-            this.proxyConnection.getC2P().config().setAutoRead(false);
+            this.proxyConnection.setC2pConnectionState(ConnectionState.CONFIGURATION);
             listeners.add(f -> {
                 if (f.isSuccess()) {
-                    this.proxyConnection.setConnectionState(ConnectionState.CONFIGURATION);
+                    this.proxyConnection.setP2sConnectionState(ConnectionState.CONFIGURATION);
                     this.proxyConnection.getChannel().config().setAutoRead(true);
-                    this.proxyConnection.getC2P().config().setAutoRead(true);
                 }
             });
         } else if (packet instanceof C2SConfigFinishConfiguration1_20_2) {
+            this.proxyConnection.setC2pConnectionState(ConnectionState.PLAY);
             listeners.add(f -> {
                 if (f.isSuccess()) {
                     Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Configuration finished! Switching to PLAY state");
-                    this.proxyConnection.setConnectionState(ConnectionState.PLAY);
+                    this.proxyConnection.setP2sConnectionState(ConnectionState.PLAY);
                     this.proxyConnection.getChannel().config().setAutoRead(true);
                 }
             });
@@ -79,7 +80,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket && this.proxyConnection.getConnectionState() == ConnectionState.PLAY) {
+        if (packet instanceof UnknownPacket && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY) {
             final UnknownPacket unknownPacket = (UnknownPacket) packet;
             if (unknownPacket.packetId == this.startConfigurationId) {
                 this.proxyConnection.getChannel().config().setAutoRead(false);

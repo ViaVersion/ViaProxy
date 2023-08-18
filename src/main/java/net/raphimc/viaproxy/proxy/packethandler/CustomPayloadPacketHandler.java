@@ -46,7 +46,7 @@ public class CustomPayloadPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket && this.proxyConnection.getConnectionState() == ConnectionState.PLAY) {
+        if (packet instanceof UnknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
             final UnknownPacket unknownPacket = (UnknownPacket) packet;
             if (unknownPacket.packetId == this.customPayloadId) {
                 final ByteBuf data = Unpooled.wrappedBuffer(unknownPacket.data);

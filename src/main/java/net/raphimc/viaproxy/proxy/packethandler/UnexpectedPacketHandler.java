@@ -32,7 +32,7 @@ public class UnexpectedPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        final ConnectionState connectionState = this.proxyConnection.getConnectionState();
+        final ConnectionState connectionState = this.proxyConnection.getC2pConnectionState();
         if (connectionState.equals(ConnectionState.HANDSHAKING)) {
             throw new IllegalStateException("Unexpected packet in " + connectionState + " state");
         }

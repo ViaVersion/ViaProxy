@@ -85,7 +85,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     protected void channelRead0(ChannelHandlerContext ctx, IPacket packet) throws Exception {
         if (this.proxyConnection.isClosed()) return;
 
-        if (this.proxyConnection.getConnectionState() == ConnectionState.HANDSHAKING) {
+        if (this.proxyConnection.getC2pConnectionState() == ConnectionState.HANDSHAKING) {
             if (packet instanceof C2SHandshakePacket) this.handleHandshake((C2SHandshakePacket) packet);
             else throw new IllegalStateException("Unexpected packet in HANDSHAKING state");
             return;
@@ -105,15 +105,15 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         ExceptionUtil.handleNettyException(ctx, cause, this.proxyConnection);
     }
 
-    private void handleHandshake(final C2SHandshakePacket packet) throws InterruptedException {
+    private void handleHandshake(final C2SHandshakePacket packet) {
         final VersionEnum clientVersion = VersionEnum.fromProtocolVersion(ProtocolVersion.getProtocol(packet.protocolVersion));
 
-        if (packet.intendedState != ConnectionState.STATUS && packet.intendedState != ConnectionState.LOGIN) {
+        if (packet.intendedState == null) {
             throw CloseAndReturn.INSTANCE;
         }
 
         this.proxyConnection.setClientVersion(clientVersion);
-        this.proxyConnection.setConnectionState(packet.intendedState);
+        this.proxyConnection.setC2pConnectionState(packet.intendedState);
 
         if (clientVersion == VersionEnum.UNKNOWN || !VersionEnum.OFFICIAL_SUPPORTED_PROTOCOLS.contains(clientVersion)) {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
@@ -213,7 +213,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
         this.proxyConnection.getC2P().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
         this.proxyConnection.setClientVersion(clientVersion);
-        this.proxyConnection.setConnectionState(packet.intendedState);
+        this.proxyConnection.setC2pConnectionState(packet.intendedState);
         this.proxyConnection.setClassicMpPass(classicMpPass);
         this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CustomPayloadPacketHandler(this.proxyConnection));
@@ -246,8 +246,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
 
         handshakeParts[0] = serverAddress.getAddress();
-        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).await();
-        this.proxyConnection.setConnectionState(packet.intendedState);
+        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
+            if (f.isSuccess()) {
+                this.proxyConnection.setP2sConnectionState(packet.intendedState);
+            }
+        });
     }
 
 }
