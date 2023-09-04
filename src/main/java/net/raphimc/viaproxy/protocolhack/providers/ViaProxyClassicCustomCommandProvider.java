@@ -32,7 +32,7 @@ public class ViaProxyClassicCustomCommandProvider extends ClassicCustomCommandPr
             if (message.startsWith("/")) {
                 message = message.substring(1);
                 final String[] args = message.split(" ");
-                if (args.length <= 0) return super.handleChatMessage(user, message);
+                if (args.length == 0) return super.handleChatMessage(user, message);
                 if (args[0].equals("settime")) {
                     try {
                         if (args.length > 1) {

@@ -346,23 +346,23 @@ public class ArrayHelper {
             return "";
         }
 
-        String out = "";
+        StringBuilder out = new StringBuilder();
         for (int i = start; i <= end; i++) {
             if (out.isEmpty()) {
-                out = this.getString(i);
+                out = new StringBuilder(this.getString(i));
             } else {
-                out += combiner + this.getString(i);
+                out.append(combiner).append(this.getString(i));
             }
         }
-        return out;
+        return out.toString();
     }
 
 
     @Override
     public String toString() {
-        String complete = "";
+        StringBuilder complete = new StringBuilder();
         for (String t : this.array) {
-            complete += (complete.isEmpty() ? "" : ", ") + t;
+            complete.append((complete.isEmpty()) ? "" : ", ").append(t);
         }
         return "[" + complete + "]";
     }

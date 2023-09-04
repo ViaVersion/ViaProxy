@@ -44,7 +44,7 @@ public class VersionEnumConverter implements ValueConverter<VersionEnum> {
     public String valuePattern() {
         StringBuilder s = new StringBuilder();
         for (VersionEnum version : VersionEnum.getAllVersions()) {
-            s.append((s.length() == 0) ? "" : ", ").append(version.getName());
+            s.append((s.isEmpty()) ? "" : ", ").append(version.getName());
         }
         return "[" + s + "]";
     }
