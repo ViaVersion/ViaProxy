@@ -35,7 +35,6 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.injection.Java17ToJava8;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
@@ -74,7 +73,6 @@ public class ViaProxy {
         final IClassProvider classProvider = new GuavaClassPathProvider();
         final TransformerManager transformerManager = new TransformerManager(classProvider);
         transformerManager.addTransformerPreprocessor(new MixinsTranslator());
-        transformerManager.addBytecodeTransformer(new Java17ToJava8(transformerManager).addWhitelistedPackage("com.mojang"));
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.transformer.**");
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
         if (instrumentation != null) {
@@ -103,6 +101,14 @@ public class ViaProxy {
         Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
 
         if (System.getProperty("ignoreSystemRequirements") == null) {
+            if ("32".equals(System.getProperty("sun.arch.data.model")) && Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
+                Logger.LOGGER.fatal("ViaProxy is not able to run on 32bit Java.");
+                if (hasUI) {
+                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run on 32bit Java. Please install 64bit Java", "ViaProxy", JOptionPane.ERROR_MESSAGE);
+                }
+                System.exit(1);
+            }
+
             if (Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
                 Logger.LOGGER.fatal("ViaProxy is not able to run with less than 256MB of RAM.");
                 if (hasUI) {

@@ -75,11 +75,12 @@ public class UpdateCheckTask implements Runnable {
             if (updateAvailable) {
                 Logger.LOGGER.warn("You are running an outdated version of ViaProxy! Latest version: " + latestVersion);
                 if (this.hasUI) {
+                    final boolean runsJava8 = System.getProperty("java.version").startsWith("1.8");
                     JsonArray assets = object.getAsJsonArray("assets");
                     boolean found = false;
                     for (JsonElement asset : assets) {
                         JsonObject assetObject = asset.getAsJsonObject();
-                        if (this.isViaProxyJar(object, assetObject)) {
+                        if ((this.isMainViaProxyJar(object, assetObject) && !runsJava8) || this.isJava8ViaProxyJar(object, assetObject) && runsJava8) {
                             found = true;
                             SwingUtilities.invokeLater(() -> this.showUpdateQuestion(assetObject.get("name").getAsString(), assetObject.get("browser_download_url").getAsString(), latestVersion));
                             break;
@@ -100,18 +101,16 @@ public class UpdateCheckTask implements Runnable {
         int chosen = JOptionPane.showConfirmDialog(ViaProxy.ui, "You are running an outdated version of ViaProxy!\nCurrent version: " + VERSION + "\nLatest version: " + latestVersion + "\n\nDo you want to update?", "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (chosen == JOptionPane.YES_OPTION) {
             File f = new File(name);
-            new DownloadPopup(ViaProxy.ui, downloadUrl, f, () -> {
-                SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(ViaProxy.ui, "Downloaded the latest version of ViaProxy!\nPress OK to restart.", "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
-                    try {
-                        Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
-                        System.exit(0);
-                    } catch (IOException e) {
-                        Logger.LOGGER.error("Could not start the new ViaProxy jar", e);
-                        ViaProxy.ui.showException(e);
-                    }
-                });
-            }, t -> {
+            new DownloadPopup(ViaProxy.ui, downloadUrl, f, () -> SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(ViaProxy.ui, "Downloaded the latest version of ViaProxy!\nPress OK to restart.", "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
+                    System.exit(0);
+                } catch (IOException e) {
+                    Logger.LOGGER.error("Could not start the new ViaProxy jar", e);
+                    ViaProxy.ui.showException(e);
+                }
+            }), t -> {
                 if (t != null) {
                     Logger.LOGGER.error("Could not download the latest version of ViaProxy", t);
                     ViaProxy.ui.showException(t);
@@ -120,8 +119,12 @@ public class UpdateCheckTask implements Runnable {
         }
     }
 
-    private boolean isViaProxyJar(final JsonObject root, final JsonObject assetObject) {
+    private boolean isMainViaProxyJar(final JsonObject root, final JsonObject assetObject) {
         return assetObject.get("name").getAsString().equals(root.get("name").getAsString() + ".jar");
+    }
+
+    private boolean isJava8ViaProxyJar(final JsonObject root, final JsonObject assetObject) {
+        return assetObject.get("name").getAsString().equals(root.get("name").getAsString() + "+java8.jar");
     }
 
 }
