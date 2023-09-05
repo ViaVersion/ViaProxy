@@ -169,9 +169,8 @@ public class ViaProxy {
         }
         try {
             Logger.LOGGER.info("Starting proxy server");
-            PluginManager.EVENT_MANAGER.call(new ProxyStartEvent());
-
             currentProxyServer = new NetServer(() -> PluginManager.EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler())).getHandler(), Client2ProxyChannelInitializer::new);
+            PluginManager.EVENT_MANAGER.call(new ProxyStartEvent());
             Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS + ":" + Options.BIND_PORT);
             currentProxyServer.bind(Options.BIND_ADDRESS, Options.BIND_PORT, false);
         } catch (Throwable e) {
