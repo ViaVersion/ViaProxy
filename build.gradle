@@ -3,12 +3,8 @@ import net.raphimc.javadowngrader.gradle.task.DowngradeJarTask
 buildscript {
     repositories {
         maven {
-            name = "Lenni0451 Releases"
-            url "https://maven.lenni0451.net/releases"
-        }
-        maven {
-            name = "Lenni0451 Snapshots"
-            url "https://maven.lenni0451.net/snapshots"
+            name = "Lenni0451"
+            url "https://maven.lenni0451.net/everything"
         }
     }
 
@@ -21,7 +17,7 @@ plugins {
     id "java"
     id "application"
     id "maven-publish"
-    id "net.kyori.blossom" version "1.3.1"
+    id "net.raphimc.class-token-replacer" version "1.0.0"
 }
 
 base {
@@ -47,12 +43,8 @@ repositories {
         url = "https://jitpack.io"
     }
     maven {
-        name = "Lenni0451 Releases"
-        url "https://maven.lenni0451.net/releases"
-    }
-    maven {
-        name = "Lenni0451 Snapshots"
-        url "https://maven.lenni0451.net/snapshots"
+        name = "Lenni0451"
+        url "https://maven.lenni0451.net/everything"
     }
     maven {
         name = "OpenCollab Releases"
@@ -125,8 +117,12 @@ dependencies {
     include "gs.mclo:api:3.0.1"
 }
 
-blossom {
-    replaceToken("\${version}", project.version, "src/main/java/net/raphimc/viaproxy/ViaProxy.java")
+sourceSets {
+    main {
+        classTokenReplacer {
+            property("\${version}", project.version)
+        }
+    }
 }
 
 java {
