@@ -19,12 +19,10 @@ package net.raphimc.viaproxy.proxy.client2proxy;
 
 import com.google.common.collect.Lists;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.haproxy.*;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
@@ -46,14 +44,13 @@ import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
+import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.ConnectException;
-import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.nio.channels.UnresolvedAddressException;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -236,13 +233,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
 
         if (Options.SERVER_HAPROXY_PROTOCOL) {
-            final InetSocketAddress sourceAddress = (InetSocketAddress) this.proxyConnection.getC2P().remoteAddress();
-            final InetSocketAddress targetAddress = (InetSocketAddress) this.proxyConnection.getChannel().remoteAddress();
-            final HAProxyProxiedProtocol protocol = sourceAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
-            final HAProxyTLV tlv = new HAProxyTLV((byte) 0xE0, Unpooled.buffer().writeInt(clientVersion.getOriginalVersion()));
-
-            final HAProxyMessage haProxyMessage = new HAProxyMessage(HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, protocol, sourceAddress.getAddress().getHostAddress(), targetAddress.getAddress().getHostAddress(), sourceAddress.getPort(), targetAddress.getPort(), Collections.singletonList(tlv));
-            this.proxyConnection.getChannel().writeAndFlush(haProxyMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
 
         handshakeParts[0] = serverAddress.getAddress();

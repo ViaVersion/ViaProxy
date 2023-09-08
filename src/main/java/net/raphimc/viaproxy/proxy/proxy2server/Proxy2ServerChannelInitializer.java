@@ -87,16 +87,18 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         final String password = proxyUrl.getUserInfo() != null && proxyUrl.getUserInfo().contains(":") ? proxyUrl.getUserInfo().split(":")[1] : null;
 
         switch (proxyUrl.getScheme().toUpperCase(Locale.ROOT)) {
-            case "HTTP":
-            case "HTTPS":
+            case "HTTP", "HTTPS" -> {
                 if (username != null && password != null) return new HttpProxyHandler(proxyAddress, username, password);
                 else return new HttpProxyHandler(proxyAddress);
-            case "SOCKS4":
+            }
+            case "SOCKS4" -> {
                 if (username != null) return new Socks4ProxyHandler(proxyAddress, username);
                 else return new Socks4ProxyHandler(proxyAddress);
-            case "SOCKS5":
+            }
+            case "SOCKS5" -> {
                 if (username != null && password != null) return new Socks5ProxyHandler(proxyAddress, username, password);
                 else return new Socks5ProxyHandler(proxyAddress);
+            }
         }
 
         throw new IllegalArgumentException("Unknown proxy type: " + proxyUrl.getScheme());

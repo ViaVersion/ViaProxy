@@ -20,10 +20,14 @@ package net.raphimc.viaproxy.proxy.client2proxy.passthrough;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
+import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
+import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetClient;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
+import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.util.function.Function;
@@ -97,6 +101,10 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
             this.p2sConnection = null;
             this.c2pChannel.close();
         }
+
+        if (Options.SERVER_HAPROXY_PROTOCOL) {
+            this.p2sConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.c2pChannel, this.p2sConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        }
     }
 
     protected ServerAddress getServerAddress() {
@@ -104,10 +112,13 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
     }
 
     protected Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> getChannelInitializerSupplier() {
-        return s -> new ChannelInitializer<Channel>() {
+        return s -> new ChannelInitializer<>() {
             @Override
             protected void initChannel(Channel channel) {
-                channel.pipeline().addLast(s.get());
+                if (Options.SERVER_HAPROXY_PROTOCOL) {
+                    channel.pipeline().addLast(Proxy2ServerChannelInitializer.VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
+                }
+                channel.pipeline().addLast(MCPipeline.HANDLER_HANDLER_NAME, s.get());
             }
         };
     }
