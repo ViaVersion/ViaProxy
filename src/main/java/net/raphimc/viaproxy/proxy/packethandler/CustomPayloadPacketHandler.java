@@ -46,8 +46,7 @@ public class CustomPayloadPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
-            final UnknownPacket unknownPacket = (UnknownPacket) packet;
+        if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
             if (unknownPacket.packetId == this.customPayloadId) {
                 final ByteBuf data = Unpooled.wrappedBuffer(unknownPacket.data);
                 final String channel = PacketTypes.readString(data, Short.MAX_VALUE); // channel
@@ -55,14 +54,11 @@ public class CustomPayloadPacketHandler extends PacketHandler {
                     return false;
                 }
             }
-        } else if (packet instanceof C2SLoginCustomPayloadPacket) {
-            final C2SLoginCustomPayloadPacket loginCustomPayload = (C2SLoginCustomPayloadPacket) packet;
+        } else if (packet instanceof C2SLoginCustomPayloadPacket loginCustomPayload) {
             if (loginCustomPayload.response != null && this.proxyConnection.handleCustomPayload(loginCustomPayload.queryId, Unpooled.wrappedBuffer(loginCustomPayload.response))) {
                 return false;
             }
-        } else if (packet instanceof C2SLoginKeyPacket1_7) {
-            final C2SLoginKeyPacket1_7 loginKeyPacket = (C2SLoginKeyPacket1_7) packet;
-
+        } else if (packet instanceof C2SLoginKeyPacket1_7 loginKeyPacket) {
             if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(loginKeyPacket.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
                 final ByteBuf byteBuf = Unpooled.wrappedBuffer(loginKeyPacket.encryptedSecretKey);
                 this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);

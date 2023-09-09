@@ -47,8 +47,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY) {
-            final UnknownPacket unknownPacket = (UnknownPacket) packet;
+        if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY) {
             if (unknownPacket.packetId == this.joinGameId) {
                 listeners.add(f -> {
                     if (f.isSuccess()) {

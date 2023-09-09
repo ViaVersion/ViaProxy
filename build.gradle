@@ -65,8 +65,8 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion:4.8.0-23w35a-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.8.0-23w35a-SNAPSHOT") {
+    include "com.viaversion:viaversion:4.8.0-1.20.2-pre2-SNAPSHOT"
+    include("com.viaversion:viabackwards-common:4.8.0-1.20.2-pre2-SNAPSHOT") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"

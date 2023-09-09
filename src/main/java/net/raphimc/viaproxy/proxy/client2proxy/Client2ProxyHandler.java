@@ -214,8 +214,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.setClassicMpPass(classicMpPass);
         this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CustomPayloadPacketHandler(this.proxyConnection));
+        this.proxyConnection.getPacketHandlers().add(new CompressionPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new LoginPacketHandler(this.proxyConnection));
-        this.proxyConnection.getPacketHandlers().add(new ConfigurationPacketHandler(this.proxyConnection));
+        if (clientVersion.isNewerThanOrEqualTo(VersionEnum.r1_20_2) || serverVersion.isNewerThanOrEqualTo(VersionEnum.r1_20_2)) {
+            this.proxyConnection.getPacketHandlers().add(new ConfigurationPacketHandler(this.proxyConnection));
+        }
         this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
 

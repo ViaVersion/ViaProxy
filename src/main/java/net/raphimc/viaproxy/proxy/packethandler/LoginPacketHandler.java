@@ -67,26 +67,23 @@ public class LoginPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException {
-        if (packet instanceof UnknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
-            final UnknownPacket unknownPacket = (UnknownPacket) packet;
+        if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
             if (unknownPacket.packetId == this.chatSessionUpdateId && this.proxyConnection.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).get() == null) {
                 return false;
             }
-        } else if (packet instanceof C2SLoginHelloPacket1_7) {
+        } else if (packet instanceof C2SLoginHelloPacket1_7 loginHelloPacket) {
             if (this.loginState != LoginState.FIRST_PACKET) throw CloseAndReturn.INSTANCE;
             this.loginState = LoginState.SENT_HELLO;
-            final C2SLoginHelloPacket1_7 loginHelloPacket = (C2SLoginHelloPacket1_7) packet;
 
-            if (packet instanceof C2SLoginHelloPacket1_19) {
-                final C2SLoginHelloPacket1_19 packet1_19 = (C2SLoginHelloPacket1_19) packet;
+            if (packet instanceof C2SLoginHelloPacket1_19 packet1_19) {
                 if (packet1_19.expiresAt != null && packet1_19.expiresAt.isBefore(Instant.now())) {
                     throw new IllegalStateException("Expired public key");
                 }
             }
 
             proxyConnection.setLoginHelloPacket(loginHelloPacket);
-            if (packet instanceof C2SLoginHelloPacket1_19_3) {
-                proxyConnection.setGameProfile(new GameProfile(((C2SLoginHelloPacket1_19_3) packet).uuid, loginHelloPacket.name));
+            if (packet instanceof C2SLoginHelloPacket1_19_3 packet1_19_3) {
+                proxyConnection.setGameProfile(new GameProfile(packet1_19_3.uuid, loginHelloPacket.name));
             } else {
                 proxyConnection.setGameProfile(new GameProfile(null, loginHelloPacket.name));
             }
@@ -99,10 +96,9 @@ public class LoginPacketHandler extends PacketHandler {
             }
 
             return false;
-        } else if (packet instanceof C2SLoginKeyPacket1_7) {
+        } else if (packet instanceof C2SLoginKeyPacket1_7 loginKeyPacket) {
             if (this.loginState != LoginState.SENT_HELLO) throw CloseAndReturn.INSTANCE;
             this.loginState = LoginState.SENT_KEY;
-            final C2SLoginKeyPacket1_7 loginKeyPacket = (C2SLoginKeyPacket1_7) packet;
 
             if (loginKeyPacket.encryptedNonce != null) {
                 if (!Arrays.equals(this.verifyToken, CryptUtil.decryptData(KEY_PAIR.getPrivate(), loginKeyPacket.encryptedNonce))) {
@@ -148,9 +144,7 @@ public class LoginPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException, ExecutionException, InterruptedException {
-        if (packet instanceof S2CLoginKeyPacket1_7) {
-            final S2CLoginKeyPacket1_7 loginKeyPacket = (S2CLoginKeyPacket1_7) packet;
-
+        if (packet instanceof S2CLoginKeyPacket1_7 loginKeyPacket) {
             final PublicKey publicKey = CryptUtil.decodeRsaPublicKey(loginKeyPacket.publicKey);
             final SecretKey secretKey = CryptUtil.generateSecretKey();
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginKeyPacket.serverId, publicKey, secretKey)).toString(16);
@@ -179,21 +173,7 @@ public class LoginPacketHandler extends PacketHandler {
             }
 
             return false;
-        } else if (packet instanceof S2CLoginSuccessPacket1_7) {
-            final S2CLoginSuccessPacket1_7 loginSuccessPacket = (S2CLoginSuccessPacket1_7) packet;
-
-            if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_8)) {
-                if (Options.COMPRESSION_THRESHOLD > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
-                    this.proxyConnection.getChannel().config().setAutoRead(false);
-                    this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(Options.COMPRESSION_THRESHOLD)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
-                        if (f.isSuccess()) {
-                            this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(Options.COMPRESSION_THRESHOLD);
-                            this.proxyConnection.getChannel().config().setAutoRead(true);
-                        }
-                    });
-                }
-            }
-
+        } else if (packet instanceof S2CLoginSuccessPacket1_7 loginSuccessPacket) {
             final ConnectionState nextState = this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_20_2) ? ConnectionState.CONFIGURATION : ConnectionState.PLAY;
 
             this.proxyConnection.setGameProfile(new GameProfile(loginSuccessPacket.uuid, loginSuccessPacket.name));
@@ -207,11 +187,6 @@ public class LoginPacketHandler extends PacketHandler {
                     this.proxyConnection.getChannel().config().setAutoRead(true);
                 }
             });
-        } else if (packet instanceof S2CLoginCompressionPacket) {
-            final S2CLoginCompressionPacket loginCompressionPacket = (S2CLoginCompressionPacket) packet;
-
-            this.proxyConnection.getChannel().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(loginCompressionPacket.compressionThreshold);
-            return false;
         }
 
         return true;
