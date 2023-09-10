@@ -191,6 +191,7 @@ public class GeneralTab extends AUITab {
         ViaProxy.ui.advancedTab.proxy.setEnabled(state);
         ViaProxy.ui.advancedTab.legacySkinLoading.setEnabled(state);
         ViaProxy.ui.advancedTab.chatSigning.setEnabled(state);
+        ViaProxy.ui.advancedTab.ignorePacketTranslationErrors.setEnabled(state);
         if (state) this.serverVersion.getActionListeners()[0].actionPerformed(null);
     }
 
@@ -232,6 +233,7 @@ public class GeneralTab extends AUITab {
             final boolean legacySkinLoading = ViaProxy.ui.advancedTab.legacySkinLoading.isSelected();
             final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText().trim();
             final boolean chatSigning = ViaProxy.ui.advancedTab.chatSigning.isSelected();
+            final boolean ignorePacketTranslationErrors = ViaProxy.ui.advancedTab.ignorePacketTranslationErrors.isSelected();
 
             try {
                 try {
@@ -270,6 +272,7 @@ public class GeneralTab extends AUITab {
                     Options.LEGACY_SKIN_LOADING = legacySkinLoading;
                     Options.OPENAUTHMOD_AUTH = authMethod == 2;
                     Options.CHAT_SIGNING = chatSigning;
+                    Options.IGNORE_PACKET_TRANSLATION_ERRORS = ignorePacketTranslationErrors;
 
                     if (!proxyUrl.isEmpty()) {
                         try {

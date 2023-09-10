@@ -18,35 +18,28 @@
 package net.raphimc.viaproxy.protocolhack.impl;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import io.netty.channel.ChannelHandler;
-import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.vialoader.netty.VLPipeline;
-import net.raphimc.vialoader.util.VersionEnum;
+import io.netty.channel.ChannelHandlerContext;
+import net.raphimc.vialoader.netty.ViaCodec;
+import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.util.logging.Logger;
 
-public class ViaProxyVLPipeline extends VLPipeline {
+public class ViaProxyViaCodec extends ViaCodec {
 
-    public ViaProxyVLPipeline(UserConnection user, VersionEnum version) {
-        super(user, version);
+    public ViaProxyViaCodec(UserConnection user) {
+        super(user);
     }
 
     @Override
-    public ChannelHandler createViaCodec() {
-        return new ViaProxyViaCodec(this.user);
-    }
-
-    @Override
-    protected String compressionCodecName() {
-        return MCPipeline.COMPRESSION_HANDLER_NAME;
-    }
-
-    @Override
-    protected String packetCodecName() {
-        return MCPipeline.PACKET_CODEC_HANDLER_NAME;
-    }
-
-    @Override
-    protected String lengthCodecName() {
-        return MCPipeline.SIZER_HANDLER_NAME;
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (Options.IGNORE_PACKET_TRANSLATION_ERRORS) {
+            try {
+                super.channelRead(ctx, msg);
+            } catch (Throwable e) {
+                Logger.LOGGER.error("ProtocolHack packet translation error occurred", e);
+            }
+        } else {
+            super.channelRead(ctx, msg);
+        }
     }
 
 }

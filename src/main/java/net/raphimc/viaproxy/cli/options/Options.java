@@ -52,6 +52,7 @@ public class Options {
     public static String CLASSIC_MP_PASS;
     public static Boolean LEGACY_SKIN_LOADING;
     public static boolean CHAT_SIGNING;
+    public static boolean IGNORE_PACKET_TRANSLATION_ERRORS;
 
     // CLI only config options
     public static int COMPRESSION_THRESHOLD = 256;

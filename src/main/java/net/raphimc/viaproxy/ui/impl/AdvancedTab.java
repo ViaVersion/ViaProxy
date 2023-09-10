@@ -41,6 +41,7 @@ public class AdvancedTab extends AUITab {
     JCheckBox proxyOnlineMode;
     JCheckBox legacySkinLoading;
     JCheckBox chatSigning;
+    JCheckBox ignorePacketTranslationErrors;
     JButton viaVersionDumpButton;
     JButton uploadLogsButton;
 
@@ -103,6 +104,15 @@ public class AdvancedTab extends AUITab {
             this.chatSigning.setSelected(true);
             ViaProxy.saveManager.uiSave.loadCheckBox("chat_signing", this.chatSigning);
             contentPane.add(this.chatSigning);
+        }
+        {
+            this.ignorePacketTranslationErrors = new JCheckBox("Ignore packet translation errors");
+            this.ignorePacketTranslationErrors.setBounds(10, 200, 465, 20);
+            this.ignorePacketTranslationErrors.setToolTipText("Enabling this will prevent getting disconnected from the server when a packet translation error occurs and instead only print the error in the console.\n" +
+                    "This may cause issues depending on the type of packet which failed to translate.");
+            this.ignorePacketTranslationErrors.setSelected(false);
+            ViaProxy.saveManager.uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
+            contentPane.add(this.ignorePacketTranslationErrors);
         }
         {
             this.viaVersionDumpButton = new JButton("Create ViaVersion dump");
@@ -174,6 +184,7 @@ public class AdvancedTab extends AUITab {
         save.put("proxy_online_mode", String.valueOf(this.proxyOnlineMode.isSelected()));
         save.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
         save.put("chat_signing", String.valueOf(this.chatSigning.isSelected()));
+        save.put("ignore_packet_translation_errors", String.valueOf(this.ignorePacketTranslationErrors.isSelected()));
         ViaProxy.saveManager.save();
     }
 
