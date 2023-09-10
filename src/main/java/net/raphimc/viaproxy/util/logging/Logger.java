@@ -21,6 +21,7 @@ import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.fusesource.jansi.AnsiConsole;
 
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
@@ -35,6 +36,7 @@ public class Logger {
     public static final PrintStream SYSERR = System.err;
 
     public static void setup() {
+        AnsiConsole.systemInstall();
         System.setErr(new LoggerPrintStream("STDERR", SYSERR));
         System.setOut(new LoggerPrintStream("STDOUT", SYSOUT));
     }
