@@ -36,7 +36,9 @@ public class Logger {
     public static final PrintStream SYSERR = System.err;
 
     public static void setup() {
-        AnsiConsole.systemInstall();
+        if (System.console() != null) { // jANSI is the best lib. If there is no console it just segfaults the JVM process. Thanks!
+            AnsiConsole.systemInstall();
+        }
         System.setErr(new LoggerPrintStream("STDERR", SYSERR));
         System.setOut(new LoggerPrintStream("STDOUT", SYSOUT));
     }
