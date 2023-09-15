@@ -39,7 +39,7 @@ public class URLClassProvider implements IClassProvider {
     }
 
     @Override
-    public byte[] getClass(String name) {
+    public byte[] getClass(String name) throws ClassNotFoundException {
         for (URL url : this.urls) {
             try (InputStream is = new URL("jar:" + url + "!/" + ASMUtils.slash(name) + ".class").openStream()) {
                 return IOUtils.toByteArray(is);
