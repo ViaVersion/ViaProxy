@@ -97,7 +97,7 @@ dependencies {
     }
     include "net.lenni0451.classtransform:mixinstranslator:1.11.0-SNAPSHOT"
     include "net.lenni0451.classtransform:mixinsdummy:1.11.0-SNAPSHOT"
-    include "net.lenni0451.classtransform:additionalclassprovider:1.11.0-SNAPSHOT"
+    include "net.lenni0451.classtransform:additionalclassprovider:1.11.0"
     include "net.lenni0451:Reflect:1.2.4"
     include "net.lenni0451:LambdaEvents:2.2.0"
     include "net.raphimc.netminecraft:all:2.3.6-SNAPSHOT"
