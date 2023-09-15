@@ -20,6 +20,7 @@ package net.raphimc.viaproxy.plugins;
 import com.vdurmont.semver4j.Semver;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.additionalclassprovider.GuavaClassPathProvider;
+import net.lenni0451.classtransform.additionalclassprovider.LazyFileClassProvider;
 import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.LambdaManager;
@@ -27,7 +28,6 @@ import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.javadowngrader.impl.classtransform.JavaDowngraderTransformer;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.util.URLClassProvider;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
@@ -90,7 +90,7 @@ public class PluginManager {
 
     private static void loadAndScanJar(final File file) throws Throwable {
         final URL url = file.toURI().toURL();
-        final TransformerManager transformerManager = new TransformerManager(new URLClassProvider(ROOT_CLASS_PROVIDER, url));
+        final TransformerManager transformerManager = new TransformerManager(new LazyFileClassProvider(Collections.singletonList(file), ROOT_CLASS_PROVIDER));
         transformerManager.addBytecodeTransformer(new JavaDowngraderTransformer(transformerManager));
         final InjectionClassLoader loader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
         final InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");

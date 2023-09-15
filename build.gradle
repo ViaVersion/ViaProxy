@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "net.raphimc.javadowngrader:gradle-plugin:1.0.0"
+        classpath "net.raphimc.javadowngrader:gradle-plugin:1.0.1-SNAPSHOT"
     }
 }
 
@@ -105,9 +105,9 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    include("net.raphimc.javadowngrader:impl-classtransform:1.0.0") {
+    include("net.raphimc.javadowngrader:impl-classtransform:1.0.1-SNAPSHOT") {
         exclude group: "org.ow2.asm", module: "asm-commons"
-        exclude group: "net.lenni0451.classtransform", module: "core"
+        exclude group: "net.lenni0451.classtransform", module: "additionalclassprovider"
     }
     include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-common"
