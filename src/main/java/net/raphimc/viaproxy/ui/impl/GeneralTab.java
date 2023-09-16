@@ -27,7 +27,9 @@ import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
+import org.jdesktop.swingx.VerticalLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,11 +42,14 @@ import java.net.URISyntaxException;
 
 public class GeneralTab extends AUITab {
 
+    private static final int BORDER_PADDING = 10;
+    private static final int BODY_BLOCK_PADDING = 10;
+
     private JTextField serverAddress;
     private JComboBox<VersionEnum> serverVersion;
     private JComboBox<String> authMethod;
     private JCheckBox betaCraftAuth;
-    private JLabel stateLabel;
+    private JLabel stateLabelLabel;
     private JButton stateButton;
 
     public GeneralTab(final ViaProxyUI frame) {
@@ -53,60 +58,74 @@ public class GeneralTab extends AUITab {
 
     @Override
     protected void init(JPanel contentPane) {
-        {
-            JLabel titleLabel = new JLabel("ViaProxy");
-            titleLabel.setBounds(0, 0, 500, 50);
-            titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            titleLabel.setFont(titleLabel.getFont().deriveFont(30F));
-            contentPane.add(titleLabel);
-        }
-        {
-            JLabel copyrightLabel = new JLabel("© RK_01 & Lenni0451");
-            copyrightLabel.setBounds(360, 10, 500, 20);
-            contentPane.add(copyrightLabel);
-        }
-        {
-            JLabel discordLabel = new JLabel("<html><a href=\"\">Discord</a></html>");
-            discordLabel.setBounds(10, 10, 45, 20);
-            discordLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    frame.openURL("https://discord.gg/viaversion");
-                }
-            });
-            contentPane.add(discordLabel);
-        }
-        {
-            String toolTipText = "Supported formats:\n" +
-                    "- address\n" +
-                    "- address:port\n" +
-                    "- ClassiCube Direct URL";
+        JPanel top = new JPanel();
+        top.setLayout(new VerticalLayout());
 
-            JLabel addressLabel = new JLabel("Server Address:");
-            addressLabel.setBounds(10, 50, 100, 20);
-            addressLabel.setToolTipText(toolTipText);
-            contentPane.add(addressLabel);
+        JPanel bottom = new JPanel();
+        bottom.setLayout(new VerticalLayout());
+
+        this.addHeader(top);
+        this.addBody(top);
+        this.addFooter(bottom);
+
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(top, BorderLayout.NORTH);
+        contentPane.add(bottom, BorderLayout.SOUTH);
+    }
+
+    private void addHeader(final Container parent) {
+        JPanel header = new JPanel();
+        header.setLayout(new GridBagLayout());
+
+        JLabel discord = new JLabel("<html><a href=\"\">Discord</a></html>");
+        discord.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                frame.openURL("https://discord.gg/viaversion");
+            }
+        });
+        GBC.create(header).grid(0, 0).width(0).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(discord);
+
+        JLabel title = new JLabel("ViaProxy");
+        title.setFont(title.getFont().deriveFont(30F));
+        GBC.create(header).grid(1, 0).weightx(1).width(0).insets(BORDER_PADDING, 0, 0, 0).anchor(GridBagConstraints.CENTER).add(title);
+
+        JLabel copyright = new JLabel("© RK_01 & Lenni0451");
+        GBC.create(header).grid(2, 0).width(0).insets(BORDER_PADDING, 0, 0, BORDER_PADDING).anchor(GridBagConstraints.NORTHEAST).add(copyright);
+
+        parent.add(header);
+    }
+
+    private void addBody(final Container parent) {
+        JPanel body = new JPanel();
+        body.setLayout(new GridBagLayout());
+
+        int gridy = 0;
+        {
+            String toolTipText = """
+                    Supported formats:
+                    - address
+                    - address:port
+                    - ClassiCube Direct URL""";
+
+            JLabel serverAddressLabel = new JLabel("Server Address:");
+            serverAddressLabel.setToolTipText(toolTipText);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(serverAddressLabel);
 
             this.serverAddress = new JTextField();
-            this.serverAddress.setBounds(10, 70, 465, 22);
             this.serverAddress.setToolTipText(toolTipText);
             ViaProxy.saveManager.uiSave.loadTextField("server_address", this.serverAddress);
-            contentPane.add(this.serverAddress);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverAddress);
         }
         {
             JLabel serverVersionLabel = new JLabel("Server Version:");
-            serverVersionLabel.setBounds(10, 100, 100, 20);
-            contentPane.add(serverVersionLabel);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(serverVersionLabel);
 
             this.serverVersion = new JComboBox<>(VersionEnum.SORTED_VERSIONS.toArray(new VersionEnum[0]));
-            this.serverVersion.setBounds(10, 120, 465, 22);
             this.serverVersion.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                    if (value instanceof VersionEnum) {
-                        VersionEnum version = (VersionEnum) value;
-                        value = version.getName();
-                    }
+                    if (value instanceof VersionEnum version) value = version.getName();
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
             });
@@ -121,46 +140,48 @@ public class GeneralTab extends AUITab {
                 }
             });
             ViaProxy.saveManager.uiSave.loadComboBox("server_version", this.serverVersion);
-            contentPane.add(this.serverVersion);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverVersion);
         }
         {
-            JLabel authMethodLabel = new JLabel("Minecraft Account:");
-            authMethodLabel.setBounds(10, 150, 400, 20);
-            contentPane.add(authMethodLabel);
+            JLabel minecraftAccountLabel = new JLabel("Minecraft Account:");
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(minecraftAccountLabel);
 
-            this.authMethod = new JComboBox<>(new String[]{"Use no account", "Use selected account", "Use OpenAuthMod"});
-            this.authMethod.setBounds(10, 170, 465, 22);
+            this.authMethod = new JComboBox(new String[]{"Use no account", "Use selected account", "Use OpenAuthMod"});
             ViaProxy.saveManager.uiSave.loadComboBox("auth_method", this.authMethod);
-            contentPane.add(this.authMethod);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.authMethod);
         }
         {
             this.betaCraftAuth = new JCheckBox("BetaCraft Auth (Classic)");
-            this.betaCraftAuth.setBounds(10, 200, 250, 20);
             this.betaCraftAuth.setToolTipText("Enabling BetaCraft Auth allows you to join Classic servers which have online mode enabled.");
             ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
-            contentPane.add(this.betaCraftAuth);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.betaCraftAuth);
             // Simulate user action on serverVersion to update betaCraftAuth
             final ActionEvent fakeAction = new ActionEvent(this.serverVersion, ActionEvent.ACTION_PERFORMED, "");
             for (ActionListener listener : this.serverVersion.getActionListeners()) {
                 listener.actionPerformed(fakeAction);
             }
         }
-        {
-            this.stateLabel = new JLabel();
-            this.stateLabel.setBounds(14, 230, 465, 20);
-            this.stateLabel.setVisible(false);
-            contentPane.add(this.stateLabel);
-        }
-        {
-            this.stateButton = new JButton("Loading ViaProxy...");
-            this.stateButton.setBounds(10, 250, 465, 20);
-            this.stateButton.addActionListener(event -> {
-                if (this.stateButton.getText().equalsIgnoreCase("Start")) this.start();
-                else if (this.stateButton.getText().equalsIgnoreCase("Stop")) this.stop();
-            });
-            this.stateButton.setEnabled(false);
-            contentPane.add(this.stateButton);
-        }
+
+        parent.add(body);
+    }
+
+    private void addFooter(final Container parent) {
+        JPanel footer = new JPanel();
+        footer.setLayout(new GridBagLayout());
+
+        this.stateLabelLabel = new JLabel("State: Not Connected");
+        this.stateLabelLabel.setVisible(false);
+        GBC.create(footer).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateLabelLabel);
+
+        this.stateButton = new JButton("Loading ViaProxy...");
+        this.stateButton.addActionListener(event -> {
+            if (this.stateButton.getText().equalsIgnoreCase("Start")) this.start();
+            else if (this.stateButton.getText().equalsIgnoreCase("Stop")) this.stop();
+        });
+        this.stateButton.setEnabled(false);
+        GBC.create(footer).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateButton);
+
+        parent.add(footer);
     }
 
     @Override
@@ -196,8 +217,8 @@ public class GeneralTab extends AUITab {
     }
 
     private void updateStateLabel() {
-        this.stateLabel.setText("ViaProxy is running! Connect with Minecraft 1.7+ to 127.0.0.1:" + ViaProxy.ui.advancedTab.bindPort.getValue());
-        this.stateLabel.setVisible(true);
+        this.stateLabelLabel.setText("ViaProxy is running! Connect with Minecraft 1.7+ to 127.0.0.1:" + ViaProxy.ui.advancedTab.bindPort.getValue());
+        this.stateLabelLabel.setVisible(true);
     }
 
     private void start() {
@@ -310,7 +331,7 @@ public class GeneralTab extends AUITab {
                     this.setComponentsEnabled(true);
                     this.stateButton.setEnabled(true);
                     this.stateButton.setText("Start");
-                    this.stateLabel.setVisible(false);
+                    this.stateLabelLabel.setVisible(false);
                 });
             }
         }).start();
@@ -319,7 +340,7 @@ public class GeneralTab extends AUITab {
     private void stop() {
         ViaProxy.stopProxy();
 
-        this.stateLabel.setVisible(false);
+        this.stateLabelLabel.setVisible(false);
         this.stateButton.setText("Start");
         this.setComponentsEnabled(true);
     }

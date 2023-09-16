@@ -66,6 +66,7 @@ public class ViaProxyUI extends JFrame {
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
             UIManager.getLookAndFeelDefaults().put("defaultFont", font);
             UIManager.getLookAndFeelDefaults().put("TextComponent.arc", 5);
+            UIManager.getLookAndFeelDefaults().put("Button.arc", 5);
         } catch (Throwable t) {
             t.printStackTrace();
         }
@@ -85,8 +86,8 @@ public class ViaProxyUI extends JFrame {
                 for (AUITab tab : ViaProxyUI.this.tabs) tab.onClose();
             }
         });
-        this.setSize(500, 353);
-        this.setResizable(false);
+        this.setSize(500, 360);
+        this.setMinimumSize(this.getSize());
         this.setLocationRelativeTo(null);
         this.setContentPane(this.contentPane);
     }
