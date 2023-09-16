@@ -35,6 +35,9 @@ import java.util.List;
 
 public class ViaProxyUI extends JFrame {
 
+    public static final int BORDER_PADDING = 10;
+    public static final int BODY_BLOCK_PADDING = 10;
+
     private final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
 

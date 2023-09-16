@@ -28,6 +28,7 @@ import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
+import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.TFunction;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -39,6 +40,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BODY_BLOCK_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
 
 public class AccountsTab extends AUITab {
 
@@ -55,40 +59,22 @@ public class AccountsTab extends AUITab {
 
     @Override
     protected void init(JPanel contentPane) {
-        {
-            JLabel infoLabel = new JLabel("To join online mode servers you have to add minecraft accounts for ViaProxy to use.");
-            infoLabel.setBounds(10, 10, 500, 20);
-            contentPane.add(infoLabel);
-        }
-        {
-            JLabel info2Label = new JLabel("You can select the account by right clicking it. By default the first one will be used.");
-            info2Label.setBounds(10, 30, 500, 20);
-            contentPane.add(info2Label);
-        }
-        {
-            JLabel infoLabel = new JLabel("<html>If you change your account frequently, you can install <a href=\"\">OpenAuthMod</a> on your</html>");
-            infoLabel.setBounds(10, 60, 500, 20);
-            contentPane.add(infoLabel);
+        JPanel body = new JPanel();
+        body.setLayout(new GridBagLayout());
 
-            JLabel infoLabel2 = new JLabel("client. This allows ViaProxy to use the account you are logged in with on the client.");
-            infoLabel2.setBounds(10, 80, 500, 20);
-            contentPane.add(infoLabel2);
-
-            JLabel clickRect = new JLabel();
-            clickRect.setBounds(305, 60, 90, 24);
-            clickRect.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    frame.openURL("https://github.com/RaphiMC/OpenAuthMod/");
-                }
-            });
-            contentPane.add(clickRect);
+        {
+            JLabel infoLabel = new JLabel("""
+                    <html>
+                    <p>To join online mode servers you have to add minecraft accounts for ViaProxy to use.</p>
+                    <p>You can select the account by right clicking it. By default the first one will be used.</p>
+                    <br>
+                    <p>If you change your account frequently, you can install OpenAuthMod on your client.</p>
+                    <p>This allows ViaProxy to use the account you are logged in with on the client.</p>
+                    </html>""");
+            GBC.create(body).grid(0, 0).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(infoLabel);
         }
         {
             JScrollPane scrollPane = new JScrollPane();
-            scrollPane.setBounds(10, 105, 465, 110);
-            contentPane.add(scrollPane);
-
             DefaultListModel<Account> model = new DefaultListModel<>();
             this.accountsList = new JList<>(model);
             this.accountsList.addMouseListener(new MouseAdapter() {
@@ -130,7 +116,6 @@ public class AccountsTab extends AUITab {
                 }
             });
             scrollPane.setViewportView(this.accountsList);
-
             JPopupMenu contextMenu = new JPopupMenu();
             {
                 JMenuItem selectItem = new JMenuItem("Select account");
@@ -175,53 +160,59 @@ public class AccountsTab extends AUITab {
                 contextMenu.add(moveDown);
             }
             this.accountsList.setComponentPopupMenu(contextMenu);
-        }
-
-        final JPanel addButtons = new JPanel();
-        addButtons.setBorder(BorderFactory.createTitledBorder("Add Account"));
-        addButtons.setBounds(10, 220, 465, 50);
-        addButtons.setLayout(null);
-        contentPane.add(addButtons);
-
-        {
-            JButton addOfflineAccountButton = new JButton("Offline Account");
-            addOfflineAccountButton.setBounds(10, 20, 145, 20);
-            addOfflineAccountButton.addActionListener(event -> {
-                String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
-                if (username != null && !username.trim().isEmpty()) {
-                    Account account = ViaProxy.saveManager.accountsSave.addAccount(username);
-                    ViaProxy.saveManager.save();
-                    this.addAccount(account);
-                }
-            });
-            addButtons.add(addOfflineAccountButton);
+            GBC.create(body).grid(0, 1).weight(1, 1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.BOTH).add(scrollPane);
         }
         {
-            this.addMicrosoftAccountButton = new JButton("Microsoft Account");
-            this.addMicrosoftAccountButton.setBounds(160, 20, 145, 20);
-            this.addMicrosoftAccountButton.addActionListener(event -> {
-                this.addMicrosoftAccountButton.setEnabled(false);
-                this.handleLogin(msaDeviceCodeConsumer -> {
-                    try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                        return new MicrosoftAccount(MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
+            final JPanel addButtons = new JPanel();
+            addButtons.setLayout(new GridLayout(1, 3, BORDER_PADDING, 0));
+            contentPane.add(addButtons);
+            {
+                JButton addOfflineAccountButton = new JButton("Offline Account");
+                addOfflineAccountButton.addActionListener(event -> {
+                    String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
+                    if (username != null && !username.trim().isEmpty()) {
+                        Account account = ViaProxy.saveManager.accountsSave.addAccount(username);
+                        ViaProxy.saveManager.save();
+                        this.addAccount(account);
                     }
                 });
-            });
-            addButtons.add(this.addMicrosoftAccountButton);
-        }
-        {
-            this.addBedrockAccountButton = new JButton("Bedrock Account");
-            this.addBedrockAccountButton.setBounds(310, 20, 145, 20);
-            this.addBedrockAccountButton.addActionListener(event -> {
-                this.addBedrockAccountButton.setEnabled(false);
-                this.handleLogin(msaDeviceCodeConsumer -> {
-                    try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                        return new BedrockAccount(MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
-                    }
+                addButtons.add(addOfflineAccountButton);
+            }
+            {
+                this.addMicrosoftAccountButton = new JButton("Microsoft Account");
+                this.addMicrosoftAccountButton.addActionListener(event -> {
+                    this.addMicrosoftAccountButton.setEnabled(false);
+                    this.handleLogin(msaDeviceCodeConsumer -> {
+                        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+                            return new MicrosoftAccount(MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
+                        }
+                    });
                 });
-            });
-            addButtons.add(this.addBedrockAccountButton);
+                addButtons.add(this.addMicrosoftAccountButton);
+            }
+            {
+                this.addBedrockAccountButton = new JButton("Bedrock Account");
+                this.addBedrockAccountButton.addActionListener(event -> {
+                    this.addBedrockAccountButton.setEnabled(false);
+                    this.handleLogin(msaDeviceCodeConsumer -> {
+                        try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
+                            return new BedrockAccount(MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
+                        }
+                    });
+                });
+                addButtons.add(this.addBedrockAccountButton);
+            }
+
+            JPanel border = new JPanel();
+            border.setLayout(new GridBagLayout());
+            border.setBorder(BorderFactory.createTitledBorder("Add Account"));
+            GBC.create(border).grid(0, 0).weightx(1).insets(2, 4, 4, 4).fill(GridBagConstraints.HORIZONTAL).add(addButtons);
+
+            GBC.create(body).grid(0, 2).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(border);
         }
+
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(body, BorderLayout.CENTER);
     }
 
     @Override

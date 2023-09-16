@@ -74,6 +74,12 @@ public class GBC {
         return this;
     }
 
+    public GBC weight(final double weightx, final double weighty) {
+        this.gbc.weightx = weightx;
+        this.gbc.weighty = weighty;
+        return this;
+    }
+
     public GBC anchor(final int anchor) {
         this.gbc.anchor = anchor;
         return this;

@@ -40,10 +40,10 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class GeneralTab extends AUITab {
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BODY_BLOCK_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
 
-    private static final int BORDER_PADDING = 10;
-    private static final int BODY_BLOCK_PADDING = 10;
+public class GeneralTab extends AUITab {
 
     private JTextField serverAddress;
     private JComboBox<VersionEnum> serverVersion;

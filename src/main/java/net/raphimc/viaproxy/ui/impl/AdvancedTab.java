@@ -24,15 +24,20 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
+import org.jdesktop.swingx.VerticalLayout;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.FileNotFoundException;
+
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BODY_BLOCK_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
 
 public class AdvancedTab extends AUITab {
 
@@ -51,72 +56,93 @@ public class AdvancedTab extends AUITab {
 
     @Override
     protected void init(JPanel contentPane) {
+        JPanel top = new JPanel();
+        top.setLayout(new VerticalLayout());
+
+        JPanel bottom = new JPanel();
+        bottom.setLayout(new VerticalLayout());
+
+        this.addBody(top);
+        this.addFooter(bottom);
+
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(top, BorderLayout.NORTH);
+        contentPane.add(bottom, BorderLayout.SOUTH);
+    }
+
+    private void addBody(final Container parent) {
+        JPanel body = new JPanel();
+        body.setLayout(new GridBagLayout());
+
+        int gridy = 0;
         {
             String toolTipText = "The port the proxy should bind to.";
 
             JLabel bindPortLabel = new JLabel("Bind Port:");
-            bindPortLabel.setBounds(10, 10, 100, 20);
             bindPortLabel.setToolTipText(toolTipText);
-            contentPane.add(bindPortLabel);
+            GBC.create(body).grid(0, gridy++).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(bindPortLabel);
 
             this.bindPort = new JSpinner(new SpinnerNumberModel(25568, 1, 65535, 1));
-            this.bindPort.setBounds(10, 30, 465, 22);
             this.bindPort.setToolTipText(toolTipText);
             ViaProxy.saveManager.uiSave.loadSpinner("bind_port", this.bindPort);
-            contentPane.add(this.bindPort);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.bindPort);
         }
         {
-            String toolTipText = "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for TCP connections.\n" +
-                    "Supported formats:\n" +
-                    "- type://address:port\n" +
-                    "- type://username:password@address:port";
+            String toolTipText = """
+                    URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for TCP connections.
+                    Supported formats:
+                    - type://address:port
+                    - type://username:password@address:port""";
 
             JLabel proxyLabel = new JLabel("Proxy URL:");
-            proxyLabel.setBounds(10, 60, 100, 20);
             proxyLabel.setToolTipText(toolTipText);
-            contentPane.add(proxyLabel);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(proxyLabel);
 
             this.proxy = new JTextField();
-            this.proxy.setBounds(10, 80, 465, 22);
             this.proxy.setToolTipText(toolTipText);
             ViaProxy.saveManager.uiSave.loadTextField("proxy", this.proxy);
-            contentPane.add(this.proxy);
+            GBC.create(body).grid(0, gridy++).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.proxy);
         }
         {
             this.proxyOnlineMode = new JCheckBox("Proxy Online Mode");
-            this.proxyOnlineMode.setBounds(10, 110, 465, 20);
-            this.proxyOnlineMode.setToolTipText("Enabling Proxy Online Mode requires your client to have a valid account.\n" +
-                    "Proxy Online Mode allows your client to see skins on online mode servers and use the signed chat features.");
+            this.proxyOnlineMode.setToolTipText("""
+                    Enabling Proxy Online Mode requires your client to have a valid account.
+                    Proxy Online Mode allows your client to see skins on online mode servers and use the signed chat features.""");
             ViaProxy.saveManager.uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
-            contentPane.add(this.proxyOnlineMode);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.proxyOnlineMode);
         }
         {
             this.legacySkinLoading = new JCheckBox("Legacy Skin Loading");
-            this.legacySkinLoading.setBounds(10, 140, 465, 20);
-            this.legacySkinLoading.setToolTipText("Enabling Legacy Skin Loading allows you to see skins on <= 1.6.4 servers");
+            this.legacySkinLoading.setToolTipText("Enabling Legacy Skin Loading allows you to see skins on <= 1.6.4 servers.");
             ViaProxy.saveManager.uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
-            contentPane.add(this.legacySkinLoading);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).fill(GridBagConstraints.HORIZONTAL).add(this.legacySkinLoading);
         }
         {
             this.chatSigning = new JCheckBox("Chat signing");
-            this.chatSigning.setBounds(10, 170, 465, 20);
-            this.chatSigning.setToolTipText("Enables sending signed chat messages on >= 1.19 servers");
+            this.chatSigning.setToolTipText("Enables sending signed chat messages on >= 1.19 servers.");
             this.chatSigning.setSelected(true);
             ViaProxy.saveManager.uiSave.loadCheckBox("chat_signing", this.chatSigning);
-            contentPane.add(this.chatSigning);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.chatSigning);
         }
         {
             this.ignorePacketTranslationErrors = new JCheckBox("Ignore packet translation errors");
-            this.ignorePacketTranslationErrors.setBounds(10, 200, 465, 20);
-            this.ignorePacketTranslationErrors.setToolTipText("Enabling this will prevent getting disconnected from the server when a packet translation error occurs and instead only print the error in the console.\n" +
-                    "This may cause issues depending on the type of packet which failed to translate.");
+            this.ignorePacketTranslationErrors.setToolTipText("""
+                    Enabling this will prevent getting disconnected from the server when a packet translation error occurs and instead only print the error in the console.
+                    This may cause issues depending on the type of packet which failed to translate.""");
             this.ignorePacketTranslationErrors.setSelected(false);
             ViaProxy.saveManager.uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
-            contentPane.add(this.ignorePacketTranslationErrors);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).fill(GridBagConstraints.HORIZONTAL).add(this.ignorePacketTranslationErrors);
         }
+
+        parent.add(body, BorderLayout.CENTER);
+    }
+
+    private void addFooter(final Container container) {
+        JPanel footer = new JPanel();
+        footer.setLayout(new GridLayout(1, 2, BORDER_PADDING, 0));
+
         {
             this.viaVersionDumpButton = new JButton("Create ViaVersion dump");
-            this.viaVersionDumpButton.setBounds(10, 250, 225, 20);
             this.viaVersionDumpButton.addActionListener(event -> {
                 this.viaVersionDumpButton.setEnabled(false);
                 DumpUtil.postDump(null).whenComplete((url, e) -> {
@@ -133,11 +159,10 @@ public class AdvancedTab extends AUITab {
                 });
             });
             this.viaVersionDumpButton.setEnabled(false);
-            contentPane.add(this.viaVersionDumpButton);
+            footer.add(this.viaVersionDumpButton);
         }
         {
             this.uploadLogsButton = new JButton("Upload latest.log");
-            this.uploadLogsButton.setBounds(249, 250, 225, 20);
             this.uploadLogsButton.addActionListener(event -> {
                 final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
                 final RollingRandomAccessFileAppender fileAppender = (RollingRandomAccessFileAppender) logger.getAppenders().get("LatestFile");
@@ -165,8 +190,14 @@ public class AdvancedTab extends AUITab {
                     this.uploadLogsButton.setEnabled(true);
                 }
             });
-            contentPane.add(this.uploadLogsButton);
+            footer.add(this.uploadLogsButton);
         }
+
+        JPanel padding = new JPanel();
+        padding.setLayout(new GridBagLayout());
+        GBC.create(padding).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(footer);
+
+        container.add(padding, BorderLayout.CENTER);
     }
 
     @Override
