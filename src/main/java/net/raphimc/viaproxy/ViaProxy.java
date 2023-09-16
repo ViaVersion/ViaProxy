@@ -47,6 +47,7 @@ import net.raphimc.viaproxy.saves.SaveManager;
 import net.raphimc.viaproxy.tasks.LoaderTask;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -143,7 +144,7 @@ public class ViaProxy {
                 Logger.LOGGER.info("Waiting for UI to be initialized...");
                 Thread.sleep(1000);
             }
-            ui.setReady();
+            ViaProxyUI.EVENT_MANAGER.call(new UIInitEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
             return;
         }

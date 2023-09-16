@@ -18,8 +18,14 @@
 package net.raphimc.viaproxy.ui;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import net.lenni0451.lambdaevents.EventHandler;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
+import net.lenni0451.reflect.JavaBypass;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.ui.events.UICloseEvent;
+import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.ui.impl.AccountsTab;
 import net.raphimc.viaproxy.ui.impl.AdvancedTab;
 import net.raphimc.viaproxy.ui.impl.GeneralTab;
@@ -34,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ViaProxyUI extends JFrame {
+
+    public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
 
     public static final int BORDER_PADDING = 10;
     public static final int BODY_BLOCK_PADDING = 10;
@@ -59,6 +67,8 @@ public class ViaProxyUI extends JFrame {
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
         this.setVisible(true);
+
+        EVENT_MANAGER.register(this);
     }
 
     private void setLookAndFeel() {
@@ -83,7 +93,7 @@ public class ViaProxyUI extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                for (AUITab tab : ViaProxyUI.this.tabs) tab.onClose();
+                EVENT_MANAGER.call(new UICloseEvent());
             }
         });
         this.setSize(500, 360);
@@ -98,18 +108,20 @@ public class ViaProxyUI extends JFrame {
                 .fields()
                 .filter(field -> AUITab.class.isAssignableFrom(field.type()))
                 .forEach(field -> {
-                    AUITab tab = field.get();
+                    final AUITab tab = field.get();
                     this.tabs.add(field.get());
                     tab.add(this.contentPane);
+                    EVENT_MANAGER.register(tab);
                 });
 
         this.contentPane.setEnabledAt(this.contentPane.indexOfTab(this.accountsTab.getName()), false);
     }
 
-
-    public void setReady() {
-        for (AUITab tab : this.tabs) tab.setReady();
-        for (int i = 0; i < this.contentPane.getTabCount(); i++) this.contentPane.setEnabledAt(i, true);
+    @EventHandler
+    private void onInit(final UIInitEvent event) {
+        for (int i = 0; i < this.contentPane.getTabCount(); i++) {
+            this.contentPane.setEnabledAt(i, true);
+        }
     }
 
     public void openURL(final String url) {

@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import com.google.common.net.HostAndPort;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
@@ -27,6 +28,8 @@ import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.events.UICloseEvent;
+import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.jdesktop.swingx.VerticalLayout;
@@ -185,16 +188,16 @@ public class GeneralTab extends AUITab {
         parent.add(footer);
     }
 
-    @Override
-    public void setReady() {
+    @EventHandler
+    private void setReady(final UIInitEvent event) {
         SwingUtilities.invokeLater(() -> {
             this.stateButton.setText("Start");
             this.stateButton.setEnabled(true);
         });
     }
 
-    @Override
-    public void onClose() {
+    @EventHandler
+    private void onClose(final UICloseEvent event) {
         UISave save = ViaProxy.saveManager.uiSave;
         save.put("server_address", this.serverAddress.getText());
         save.put("server_version", String.valueOf(this.serverVersion.getSelectedIndex()));

@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.mcauth.MinecraftAuth;
 import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.mcauth.util.MicrosoftConstants;
@@ -27,6 +28,7 @@ import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
 import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.TFunction;
@@ -216,8 +218,8 @@ public class AccountsTab extends AUITab {
         contentPane.add(body, BorderLayout.CENTER);
     }
 
-    @Override
-    public void setReady() {
+    @EventHandler
+    private void onInit(final UIInitEvent event) {
         ViaProxy.saveManager.accountsSave.getAccounts().forEach(this::addAccount);
         DefaultListModel<Account> model = (DefaultListModel<Account>) this.accountsList.getModel();
         if (!model.isEmpty()) this.markSelected(0);

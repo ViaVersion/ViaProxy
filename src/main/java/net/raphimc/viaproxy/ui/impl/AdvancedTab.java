@@ -20,10 +20,13 @@ package net.raphimc.viaproxy.ui.impl;
 import com.viaversion.viaversion.util.DumpUtil;
 import gs.mclo.api.MclogsClient;
 import gs.mclo.api.response.UploadLogResponse;
+import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.events.UICloseEvent;
+import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -200,15 +203,15 @@ public class AdvancedTab extends AUITab {
         container.add(padding, BorderLayout.CENTER);
     }
 
-    @Override
-    public void setReady() {
+    @EventHandler
+    private void onInit(final UIInitEvent event) {
         SwingUtilities.invokeLater(() -> {
             this.viaVersionDumpButton.setEnabled(true);
         });
     }
 
-    @Override
-    public void onClose() {
+    @EventHandler
+    private void onClose(final UICloseEvent event) {
         UISave save = ViaProxy.saveManager.uiSave;
         save.put("bind_port", String.valueOf(this.bindPort.getValue()));
         save.put("proxy", this.proxy.getText());

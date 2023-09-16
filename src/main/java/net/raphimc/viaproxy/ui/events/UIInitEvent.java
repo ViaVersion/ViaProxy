@@ -15,33 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.ui;
+package net.raphimc.viaproxy.ui.events;
 
-import javax.swing.*;
-
-public abstract class AUITab {
-
-    protected final ViaProxyUI frame;
-    private final String name;
-    private final JPanel contentPane;
-
-    public AUITab(final ViaProxyUI frame, final String name) {
-        this.frame = frame;
-        this.name = name;
-        this.contentPane = new JPanel();
-
-        this.contentPane.setLayout(null);
-        this.init(this.contentPane);
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void add(final JTabbedPane tabbedPane) {
-        tabbedPane.addTab(this.name, this.contentPane);
-    }
-
-    protected abstract void init(final JPanel contentPane);
-
+public class UIInitEvent {
 }
