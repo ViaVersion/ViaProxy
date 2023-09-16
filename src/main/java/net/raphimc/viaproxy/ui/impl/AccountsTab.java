@@ -62,6 +62,7 @@ public class AccountsTab extends AUITab {
         JPanel body = new JPanel();
         body.setLayout(new GridBagLayout());
 
+        int gridy = 0;
         {
             JLabel infoLabel = new JLabel("""
                     <html>
@@ -71,7 +72,7 @@ public class AccountsTab extends AUITab {
                     <p>If you change your account frequently, you can install OpenAuthMod on your client.</p>
                     <p>This allows ViaProxy to use the account you are logged in with on the client.</p>
                     </html>""");
-            GBC.create(body).grid(0, 0).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(infoLabel);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(infoLabel);
         }
         {
             JScrollPane scrollPane = new JScrollPane();
@@ -160,7 +161,7 @@ public class AccountsTab extends AUITab {
                 contextMenu.add(moveDown);
             }
             this.accountsList.setComponentPopupMenu(contextMenu);
-            GBC.create(body).grid(0, 1).weight(1, 1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.BOTH).add(scrollPane);
+            GBC.create(body).grid(0, gridy++).weight(1, 1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.BOTH).add(scrollPane);
         }
         {
             final JPanel addButtons = new JPanel();
@@ -208,7 +209,7 @@ public class AccountsTab extends AUITab {
             border.setBorder(BorderFactory.createTitledBorder("Add Account"));
             GBC.create(border).grid(0, 0).weightx(1).insets(2, 4, 4, 4).fill(GridBagConstraints.HORIZONTAL).add(addButtons);
 
-            GBC.create(body).grid(0, 2).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(border);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(border);
         }
 
         contentPane.setLayout(new BorderLayout());
