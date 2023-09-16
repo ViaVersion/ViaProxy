@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.ui.popups;
 
 import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.util.GBC;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,6 +29,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
+
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BODY_BLOCK_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
 
 public class AddAccountPopup extends JDialog {
 
@@ -62,44 +66,38 @@ public class AddAccountPopup extends JDialog {
 
     private void initComponents() {
         JPanel contentPane = new JPanel();
-        contentPane.setLayout(null);
-        this.setContentPane(contentPane);
+        contentPane.setLayout(new GridBagLayout());
         {
             JLabel browserLabel = new JLabel("Please open the following URL in your browser:");
-            browserLabel.setBounds(10, 10, 380, 20);
-            contentPane.add(browserLabel);
+            GBC.create(contentPane).grid(0, 0).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(browserLabel);
 
             JLabel urlLabel = new JLabel("<html><a href=\"\">" + this.deviceCode.verificationUri() + "</a></html>");
-            urlLabel.setBounds(10, 30, 380, 20);
             urlLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     AddAccountPopup.this.parent.openURL(AddAccountPopup.this.deviceCode.verificationUri());
                 }
             });
-            contentPane.add(urlLabel);
+            GBC.create(contentPane).grid(0, 1).insets(0, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(urlLabel);
 
             JLabel enterCodeLabel = new JLabel("Enter the following code:");
-            enterCodeLabel.setBounds(10, 50, 380, 20);
-            contentPane.add(enterCodeLabel);
+            GBC.create(contentPane).grid(0, 2).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(enterCodeLabel);
 
             JLabel codeLabel = new JLabel(this.deviceCode.userCode());
-            codeLabel.setBounds(10, 70, 380, 20);
-            contentPane.add(codeLabel);
+            GBC.create(contentPane).grid(0, 3).insets(0, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(codeLabel);
 
             JLabel closeInfo = new JLabel("The popup will close automatically after you have been logged in.");
-            closeInfo.setBounds(10, 100, 380, 20);
-            contentPane.add(closeInfo);
+            GBC.create(contentPane).grid(0, 4).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(closeInfo);
         }
         {
             JButton copyCodeButton = new JButton("Copy Code");
-            copyCodeButton.setBounds(this.getWidth() / 2 - 130 / 2, 130, 100, 20);
             copyCodeButton.addActionListener(event -> {
                 StringSelection selection = new StringSelection(this.deviceCode.userCode());
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
             });
-            contentPane.add(copyCodeButton);
+            GBC.create(contentPane).grid(0, 5).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(copyCodeButton);
         }
+        this.setContentPane(contentPane);
     }
 
     public void markExternalClose() {

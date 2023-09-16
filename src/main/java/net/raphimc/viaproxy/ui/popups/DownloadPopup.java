@@ -19,8 +19,10 @@ package net.raphimc.viaproxy.ui.popups;
 
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.util.GBC;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -31,6 +33,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Consumer;
+
+import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
 
 public class DownloadPopup extends JDialog {
 
@@ -72,20 +76,18 @@ public class DownloadPopup extends JDialog {
 
     private void initComponents() {
         JPanel contentPane = new JPanel();
-        contentPane.setLayout(null);
-        this.setContentPane(contentPane);
+        contentPane.setLayout(new GridBagLayout());
         {
             this.progressBar = new JProgressBar();
-            this.progressBar.setBounds(10, 10, 365, 20);
             this.progressBar.setStringPainted(true);
-            contentPane.add(this.progressBar);
+            GBC.create(contentPane).grid(0, 0).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.progressBar);
         }
         {
             JButton cancelButton = new JButton("Cancel");
-            cancelButton.setBounds(10, 40, 365, 20);
             cancelButton.addActionListener(event -> this.close(false));
-            contentPane.add(cancelButton);
+            GBC.create(contentPane).grid(0, 1).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(cancelButton);
         }
+        this.setContentPane(contentPane);
         this.start();
     }
 
