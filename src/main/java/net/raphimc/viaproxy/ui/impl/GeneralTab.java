@@ -84,6 +84,7 @@ public class GeneralTab extends AUITab {
                 frame.openURL("https://discord.gg/viaversion");
             }
         });
+        discord.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         GBC.create(header).grid(0, 0).width(0).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(discord);
 
         JLabel title = new JLabel("ViaProxy");
