@@ -62,6 +62,7 @@ public class UISettingsTab extends AUITab {
             language.setSelectedItem(I18n.getCurrentLocale());
             language.addActionListener(event -> {
                 if (!(language.getSelectedItem() instanceof String locale)) return;
+                if (locale.equals(I18n.getCurrentLocale())) return;
                 I18n.setLocale(locale);
                 ViaProxy.ui.showInfo(I18n.get("tab.ui_settings.language.success", I18n.get("language.name"), locale));
                 try {
