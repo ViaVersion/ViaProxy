@@ -30,6 +30,8 @@ import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.ClientLoggedInEvent;
 import net.raphimc.viaproxy.proxy.LoginState;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
 import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
@@ -91,6 +93,7 @@ public class LoginPacketHandler extends PacketHandler {
             if (Options.ONLINE_MODE) {
                 this.proxyConnection.getC2P().writeAndFlush(new S2CLoginKeyPacket1_8("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             } else {
+                PluginManager.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
                 ExternalInterface.fillPlayerData(this.proxyConnection);
                 this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             }
@@ -133,6 +136,7 @@ public class LoginPacketHandler extends PacketHandler {
                 throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
             }
 
+            PluginManager.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
             ExternalInterface.fillPlayerData(this.proxyConnection);
             this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
