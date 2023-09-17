@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.ui.popups;
 
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.util.GBC;
 
@@ -68,7 +69,7 @@ public class DownloadPopup extends JDialog {
                 DownloadPopup.this.close(false);
             }
         });
-        this.setTitle("Downloading...");
+        this.setTitle(I18n.get("popup.download.title"));
         this.setSize(400, 110);
         this.setResizable(false);
         this.setLocationRelativeTo(this.parent);
@@ -83,7 +84,7 @@ public class DownloadPopup extends JDialog {
             GBC.create(contentPane).grid(0, 0).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.progressBar);
         }
         {
-            JButton cancelButton = new JButton("Cancel");
+            JButton cancelButton = new JButton(I18n.get("generic.cancel"));
             cancelButton.addActionListener(event -> this.close(false));
             GBC.create(contentPane).grid(0, 1).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(cancelButton);
         }

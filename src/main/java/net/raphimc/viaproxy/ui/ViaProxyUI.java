@@ -29,6 +29,7 @@ import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.ui.impl.AccountsTab;
 import net.raphimc.viaproxy.ui.impl.AdvancedTab;
 import net.raphimc.viaproxy.ui.impl.GeneralTab;
+import net.raphimc.viaproxy.ui.impl.UISettingsTab;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -52,11 +53,13 @@ public class ViaProxyUI extends JFrame {
     public final GeneralTab generalTab = new GeneralTab(this);
     public final AdvancedTab advancedTab = new AdvancedTab(this);
     public final AccountsTab accountsTab = new AccountsTab(this);
+    public final UISettingsTab uiSettingsTab = new UISettingsTab(this);
 
     private ImageIcon icon;
 
     public ViaProxyUI() {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> this.showException(e));
+        EVENT_MANAGER.register(this);
 
         this.setLookAndFeel();
         this.loadIcons();
@@ -67,8 +70,6 @@ public class ViaProxyUI extends JFrame {
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
         this.setVisible(true);
-
-        EVENT_MANAGER.register(this);
     }
 
     private void setLookAndFeel() {
@@ -128,7 +129,7 @@ public class ViaProxyUI extends JFrame {
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (Throwable t) {
-            this.showInfo("Couldn't open the link :(\nHere it is for you: " + url);
+            this.showInfo(I18n.get("generic.could_not_open_url", url));
         }
     }
 

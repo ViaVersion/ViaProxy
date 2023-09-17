@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.vdurmont.semver4j.Semver;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.popups.DownloadPopup;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -94,15 +95,15 @@ public class UpdateCheckTask implements Runnable {
     }
 
     private void showUpdateWarning(final String latestVersion) {
-        JOptionPane.showMessageDialog(ViaProxy.ui, "You are running an outdated version of ViaProxy!\nCurrent version: " + VERSION + "\nLatest version: " + latestVersion, "ViaProxy", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(ViaProxy.ui, I18n.get("popup.update.info", VERSION, latestVersion), "ViaProxy", JOptionPane.WARNING_MESSAGE);
     }
 
     private void showUpdateQuestion(final String name, final String downloadUrl, final String latestVersion) {
-        int chosen = JOptionPane.showConfirmDialog(ViaProxy.ui, "You are running an outdated version of ViaProxy!\nCurrent version: " + VERSION + "\nLatest version: " + latestVersion + "\n\nDo you want to update?", "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        int chosen = JOptionPane.showConfirmDialog(ViaProxy.ui, I18n.get("popup.update.info", VERSION, latestVersion) + "\n\n" + I18n.get("popup.update.question"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (chosen == JOptionPane.YES_OPTION) {
             File f = new File(name);
             new DownloadPopup(ViaProxy.ui, downloadUrl, f, () -> SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(ViaProxy.ui, "Downloaded the latest version of ViaProxy!\nPress OK to restart.", "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(ViaProxy.ui, I18n.get("popup.update.success"), "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
                 try {
                     Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                     System.exit(0);

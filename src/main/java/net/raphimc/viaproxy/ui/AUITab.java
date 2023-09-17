@@ -27,7 +27,7 @@ public abstract class AUITab {
 
     public AUITab(final ViaProxyUI frame, final String name) {
         this.frame = frame;
-        this.name = name;
+        this.name = I18n.get("tab." + name + ".name");
         this.contentPane = new JPanel();
 
         this.contentPane.setLayout(null);

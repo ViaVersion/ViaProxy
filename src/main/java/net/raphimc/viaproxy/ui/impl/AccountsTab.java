@@ -27,6 +27,7 @@ import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.AUITab;
+import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
@@ -56,7 +57,7 @@ public class AccountsTab extends AUITab {
     private Thread addThread;
 
     public AccountsTab(final ViaProxyUI frame) {
-        super(frame, "Accounts");
+        super(frame, "accounts");
     }
 
     @Override
@@ -66,14 +67,7 @@ public class AccountsTab extends AUITab {
 
         int gridy = 0;
         {
-            JLabel infoLabel = new JLabel("""
-                    <html>
-                    <p>To join online mode servers you have to add minecraft accounts for ViaProxy to use.</p>
-                    <p>You can select the account by right clicking it. By default the first one will be used.</p>
-                    <br>
-                    <p>If you change your account frequently, you can install OpenAuthMod on your client.</p>
-                    <p>This allows ViaProxy to use the account you are logged in with on the client.</p>
-                    </html>""");
+            JLabel infoLabel = new JLabel("<html><p>" + I18n.get("tab.accounts.description.line1") + "</p><br><p>" + I18n.get("tab.accounts.description.line2") + "</p></html>");
             GBC.create(body).grid(0, gridy++).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(infoLabel);
         }
         {
@@ -121,7 +115,7 @@ public class AccountsTab extends AUITab {
             scrollPane.setViewportView(this.accountsList);
             JPopupMenu contextMenu = new JPopupMenu();
             {
-                JMenuItem selectItem = new JMenuItem("Select account");
+                JMenuItem selectItem = new JMenuItem(I18n.get("tab.accounts.list.context_menu.select"));
                 selectItem.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) this.markSelected(index);
@@ -129,7 +123,7 @@ public class AccountsTab extends AUITab {
                 contextMenu.add(selectItem);
             }
             {
-                JMenuItem removeItem = new JMenuItem("Remove");
+                JMenuItem removeItem = new JMenuItem(I18n.get("tab.accounts.list.context_menu.remove"));
                 removeItem.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) {
@@ -147,7 +141,7 @@ public class AccountsTab extends AUITab {
                 contextMenu.add(removeItem);
             }
             {
-                JMenuItem moveUp = new JMenuItem("Move up ↑");
+                JMenuItem moveUp = new JMenuItem(I18n.get("tab.accounts.list.context_menu.move_up"));
                 moveUp.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) this.moveUp(index);
@@ -155,7 +149,7 @@ public class AccountsTab extends AUITab {
                 contextMenu.add(moveUp);
             }
             {
-                JMenuItem moveDown = new JMenuItem("Move down ↓");
+                JMenuItem moveDown = new JMenuItem(I18n.get("tab.accounts.list.context_menu.move_down"));
                 moveDown.addActionListener(event -> {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) this.moveDown(index);
@@ -170,9 +164,9 @@ public class AccountsTab extends AUITab {
             addButtons.setLayout(new GridLayout(1, 3, BORDER_PADDING, 0));
             contentPane.add(addButtons);
             {
-                JButton addOfflineAccountButton = new JButton("Offline Account");
+                JButton addOfflineAccountButton = new JButton(I18n.get("tab.accounts.add_offline.label"));
                 addOfflineAccountButton.addActionListener(event -> {
-                    String username = JOptionPane.showInputDialog(this.frame, "Enter your offline mode Username:", "Add Offline Account", JOptionPane.PLAIN_MESSAGE);
+                    String username = JOptionPane.showInputDialog(this.frame, I18n.get("tab.accounts.add_offline.enter_username"), I18n.get("tab.accounts.add.title"), JOptionPane.PLAIN_MESSAGE);
                     if (username != null && !username.trim().isEmpty()) {
                         Account account = ViaProxy.saveManager.accountsSave.addAccount(username);
                         ViaProxy.saveManager.save();
@@ -182,7 +176,7 @@ public class AccountsTab extends AUITab {
                 addButtons.add(addOfflineAccountButton);
             }
             {
-                this.addMicrosoftAccountButton = new JButton("Microsoft Account");
+                this.addMicrosoftAccountButton = new JButton(I18n.get("tab.accounts.add_microsoft.label"));
                 this.addMicrosoftAccountButton.addActionListener(event -> {
                     this.addMicrosoftAccountButton.setEnabled(false);
                     this.handleLogin(msaDeviceCodeConsumer -> {
@@ -194,7 +188,7 @@ public class AccountsTab extends AUITab {
                 addButtons.add(this.addMicrosoftAccountButton);
             }
             {
-                this.addBedrockAccountButton = new JButton("Bedrock Account");
+                this.addBedrockAccountButton = new JButton(I18n.get("tab.accounts.add_bedrock.label"));
                 this.addBedrockAccountButton.addActionListener(event -> {
                     this.addBedrockAccountButton.setEnabled(false);
                     this.handleLogin(msaDeviceCodeConsumer -> {
@@ -208,7 +202,7 @@ public class AccountsTab extends AUITab {
 
             JPanel border = new JPanel();
             border.setLayout(new GridBagLayout());
-            border.setBorder(BorderFactory.createTitledBorder("Add Account"));
+            border.setBorder(BorderFactory.createTitledBorder(I18n.get("tab.accounts.add.title")));
             GBC.create(border).grid(0, 0).weightx(1).insets(2, 4, 4, 4).fill(GridBagConstraints.HORIZONTAL).add(addButtons);
 
             GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(border);
@@ -280,26 +274,22 @@ public class AccountsTab extends AUITab {
     private void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, Account> requestHandler) {
         this.addThread = new Thread(() -> {
             try {
-                final Account account = requestHandler.apply(msaDeviceCode -> {
-                    SwingUtilities.invokeLater(() -> {
-                        new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
-                            this.closePopup();
-                            this.addThread.interrupt();
-                        });
-                    });
-                });
+                final Account account = requestHandler.apply(msaDeviceCode -> SwingUtilities.invokeLater(() -> new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
+                    this.closePopup();
+                    this.addThread.interrupt();
+                })));
                 SwingUtilities.invokeLater(() -> {
                     this.closePopup();
                     ViaProxy.saveManager.accountsSave.addAccount(account);
                     ViaProxy.saveManager.save();
                     this.addAccount(account);
-                    this.frame.showInfo("The account " + account.getName() + " was added successfully.");
+                    this.frame.showInfo(I18n.get("tab.accounts.add.success", account.getName()));
                 });
             } catch (InterruptedException ignored) {
             } catch (TimeoutException e) {
                 SwingUtilities.invokeLater(() -> {
                     this.closePopup();
-                    this.frame.showError("The login request timed out.\nPlease login within 60 seconds.");
+                    this.frame.showError(I18n.get("tab.accounts.add.timeout", "60"));
                 });
             } catch (Throwable t) {
                 SwingUtilities.invokeLater(() -> {

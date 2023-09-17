@@ -130,12 +130,19 @@ public class ViaProxy {
         PluginManager.loadPlugins();
         PluginManager.EVENT_MANAGER.register(EventListener.class);
 
-        Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
-        Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
+        final Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
+        final Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
 
         if (hasUI) {
             loaderThread.start();
-            SwingUtilities.invokeLater(() -> ui = new ViaProxyUI());
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    ui = new ViaProxyUI();
+                } catch (Throwable e) {
+                    Logger.LOGGER.fatal("Failed to initialize UI", e);
+                    System.exit(1);
+                }
+            });
             if (System.getProperty("skipUpdateCheck") == null) {
                 updateCheckThread.start();
             }

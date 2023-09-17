@@ -27,6 +27,7 @@ import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
 import net.raphimc.viaproxy.ui.AUITab;
+import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
@@ -52,11 +53,11 @@ public class GeneralTab extends AUITab {
     private JComboBox<VersionEnum> serverVersion;
     private JComboBox<String> authMethod;
     private JCheckBox betaCraftAuth;
-    private JLabel stateLabelLabel;
+    private JLabel stateLabel;
     private JButton stateButton;
 
     public GeneralTab(final ViaProxyUI frame) {
-        super(frame, "General");
+        super(frame, "general");
     }
 
     @Override
@@ -106,37 +107,33 @@ public class GeneralTab extends AUITab {
 
         int gridy = 0;
         {
-            String toolTipText = """
-                    Supported formats:
-                    - address
-                    - address:port
-                    - ClassiCube Direct URL""";
-
-            JLabel serverAddressLabel = new JLabel("Server Address:");
-            serverAddressLabel.setToolTipText(toolTipText);
+            JLabel serverAddressLabel = new JLabel(I18n.get("tab.general.server_address.label"));
+            serverAddressLabel.setToolTipText(I18n.get("tab.general.server_address.tooltip"));
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(serverAddressLabel);
 
             this.serverAddress = new JTextField();
-            this.serverAddress.setToolTipText(toolTipText);
+            this.serverAddress.setToolTipText(I18n.get("tab.general.server_address.tooltip"));
             ViaProxy.saveManager.uiSave.loadTextField("server_address", this.serverAddress);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverAddress);
         }
         {
-            JLabel serverVersionLabel = new JLabel("Server Version:");
+            JLabel serverVersionLabel = new JLabel(I18n.get("tab.general.server_version.label"));
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(serverVersionLabel);
 
             this.serverVersion = new JComboBox<>(VersionEnum.SORTED_VERSIONS.toArray(new VersionEnum[0]));
             this.serverVersion.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                    if (value instanceof VersionEnum version) value = version.getName();
+                    if (value instanceof VersionEnum version) {
+                        value = version.getName();
+                    }
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
             });
             this.serverVersion.addActionListener(event -> {
                 if (this.betaCraftAuth == null) return; // This is called when the JComboBox is created (before betaCraftAuth is set)
-                if (!(this.serverVersion.getSelectedItem() instanceof VersionEnum)) return;
-                if (((VersionEnum) this.serverVersion.getSelectedItem()).isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
+                if (!(this.serverVersion.getSelectedItem() instanceof VersionEnum selectedVersion)) return;
+                if (selectedVersion.isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
                     this.betaCraftAuth.setEnabled(true);
                 } else {
                     this.betaCraftAuth.setEnabled(false);
@@ -147,16 +144,16 @@ public class GeneralTab extends AUITab {
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverVersion);
         }
         {
-            JLabel minecraftAccountLabel = new JLabel("Minecraft Account:");
+            JLabel minecraftAccountLabel = new JLabel(I18n.get("tab.general.minecraft_account.label"));
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(minecraftAccountLabel);
 
-            this.authMethod = new JComboBox(new String[]{"Use no account", "Use selected account", "Use OpenAuthMod"});
+            this.authMethod = new JComboBox<>(new String[]{I18n.get("tab.general.minecraft_account.option_no_account"), I18n.get("tab.general.minecraft_account.option_select_account"), I18n.get("tab.general.minecraft_account.option_openauthmod")});
             ViaProxy.saveManager.uiSave.loadComboBox("auth_method", this.authMethod);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.authMethod);
         }
         {
-            this.betaCraftAuth = new JCheckBox("BetaCraft Auth (Classic)");
-            this.betaCraftAuth.setToolTipText("Enabling BetaCraft Auth allows you to join Classic servers which have online mode enabled.");
+            this.betaCraftAuth = new JCheckBox(I18n.get("tab.general.betacraft_auth.label"));
+            this.betaCraftAuth.setToolTipText(I18n.get("tab.general.betacraft_auth.tooltip"));
             ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.betaCraftAuth);
             // Simulate user action on serverVersion to update betaCraftAuth
@@ -173,14 +170,14 @@ public class GeneralTab extends AUITab {
         JPanel footer = new JPanel();
         footer.setLayout(new GridBagLayout());
 
-        this.stateLabelLabel = new JLabel("State: Not Connected");
-        this.stateLabelLabel.setVisible(false);
-        GBC.create(footer).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateLabelLabel);
+        this.stateLabel = new JLabel("");
+        this.stateLabel.setVisible(false);
+        GBC.create(footer).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateLabel);
 
-        this.stateButton = new JButton("Loading ViaProxy...");
+        this.stateButton = new JButton(I18n.get("tab.general.state.loading"));
         this.stateButton.addActionListener(event -> {
-            if (this.stateButton.getText().equalsIgnoreCase("Start")) this.start();
-            else if (this.stateButton.getText().equalsIgnoreCase("Stop")) this.stop();
+            if (this.stateButton.getText().equalsIgnoreCase(I18n.get("tab.general.state.start"))) this.start();
+            else if (this.stateButton.getText().equalsIgnoreCase(I18n.get("tab.general.state.stop"))) this.stop();
         });
         this.stateButton.setEnabled(false);
         GBC.create(footer).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateButton);
@@ -191,7 +188,7 @@ public class GeneralTab extends AUITab {
     @EventHandler
     private void setReady(final UIInitEvent event) {
         SwingUtilities.invokeLater(() -> {
-            this.stateButton.setText("Start");
+            this.stateButton.setText(I18n.get("tab.general.state.start"));
             this.stateButton.setEnabled(true);
         });
     }
@@ -221,32 +218,32 @@ public class GeneralTab extends AUITab {
     }
 
     private void updateStateLabel() {
-        this.stateLabelLabel.setText("ViaProxy is running! Connect with Minecraft 1.7+ to 127.0.0.1:" + ViaProxy.ui.advancedTab.bindPort.getValue());
-        this.stateLabelLabel.setVisible(true);
+        this.stateLabel.setText(I18n.get("tab.general.state.running", ViaProxy.ui.advancedTab.bindPort.getValue().toString()));
+        this.stateLabel.setVisible(true);
     }
 
     private void start() {
-        Object selectedItem = this.serverVersion.getSelectedItem();
+        final Object selectedItem = this.serverVersion.getSelectedItem();
         if (!(selectedItem instanceof VersionEnum)) {
-            this.frame.showError("Please select a server version!");
+            this.frame.showError(I18n.get("tab.general.error.no_server_version_selected"));
             return;
         }
         if (ViaProxy.saveManager.uiSave.get("notice.ban_warning") == null) {
             ViaProxy.saveManager.uiSave.put("notice.ban_warning", "true");
             ViaProxy.saveManager.save();
 
-            this.frame.showWarning("<html><div style='text-align: center;'>ViaProxy may trigger anti-cheats, due to block, item, movement and other differences between versions.<br><b>USE AT YOUR OWN RISK!</b></div></html>");
+            this.frame.showWarning("<html><div style='text-align: center;'>" + I18n.get("tab.general.warning.ban_warning.line1") + "<br><b>" + I18n.get("tab.general.warning.risk") + "</b></div></html>");
         }
         if (VersionEnum.bedrockLatest.equals(selectedItem) && ViaProxy.saveManager.uiSave.get("notice.bedrock_warning") == null) {
             ViaProxy.saveManager.uiSave.put("notice.bedrock_warning", "true");
             ViaProxy.saveManager.save();
 
-            this.frame.showWarning("<html><div style='text-align: center;'>ViaBedrock is currently in very early development and not ready for general use.<br><b>CONTINUE AT YOUR OWN RISK!</b></div></html>");
+            this.frame.showWarning("<html><div style='text-align: center;'>" + I18n.get("tab.general.warning.bedrock_warning.line1") + "<br><b>" + I18n.get("tab.general.warning.risk") + "</b></div></html>");
         }
 
         this.setComponentsEnabled(false);
         this.stateButton.setEnabled(false);
-        this.stateButton.setText("Starting...");
+        this.stateButton.setText(I18n.get("tab.general.state.starting"));
 
         new Thread(() -> {
             String serverAddress = this.serverAddress.getText().trim();
@@ -268,7 +265,7 @@ public class GeneralTab extends AUITab {
 
                         final String[] path = uri.getPath().substring(1).split("/");
                         if (path.length < 2) {
-                            throw new IllegalArgumentException("Invalid ClassiCube Direct URL!");
+                            throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_classicube_url"));
                         }
 
                         Options.MC_ACCOUNT = new OfflineAccount(path[0]);
@@ -287,7 +284,7 @@ public class GeneralTab extends AUITab {
                         Options.CONNECT_ADDRESS = hostAndPort.getHost();
                         Options.CONNECT_PORT = hostAndPort.getPortOrDefault(PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
                     } catch (Throwable t) {
-                        throw new IllegalArgumentException("Invalid server address!");
+                        throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_server_address"));
                     }
 
                     Options.BIND_PORT = bindPort;
@@ -303,39 +300,35 @@ public class GeneralTab extends AUITab {
                         try {
                             Options.PROXY_URL = new URI(proxyUrl);
                         } catch (URISyntaxException e) {
-                            throw new IllegalArgumentException("Invalid proxy URL!");
+                            throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_proxy_url"));
                         }
                     } else {
                         Options.PROXY_URL = null;
                     }
                 } catch (Throwable t) {
-                    SwingUtilities.invokeLater(() -> {
-                        this.frame.showError(t.getMessage());
-                    });
+                    SwingUtilities.invokeLater(() -> this.frame.showError(t.getMessage()));
                     throw t;
                 }
 
                 try {
                     ViaProxy.startProxy();
                 } catch (Throwable e) {
-                    SwingUtilities.invokeLater(() -> {
-                        this.frame.showError("Failed to start ViaProxy! Ensure that the local port is not already in use and try again.");
-                    });
+                    SwingUtilities.invokeLater(() -> this.frame.showError(I18n.get("tab.general.error.failed_to_start")));
                     throw e;
                 }
 
                 SwingUtilities.invokeLater(() -> {
                     this.updateStateLabel();
                     this.stateButton.setEnabled(true);
-                    this.stateButton.setText("Stop");
+                    this.stateButton.setText(I18n.get("tab.general.state.stop"));
                 });
             } catch (Throwable e) {
                 Logger.LOGGER.error("Error while starting ViaProxy", e);
                 SwingUtilities.invokeLater(() -> {
                     this.setComponentsEnabled(true);
                     this.stateButton.setEnabled(true);
-                    this.stateButton.setText("Start");
-                    this.stateLabelLabel.setVisible(false);
+                    this.stateButton.setText(I18n.get("tab.general.state.start"));
+                    this.stateLabel.setVisible(false);
                 });
             }
         }).start();
@@ -344,8 +337,8 @@ public class GeneralTab extends AUITab {
     private void stop() {
         ViaProxy.stopProxy();
 
-        this.stateLabelLabel.setVisible(false);
-        this.stateButton.setText("Start");
+        this.stateLabel.setVisible(false);
+        this.stateButton.setText(I18n.get("tab.general.state.start"));
         this.setComponentsEnabled(true);
     }
 
