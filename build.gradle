@@ -65,21 +65,21 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion:4.8.0-1.20.2-pre2-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.8.0-1.20.2-pre2-SNAPSHOT") {
+    include "com.viaversion:viaversion:4.8.0"
+    include("com.viaversion:viabackwards-common:4.8.0") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
     }
-    include "com.viaversion:viarewind-core:3.0.0-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:2.2.19-SNAPSHOT"
-    include "net.raphimc:ViaAprilFools:2.0.9-SNAPSHOT"
+    include "com.viaversion:viarewind-common:3.0.0"
+    include "net.raphimc:ViaLegacy:2.2.19"
+    include "net.raphimc:ViaAprilFools:2.0.9"
     include("net.raphimc:ViaBedrock:0.0.3-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
         exclude group: "io.jsonwebtoken", module: "jjwt-gson"
     }
-    include("net.raphimc:ViaLoader:2.2.9-SNAPSHOT") {
+    include("net.raphimc:ViaLoader:2.2.9") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
@@ -100,7 +100,7 @@ dependencies {
     include "net.lenni0451.classtransform:additionalclassprovider:1.11.0"
     include "net.lenni0451:Reflect:1.2.4"
     include "net.lenni0451:LambdaEvents:2.2.0"
-    include "net.raphimc.netminecraft:all:2.3.6-SNAPSHOT"
+    include "net.raphimc.netminecraft:all:2.3.7-SNAPSHOT"
     include("net.raphimc:MinecraftAuth:2.1.6-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
