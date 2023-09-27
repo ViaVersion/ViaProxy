@@ -36,11 +36,9 @@ public class ViaProxyClassicMPPassProvider extends ClassicMPPassProvider {
 
     @Override
     public String getMpPass(UserConnection user) {
-        final String mppass = ProxyConnection.fromUserConnection(user).getClassicMpPass();
+        final String mppass = ProxyConnection.fromUserConnection(user).getUserOptions().classicMpPass();
         if (mppass != null && !mppass.isEmpty() && !mppass.equals("0")) {
             return mppass;
-        } else if (Options.CLASSIC_MP_PASS != null) {
-            return Options.CLASSIC_MP_PASS;
         } else if (Options.BETACRAFT_AUTH) {
             final HandshakeStorage handshakeStorage = user.get(HandshakeStorage.class);
             return getBetacraftMpPass(user, user.getProtocolInfo().getUsername(), handshakeStorage.getHostname(), handshakeStorage.getPort());

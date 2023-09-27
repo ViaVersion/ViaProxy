@@ -68,17 +68,19 @@ public class ProxyConnection extends NetClient {
     private final Map<Integer, CompletableFuture<ByteBuf>> customPayloadListener = new ConcurrentHashMap<>();
 
     private ServerAddress serverAddress;
-    private VersionEnum serverVersion;
 
+    private VersionEnum serverVersion;
     private VersionEnum clientVersion;
+
     private GameProfile gameProfile;
     private C2SLoginHelloPacket1_7 loginHelloPacket;
+    private Key storedSecretKey;
+
     private UserConnection userConnection;
+    private UserOptions userOptions;
+
     private ConnectionState c2pConnectionState = ConnectionState.HANDSHAKING;
     private ConnectionState p2sConnectionState = ConnectionState.HANDSHAKING;
-
-    private Key storedSecretKey;
-    private String classicMpPass;
 
     public ProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, final Channel c2p) {
         super(handlerSupplier, channelInitializerSupplier);
@@ -128,6 +130,30 @@ public class ProxyConnection extends NetClient {
         return this.serverVersion;
     }
 
+    public VersionEnum getClientVersion() {
+        return this.clientVersion;
+    }
+
+    public void setClientVersion(final VersionEnum clientVersion) {
+        this.clientVersion = clientVersion;
+    }
+
+    public GameProfile getGameProfile() {
+        return this.gameProfile;
+    }
+
+    public void setGameProfile(final GameProfile gameProfile) {
+        this.gameProfile = gameProfile;
+    }
+
+    public C2SLoginHelloPacket1_7 getLoginHelloPacket() {
+        return this.loginHelloPacket;
+    }
+
+    public void setLoginHelloPacket(final C2SLoginHelloPacket1_7 loginHelloPacket) {
+        this.loginHelloPacket = loginHelloPacket;
+    }
+
     public void setKeyForPreNettyEncryption(final Key key) {
         this.storedSecretKey = key;
     }
@@ -136,36 +162,28 @@ public class ProxyConnection extends NetClient {
         this.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(this.storedSecretKey));
     }
 
-    public void setClientVersion(final VersionEnum clientVersion) {
-        this.clientVersion = clientVersion;
-    }
-
-    public VersionEnum getClientVersion() {
-        return this.clientVersion;
-    }
-
-    public void setGameProfile(final GameProfile gameProfile) {
-        this.gameProfile = gameProfile;
-    }
-
-    public GameProfile getGameProfile() {
-        return this.gameProfile;
-    }
-
-    public void setLoginHelloPacket(final C2SLoginHelloPacket1_7 loginHelloPacket) {
-        this.loginHelloPacket = loginHelloPacket;
-    }
-
-    public C2SLoginHelloPacket1_7 getLoginHelloPacket() {
-        return this.loginHelloPacket;
+    public UserConnection getUserConnection() {
+        return this.userConnection;
     }
 
     public void setUserConnection(final UserConnection userConnection) {
         this.userConnection = userConnection;
     }
 
-    public UserConnection getUserConnection() {
-        return this.userConnection;
+    public UserOptions getUserOptions() {
+        return this.userOptions;
+    }
+
+    public void setUserOptions(final UserOptions userOptions) {
+        this.userOptions = userOptions;
+    }
+
+    public ConnectionState getC2pConnectionState() {
+        return this.c2pConnectionState;
+    }
+
+    public ConnectionState getP2sConnectionState() {
+        return this.p2sConnectionState;
     }
 
     public void setC2pConnectionState(final ConnectionState connectionState) {
@@ -215,14 +233,6 @@ public class ProxyConnection extends NetClient {
         }
     }
 
-    public ConnectionState getC2pConnectionState() {
-        return this.c2pConnectionState;
-    }
-
-    public ConnectionState getP2sConnectionState() {
-        return this.p2sConnectionState;
-    }
-
     public CompletableFuture<ByteBuf> sendCustomPayload(final String channel, final ByteBuf data) {
         if (channel.length() > 20) throw new IllegalStateException("Channel name can't be longer than 20 characters");
         final CompletableFuture<ByteBuf> future = new CompletableFuture<>();
@@ -262,14 +272,6 @@ public class ProxyConnection extends NetClient {
             return true;
         }
         return false;
-    }
-
-    public void setClassicMpPass(final String classicMpPass) {
-        this.classicMpPass = classicMpPass;
-    }
-
-    public String getClassicMpPass() {
-        return this.classicMpPass;
     }
 
     public void kickClient(final String message) throws CloseAndReturn {

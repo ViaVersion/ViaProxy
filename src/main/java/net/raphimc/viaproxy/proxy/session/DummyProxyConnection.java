@@ -57,6 +57,26 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
+    public GameProfile getGameProfile() {
+        return null;
+    }
+
+    @Override
+    public void setGameProfile(GameProfile gameProfile) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public C2SLoginHelloPacket1_7 getLoginHelloPacket() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setLoginHelloPacket(C2SLoginHelloPacket1_7 loginHelloPacket) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setKeyForPreNettyEncryption(Key key) {
         throw new UnsupportedOperationException();
     }
@@ -67,22 +87,7 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public void setGameProfile(GameProfile gameProfile) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public GameProfile getGameProfile() {
-        return null;
-    }
-
-    @Override
-    public void setLoginHelloPacket(C2SLoginHelloPacket1_7 loginHelloPacket) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public C2SLoginHelloPacket1_7 getLoginHelloPacket() {
+    public UserConnection getUserConnection() {
         throw new UnsupportedOperationException();
     }
 
@@ -92,7 +97,12 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public UserConnection getUserConnection() {
+    public UserOptions getUserOptions() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setUserOptions(UserOptions userOptions) {
         throw new UnsupportedOperationException();
     }
 
@@ -113,16 +123,6 @@ public class DummyProxyConnection extends ProxyConnection {
 
     @Override
     public boolean handleCustomPayload(int id, ByteBuf data) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setClassicMpPass(String classicMpPass) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getClassicMpPass() {
         throw new UnsupportedOperationException();
     }
 

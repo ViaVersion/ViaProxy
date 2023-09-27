@@ -42,6 +42,7 @@ import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.session.BedrockProxyConnection;
 import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
@@ -137,7 +138,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         String connectIP = Options.CONNECT_ADDRESS;
         int connectPort = Options.CONNECT_PORT;
         VersionEnum serverVersion = Options.PROTOCOL_VERSION;
-        String classicMpPass = null;
+        String classicMpPass = Options.CLASSIC_MP_PASS;
 
         if (Options.INTERNAL_SRV_MODE) {
             final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
@@ -211,7 +212,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.getC2P().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
         this.proxyConnection.setClientVersion(clientVersion);
         this.proxyConnection.setC2pConnectionState(packet.intendedState);
-        this.proxyConnection.setClassicMpPass(classicMpPass);
+        this.proxyConnection.setUserOptions(new UserOptions(classicMpPass, Options.MC_ACCOUNT));
         this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CustomPayloadPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CompressionPacketHandler(this.proxyConnection));
