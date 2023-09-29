@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "net.raphimc.javadowngrader:gradle-plugin:1.0.1-SNAPSHOT"
+        classpath "net.raphimc.javadowngrader:gradle-plugin:1.1.0"
     }
 }
 
