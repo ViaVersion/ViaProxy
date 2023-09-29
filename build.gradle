@@ -105,7 +105,7 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    include("net.raphimc.javadowngrader:impl-classtransform:1.0.1-SNAPSHOT") {
+    include("net.raphimc.javadowngrader:impl-classtransform:1.1.0") {
         exclude group: "org.ow2.asm", module: "asm-commons"
         exclude group: "net.lenni0451.classtransform", module: "additionalclassprovider"
     }
