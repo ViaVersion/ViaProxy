@@ -17,16 +17,15 @@
  */
 package net.raphimc.viaproxy.proxy.client2proxy.passthrough;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import net.raphimc.netminecraft.netty.connection.NetClient;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerHandler;
+import net.raphimc.viaproxy.proxy.session.LegacyProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -35,23 +34,15 @@ import java.util.function.Supplier;
 
 public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    protected Channel c2pChannel;
-    protected NetClient p2sConnection;
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-
-        this.c2pChannel = ctx.channel();
-    }
+    private LegacyProxyConnection proxyConnection;
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
 
         try {
-            if (this.p2sConnection != null) {
-                this.p2sConnection.getChannel().close();
+            if (this.proxyConnection != null) {
+                this.proxyConnection.getChannel().close();
             }
         } catch (Throwable ignored) {
         }
@@ -62,11 +53,11 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         if (!ctx.channel().isOpen()) return;
         if (!msg.isReadable()) return;
 
-        if (this.p2sConnection == null) {
-            this.connectToServer();
+        if (this.proxyConnection == null) {
+            this.connectToServer(ctx.channel());
         }
 
-        this.p2sConnection.getChannel().writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        this.proxyConnection.getChannel().writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     @Override
@@ -74,35 +65,26 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         ExceptionUtil.handleNettyException(ctx, cause, null);
     }
 
-    protected void connectToServer() {
-        final Supplier<ChannelHandler> handlerSupplier = () -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new PassthroughProxy2ServerHandler(this), true)).getHandler();
-        this.p2sConnection = new NetClient(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new) {
-            @Override
-            public void initialize(Bootstrap bootstrap) {
-                bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
-                super.initialize(bootstrap);
-            }
-        };
+    protected void connectToServer(final Channel c2pChannel) {
+        final Supplier<ChannelHandler> handlerSupplier = () -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new PassthroughProxy2ServerHandler(), true)).getHandler();
+        this.proxyConnection = new LegacyProxyConnection(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new, c2pChannel);
+        this.proxyConnection.getC2P().attr(LegacyProxyConnection.LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
         try {
-            this.p2sConnection.connect(this.getServerAddress());
+            this.proxyConnection.connect(this.getServerAddress());
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to connect to target server", e);
-            this.p2sConnection = null;
-            this.c2pChannel.close();
+            this.proxyConnection = null;
+            c2pChannel.close();
         }
 
         if (Options.SERVER_HAPROXY_PROTOCOL) {
-            this.p2sConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.c2pChannel, this.p2sConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(c2pChannel, this.proxyConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
     }
 
     protected ServerAddress getServerAddress() {
         return new ServerAddress(Options.CONNECT_ADDRESS, Options.CONNECT_PORT);
-    }
-
-    public Channel getC2pChannel() {
-        return this.c2pChannel;
     }
 
 }

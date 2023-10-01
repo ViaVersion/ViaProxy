@@ -21,15 +21,18 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import net.raphimc.viaproxy.proxy.client2proxy.passthrough.PassthroughClient2ProxyHandler;
+import net.raphimc.viaproxy.proxy.session.LegacyProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 
 public class PassthroughProxy2ServerHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    private final PassthroughClient2ProxyHandler c2pHandler;
+    private LegacyProxyConnection proxyConnection;
 
-    public PassthroughProxy2ServerHandler(final PassthroughClient2ProxyHandler c2pHandler) {
-        this.c2pHandler = c2pHandler;
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+
+        this.proxyConnection = LegacyProxyConnection.fromChannel(ctx.channel());
     }
 
     @Override
@@ -37,14 +40,14 @@ public class PassthroughProxy2ServerHandler extends SimpleChannelInboundHandler<
         super.channelInactive(ctx);
 
         try {
-            this.c2pHandler.getC2pChannel().close();
+            this.proxyConnection.getC2P().close();
         } catch (Throwable ignored) {
         }
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-        this.c2pHandler.getC2pChannel().writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        this.proxyConnection.getC2P().writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     @Override

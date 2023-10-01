@@ -104,7 +104,7 @@ public class ProxyConnection extends NetClient {
     @Override
     public void initialize(final Bootstrap bootstrap) {
         bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
-        bootstrap.attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY, this);
+        bootstrap.attr(PROXY_CONNECTION_ATTRIBUTE_KEY, this);
         super.initialize(bootstrap);
     }
 
