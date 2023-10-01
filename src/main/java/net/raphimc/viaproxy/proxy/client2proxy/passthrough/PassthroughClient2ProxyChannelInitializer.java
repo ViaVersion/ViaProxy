@@ -15,44 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.proxy.client2proxy;
+package net.raphimc.viaproxy.proxy.client2proxy.passthrough;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
-import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.proxy.client2proxy.passthrough.PassthroughInitialHandler;
+import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 
 import java.util.function.Supplier;
 
-public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer {
+public class PassthroughClient2ProxyChannelInitializer extends Client2ProxyChannelInitializer {
 
-    public static final String LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME = "legacy-passthrough-initial-handler";
-
-    public Client2ProxyChannelInitializer(final Supplier<ChannelHandler> handlerSupplier) {
+    public PassthroughClient2ProxyChannelInitializer(final Supplier<ChannelHandler> handlerSupplier) {
         super(handlerSupplier);
     }
 
     @Override
     protected void initChannel(Channel channel) {
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.PRE, channel, false)).isCancelled()) {
+        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.PRE, channel, true)).isCancelled()) {
             channel.close();
             return;
         }
 
-        if (Options.LEGACY_CLIENT_PASSTHROUGH) {
-            channel.pipeline().addLast(LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME, new PassthroughInitialHandler());
-        }
+        channel.pipeline().addLast(MCPipeline.HANDLER_HANDLER_NAME, this.handlerSupplier.get());
 
-        super.initChannel(channel);
-        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
-
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
+        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, true)).isCancelled()) {
             channel.close();
         }
     }

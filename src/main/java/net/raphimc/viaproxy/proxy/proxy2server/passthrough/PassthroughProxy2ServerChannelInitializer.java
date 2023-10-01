@@ -15,44 +15,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.proxy.client2proxy;
+package net.raphimc.viaproxy.proxy.proxy2server.passthrough;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
-import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
-import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
+import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.proxy.client2proxy.passthrough.PassthroughInitialHandler;
+import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 
 import java.util.function.Supplier;
 
-public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer {
+public class PassthroughProxy2ServerChannelInitializer extends Proxy2ServerChannelInitializer {
 
-    public static final String LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME = "legacy-passthrough-initial-handler";
-
-    public Client2ProxyChannelInitializer(final Supplier<ChannelHandler> handlerSupplier) {
+    public PassthroughProxy2ServerChannelInitializer(final Supplier<ChannelHandler> handlerSupplier) {
         super(handlerSupplier);
     }
 
     @Override
     protected void initChannel(Channel channel) {
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.PRE, channel, false)).isCancelled()) {
+        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel, true)).isCancelled()) {
             channel.close();
             return;
         }
 
-        if (Options.LEGACY_CLIENT_PASSTHROUGH) {
-            channel.pipeline().addLast(LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME, new PassthroughInitialHandler());
+        if (Options.PROXY_URL != null) {
+            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, this.getProxyHandler());
+        }
+        if (Options.SERVER_HAPROXY_PROTOCOL) {
+            channel.pipeline().addLast(VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
         }
 
-        super.initChannel(channel);
-        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
+        channel.pipeline().addLast(MCPipeline.HANDLER_HANDLER_NAME, this.handlerSupplier.get());
 
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
+        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, true)).isCancelled()) {
             channel.close();
         }
     }

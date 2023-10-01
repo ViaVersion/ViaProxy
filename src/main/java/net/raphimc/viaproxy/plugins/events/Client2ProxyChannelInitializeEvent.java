@@ -25,14 +25,20 @@ public class Client2ProxyChannelInitializeEvent extends EventCancellable impleme
 
     private final Type type;
     private final Channel channel;
+    private final boolean isLegacyPassthrough;
 
-    public Client2ProxyChannelInitializeEvent(final Type type, final Channel channel) {
+    public Client2ProxyChannelInitializeEvent(final Type type, final Channel channel, final boolean isLegacyPassthrough) {
         this.type = type;
         this.channel = channel;
+        this.isLegacyPassthrough = isLegacyPassthrough;
     }
 
     public Channel getChannel() {
         return this.channel;
+    }
+
+    public boolean isLegacyPassthrough() {
+        return this.isLegacyPassthrough;
     }
 
 

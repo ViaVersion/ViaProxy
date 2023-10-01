@@ -20,20 +20,20 @@ package net.raphimc.viaproxy.proxy.client2proxy.passthrough;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
-import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetClient;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
+import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerChannelInitializer;
+import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     protected Channel c2pChannel;
     protected NetClient p2sConnection;
@@ -63,18 +63,7 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
         if (!msg.isReadable()) return;
 
         if (this.p2sConnection == null) {
-            final int lengthOrPacketId = msg.getUnsignedByte(0);
-            if (lengthOrPacketId == 0/*classic*/ || lengthOrPacketId == 1/*a1.0.15*/ || lengthOrPacketId == 2/*<= 1.6.4*/ || lengthOrPacketId == 254/*<= 1.6.4 (ping)*/) {
-                while (ctx.pipeline().last() != this) {
-                    ctx.pipeline().removeLast();
-                }
-
-                this.connectToServer();
-            } else {
-                ctx.pipeline().remove(this);
-                ctx.pipeline().fireChannelRead(msg.retain());
-                return;
-            }
+            this.connectToServer();
         }
 
         this.p2sConnection.getChannel().writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
@@ -86,7 +75,8 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
     }
 
     protected void connectToServer() {
-        this.p2sConnection = new NetClient(this.getHandlerSupplier(), this.getChannelInitializerSupplier()) {
+        final Supplier<ChannelHandler> handlerSupplier = () -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new PassthroughProxy2ServerHandler(this), true)).getHandler();
+        this.p2sConnection = new NetClient(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new) {
             @Override
             public void initialize(Bootstrap bootstrap) {
                 bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
@@ -111,40 +101,8 @@ public class LegacyClientPassthroughHandler extends SimpleChannelInboundHandler<
         return new ServerAddress(Options.CONNECT_ADDRESS, Options.CONNECT_PORT);
     }
 
-    protected Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> getChannelInitializerSupplier() {
-        return s -> new ChannelInitializer<>() {
-            @Override
-            protected void initChannel(Channel channel) {
-                if (Options.SERVER_HAPROXY_PROTOCOL) {
-                    channel.pipeline().addLast(Proxy2ServerChannelInitializer.VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
-                }
-                channel.pipeline().addLast(MCPipeline.HANDLER_HANDLER_NAME, s.get());
-            }
-        };
-    }
-
-    protected Supplier<ChannelHandler> getHandlerSupplier() {
-        return () -> new SimpleChannelInboundHandler<ByteBuf>() {
-            @Override
-            public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                super.channelInactive(ctx);
-
-                try {
-                    LegacyClientPassthroughHandler.this.c2pChannel.close();
-                } catch (Throwable ignored) {
-                }
-            }
-
-            @Override
-            protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-                LegacyClientPassthroughHandler.this.c2pChannel.writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-            }
-
-            @Override
-            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-                ExceptionUtil.handleNettyException(ctx, cause, null);
-            }
-        };
+    public Channel getC2pChannel() {
+        return this.c2pChannel;
     }
 
 }

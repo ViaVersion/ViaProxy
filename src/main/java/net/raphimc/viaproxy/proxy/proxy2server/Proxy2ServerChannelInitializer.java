@@ -56,10 +56,11 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
     @Override
     protected void initChannel(Channel channel) {
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel)).isCancelled()) {
+        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel, false)).isCancelled()) {
             channel.close();
             return;
         }
+
         final ProxyConnection proxyConnection = ProxyConnection.fromChannel(channel);
 
         final UserConnection user = new UserConnectionImpl(channel, true);
@@ -78,7 +79,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         channel.pipeline().addLast(new ViaProxyVLPipeline(user, proxyConnection.getServerVersion()));
         channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new FlowControlHandler());
 
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel)).isCancelled()) {
+        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();
         }
     }

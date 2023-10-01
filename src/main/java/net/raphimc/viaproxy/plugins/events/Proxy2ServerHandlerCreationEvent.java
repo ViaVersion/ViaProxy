@@ -26,16 +26,26 @@ public class Proxy2ServerHandlerCreationEvent {
      */
     private ChannelHandler handler;
 
-    public Proxy2ServerHandlerCreationEvent(final ChannelHandler handler) {
+    /**
+     * Whether the handler is a legacy passthrough handler.
+     */
+    private final boolean isLegacyPassthrough;
+
+    public Proxy2ServerHandlerCreationEvent(final ChannelHandler handler, final boolean isLegacyPassthrough) {
         this.handler = handler;
+        this.isLegacyPassthrough = isLegacyPassthrough;
+    }
+
+    public ChannelHandler getHandler() {
+        return this.handler;
     }
 
     public void setHandler(final ChannelHandler handler) {
         this.handler = handler;
     }
 
-    public ChannelHandler getHandler() {
-        return this.handler;
+    public boolean isLegacyPassthrough() {
+        return this.isLegacyPassthrough;
     }
 
 }
