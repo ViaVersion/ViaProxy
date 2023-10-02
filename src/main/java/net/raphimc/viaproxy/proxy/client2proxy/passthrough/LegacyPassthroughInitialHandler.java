@@ -27,7 +27,7 @@ import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 
 import java.util.function.Supplier;
 
-public class PassthroughInitialHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class LegacyPassthroughInitialHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {

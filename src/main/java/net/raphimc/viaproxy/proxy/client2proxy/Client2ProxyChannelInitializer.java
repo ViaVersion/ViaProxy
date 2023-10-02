@@ -26,7 +26,7 @@ import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.proxy.client2proxy.passthrough.PassthroughInitialHandler;
+import net.raphimc.viaproxy.proxy.client2proxy.passthrough.LegacyPassthroughInitialHandler;
 
 import java.util.function.Supplier;
 
@@ -46,7 +46,7 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
         }
 
         if (Options.LEGACY_CLIENT_PASSTHROUGH) {
-            channel.pipeline().addLast(LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME, new PassthroughInitialHandler());
+            channel.pipeline().addLast(LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME, new LegacyPassthroughInitialHandler());
         }
 
         super.initChannel(channel);
