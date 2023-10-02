@@ -36,6 +36,7 @@ import net.raphimc.viaproxy.proxy.LoginState;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
 import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.proxy.util.ChannelUtil;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -183,12 +184,12 @@ public class LoginPacketHandler extends PacketHandler {
             this.proxyConnection.setGameProfile(new GameProfile(loginSuccessPacket.uuid, loginSuccessPacket.name));
             Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Connected successfully! Switching to " + nextState + " state");
 
-            this.proxyConnection.getChannel().config().setAutoRead(false);
+            ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
             listeners.add(f -> {
                 if (f.isSuccess() && nextState != ConnectionState.CONFIGURATION) {
                     this.proxyConnection.setC2pConnectionState(nextState);
                     this.proxyConnection.setP2sConnectionState(nextState);
-                    this.proxyConnection.getChannel().config().setAutoRead(true);
+                    ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
                 }
             });
         }

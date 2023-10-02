@@ -31,6 +31,7 @@ import net.raphimc.netminecraft.packet.impl.login.S2CLoginSuccessPacket1_7;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.proxy.util.ChannelUtil;
 
 import java.util.List;
 
@@ -58,11 +59,11 @@ public class CompressionPacketHandler extends PacketHandler {
         } else if (packet instanceof S2CLoginSuccessPacket1_7) {
             if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_8)) {
                 if (Options.COMPRESSION_THRESHOLD > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
-                    this.proxyConnection.getChannel().config().setAutoRead(false);
+                    ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
                     this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(Options.COMPRESSION_THRESHOLD)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
                         if (f.isSuccess()) {
                             this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(Options.COMPRESSION_THRESHOLD);
-                            this.proxyConnection.getChannel().config().setAutoRead(true);
+                            ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
                         }
                     });
                 }
