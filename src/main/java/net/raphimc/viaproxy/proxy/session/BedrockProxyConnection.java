@@ -19,7 +19,7 @@ package net.raphimc.viaproxy.proxy.session;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.epoll.Epoll;
@@ -73,25 +73,24 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public void connectToServer(ServerAddress serverAddress, VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(ServerAddress serverAddress, VersionEnum targetVersion) {
         if (this.getC2pConnectionState() == ConnectionState.STATUS) {
             RStream.of(this).withSuper().fields().by("serverAddress").set(serverAddress);
             RStream.of(this).withSuper().fields().by("serverVersion").set(targetVersion);
-            this.ping(serverAddress);
+            return this.ping(serverAddress);
         } else {
-            super.connectToServer(serverAddress, targetVersion);
+            return super.connectToServer(serverAddress, targetVersion);
         }
     }
 
-    private void ping(final ServerAddress serverAddress) {
-        if (this.channelFuture == null) {
-            this.initialize(new Bootstrap());
-        }
-        this.getChannel().bind(new InetSocketAddress(0)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).syncUninterruptibly();
+    private ChannelFuture ping(final ServerAddress serverAddress) {
+        if (this.channelFuture == null) this.initialize(new Bootstrap());
 
         this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(serverAddress.toSocketAddress()));
         this.getChannel().pipeline().remove(VLPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
         this.getChannel().pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
+
+        return this.getChannel().bind(new InetSocketAddress(0));
     }
 
 }

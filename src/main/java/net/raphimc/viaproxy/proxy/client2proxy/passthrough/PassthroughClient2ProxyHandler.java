@@ -26,8 +26,10 @@ import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.session.LegacyProxyConnection;
+import net.raphimc.viaproxy.proxy.util.ChannelUtil;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
+import net.raphimc.viaproxy.proxy.util.ThrowingChannelFutureListener;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.util.function.Supplier;
@@ -70,17 +72,26 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         this.proxyConnection = new LegacyProxyConnection(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new, c2pChannel);
         this.proxyConnection.getC2P().attr(LegacyProxyConnection.LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
-        try {
-            this.proxyConnection.connect(this.getServerAddress());
-        } catch (Throwable e) {
-            Logger.LOGGER.error("Failed to connect to target server", e);
-            this.proxyConnection = null;
-            c2pChannel.close();
-        }
+        final ServerAddress serverAddress = this.getServerAddress();
 
-        if (Options.SERVER_HAPROXY_PROTOCOL) {
-            this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(c2pChannel, this.proxyConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-        }
+        ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
+        Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), null, "[Legacy <-> Legacy] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
+
+        this.proxyConnection.connect(serverAddress).addListeners((ThrowingChannelFutureListener) f -> {
+            if (f.isSuccess()) {
+                if (Options.SERVER_HAPROXY_PROTOCOL) {
+                    this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                }
+
+                ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
+            }
+        }, (ThrowingChannelFutureListener) f -> {
+            if (!f.isSuccess()) {
+                Logger.LOGGER.error("Failed to connect to target server", f.cause());
+                this.proxyConnection.getC2P().close();
+                this.proxyConnection = null;
+            }
+        });
     }
 
     protected ServerAddress getServerAddress() {

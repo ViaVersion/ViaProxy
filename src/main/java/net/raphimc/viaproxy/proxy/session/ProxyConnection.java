@@ -97,7 +97,7 @@ public class ProxyConnection extends NetClient {
 
     @Override
     @Deprecated
-    public void connect(final ServerAddress serverAddress) {
+    public ChannelFuture connect(final ServerAddress serverAddress) {
         throw new UnsupportedOperationException();
     }
 
@@ -108,10 +108,10 @@ public class ProxyConnection extends NetClient {
         super.initialize(bootstrap);
     }
 
-    public void connectToServer(final ServerAddress serverAddress, final VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(final ServerAddress serverAddress, final VersionEnum targetVersion) {
         this.serverAddress = serverAddress;
         this.serverVersion = targetVersion;
-        super.connect(serverAddress);
+        return super.connect(serverAddress);
     }
 
     public Channel getC2P() {

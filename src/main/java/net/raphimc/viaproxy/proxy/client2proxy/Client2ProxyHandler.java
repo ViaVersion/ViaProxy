@@ -43,9 +43,7 @@ import net.raphimc.viaproxy.proxy.session.BedrockProxyConnection;
 import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.session.UserOptions;
-import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
-import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
-import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
+import net.raphimc.viaproxy.proxy.util.*;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -117,7 +115,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
         }
 
-        String[] handshakeParts = new String[]{packet.address};
+        final String[] handshakeParts;
         if (Options.PLAYER_INFO_FORWARDING) {
             handshakeParts = new String[3];
             final String[] receivedParts = packet.address.split("\0");
@@ -133,6 +131,8 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             if (handshakeParts[2] == null) {
                 this.proxyConnection.kickClient("§cMissing player UUID in handshake. Ensure that your proxy has player info forwarding enabled.");
             }
+        } else {
+            handshakeParts = new String[]{packet.address};
         }
 
         String connectIP = Options.CONNECT_ADDRESS;
@@ -223,27 +223,33 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
 
+        ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
-        try {
-            PluginManager.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
-            this.proxyConnection.connectToServer(serverAddress, serverVersion);
-        } catch (Throwable e) {
-            if (e instanceof ConnectException || e instanceof UnresolvedAddressException) { // Trust me, this is not always false
-                this.proxyConnection.kickClient("§cCould not connect to the backend server!\n§cTry again in a few seconds.");
-            } else {
-                Logger.LOGGER.error("Error while connecting to the backend server", e);
-                this.proxyConnection.kickClient("§cAn error occurred while connecting to the backend server: " + e.getMessage() + "\n§cCheck the console for more information.");
-            }
-        }
+        PluginManager.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
 
-        if (Options.SERVER_HAPROXY_PROTOCOL) {
-            this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-        }
-
-        handshakeParts[0] = serverAddress.getAddress();
-        this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
+        this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
-                this.proxyConnection.setP2sConnectionState(packet.intendedState);
+                if (Options.SERVER_HAPROXY_PROTOCOL) {
+                    this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                }
+
+                handshakeParts[0] = serverAddress.getAddress();
+                this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
+                    if (f2.isSuccess()) {
+                        this.proxyConnection.setP2sConnectionState(packet.intendedState);
+                    }
+                });
+
+                ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
+            }
+        }, (ThrowingChannelFutureListener) f -> {
+            if (!f.isSuccess()) {
+                if (f.cause() instanceof ConnectException || f.cause() instanceof UnresolvedAddressException) {
+                    this.proxyConnection.kickClient("§cCould not connect to the backend server!\n§cTry again in a few seconds.");
+                } else {
+                    Logger.LOGGER.error("Error while connecting to the backend server", f.cause());
+                    this.proxyConnection.kickClient("§cAn error occurred while connecting to the backend server: " + f.cause().getMessage() + "\n§cCheck the console for more information.");
+                }
             }
         });
     }
