@@ -116,7 +116,6 @@ dependencies {
         exclude group: "io.netty", module: "netty-transport"
     }
     include "gs.mclo:api:3.0.1"
-    include "org.swinglabs:swingx:1.6.1"
 }
 
 sourceSets {

@@ -32,7 +32,6 @@ import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
-import org.jdesktop.swingx.VerticalLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,18 +59,10 @@ public class AdvancedTab extends AUITab {
 
     @Override
     protected void init(JPanel contentPane) {
-        JPanel top = new JPanel();
-        top.setLayout(new VerticalLayout());
-
-        JPanel bottom = new JPanel();
-        bottom.setLayout(new VerticalLayout());
-
-        this.addBody(top);
-        this.addFooter(bottom);
-
         contentPane.setLayout(new BorderLayout());
-        contentPane.add(top, BorderLayout.NORTH);
-        contentPane.add(bottom, BorderLayout.SOUTH);
+
+        this.addBody(contentPane);
+        this.addFooter(contentPane);
     }
 
     private void addBody(final Container parent) {
@@ -126,7 +117,7 @@ public class AdvancedTab extends AUITab {
             GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).fill(GridBagConstraints.HORIZONTAL).add(this.ignorePacketTranslationErrors);
         }
 
-        parent.add(body, BorderLayout.CENTER);
+        parent.add(body, BorderLayout.NORTH);
     }
 
     private void addFooter(final Container container) {
@@ -189,7 +180,7 @@ public class AdvancedTab extends AUITab {
         padding.setLayout(new GridBagLayout());
         GBC.create(padding).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(footer);
 
-        container.add(padding, BorderLayout.CENTER);
+        container.add(padding, BorderLayout.SOUTH);
     }
 
     @EventHandler
