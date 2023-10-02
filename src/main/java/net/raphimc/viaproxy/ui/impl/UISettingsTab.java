@@ -23,7 +23,6 @@ import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
-import org.jdesktop.swingx.VerticalLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,8 +77,8 @@ public class UISettingsTab extends AUITab {
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(language);
         }
 
-        contentPane.setLayout(new VerticalLayout());
-        contentPane.add(body);
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(body, BorderLayout.NORTH);
     }
 
 }

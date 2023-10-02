@@ -33,7 +33,6 @@ import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
-import org.jdesktop.swingx.VerticalLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,18 +62,14 @@ public class GeneralTab extends AUITab {
     @Override
     protected void init(JPanel contentPane) {
         JPanel top = new JPanel();
-        top.setLayout(new VerticalLayout());
-
-        JPanel bottom = new JPanel();
-        bottom.setLayout(new VerticalLayout());
-
-        this.addHeader(top);
-        this.addBody(top);
-        this.addFooter(bottom);
+        top.setLayout(new BorderLayout());
 
         contentPane.setLayout(new BorderLayout());
         contentPane.add(top, BorderLayout.NORTH);
-        contentPane.add(bottom, BorderLayout.SOUTH);
+
+        this.addHeader(top);
+        this.addBody(top);
+        this.addFooter(contentPane);
     }
 
     private void addHeader(final Container parent) {
@@ -98,7 +93,7 @@ public class GeneralTab extends AUITab {
         JLabel copyright = new JLabel("© RK_01 & Lenni0451");
         GBC.create(header).grid(2, 0).width(0).insets(BORDER_PADDING, 0, 0, BORDER_PADDING).anchor(GridBagConstraints.NORTHEAST).add(copyright);
 
-        parent.add(header);
+        parent.add(header, BorderLayout.NORTH);
     }
 
     private void addBody(final Container parent) {
@@ -163,7 +158,7 @@ public class GeneralTab extends AUITab {
             }
         }
 
-        parent.add(body);
+        parent.add(body, BorderLayout.CENTER);
     }
 
     private void addFooter(final Container parent) {
@@ -182,7 +177,7 @@ public class GeneralTab extends AUITab {
         this.stateButton.setEnabled(false);
         GBC.create(footer).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateButton);
 
-        parent.add(footer);
+        parent.add(footer, BorderLayout.SOUTH);
     }
 
     @EventHandler
