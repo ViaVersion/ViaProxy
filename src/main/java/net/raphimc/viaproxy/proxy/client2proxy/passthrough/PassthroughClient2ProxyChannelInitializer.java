@@ -40,6 +40,7 @@ public class PassthroughClient2ProxyChannelInitializer extends Client2ProxyChann
             return;
         }
 
+        channel.pipeline().addLast(MCPipeline.FLOW_CONTROL_HANDLER_NAME, MCPipeline.FLOW_CONTROL_HANDLER.get());
         channel.pipeline().addLast(MCPipeline.HANDLER_HANDLER_NAME, this.handlerSupplier.get());
 
         if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, true)).isCancelled()) {

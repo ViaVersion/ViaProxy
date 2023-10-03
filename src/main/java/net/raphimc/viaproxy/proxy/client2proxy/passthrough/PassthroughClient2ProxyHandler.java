@@ -39,6 +39,13 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
     private LegacyProxyConnection proxyConnection;
 
     @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+
+        this.connectToServer(ctx.channel());
+    }
+
+    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
 
@@ -54,10 +61,6 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
         if (!ctx.channel().isOpen()) return;
         if (!msg.isReadable()) return;
-
-        if (this.proxyConnection == null) {
-            this.connectToServer(ctx.channel());
-        }
 
         this.proxyConnection.getChannel().writeAndFlush(msg.retain()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
