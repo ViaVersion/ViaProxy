@@ -82,11 +82,13 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
 
         this.proxyConnection.connect(serverAddress).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
-                if (Options.SERVER_HAPROXY_PROTOCOL) {
-                    this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                }
+                f.channel().eventLoop().submit(() -> { // Reschedule so the packets get sent after the channel is fully initialized and active
+                    if (Options.SERVER_HAPROXY_PROTOCOL) {
+                        this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    }
 
-                ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
+                    ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
+                });
             }
         }, (ThrowingChannelFutureListener) f -> {
             if (!f.isSuccess()) {

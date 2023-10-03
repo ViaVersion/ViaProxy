@@ -229,18 +229,20 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
         this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
-                if (Options.SERVER_HAPROXY_PROTOCOL) {
-                    this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                }
-
-                handshakeParts[0] = serverAddress.getAddress();
-                this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
-                    if (f2.isSuccess()) {
-                        this.proxyConnection.setP2sConnectionState(packet.intendedState);
+                f.channel().eventLoop().submit(() -> { // Reschedule so the packets get sent after the channel is fully initialized and active
+                    if (Options.SERVER_HAPROXY_PROTOCOL) {
+                        this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                     }
-                });
 
-                ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
+                    handshakeParts[0] = serverAddress.getAddress();
+                    this.proxyConnection.getChannel().writeAndFlush(new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
+                        if (f2.isSuccess()) {
+                            this.proxyConnection.setP2sConnectionState(packet.intendedState);
+                        }
+                    });
+
+                    ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
+                });
             }
         }, (ThrowingChannelFutureListener) f -> {
             if (!f.isSuccess()) {
