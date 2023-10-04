@@ -86,9 +86,11 @@ public class BedrockProxyConnection extends ProxyConnection {
     private ChannelFuture ping(final ServerAddress serverAddress) {
         if (this.channelFuture == null) this.initialize(new Bootstrap());
 
-        this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(serverAddress.toSocketAddress()));
-        this.getChannel().pipeline().remove(VLPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
-        this.getChannel().pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
+        this.channelFuture.channel().eventLoop().submit(() -> {
+            this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(serverAddress.toSocketAddress()));
+            this.getChannel().pipeline().remove(VLPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
+            this.getChannel().pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
+        });
 
         return this.getChannel().bind(new InetSocketAddress(0));
     }
