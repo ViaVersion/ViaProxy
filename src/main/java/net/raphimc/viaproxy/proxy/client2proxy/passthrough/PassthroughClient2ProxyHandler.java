@@ -20,9 +20,11 @@ package net.raphimc.viaproxy.proxy.client2proxy.passthrough;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import net.raphimc.netminecraft.util.ServerAddress;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
+import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.session.LegacyProxyConnection;
@@ -75,7 +77,19 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         this.proxyConnection = new LegacyProxyConnection(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new, c2pChannel);
         this.proxyConnection.getC2P().attr(LegacyProxyConnection.LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
-        final ServerAddress serverAddress = this.getServerAddress();
+        final ServerAddress unresolvedAddress = this.getServerAddress();
+        final VersionEnum serverVersion = Options.PROTOCOL_VERSION;
+
+        final ResolveSrvEvent resolveSrvEvent = PluginManager.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, unresolvedAddress.getAddress(), unresolvedAddress.getPort()));
+        final String connectIP = resolveSrvEvent.getHost();
+        final int connectPort = resolveSrvEvent.getPort();
+
+        final ServerAddress serverAddress;
+        if (resolveSrvEvent.isCancelled() || serverVersion.isOlderThan(VersionEnum.r1_3_1tor1_3_2) || serverVersion.equals(VersionEnum.bedrockLatest)) {
+            serverAddress = new ServerAddress(connectIP, connectPort);
+        } else {
+            serverAddress = ServerAddress.fromSRV(connectIP + ":" + connectPort);
+        }
 
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), null, "[Legacy <-> Legacy] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
