@@ -23,7 +23,6 @@ import com.viaversion.viaversion.api.protocol.packet.State;
 import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.types.BitSetType;
-import com.viaversion.viaversion.api.type.types.ByteArrayType;
 import com.viaversion.viaversion.protocols.base.ClientboundLoginPackets;
 import com.viaversion.viaversion.protocols.base.ServerboundLoginPackets;
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ClientboundPackets1_19_1;
@@ -48,10 +47,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Mixin(value = Protocol1_19_3To1_19_1.class, remap = false)
 public abstract class MixinProtocol1_19_3To1_19_1 extends AbstractProtocol<ClientboundPackets1_19_1, ClientboundPackets1_19_3, ServerboundPackets1_19_1, ServerboundPackets1_19_3> {
-
-    @Final
-    @Shadow
-    private static ByteArrayType.OptionalByteArrayType OPTIONAL_MESSAGE_SIGNATURE_BYTES_TYPE;
 
     @Final
     @Shadow
@@ -114,7 +109,7 @@ public abstract class MixinProtocol1_19_3To1_19_1 extends AbstractProtocol<Clien
                 map(Type.STRING); // Message
                 map(Type.LONG); // Timestamp
                 map(Type.LONG); // Salt
-                read(OPTIONAL_MESSAGE_SIGNATURE_BYTES_TYPE); // Signature
+                read(Type.OPTIONAL_SIGNATURE_BYTES); // Signature
                 handler(wrapper -> {
                     final ChatSession1_19_1 chatSession = wrapper.user().get(ChatSession1_19_1.class);
                     final ReceivedMessagesStorage messagesStorage = wrapper.user().get(ReceivedMessagesStorage.class);
