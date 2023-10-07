@@ -65,21 +65,21 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion:4.8.0"
-    include("com.viaversion:viabackwards-common:4.8.0") {
+    include "com.viaversion:viaversion:4.8.1"
+    include("com.viaversion:viabackwards-common:4.8.1") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
     }
     include "com.viaversion:viarewind-common:3.0.0"
-    include "net.raphimc:ViaLegacy:2.2.19"
+    include "net.raphimc:ViaLegacy:2.2.20"
     include "net.raphimc:ViaAprilFools:2.0.9"
     include("net.raphimc:ViaBedrock:0.0.3-SNAPSHOT") {
         exclude group: "io.netty", module: "netty-codec-http"
         exclude group: "io.jsonwebtoken", module: "jjwt-impl"
         exclude group: "io.jsonwebtoken", module: "jjwt-gson"
     }
-    include("net.raphimc:ViaLoader:2.2.9") {
+    include("net.raphimc:ViaLoader:2.2.10") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
