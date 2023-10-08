@@ -33,7 +33,7 @@ public class ConfigPatcher extends Config {
         super(configFile);
 
         this.patches = patches;
-        this.reloadConfig();
+        this.reload();
     }
 
     @Override

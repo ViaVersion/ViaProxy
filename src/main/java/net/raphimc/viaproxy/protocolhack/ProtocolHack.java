@@ -51,7 +51,7 @@ public class ProtocolHack {
         viaVersionPatches.put("chunk-border-fix", true);
         new ConfigPatcher(viaVersionConfig, viaVersionPatches);
 
-        final File viaBackwardsConfig = new File(configFolder, "config.yml");
+        final File viaBackwardsConfig = new File(configFolder, "viabackwards.yml");
         final Map<String, Object> viaBackwardsPatches = new HashMap<>();
         viaBackwardsPatches.put("fix-1_13-face-player", true);
         viaBackwardsPatches.put("handle-pings-as-inv-acknowledgements", true);
