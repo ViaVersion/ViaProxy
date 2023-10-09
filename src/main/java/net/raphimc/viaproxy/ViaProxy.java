@@ -98,7 +98,7 @@ public class ViaProxy {
         Logger.setup();
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         ConsoleHandler.hookConsole();
-        Logger.LOGGER.info("Initializing ViaProxy {} v{} (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, injectionMethod);
+        Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
         Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
         Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
 
