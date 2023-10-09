@@ -213,7 +213,8 @@ public class GeneralTab extends AUITab {
     }
 
     private void updateStateLabel() {
-        this.stateLabel.setText(I18n.get("tab.general.state.running", ViaProxy.ui.advancedTab.bindPort.getValue().toString()));
+        this.stateLabel.setText(I18n.get("tab.general.state.running", "1.7+", "127.0.0.1:" + ViaProxy.ui.advancedTab.bindPort.getValue()));
+        this.stateLabel.setForeground(Color.GREEN);
         this.stateLabel.setVisible(true);
     }
 
