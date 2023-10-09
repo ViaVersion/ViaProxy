@@ -71,7 +71,7 @@ dependencies {
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
     }
-    include "com.viaversion:viarewind-common:3.0.2-SNAPSHOT"
+    include "com.viaversion:viarewind-common:3.0.3-SNAPSHOT"
     include "net.raphimc:ViaLegacy:2.2.21-SNAPSHOT"
     include "net.raphimc:ViaAprilFools:2.0.10-SNAPSHOT"
     include("net.raphimc:ViaBedrock:0.0.3-SNAPSHOT") {
