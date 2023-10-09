@@ -122,6 +122,7 @@ sourceSets {
     main {
         classTokenReplacer {
             property("\${version}", project.version)
+            property("\${impl_version}", "git-${project.name}-${project.version}:${project.latestCommitHash()}")
         }
     }
 }
@@ -210,3 +211,12 @@ tasks.register("java8Jar", DowngradeJarTask) {
     copyRuntimeClasses = false
 }.get().dependsOn("build")
 build.finalizedBy("java8Jar")
+
+String latestCommitHash() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine "git", "rev-parse", "--short", "HEAD"
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}

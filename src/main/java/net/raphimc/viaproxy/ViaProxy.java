@@ -59,6 +59,7 @@ import java.lang.instrument.Instrumentation;
 public class ViaProxy {
 
     public static final String VERSION = "${version}";
+    public static final String IMPL_VERSION = "${impl_version}";
 
     private static Instrumentation instrumentation;
     public static SaveManager saveManager;
