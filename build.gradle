@@ -1,23 +1,11 @@
 import net.raphimc.javadowngrader.gradle.task.DowngradeJarTask
 
-buildscript {
-    repositories {
-        maven {
-            name = "Lenni0451"
-            url "https://maven.lenni0451.net/everything"
-        }
-    }
-
-    dependencies {
-        classpath "net.raphimc.javadowngrader:gradle-plugin:1.1.1-SNAPSHOT"
-    }
-}
-
 plugins {
     id "java"
     id "application"
     id "maven-publish"
     id "net.raphimc.class-token-replacer" version "1.0.0"
+    id "net.raphimc.java-downgrader" version "1.1.1-SNAPSHOT"
 }
 
 base {
