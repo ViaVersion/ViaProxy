@@ -154,21 +154,20 @@ public class ViaProxy {
             }
             ViaProxyUI.EVENT_MANAGER.call(new UIInitEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
-            return;
-        }
+        } else {
+            Options.parse(args);
 
-        Options.parse(args);
+            if (System.getProperty("skipUpdateCheck") == null) {
+                updateCheckThread.start();
+            }
+            loaderThread.start();
+            loaderThread.join();
+            Logger.LOGGER.info("ViaProxy started successfully!");
+            startProxy();
 
-        if (System.getProperty("skipUpdateCheck") == null) {
-            updateCheckThread.start();
-        }
-        loaderThread.start();
-        loaderThread.join();
-        Logger.LOGGER.info("ViaProxy started successfully!");
-        startProxy();
-
-        while (true) {
-            Thread.sleep(Integer.MAX_VALUE);
+            while (true) {
+                Thread.sleep(Integer.MAX_VALUE);
+            }
         }
     }
 

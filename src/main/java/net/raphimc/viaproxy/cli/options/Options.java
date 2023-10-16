@@ -22,6 +22,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.raphimc.vialoader.util.VersionEnum;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
@@ -32,6 +33,7 @@ import net.raphimc.viaproxy.util.logging.Logger;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 
@@ -45,10 +47,10 @@ public class Options {
     public static boolean ONLINE_MODE;
     public static boolean OPENAUTHMOD_AUTH;
     public static boolean BETACRAFT_AUTH;
+    public static Account MC_ACCOUNT;
     public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
 
     // GUI only config options
-    public static Account MC_ACCOUNT;
     public static String CLASSIC_MP_PASS;
     public static Boolean LEGACY_SKIN_LOADING;
     public static boolean CHAT_SIGNING;
@@ -71,12 +73,13 @@ public class Options {
         final OptionSpec<Integer> bindPort = parser.acceptsAll(asList("bind_port", "bp"), "The port the proxy should bind to").withRequiredArg().ofType(Integer.class).defaultsTo(BIND_PORT);
         final OptionSpec<Void> srvMode = parser.acceptsAll(asList("srv_mode", "srv", "s"), "Enable srv mode");
         final OptionSpec<Void> iSrvMode = parser.acceptsAll(asList("internal_srv_mode", "isrv"), "Enable internal srv mode").availableUnless(srvMode);
-        final OptionSpec<Void> onlineMode = parser.acceptsAll(asList("online_mode", "om", "o"), "Enable online mode");
+        final OptionSpec<Void> proxyOnlineMode = parser.acceptsAll(asList("online_mode", "om", "o"), "Enable proxy online mode");
         final OptionSpec<Integer> compressionThreshold = parser.acceptsAll(asList("compression_threshold", "ct", "c"), "The threshold for packet compression").withRequiredArg().ofType(Integer.class).defaultsTo(COMPRESSION_THRESHOLD);
         final OptionSpec<String> connectAddress = parser.acceptsAll(asList("connect_address", "target_ip", "ca", "a"), "The address of the target server").withRequiredArg().ofType(String.class).required();
         final OptionSpec<Integer> connectPort = parser.acceptsAll(asList("connect_port", "target_port", "cp", "p"), "The port of the target server").withRequiredArg().ofType(Integer.class);
         final OptionSpec<VersionEnum> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new VersionEnumConverter()).required();
-        final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Enable OpenAuthMod authentication");
+        final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Use OpenAuthMod for joining online mode servers");
+        final OptionSpec<Integer> guiAccountIndex = parser.acceptsAll(asList("gui_account_index", "gui_account"), "Use an account from the ViaProxy GUI for joining online mode servers (Specify -1 for instructions)").withRequiredArg().ofType(Integer.class);
         final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication for classic servers");
         final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which clients can optionally download").withRequiredArg().ofType(String.class);
         final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for backend TCP connections").withRequiredArg().ofType(String.class);
@@ -99,7 +102,7 @@ public class Options {
             BIND_PORT = options.valueOf(bindPort);
             SRV_MODE = options.has(srvMode);
             INTERNAL_SRV_MODE = options.has(iSrvMode);
-            ONLINE_MODE = options.has(onlineMode);
+            ONLINE_MODE = options.has(proxyOnlineMode);
             CONNECT_ADDRESS = options.valueOf(connectAddress);
             PROTOCOL_VERSION = options.valueOf(version);
             if (options.has(connectPort)) {
@@ -109,6 +112,26 @@ public class Options {
             }
             COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
             OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
+            if (options.has(guiAccountIndex)) {
+                final List<Account> accounts = ViaProxy.saveManager.accountsSave.getAccounts();
+                final int index = options.valueOf(guiAccountIndex);
+                if (index < 0 || index >= accounts.size()) {
+                    Logger.LOGGER.error("Invalid account index: " + index);
+                    Logger.LOGGER.info("To use this feature you have to:");
+                    Logger.LOGGER.info("1. Launch the ViaProxy GUI on your computer and add an account in the GUI");
+                    Logger.LOGGER.info("2. Copy the 'saves.json' file from the directory of your ViaProxy GUI jar to the directory of the current ViaProxy CLI jar");
+                    Logger.LOGGER.info("3. Specify the index of the account (See list below)");
+                    Logger.LOGGER.info("=== Account list ===");
+                    for (int i = 0; i < accounts.size(); i++) {
+                        Logger.LOGGER.info(i + ": " + accounts.get(i).getDisplayString());
+                    }
+                    Logger.LOGGER.info("====================");
+                    System.exit(1);
+                } else {
+                    MC_ACCOUNT = accounts.get(index);
+                    Logger.LOGGER.info("Using account: " + MC_ACCOUNT.getDisplayString() + " to join online mode servers");
+                }
+            }
             BETACRAFT_AUTH = options.has(betaCraftAuth);
             if (options.has(resourcePackUrl)) {
                 RESOURCE_PACK_URL = options.valueOf(resourcePackUrl);
