@@ -17,8 +17,13 @@
  */
 package net.raphimc.viaproxy.protocolhack.impl;
 
+import com.viaversion.viaversion.libs.gson.JsonArray;
+import com.viaversion.viaversion.libs.gson.JsonObject;
 import net.raphimc.vialoader.impl.platform.ViaVersionPlatformImpl;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
+import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 
 import java.util.UUID;
 
@@ -31,6 +36,26 @@ public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
     @Override
     public void sendMessage(UUID uuid, String msg) {
         super.sendMessage(uuid, ConsoleFormatter.convert(msg));
+    }
+
+    @Override
+    public JsonObject getDump() {
+        final JsonObject root = new JsonObject();
+
+        root.addProperty("version", ViaProxy.VERSION);
+        root.addProperty("impl_version", ViaProxy.IMPL_VERSION);
+
+        final JsonArray plugins = new JsonArray();
+        for (ViaProxyPlugin plugin : PluginManager.getPlugins()) {
+            final JsonObject pluginObj = new JsonObject();
+            pluginObj.addProperty("name", plugin.getName());
+            pluginObj.addProperty("version", plugin.getVersion());
+            pluginObj.addProperty("author", plugin.getAuthor());
+            plugins.add(pluginObj);
+        }
+        root.add("plugins", plugins);
+
+        return root;
     }
 
 }
