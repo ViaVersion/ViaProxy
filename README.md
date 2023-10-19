@@ -83,7 +83,7 @@ Here is an example command to allow players to join on yourserverip:25568 and co
 To change the protocol translation settings/features you can look into the ViaProtocolHack folder.
 You will find 5 config files there:
 - viaversion.yml (ViaVersion)
-- config.yml (ViaBackwards)
+- viabackwards.yml (ViaBackwards)
 - viarewind.yml (ViaRewind)
 - vialegacy.yml (ViaLegacy)
 - viabedrock.yml (ViaBedrock)
