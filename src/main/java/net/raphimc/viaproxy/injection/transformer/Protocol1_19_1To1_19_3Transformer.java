@@ -20,12 +20,9 @@ package net.raphimc.viaproxy.injection.transformer;
 import com.viaversion.viabackwards.api.BackwardsProtocol;
 import com.viaversion.viabackwards.protocol.protocol1_19_1to1_19_3.Protocol1_19_1To1_19_3;
 import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
-import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
-import com.viaversion.viaversion.api.protocol.packet.State;
 import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.types.BitSetType;
-import com.viaversion.viaversion.protocols.base.ClientboundLoginPackets;
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ClientboundPackets1_19_1;
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ServerboundPackets1_19_1;
 import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ClientboundPackets1_19_3;
@@ -44,22 +41,6 @@ public abstract class Protocol1_19_1To1_19_3Transformer extends BackwardsProtoco
 
     @CInject(method = "registerPackets", target = @CTarget("RETURN"))
     private void allowSignatures(InjectionCallback ic) {
-        this.registerClientbound(State.LOGIN, ClientboundLoginPackets.GAME_PROFILE.getId(), ClientboundLoginPackets.GAME_PROFILE.getId(), new PacketHandlers() {
-            @Override
-            public void register() {
-                handler(wrapper -> {
-                    final ChatSession1_19_3 chatSession = wrapper.user().get(ChatSession1_19_3.class);
-
-                    if (chatSession != null) {
-                        final PacketWrapper chatSessionUpdate = wrapper.create(ServerboundPackets1_19_3.CHAT_SESSION_UPDATE);
-                        chatSessionUpdate.write(Type.UUID, chatSession.getSessionId());
-                        chatSessionUpdate.write(Type.PROFILE_KEY, chatSession.getProfileKey());
-                        chatSessionUpdate.sendToServer(Protocol1_19_1To1_19_3.class);
-                    }
-                });
-            }
-        }, true);
-
         this.registerServerbound(ServerboundPackets1_19_1.CHAT_MESSAGE, ServerboundPackets1_19_3.CHAT_MESSAGE, new PacketHandlers() {
             @Override
             public void register() {
