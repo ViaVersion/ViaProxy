@@ -81,15 +81,15 @@ public class ExternalInterface {
                     }
                     proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_20_2(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
 
-                    user.put(new ChatSession1_19_0(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.legacyPublicKeySignature())));
-                    user.put(new ChatSession1_19_1(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
-                    user.put(new ChatSession1_19_3(user, uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
+                    user.put(new ChatSession1_19_0(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.legacyPublicKeySignature())));
+                    user.put(new ChatSession1_19_1(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
+                    user.put(new ChatSession1_19_3(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                 } else if (proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
                     final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
 
                     final UUID deviceId = mcChain.prevResult().initialXblSession().prevResult2().id();
                     final String playFabId = bedrockAccount.getPlayFabToken().playFabId();
-                    user.put(new AuthChainData(user, mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey(), deviceId, playFabId));
+                    user.put(new AuthChainData(mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey(), deviceId, playFabId));
                 }
             }
 

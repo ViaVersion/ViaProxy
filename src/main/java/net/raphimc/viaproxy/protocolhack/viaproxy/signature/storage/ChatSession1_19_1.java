@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage;
 
-import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
 import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.model.DecoratableMessage;
@@ -33,8 +32,8 @@ public class ChatSession1_19_1 extends ChatSession {
 
     private byte[] precedingSignature;
 
-    public ChatSession1_19_1(UserConnection user, UUID uuid, PrivateKey privateKey, ProfileKey profileKey) {
-        super(user, uuid, privateKey, profileKey);
+    public ChatSession1_19_1(UUID uuid, PrivateKey privateKey, ProfileKey profileKey) {
+        super(uuid, privateKey, profileKey);
     }
 
     public byte[] signChatMessage(final MessageMetadata metadata, final DecoratableMessage content, final PlayerMessageSignature[] lastSeenMessages) throws SignatureException {

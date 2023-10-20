@@ -18,7 +18,6 @@
 package net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage;
 
 import com.google.common.primitives.Ints;
-import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
 import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.model.MessageMetadata;
@@ -34,8 +33,8 @@ public class ChatSession1_19_3 extends ChatSession {
     private final UUID sessionId = UUID.randomUUID();
     private MessageLink link;
 
-    public ChatSession1_19_3(UserConnection user, UUID uuid, PrivateKey privateKey, ProfileKey profileKey) {
-        super(user, uuid, privateKey, profileKey);
+    public ChatSession1_19_3(UUID uuid, PrivateKey privateKey, ProfileKey profileKey) {
+        super(uuid, privateKey, profileKey);
 
         this.link = new MessageLink(uuid, this.sessionId);
     }

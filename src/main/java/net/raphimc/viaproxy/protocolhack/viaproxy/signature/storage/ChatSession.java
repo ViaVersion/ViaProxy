@@ -17,8 +17,7 @@
  */
 package net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage;
 
-import com.viaversion.viaversion.api.connection.StoredObject;
-import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import net.raphimc.viaproxy.protocolhack.viaproxy.signature.util.DataConsumer;
 
@@ -28,16 +27,14 @@ import java.security.SignatureException;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class ChatSession extends StoredObject {
+public class ChatSession implements StorableObject {
 
     private final UUID uuid;
     private final PrivateKey privateKey;
     private final ProfileKey profileKey;
     private final Signature signer;
 
-    public ChatSession(final UserConnection user, final UUID uuid, final PrivateKey privateKey, final ProfileKey profileKey) {
-        super(user);
-
+    public ChatSession(final UUID uuid, final PrivateKey privateKey, final ProfileKey profileKey) {
         this.uuid = uuid;
         this.privateKey = privateKey;
         this.profileKey = profileKey;
