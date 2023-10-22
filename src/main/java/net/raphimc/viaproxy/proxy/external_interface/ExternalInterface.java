@@ -20,6 +20,9 @@ package net.raphimc.viaproxy.proxy.external_interface;
 import com.google.common.primitives.Longs;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.ProfileKey;
+import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_0;
+import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_1;
+import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.raphimc.mcauth.step.bedrock.StepMCChain;
@@ -34,9 +37,6 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
-import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_0;
-import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_1;
-import net.raphimc.viaproxy.protocolhack.viaproxy.signature.storage.ChatSession1_19_3;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
@@ -128,6 +128,8 @@ public class ExternalInterface {
 
     public static void signNonce(final byte[] nonce, final C2SLoginKeyPacket1_19 packet, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException, SignatureException {
         Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Requesting nonce signature");
+        final UserConnection user = proxyConnection.getUserConnection();
+
         if (Options.OPENAUTHMOD_AUTH) {
             try {
                 final ByteBuf response = proxyConnection.sendCustomPayload(OpenAuthModConstants.SIGN_NONCE_CHANNEL, PacketTypes.writeByteArray(Unpooled.buffer(), nonce)).get(5, TimeUnit.SECONDS);
@@ -138,18 +140,13 @@ public class ExternalInterface {
             } catch (TimeoutException e) {
                 proxyConnection.kickClient("§cAuthentication cancelled! You need to install OpenAuthMod in order to join this server.");
             }
-        } else if (Options.CHAT_SIGNING) {
-            final UserConnection user = proxyConnection.getUserConnection();
-            if (user.has(ChatSession1_19_0.class)) {
-                final long salt = ThreadLocalRandom.current().nextLong();
-                packet.signature = user.get(ChatSession1_19_0.class).sign(updater -> {
-                    updater.accept(nonce);
-                    updater.accept(Longs.toByteArray(salt));
-                });
-                packet.salt = salt;
-            } else {
-                proxyConnection.kickClient("§cFailed to sign nonce");
-            }
+        } else if (user.has(ChatSession1_19_0.class)) {
+            final long salt = ThreadLocalRandom.current().nextLong();
+            packet.signature = user.get(ChatSession1_19_0.class).sign(updater -> {
+                updater.accept(nonce);
+                updater.accept(Longs.toByteArray(salt));
+            });
+            packet.salt = salt;
         } else {
             proxyConnection.kickClient("§cThis server requires a signed nonce. Please enable chat signing in the config and select a valid authentication mode.");
         }
