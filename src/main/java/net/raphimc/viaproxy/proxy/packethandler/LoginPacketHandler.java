@@ -30,6 +30,7 @@ import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.ClientLoggedInEvent;
 import net.raphimc.viaproxy.plugins.events.ShouldVerifyOnlineModeEvent;
@@ -149,7 +150,9 @@ public class LoginPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException, ExecutionException, InterruptedException {
-        if (packet instanceof S2CLoginKeyPacket1_7 loginKeyPacket) {
+        if (packet instanceof S2CLoginDisconnectPacket1_7 loginDisconnectPacket) {
+            Logger.u_info("server kick", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), ConsoleFormatter.convert(loginDisconnectPacket.reason.asLegacyFormatString()));
+        } else if (packet instanceof S2CLoginKeyPacket1_7 loginKeyPacket) {
             final PublicKey publicKey = CryptUtil.decodeRsaPublicKey(loginKeyPacket.publicKey);
             final SecretKey secretKey = CryptUtil.generateSecretKey();
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginKeyPacket.serverId, publicKey, secretKey)).toString(16);
