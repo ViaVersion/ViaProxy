@@ -63,14 +63,14 @@ public class UISettingsTab extends AUITab {
                 if (!(language.getSelectedItem() instanceof String locale)) return;
                 if (locale.equals(I18n.getCurrentLocale())) return;
                 I18n.setLocale(locale);
-                ViaProxy.ui.showInfo(I18n.get("tab.ui_settings.language.success", I18n.get("language.name"), locale));
+                ViaProxy.getUI().showInfo(I18n.get("tab.ui_settings.language.success", I18n.get("language.name"), locale));
                 try {
                     final File f = new File(ViaProxy.class.getProtectionDomain().getCodeSource().getLocation().toURI());
                     Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                     System.exit(0);
                 } catch (URISyntaxException | IOException e) {
                     Logger.LOGGER.error("Could not start the ViaProxy jar", e);
-                    ViaProxy.ui.showException(e);
+                    ViaProxy.getUI().showException(e);
                     System.exit(1);
                 }
             });

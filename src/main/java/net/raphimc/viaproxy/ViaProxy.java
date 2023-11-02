@@ -28,8 +28,11 @@ import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
 import net.lenni0451.classtransform.utils.loader.EnumLoaderPriority;
 import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
+import net.lenni0451.lambdaevents.LambdaManager;
+import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
 import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.ClassLoaders;
+import net.lenni0451.reflect.JavaBypass;
 import net.lenni0451.reflect.Methods;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
@@ -61,11 +64,14 @@ public class ViaProxy {
     public static final String VERSION = "${version}";
     public static final String IMPL_VERSION = "${impl_version}";
 
+    public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
+    private static /*final*/ SaveManager SAVE_MANAGER;
+    private static /*final*/ PluginManager PLUGIN_MANAGER;
+    private static /*final*/ ChannelGroup CLIENT_CHANNELS;
+
     private static Instrumentation instrumentation;
-    public static SaveManager saveManager;
-    public static NetServer currentProxyServer;
-    public static ChannelGroup c2pChannels;
-    public static ViaProxyUI ui;
+    private static NetServer currentProxyServer;
+    private static ViaProxyUI ui;
 
     public static void agentmain(final String args, final Instrumentation instrumentation) {
         ViaProxy.instrumentation = instrumentation;
@@ -96,8 +102,8 @@ public class ViaProxy {
 
     public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException {
         Logger.setup();
+
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
-        ConsoleHandler.hookConsole();
         Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
         Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
         Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
@@ -125,11 +131,13 @@ public class ViaProxy {
             }
         }
 
+        ConsoleHandler.hookConsole();
         ClassLoaderPriorityUtil.loadOverridingJars();
         loadNetty();
-        saveManager = new SaveManager();
-        PluginManager.loadPlugins();
-        PluginManager.EVENT_MANAGER.register(EventListener.class);
+
+        SAVE_MANAGER = new SaveManager();
+        PLUGIN_MANAGER = new PluginManager();
+        EVENT_MANAGER.register(EventListener.class);
 
         final Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
         final Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
@@ -152,7 +160,7 @@ public class ViaProxy {
                 Logger.LOGGER.info("Waiting for UI to be initialized...");
                 Thread.sleep(1000);
             }
-            ViaProxyUI.EVENT_MANAGER.call(new UIInitEvent());
+            ui.eventManager.call(new UIInitEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
         } else {
             Options.parse(args);
@@ -177,8 +185,8 @@ public class ViaProxy {
         }
         try {
             Logger.LOGGER.info("Starting proxy server");
-            currentProxyServer = new NetServer(() -> PluginManager.EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler(), Client2ProxyChannelInitializer::new);
-            PluginManager.EVENT_MANAGER.call(new ProxyStartEvent());
+            currentProxyServer = new NetServer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler(), Client2ProxyChannelInitializer::new);
+            EVENT_MANAGER.call(new ProxyStartEvent());
             Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS + ":" + Options.BIND_PORT);
             currentProxyServer.bind(Options.BIND_ADDRESS, Options.BIND_PORT, false);
         } catch (Throwable e) {
@@ -190,12 +198,12 @@ public class ViaProxy {
     public static void stopProxy() {
         if (currentProxyServer != null) {
             Logger.LOGGER.info("Stopping proxy server");
-            PluginManager.EVENT_MANAGER.call(new ProxyStopEvent());
+            EVENT_MANAGER.call(new ProxyStopEvent());
 
             currentProxyServer.getChannel().close();
             currentProxyServer = null;
 
-            for (Channel channel : c2pChannels) {
+            for (Channel channel : CLIENT_CHANNELS) {
                 try {
                     ProxyConnection.fromChannel(channel).kickClient("§cViaProxy has been stopped");
                 } catch (Throwable ignored) {
@@ -210,7 +218,27 @@ public class ViaProxy {
             System.setProperty("io.netty.allocator.maxOrder", "9");
         }
         MCPipeline.useOptimizedPipeline();
-        c2pChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+        CLIENT_CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    }
+
+    public static SaveManager getSaveManager() {
+        return SAVE_MANAGER;
+    }
+
+    public static PluginManager getPluginManager() {
+        return PLUGIN_MANAGER;
+    }
+
+    public static ChannelGroup getConnectedClients() {
+        return CLIENT_CHANNELS;
+    }
+
+    public static NetServer getCurrentProxyServer() {
+        return currentProxyServer;
+    }
+
+    public static ViaProxyUI getUI() {
+        return ui;
     }
 
 }

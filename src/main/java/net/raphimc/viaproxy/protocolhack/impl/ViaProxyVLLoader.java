@@ -30,7 +30,7 @@ import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.provider
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
 import net.raphimc.vialoader.impl.viaversion.VLLoader;
-import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
 import net.raphimc.viaproxy.protocolhack.providers.*;
 
@@ -58,7 +58,7 @@ public class ViaProxyVLLoader extends VLLoader {
         Via.getManager().getProviders().use(TransferProvider.class, new ViaProxyTransferProvider());
 
         // ViaProxy plugins
-        PluginManager.EVENT_MANAGER.call(new ViaLoadingEvent());
+        ViaProxy.EVENT_MANAGER.call(new ViaLoadingEvent());
     }
 
 }

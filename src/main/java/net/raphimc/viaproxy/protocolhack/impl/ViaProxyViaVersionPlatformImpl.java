@@ -22,7 +22,6 @@ import com.viaversion.viaversion.libs.gson.JsonObject;
 import net.raphimc.vialoader.impl.platform.ViaVersionPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 
 import java.util.UUID;
@@ -46,7 +45,7 @@ public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
         root.addProperty("impl_version", ViaProxy.IMPL_VERSION);
 
         final JsonArray plugins = new JsonArray();
-        for (ViaProxyPlugin plugin : PluginManager.getPlugins()) {
+        for (ViaProxyPlugin plugin : ViaProxy.getPluginManager().getPlugins()) {
             final JsonObject pluginObj = new JsonObject();
             pluginObj.addProperty("name", plugin.getName());
             pluginObj.addProperty("version", plugin.getVersion());

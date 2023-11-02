@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.cli;
 
 import com.viaversion.viaversion.api.Via;
-import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ConsoleCommandEvent;
 import net.raphimc.viaproxy.protocolhack.viaproxy.ConsoleCommandSender;
 import net.raphimc.viaproxy.util.ArrayHelper;
@@ -67,7 +67,7 @@ public class ConsoleHandler {
                             for (StackTraceElement element : thread.getStackTrace()) System.out.println("    " + element.toString());
                         }
                     } else {
-                        if (PluginManager.EVENT_MANAGER.call(new ConsoleCommandEvent(command, args.getAsArray())).isCancelled()) continue;
+                        if (ViaProxy.EVENT_MANAGER.call(new ConsoleCommandEvent(command, args.getAsArray())).isCancelled()) continue;
                         System.out.println("Invalid Command!");
                         System.out.println(" gc | Run the garbage collector");
                         System.out.println(" exit | Shutdown ViaProxy");

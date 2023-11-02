@@ -22,7 +22,6 @@ import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
@@ -108,7 +107,7 @@ public class GeneralTab extends AUITab {
 
             this.serverAddress = new JTextField();
             this.serverAddress.setToolTipText(I18n.get("tab.general.server_address.tooltip"));
-            ViaProxy.saveManager.uiSave.loadTextField("server_address", this.serverAddress);
+            ViaProxy.getSaveManager().uiSave.loadTextField("server_address", this.serverAddress);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverAddress);
         }
         {
@@ -135,7 +134,7 @@ public class GeneralTab extends AUITab {
                     this.betaCraftAuth.setSelected(false);
                 }
             });
-            ViaProxy.saveManager.uiSave.loadComboBox("server_version", this.serverVersion);
+            ViaProxy.getSaveManager().uiSave.loadComboBox("server_version", this.serverVersion);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverVersion);
         }
         {
@@ -143,13 +142,13 @@ public class GeneralTab extends AUITab {
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(minecraftAccountLabel);
 
             this.authMethod = new JComboBox<>(new String[]{I18n.get("tab.general.minecraft_account.option_no_account"), I18n.get("tab.general.minecraft_account.option_select_account"), I18n.get("tab.general.minecraft_account.option_openauthmod")});
-            ViaProxy.saveManager.uiSave.loadComboBox("auth_method", this.authMethod);
+            ViaProxy.getSaveManager().uiSave.loadComboBox("auth_method", this.authMethod);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.authMethod);
         }
         {
             this.betaCraftAuth = new JCheckBox(I18n.get("tab.general.betacraft_auth.label"));
             this.betaCraftAuth.setToolTipText(I18n.get("tab.general.betacraft_auth.tooltip"));
-            ViaProxy.saveManager.uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
+            ViaProxy.getSaveManager().uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.betaCraftAuth);
             // Simulate user action on serverVersion to update betaCraftAuth
             final ActionEvent fakeAction = new ActionEvent(this.serverVersion, ActionEvent.ACTION_PERFORMED, "");
@@ -190,30 +189,30 @@ public class GeneralTab extends AUITab {
 
     @EventHandler
     private void onClose(final UICloseEvent event) {
-        UISave save = ViaProxy.saveManager.uiSave;
+        UISave save = ViaProxy.getSaveManager().uiSave;
         save.put("server_address", this.serverAddress.getText());
         save.put("server_version", String.valueOf(this.serverVersion.getSelectedIndex()));
         save.put("auth_method", String.valueOf(this.authMethod.getSelectedIndex()));
         save.put("betacraft_auth", String.valueOf(this.betaCraftAuth.isSelected()));
-        ViaProxy.saveManager.save();
+        ViaProxy.getSaveManager().save();
     }
 
     private void setComponentsEnabled(final boolean state) {
         this.serverAddress.setEnabled(state);
         this.serverVersion.setEnabled(state);
-        ViaProxy.ui.advancedTab.bindPort.setEnabled(state);
+        ViaProxy.getUI().advancedTab.bindPort.setEnabled(state);
         this.authMethod.setEnabled(state);
         this.betaCraftAuth.setEnabled(state);
-        ViaProxy.ui.advancedTab.proxyOnlineMode.setEnabled(state);
-        ViaProxy.ui.advancedTab.proxy.setEnabled(state);
-        ViaProxy.ui.advancedTab.legacySkinLoading.setEnabled(state);
-        ViaProxy.ui.advancedTab.chatSigning.setEnabled(state);
-        ViaProxy.ui.advancedTab.ignorePacketTranslationErrors.setEnabled(state);
+        ViaProxy.getUI().advancedTab.proxyOnlineMode.setEnabled(state);
+        ViaProxy.getUI().advancedTab.proxy.setEnabled(state);
+        ViaProxy.getUI().advancedTab.legacySkinLoading.setEnabled(state);
+        ViaProxy.getUI().advancedTab.chatSigning.setEnabled(state);
+        ViaProxy.getUI().advancedTab.ignorePacketTranslationErrors.setEnabled(state);
         if (state) this.serverVersion.getActionListeners()[0].actionPerformed(null);
     }
 
     private void updateStateLabel() {
-        this.stateLabel.setText(I18n.get("tab.general.state.running", "1.7+", "127.0.0.1:" + ViaProxy.ui.advancedTab.bindPort.getValue()));
+        this.stateLabel.setText(I18n.get("tab.general.state.running", "1.7+", "127.0.0.1:" + ViaProxy.getUI().advancedTab.bindPort.getValue()));
         this.stateLabel.setForeground(Color.GREEN);
         this.stateLabel.setVisible(true);
     }
@@ -224,15 +223,15 @@ public class GeneralTab extends AUITab {
             this.frame.showError(I18n.get("tab.general.error.no_server_version_selected"));
             return;
         }
-        if (ViaProxy.saveManager.uiSave.get("notice.ban_warning") == null) {
-            ViaProxy.saveManager.uiSave.put("notice.ban_warning", "true");
-            ViaProxy.saveManager.save();
+        if (ViaProxy.getSaveManager().uiSave.get("notice.ban_warning") == null) {
+            ViaProxy.getSaveManager().uiSave.put("notice.ban_warning", "true");
+            ViaProxy.getSaveManager().save();
 
             this.frame.showWarning("<html><div style='text-align: center;'>" + I18n.get("tab.general.warning.ban_warning.line1") + "<br><b>" + I18n.get("tab.general.warning.risk") + "</b></div></html>");
         }
-        if (VersionEnum.bedrockLatest.equals(selectedItem) && ViaProxy.saveManager.uiSave.get("notice.bedrock_warning") == null) {
-            ViaProxy.saveManager.uiSave.put("notice.bedrock_warning", "true");
-            ViaProxy.saveManager.save();
+        if (VersionEnum.bedrockLatest.equals(selectedItem) && ViaProxy.getSaveManager().uiSave.get("notice.bedrock_warning") == null) {
+            ViaProxy.getSaveManager().uiSave.put("notice.bedrock_warning", "true");
+            ViaProxy.getSaveManager().save();
 
             this.frame.showWarning("<html><div style='text-align: center;'>" + I18n.get("tab.general.warning.bedrock_warning.line1") + "<br><b>" + I18n.get("tab.general.warning.risk") + "</b></div></html>");
         }
@@ -244,14 +243,14 @@ public class GeneralTab extends AUITab {
         new Thread(() -> {
             String serverAddress = this.serverAddress.getText().trim();
             final VersionEnum serverVersion = (VersionEnum) this.serverVersion.getSelectedItem();
-            final int bindPort = (int) ViaProxy.ui.advancedTab.bindPort.getValue();
+            final int bindPort = (int) ViaProxy.getUI().advancedTab.bindPort.getValue();
             final int authMethod = this.authMethod.getSelectedIndex();
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();
-            final boolean proxyOnlineMode = ViaProxy.ui.advancedTab.proxyOnlineMode.isSelected();
-            final boolean legacySkinLoading = ViaProxy.ui.advancedTab.legacySkinLoading.isSelected();
-            final String proxyUrl = ViaProxy.ui.advancedTab.proxy.getText().trim();
-            final boolean chatSigning = ViaProxy.ui.advancedTab.chatSigning.isSelected();
-            final boolean ignorePacketTranslationErrors = ViaProxy.ui.advancedTab.ignorePacketTranslationErrors.isSelected();
+            final boolean proxyOnlineMode = ViaProxy.getUI().advancedTab.proxyOnlineMode.isSelected();
+            final boolean legacySkinLoading = ViaProxy.getUI().advancedTab.legacySkinLoading.isSelected();
+            final String proxyUrl = ViaProxy.getUI().advancedTab.proxy.getText().trim();
+            final boolean chatSigning = ViaProxy.getUI().advancedTab.chatSigning.isSelected();
+            final boolean ignorePacketTranslationErrors = ViaProxy.getUI().advancedTab.ignorePacketTranslationErrors.isSelected();
 
             try {
                 try {
@@ -278,7 +277,7 @@ public class GeneralTab extends AUITab {
                     try {
                         HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
                         Options.CONNECT_ADDRESS = hostAndPort.getHost();
-                        Options.CONNECT_PORT = hostAndPort.getPortOrDefault(PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
+                        Options.CONNECT_PORT = hostAndPort.getPortOrDefault(ViaProxy.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
                     } catch (Throwable t) {
                         throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_server_address"));
                     }

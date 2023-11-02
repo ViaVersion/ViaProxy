@@ -23,8 +23,6 @@ import net.lenni0451.classtransform.additionalclassprovider.GuavaClassPathProvid
 import net.lenni0451.classtransform.additionalclassprovider.LazyFileClassProvider;
 import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
-import net.lenni0451.lambdaevents.LambdaManager;
-import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.javadowngrader.impl.classtransform.JavaDowngraderTransformer;
 import net.raphimc.viaproxy.ViaProxy;
@@ -41,19 +39,22 @@ import java.util.Map;
 
 public class PluginManager {
 
-    public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator());
     public static final File PLUGINS_DIR = new File("plugins");
 
-    private static final Yaml YAML = new Yaml();
-    private static final IClassProvider ROOT_CLASS_PROVIDER = new GuavaClassPathProvider();
-    private static final List<ViaProxyPlugin> PLUGINS = new ArrayList<>();
+    private final Yaml yaml = new Yaml();
+    private final IClassProvider rootClassProvider = new GuavaClassPathProvider();
+    private final List<ViaProxyPlugin> plugins = new ArrayList<>();
 
-    public static List<ViaProxyPlugin> getPlugins() {
-        return Collections.unmodifiableList(PLUGINS);
+    public PluginManager() {
+        this.loadPlugins();
     }
 
-    public static ViaProxyPlugin getPlugin(String name) {
-        for (ViaProxyPlugin plugin : PLUGINS) {
+    public List<ViaProxyPlugin> getPlugins() {
+        return Collections.unmodifiableList(this.plugins);
+    }
+
+    public ViaProxyPlugin getPlugin(String name) {
+        for (ViaProxyPlugin plugin : this.plugins) {
             if (plugin.getName().equalsIgnoreCase(name)) {
                 return plugin;
             }
@@ -62,7 +63,7 @@ public class PluginManager {
         return null;
     }
 
-    public static void loadPlugins() {
+    private void loadPlugins() {
         if (!PLUGINS_DIR.exists() || !PLUGINS_DIR.isDirectory()) {
             if (!PLUGINS_DIR.mkdirs()) {
                 return;
@@ -81,21 +82,21 @@ public class PluginManager {
             }
         }
 
-        for (ViaProxyPlugin plugin : PLUGINS) {
+        for (ViaProxyPlugin plugin : this.plugins) {
             if (!plugin.isEnabled()) {
                 enablePlugin(plugin);
             }
         }
     }
 
-    private static void loadAndScanJar(final File file) throws Throwable {
+    private void loadAndScanJar(final File file) throws Throwable {
         final URL url = file.toURI().toURL();
-        final TransformerManager transformerManager = new TransformerManager(new LazyFileClassProvider(Collections.singletonList(file), ROOT_CLASS_PROVIDER));
+        final TransformerManager transformerManager = new TransformerManager(new LazyFileClassProvider(Collections.singletonList(file), this.rootClassProvider));
         transformerManager.addBytecodeTransformer(new JavaDowngraderTransformer(transformerManager));
         final InjectionClassLoader loader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
         final InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
         if (viaproxyYml == null) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
-        final Map<String, Object> yaml = YAML.load(viaproxyYml);
+        final Map<String, Object> yaml = this.yaml.load(viaproxyYml);
         if (!yaml.containsKey("name")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a name attribute in the viaproxy.yml");
         if (!yaml.containsKey("author")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a author attribute in the viaproxy.yml");
         if (!yaml.containsKey("version")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a version attribute in the viaproxy.yml");
@@ -122,10 +123,10 @@ public class PluginManager {
         }
 
         Logger.LOGGER.info("Loaded plugin '" + plugin.getName() + "' by " + plugin.getAuthor() + " (v" + plugin.getVersion() + ")");
-        PLUGINS.add(plugin);
+        this.plugins.add(plugin);
     }
 
-    private static void enablePlugin(final ViaProxyPlugin plugin) {
+    private void enablePlugin(final ViaProxyPlugin plugin) {
         for (String depend : plugin.getDepends()) {
             final ViaProxyPlugin dependPlugin = getPlugin(depend);
             if (dependPlugin == null) {

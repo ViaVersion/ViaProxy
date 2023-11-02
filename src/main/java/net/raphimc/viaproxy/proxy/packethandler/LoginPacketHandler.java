@@ -29,8 +29,8 @@ import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.vialoader.util.VersionEnum;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.ClientLoggedInEvent;
 import net.raphimc.viaproxy.plugins.events.PreMojangAuthEvent;
 import net.raphimc.viaproxy.proxy.LoginState;
@@ -95,7 +95,7 @@ public class LoginPacketHandler extends PacketHandler {
             if (Options.ONLINE_MODE) {
                 this.proxyConnection.getC2P().writeAndFlush(new S2CLoginKeyPacket1_8("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             } else {
-                PluginManager.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
+                ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
                 ExternalInterface.fillPlayerData(this.proxyConnection);
                 this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             }
@@ -122,7 +122,7 @@ public class LoginPacketHandler extends PacketHandler {
             final SecretKey secretKey = CryptUtil.decryptSecretKey(KEY_PAIR.getPrivate(), loginKeyPacket.encryptedSecretKey);
             this.proxyConnection.getC2P().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(secretKey));
 
-            if (!PluginManager.EVENT_MANAGER.call(new PreMojangAuthEvent(this.proxyConnection)).isCancelled()) {
+            if (!ViaProxy.EVENT_MANAGER.call(new PreMojangAuthEvent(this.proxyConnection)).isCancelled()) {
                 final String userName = this.proxyConnection.getGameProfile().getName();
                 try {
                     final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
@@ -139,7 +139,7 @@ public class LoginPacketHandler extends PacketHandler {
                 }
             }
 
-            PluginManager.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
+            ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
             ExternalInterface.fillPlayerData(this.proxyConnection);
             this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 

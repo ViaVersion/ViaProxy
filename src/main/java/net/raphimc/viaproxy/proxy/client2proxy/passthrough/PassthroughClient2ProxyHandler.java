@@ -21,8 +21,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerChannelInitializer;
@@ -73,14 +73,14 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
     }
 
     protected void connectToServer(final Channel c2pChannel) {
-        final Supplier<ChannelHandler> handlerSupplier = () -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new PassthroughProxy2ServerHandler(), true)).getHandler();
+        final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new PassthroughProxy2ServerHandler(), true)).getHandler();
         this.proxyConnection = new LegacyProxyConnection(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new, c2pChannel);
         this.proxyConnection.getC2P().attr(LegacyProxyConnection.LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
         final ServerAddress unresolvedAddress = this.getServerAddress();
         final VersionEnum serverVersion = Options.PROTOCOL_VERSION;
 
-        final ResolveSrvEvent resolveSrvEvent = PluginManager.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, unresolvedAddress.getAddress(), unresolvedAddress.getPort()));
+        final ResolveSrvEvent resolveSrvEvent = ViaProxy.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, unresolvedAddress.getAddress(), unresolvedAddress.getPort()));
         final String connectIP = resolveSrvEvent.getHost();
         final int connectPort = resolveSrvEvent.getPort();
 

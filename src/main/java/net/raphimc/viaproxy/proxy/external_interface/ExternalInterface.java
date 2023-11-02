@@ -35,7 +35,6 @@ import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
@@ -60,7 +59,7 @@ public class ExternalInterface {
         try {
             if (proxyConnection.getUserOptions().account() != null) {
                 final Account account = proxyConnection.getUserOptions().account();
-                ViaProxy.saveManager.accountsSave.ensureRefreshed(account);
+                ViaProxy.getSaveManager().accountsSave.ensureRefreshed(account);
 
                 proxyConnection.setGameProfile(account.getGameProfile());
                 final UserConnection user = proxyConnection.getUserConnection();
@@ -93,7 +92,7 @@ public class ExternalInterface {
                 }
             }
 
-            PluginManager.EVENT_MANAGER.call(new FillPlayerDataEvent(proxyConnection));
+            ViaProxy.EVENT_MANAGER.call(new FillPlayerDataEvent(proxyConnection));
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to fill player data", e);
             proxyConnection.kickClient("§cFailed to fill player data. This might be caused by outdated account tokens or rate limits. Wait a couple of seconds and try again. If the problem persists, remove and re-add your account.");

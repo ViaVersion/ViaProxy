@@ -21,8 +21,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
 import net.raphimc.netminecraft.constants.MCPipeline;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
@@ -37,7 +37,7 @@ public class PassthroughProxy2ServerChannelInitializer extends Proxy2ServerChann
 
     @Override
     protected void initChannel(Channel channel) {
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel, true)).isCancelled()) {
+        if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel, true)).isCancelled()) {
             channel.close();
             return;
         }
@@ -51,7 +51,7 @@ public class PassthroughProxy2ServerChannelInitializer extends Proxy2ServerChann
 
         channel.pipeline().addLast(MCPipeline.HANDLER_HANDLER_NAME, this.handlerSupplier.get());
 
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, true)).isCancelled()) {
+        if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, true)).isCancelled()) {
             channel.close();
         }
     }

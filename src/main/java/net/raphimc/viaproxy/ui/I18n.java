@@ -33,7 +33,7 @@ public class I18n {
     private static String currentLocale;
 
     static {
-        if (ViaProxy.saveManager == null) {
+        if (ViaProxy.getSaveManager() == null) {
             throw new IllegalStateException("ViaProxy is not yet initialized");
         }
 
@@ -47,7 +47,7 @@ public class I18n {
             throw new RuntimeException("Failed to load translations", e);
         }
 
-        currentLocale = ViaProxy.saveManager.uiSave.get("locale");
+        currentLocale = ViaProxy.getSaveManager().uiSave.get("locale");
         if (currentLocale == null || !LOCALES.containsKey(currentLocale)) {
             final String systemLocale = Locale.getDefault().getLanguage() + '_' + Locale.getDefault().getCountry();
             if (LOCALES.containsKey(systemLocale)) {
@@ -98,13 +98,13 @@ public class I18n {
     }
 
     public static void setLocale(final String locale) {
-        if (ViaProxy.saveManager == null) {
+        if (ViaProxy.getSaveManager() == null) {
             throw new IllegalStateException("ViaProxy is not yet initialized");
         }
 
         currentLocale = locale;
-        ViaProxy.saveManager.uiSave.put("locale", locale);
-        ViaProxy.saveManager.save();
+        ViaProxy.getSaveManager().uiSave.put("locale", locale);
+        ViaProxy.getSaveManager().save();
     }
 
     public static Collection<String> getAvailableLocales() {

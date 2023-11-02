@@ -77,7 +77,7 @@ public class AdvancedTab extends AUITab {
 
             this.bindPort = new JSpinner(new SpinnerNumberModel(25568, 1, 65535, 1));
             this.bindPort.setToolTipText(I18n.get("tab.advanced.bind_port.tooltip"));
-            ViaProxy.saveManager.uiSave.loadSpinner("bind_port", this.bindPort);
+            ViaProxy.getSaveManager().uiSave.loadSpinner("bind_port", this.bindPort);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.bindPort);
         }
         {
@@ -87,33 +87,33 @@ public class AdvancedTab extends AUITab {
 
             this.proxy = new JTextField();
             this.proxy.setToolTipText(I18n.get("tab.advanced.proxy_url.tooltip"));
-            ViaProxy.saveManager.uiSave.loadTextField("proxy", this.proxy);
+            ViaProxy.getSaveManager().uiSave.loadTextField("proxy", this.proxy);
             GBC.create(body).grid(0, gridy++).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.proxy);
         }
         {
             this.proxyOnlineMode = new JCheckBox(I18n.get("tab.advanced.proxy_online_mode.label"));
             this.proxyOnlineMode.setToolTipText(I18n.get("tab.advanced.proxy_online_mode.tooltip"));
-            ViaProxy.saveManager.uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
+            ViaProxy.getSaveManager().uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.proxyOnlineMode);
         }
         {
             this.legacySkinLoading = new JCheckBox(I18n.get("tab.advanced.legacy_skin_loading.label"));
             this.legacySkinLoading.setToolTipText(I18n.get("tab.advanced.legacy_skin_loading.tooltip"));
-            ViaProxy.saveManager.uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
+            ViaProxy.getSaveManager().uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).fill(GridBagConstraints.HORIZONTAL).add(this.legacySkinLoading);
         }
         {
             this.chatSigning = new JCheckBox(I18n.get("tab.advanced.chat_signing.label"));
             this.chatSigning.setToolTipText(I18n.get("tab.advanced.chat_signing.tooltip"));
             this.chatSigning.setSelected(true);
-            ViaProxy.saveManager.uiSave.loadCheckBox("chat_signing", this.chatSigning);
+            ViaProxy.getSaveManager().uiSave.loadCheckBox("chat_signing", this.chatSigning);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.chatSigning);
         }
         {
             this.ignorePacketTranslationErrors = new JCheckBox(I18n.get("tab.advanced.ignore_packet_translation_errors.label"));
             this.ignorePacketTranslationErrors.setToolTipText(I18n.get("tab.advanced.ignore_packet_translation_errors.tooltip"));
             this.ignorePacketTranslationErrors.setSelected(false);
-            ViaProxy.saveManager.uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
+            ViaProxy.getSaveManager().uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).fill(GridBagConstraints.HORIZONTAL).add(this.ignorePacketTranslationErrors);
         }
 
@@ -131,12 +131,12 @@ public class AdvancedTab extends AUITab {
                 DumpUtil.postDump(null).whenComplete((url, e) -> {
                     if (e != null) {
                         Logger.LOGGER.error("Failed to create ViaVersion dump", e);
-                        SwingUtilities.invokeLater(() -> ViaProxy.ui.showError(e.getMessage()));
+                        SwingUtilities.invokeLater(() -> ViaProxy.getUI().showError(e.getMessage()));
                     } else {
-                        ViaProxy.ui.openURL(url);
+                        ViaProxy.getUI().openURL(url);
                         final StringSelection stringSelection = new StringSelection(url);
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
-                        SwingUtilities.invokeLater(() -> ViaProxy.ui.showInfo(I18n.get("tab.advanced.create_viaversion_dump.success")));
+                        SwingUtilities.invokeLater(() -> ViaProxy.getUI().showInfo(I18n.get("tab.advanced.create_viaversion_dump.success")));
                     }
                     SwingUtilities.invokeLater(() -> this.viaVersionDumpButton.setEnabled(true));
                 });
@@ -157,18 +157,18 @@ public class AdvancedTab extends AUITab {
                     final MclogsClient mclogsClient = new MclogsClient("ViaProxy", ViaProxy.VERSION);
                     final UploadLogResponse apiResponse = mclogsClient.uploadLog(logFile.toPath());
                     if (apiResponse.isSuccess()) {
-                        ViaProxy.ui.openURL(apiResponse.getUrl());
+                        ViaProxy.getUI().openURL(apiResponse.getUrl());
                         final StringSelection selection = new StringSelection(apiResponse.getUrl());
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
-                        ViaProxy.ui.showInfo("<html>" + I18n.get("tab.advanced.upload_latest_log.success", "<a href=\"\">" + apiResponse.getUrl() + "</a>") + "</html>");
+                        ViaProxy.getUI().showInfo("<html>" + I18n.get("tab.advanced.upload_latest_log.success", "<a href=\"\">" + apiResponse.getUrl() + "</a>") + "</html>");
                     } else {
-                        ViaProxy.ui.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", apiResponse.getError()));
+                        ViaProxy.getUI().showError(I18n.get("tab.advanced.upload_latest_log.error_generic", apiResponse.getError()));
                     }
                 } catch (FileNotFoundException e) {
-                    ViaProxy.ui.showError(I18n.get("tab.advanced.upload_latest_log.error_not_found"));
+                    ViaProxy.getUI().showError(I18n.get("tab.advanced.upload_latest_log.error_not_found"));
                 } catch (Throwable e) {
                     Logger.LOGGER.error("Failed to upload log file", e);
-                    ViaProxy.ui.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", e.getMessage()));
+                    ViaProxy.getUI().showError(I18n.get("tab.advanced.upload_latest_log.error_generic", e.getMessage()));
                 } finally {
                     this.uploadLogsButton.setEnabled(true);
                 }
@@ -192,14 +192,14 @@ public class AdvancedTab extends AUITab {
 
     @EventHandler
     private void onClose(final UICloseEvent event) {
-        UISave save = ViaProxy.saveManager.uiSave;
+        UISave save = ViaProxy.getSaveManager().uiSave;
         save.put("bind_port", String.valueOf(this.bindPort.getValue()));
         save.put("proxy", this.proxy.getText());
         save.put("proxy_online_mode", String.valueOf(this.proxyOnlineMode.isSelected()));
         save.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
         save.put("chat_signing", String.valueOf(this.chatSigning.isSelected()));
         save.put("ignore_packet_translation_errors", String.valueOf(this.ignorePacketTranslationErrors.isSelected()));
-        ViaProxy.saveManager.save();
+        ViaProxy.getSaveManager().save();
     }
 
 }

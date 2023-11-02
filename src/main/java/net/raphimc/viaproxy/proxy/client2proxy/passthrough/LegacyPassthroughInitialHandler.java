@@ -21,7 +21,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import net.raphimc.viaproxy.plugins.PluginManager;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 
@@ -42,7 +42,7 @@ public class LegacyPassthroughInitialHandler extends SimpleChannelInboundHandler
                 ctx.pipeline().removeLast();
             }
 
-            final Supplier<ChannelHandler> handlerSupplier = () -> PluginManager.EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new PassthroughClient2ProxyHandler(), true)).getHandler();
+            final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new PassthroughClient2ProxyHandler(), true)).getHandler();
             final PassthroughClient2ProxyChannelInitializer channelInitializer = new PassthroughClient2ProxyChannelInitializer(handlerSupplier);
             channelInitializer.initChannel(ctx.channel());
             ctx.channel().pipeline().fireChannelActive();

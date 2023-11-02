@@ -86,7 +86,7 @@ public class NewAccountsSave extends AbstractSave {
         synchronized (this) {
             try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
                 if (account.refresh(httpClient)) {
-                    ViaProxy.saveManager.save();
+                    ViaProxy.getSaveManager().save();
                 }
             }
         }

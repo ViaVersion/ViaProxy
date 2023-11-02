@@ -128,8 +128,8 @@ public class AccountsTab extends AUITab {
                     int index = this.accountsList.getSelectedIndex();
                     if (index != -1) {
                         Account removed = model.remove(index);
-                        ViaProxy.saveManager.accountsSave.removeAccount(removed);
-                        ViaProxy.saveManager.save();
+                        ViaProxy.getSaveManager().accountsSave.removeAccount(removed);
+                        ViaProxy.getSaveManager().save();
                         if (Options.MC_ACCOUNT == removed) {
                             if (model.isEmpty()) this.markSelected(-1);
                             else this.markSelected(0);
@@ -168,8 +168,8 @@ public class AccountsTab extends AUITab {
                 addOfflineAccountButton.addActionListener(event -> {
                     String username = JOptionPane.showInputDialog(this.frame, I18n.get("tab.accounts.add_offline.enter_username"), I18n.get("tab.accounts.add.title"), JOptionPane.PLAIN_MESSAGE);
                     if (username != null && !username.trim().isEmpty()) {
-                        Account account = ViaProxy.saveManager.accountsSave.addAccount(username);
-                        ViaProxy.saveManager.save();
+                        Account account = ViaProxy.getSaveManager().accountsSave.addAccount(username);
+                        ViaProxy.getSaveManager().save();
                         this.addAccount(account);
                     }
                 });
@@ -214,7 +214,7 @@ public class AccountsTab extends AUITab {
 
     @EventHandler
     private void onInit(final UIInitEvent event) {
-        ViaProxy.saveManager.accountsSave.getAccounts().forEach(this::addAccount);
+        ViaProxy.getSaveManager().accountsSave.getAccounts().forEach(this::addAccount);
         DefaultListModel<Account> model = (DefaultListModel<Account>) this.accountsList.getModel();
         if (!model.isEmpty()) this.markSelected(0);
     }
@@ -239,7 +239,7 @@ public class AccountsTab extends AUITab {
             return;
         }
 
-        Options.MC_ACCOUNT = ViaProxy.saveManager.accountsSave.getAccounts().get(index);
+        Options.MC_ACCOUNT = ViaProxy.getSaveManager().accountsSave.getAccounts().get(index);
         this.accountsList.repaint();
     }
 
@@ -252,9 +252,9 @@ public class AccountsTab extends AUITab {
         model.add(index - 1, account);
         this.accountsList.setSelectedIndex(index - 1);
 
-        ViaProxy.saveManager.accountsSave.removeAccount(account);
-        ViaProxy.saveManager.accountsSave.addAccount(index - 1, account);
-        ViaProxy.saveManager.save();
+        ViaProxy.getSaveManager().accountsSave.removeAccount(account);
+        ViaProxy.getSaveManager().accountsSave.addAccount(index - 1, account);
+        ViaProxy.getSaveManager().save();
     }
 
     private void moveDown(final int index) {
@@ -266,9 +266,9 @@ public class AccountsTab extends AUITab {
         model.add(index + 1, account);
         this.accountsList.setSelectedIndex(index + 1);
 
-        ViaProxy.saveManager.accountsSave.removeAccount(account);
-        ViaProxy.saveManager.accountsSave.addAccount(index + 1, account);
-        ViaProxy.saveManager.save();
+        ViaProxy.getSaveManager().accountsSave.removeAccount(account);
+        ViaProxy.getSaveManager().accountsSave.addAccount(index + 1, account);
+        ViaProxy.getSaveManager().save();
     }
 
     private void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, Account> requestHandler) {
@@ -280,8 +280,8 @@ public class AccountsTab extends AUITab {
                 })));
                 SwingUtilities.invokeLater(() -> {
                     this.closePopup();
-                    ViaProxy.saveManager.accountsSave.addAccount(account);
-                    ViaProxy.saveManager.save();
+                    ViaProxy.getSaveManager().accountsSave.addAccount(account);
+                    ViaProxy.getSaveManager().save();
                     this.addAccount(account);
                     this.frame.showInfo(I18n.get("tab.accounts.add.success", account.getName()));
                 });

@@ -23,7 +23,6 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
 import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
@@ -87,7 +86,7 @@ public class Options {
         final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server (No protocol translation)");
         final OptionSpec<Void> playerInfoForwarding = parser.acceptsAll(asList("player_info_forwarding", "pif"), "Enabled BungeeCord player info forwarding");
         final OptionSpec<Void> ignorePacketTranslationErrors = parser.acceptsAll(List.of("ignore-packet-translation-errors"), "Enabling this will prevent getting disconnected from the server when a packet translation error occurs and instead only print the error in the console. This may cause issues depending on the type of packet which failed to translate");
-        PluginManager.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
+        ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options;
         try {
@@ -109,12 +108,12 @@ public class Options {
             if (options.has(connectPort)) {
                 CONNECT_PORT = options.valueOf(connectPort);
             } else {
-                CONNECT_PORT = PluginManager.EVENT_MANAGER.call(new GetDefaultPortEvent(PROTOCOL_VERSION, 25565)).getDefaultPort();
+                CONNECT_PORT = ViaProxy.EVENT_MANAGER.call(new GetDefaultPortEvent(PROTOCOL_VERSION, 25565)).getDefaultPort();
             }
             COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
             OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
             if (options.has(guiAccountIndex)) {
-                final List<Account> accounts = ViaProxy.saveManager.accountsSave.getAccounts();
+                final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
                 final int index = options.valueOf(guiAccountIndex);
                 if (index < 0 || index >= accounts.size()) {
                     Logger.LOGGER.error("Invalid account index: " + index);
@@ -150,7 +149,7 @@ public class Options {
             LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
             PLAYER_INFO_FORWARDING = options.has(playerInfoForwarding);
             IGNORE_PACKET_TRANSLATION_ERRORS = options.has(ignorePacketTranslationErrors);
-            PluginManager.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
+            ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
         } catch (OptionException e) {
             Logger.LOGGER.error("Error parsing options: " + e.getMessage());
             parser.formatHelpWith(new BetterHelpFormatter());

@@ -22,8 +22,8 @@ import io.netty.channel.ChannelHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.proxy.client2proxy.passthrough.LegacyPassthroughInitialHandler;
@@ -40,7 +40,7 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
 
     @Override
     protected void initChannel(Channel channel) {
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.PRE, channel, false)).isCancelled()) {
+        if (ViaProxy.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.PRE, channel, false)).isCancelled()) {
             channel.close();
             return;
         }
@@ -52,7 +52,7 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
         super.initChannel(channel);
         channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
 
-        if (PluginManager.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
+        if (ViaProxy.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();
         }
     }

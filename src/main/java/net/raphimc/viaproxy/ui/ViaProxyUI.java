@@ -42,7 +42,7 @@ import java.util.List;
 
 public class ViaProxyUI extends JFrame {
 
-    public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
+    public final LambdaManager eventManager = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
 
     public static final int BORDER_PADDING = 10;
     public static final int BODY_BLOCK_PADDING = 10;
@@ -59,7 +59,7 @@ public class ViaProxyUI extends JFrame {
 
     public ViaProxyUI() {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> this.showException(e));
-        EVENT_MANAGER.register(this);
+        this.eventManager.register(this);
 
         this.setLookAndFeel();
         this.loadIcons();
@@ -94,7 +94,7 @@ public class ViaProxyUI extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                EVENT_MANAGER.call(new UICloseEvent());
+                ViaProxyUI.this.eventManager.call(new UICloseEvent());
             }
         });
         this.setSize(500, 360);
@@ -112,7 +112,7 @@ public class ViaProxyUI extends JFrame {
                     final AUITab tab = field.get();
                     this.tabs.add(field.get());
                     tab.add(this.contentPane);
-                    EVENT_MANAGER.register(tab);
+                    this.eventManager.register(tab);
                 });
 
         this.contentPane.setEnabledAt(this.contentPane.indexOfTab(this.accountsTab.getName()), false);

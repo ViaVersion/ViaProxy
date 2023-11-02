@@ -33,8 +33,8 @@ import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.vialoader.util.VersionEnum;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVLPipeline;
@@ -56,7 +56,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
     @Override
     protected void initChannel(Channel channel) {
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel, false)).isCancelled()) {
+        if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.PRE, channel, false)).isCancelled()) {
             channel.close();
             return;
         }
@@ -80,7 +80,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         channel.pipeline().addLast(new ViaProxyVLPipeline(user, proxyConnection.getServerVersion()));
         channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
 
-        if (PluginManager.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
+        if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();
         }
     }

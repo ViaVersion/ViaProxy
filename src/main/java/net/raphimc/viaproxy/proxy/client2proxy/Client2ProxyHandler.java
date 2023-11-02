@@ -30,7 +30,6 @@ import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.ConnectEvent;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
@@ -63,7 +62,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         super.channelActive(ctx);
 
         this.proxyConnection = new DummyProxyConnection(ctx.channel());
-        ViaProxy.c2pChannels.add(ctx.channel());
+        ViaProxy.getConnectedClients().add(ctx.channel());
     }
 
     @Override
@@ -187,7 +186,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             connectPort = newAddress.getPort();
         }
 
-        final ResolveSrvEvent resolveSrvEvent = PluginManager.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, connectIP, connectPort));
+        final ResolveSrvEvent resolveSrvEvent = ViaProxy.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, connectIP, connectPort));
         connectIP = resolveSrvEvent.getHost();
         connectPort = resolveSrvEvent.getPort();
 
@@ -199,11 +198,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
 
         final PreConnectEvent preConnectEvent = new PreConnectEvent(serverAddress, serverVersion, clientVersion, this.proxyConnection.getC2P());
-        if (PluginManager.EVENT_MANAGER.call(preConnectEvent).isCancelled()) {
+        if (ViaProxy.EVENT_MANAGER.call(preConnectEvent).isCancelled()) {
             this.proxyConnection.kickClient(preConnectEvent.getCancelMessage());
         }
 
-        final Supplier<ChannelHandler> handlerSupplier = () -> PluginManager.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
+        final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         if (serverVersion.equals(VersionEnum.bedrockLatest)) {
             this.proxyConnection = new BedrockProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
         } else {
@@ -225,7 +224,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
-        PluginManager.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
+        ViaProxy.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
 
         this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
