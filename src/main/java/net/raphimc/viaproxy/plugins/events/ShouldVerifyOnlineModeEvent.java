@@ -20,11 +20,11 @@ package net.raphimc.viaproxy.plugins.events;
 import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
-public class PreMojangAuthEvent extends EventCancellable {
+public class ShouldVerifyOnlineModeEvent extends EventCancellable {
 
     private final ProxyConnection proxyConnection;
 
-    public PreMojangAuthEvent(final ProxyConnection proxyConnection) {
+    public ShouldVerifyOnlineModeEvent(final ProxyConnection proxyConnection) {
         this.proxyConnection = proxyConnection;
     }
 
