@@ -15,20 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.injection.transformer;
+package net.raphimc.viaproxy.injection.mixins;
 
 import com.viaversion.viaversion.util.Config;
-import net.lenni0451.classtransform.annotations.CTarget;
-import net.lenni0451.classtransform.annotations.CTransformer;
-import net.lenni0451.classtransform.annotations.injection.CRedirect;
 import net.raphimc.viaproxy.protocolhack.ConfigPatcher;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Map;
 
-@CTransformer(Config.class)
-public abstract class ConfigTransformer {
+@Mixin(Config.class)
+public abstract class MixinConfig {
 
-    @CRedirect(method = "loadConfig(Ljava/io/File;Ljava/net/URL;)Ljava/util/Map;", target = @CTarget(value = "INVOKE", target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z"))
+    @Redirect(method = "loadConfig(Ljava/io/File;Ljava/net/URL;)Ljava/util/Map;", at = @At(value = "INVOKE", target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z"))
     private boolean allowConfigPatching(final Map<String, Object> map, final Object key) {
         if (((Object) this) instanceof ConfigPatcher) {
             return true;

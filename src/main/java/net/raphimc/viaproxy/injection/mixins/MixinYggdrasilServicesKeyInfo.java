@@ -15,21 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.injection.transformer;
+package net.raphimc.viaproxy.injection.mixins;
 
 import com.mojang.authlib.yggdrasil.ServicesKeyInfo;
 import com.mojang.authlib.yggdrasil.YggdrasilServicesKeyInfo;
-import net.lenni0451.classtransform.annotations.CTransformer;
-import net.lenni0451.classtransform.annotations.injection.COverride;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.netty.crypto.CryptUtil;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 
 import java.security.PublicKey;
 
-@CTransformer(YggdrasilServicesKeyInfo.class)
-public abstract class YggdrasilServicesKeyInfoTransformer {
+@Mixin(YggdrasilServicesKeyInfo.class)
+public abstract class MixinYggdrasilServicesKeyInfo {
 
-    @COverride
+    @Overwrite
     public static ServicesKeyInfo createFromResources() {
         try {
             return RStream.of(YggdrasilServicesKeyInfo.class).constructors().by(PublicKey.class).newInstance(CryptUtil.MOJANG_PUBLIC_KEY);

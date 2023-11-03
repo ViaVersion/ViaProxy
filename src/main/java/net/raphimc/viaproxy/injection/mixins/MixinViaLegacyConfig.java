@@ -15,29 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.injection.transformer;
+package net.raphimc.viaproxy.injection.mixins;
 
-import net.lenni0451.classtransform.InjectionCallback;
-import net.lenni0451.classtransform.annotations.CTarget;
-import net.lenni0451.classtransform.annotations.CTransformer;
-import net.lenni0451.classtransform.annotations.injection.CInject;
 import net.raphimc.vialegacy.ViaLegacyConfig;
 import net.raphimc.viaproxy.cli.options.Options;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@CTransformer(ViaLegacyConfig.class)
-public abstract class ViaLegacyConfigTransformer {
+@Mixin(ViaLegacyConfig.class)
+public abstract class MixinViaLegacyConfig {
 
-    @CInject(method = "isLegacySkinLoading", target = @CTarget("HEAD"), cancellable = true)
-    private void makeGUIConfigurable1(final InjectionCallback ic) {
+    @Inject(method = "isLegacySkinLoading", at = @At("HEAD"), cancellable = true)
+    private void makeGUIConfigurable1(final CallbackInfoReturnable<Boolean> cir) {
         if (Options.LEGACY_SKIN_LOADING != null) {
-            ic.setReturnValue(Options.LEGACY_SKIN_LOADING);
+            cir.setReturnValue(Options.LEGACY_SKIN_LOADING);
         }
     }
 
-    @CInject(method = "isLegacySkullLoading", target = @CTarget("HEAD"), cancellable = true)
-    private void makeGUIConfigurable2(final InjectionCallback ic) {
+    @Inject(method = "isLegacySkullLoading", at = @At("HEAD"), cancellable = true)
+    private void makeGUIConfigurable2(final CallbackInfoReturnable<Boolean> cir) {
         if (Options.LEGACY_SKIN_LOADING != null) {
-            ic.setReturnValue(Options.LEGACY_SKIN_LOADING);
+            cir.setReturnValue(Options.LEGACY_SKIN_LOADING);
         }
     }
 

@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.injection.transformer;
+package net.raphimc.viaproxy.injection.mixins;
 
-import net.lenni0451.classtransform.annotations.CTransformer;
-import net.lenni0451.classtransform.annotations.injection.CModifyConstant;
 import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@CTransformer(C2SHandshakePacket.class)
-public abstract class C2SHandshakePacketTransformer {
+@Mixin(C2SHandshakePacket.class)
+public abstract class MixinC2SHandshakePacket {
 
-    @CModifyConstant(method = "read", intValue = 255)
-    private int allowLargerHostnames() {
+    @ModifyConstant(method = "read", constant = @Constant(intValue = 255))
+    private int allowLargerHostnames(int constant) {
         return Short.MAX_VALUE;
     }
 

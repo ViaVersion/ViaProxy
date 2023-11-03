@@ -81,7 +81,6 @@ public class ViaProxy {
         final IClassProvider classProvider = new GuavaClassPathProvider();
         final TransformerManager transformerManager = new TransformerManager(classProvider);
         transformerManager.addTransformerPreprocessor(new MixinsTranslator());
-        transformerManager.addTransformer("net.raphimc.viaproxy.injection.transformer.**");
         transformerManager.addTransformer("net.raphimc.viaproxy.injection.mixins.**");
         if (instrumentation != null) {
             transformerManager.hookInstrumentation(instrumentation);
