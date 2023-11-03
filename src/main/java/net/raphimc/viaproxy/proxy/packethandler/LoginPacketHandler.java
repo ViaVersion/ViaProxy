@@ -30,9 +30,10 @@ import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.ClientLoggedInEvent;
-import net.raphimc.viaproxy.plugins.events.PreMojangAuthEvent;
+import net.raphimc.viaproxy.plugins.events.ShouldVerifyOnlineModeEvent;
 import net.raphimc.viaproxy.proxy.LoginState;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
 import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
@@ -92,7 +93,7 @@ public class LoginPacketHandler extends PacketHandler {
                 proxyConnection.setGameProfile(new GameProfile(null, loginHelloPacket.name));
             }
 
-            if (Options.ONLINE_MODE) {
+            if (Options.ONLINE_MODE && !ViaProxy.EVENT_MANAGER.call(new ShouldVerifyOnlineModeEvent(this.proxyConnection)).isCancelled()) {
                 this.proxyConnection.getC2P().writeAndFlush(new S2CLoginKeyPacket1_8("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             } else {
                 ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
@@ -122,21 +123,19 @@ public class LoginPacketHandler extends PacketHandler {
             final SecretKey secretKey = CryptUtil.decryptSecretKey(KEY_PAIR.getPrivate(), loginKeyPacket.encryptedSecretKey);
             this.proxyConnection.getC2P().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(secretKey));
 
-            if (!ViaProxy.EVENT_MANAGER.call(new PreMojangAuthEvent(this.proxyConnection)).isCancelled()) {
-                final String userName = this.proxyConnection.getGameProfile().getName();
-                try {
-                    final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
-                    final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
-                    if (mojangProfile == null) {
-                        Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid session");
-                        this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
-                    } else {
-                        this.proxyConnection.setGameProfile(mojangProfile);
-                    }
-                    Logger.u_info("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
-                } catch (Throwable e) {
-                    throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
+            final String userName = this.proxyConnection.getGameProfile().getName();
+            try {
+                final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
+                final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
+                if (mojangProfile == null) {
+                    Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid session");
+                    this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
+                } else {
+                    this.proxyConnection.setGameProfile(mojangProfile);
                 }
+                Logger.u_info("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
+            } catch (Throwable e) {
+                throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
             }
 
             ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
@@ -151,7 +150,9 @@ public class LoginPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException, ExecutionException, InterruptedException {
-        if (packet instanceof S2CLoginKeyPacket1_7 loginKeyPacket) {
+        if (packet instanceof S2CLoginDisconnectPacket1_7 loginDisconnectPacket) {
+            Logger.u_info("server kick", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), ConsoleFormatter.convert(loginDisconnectPacket.reason.asLegacyFormatString()));
+        } else if (packet instanceof S2CLoginKeyPacket1_7 loginKeyPacket) {
             final PublicKey publicKey = CryptUtil.decodeRsaPublicKey(loginKeyPacket.publicKey);
             final SecretKey secretKey = CryptUtil.generateSecretKey();
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginKeyPacket.serverId, publicKey, secretKey)).toString(16);

@@ -24,10 +24,9 @@ import net.raphimc.viaproxy.protocolhack.viaproxy.ConsoleCommandSender;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.logging.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class ConsoleHandler {
 
@@ -43,10 +42,10 @@ public class ConsoleHandler {
     }
 
     private static void listen() {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new DelayedStream(System.in, 500)));
+        final Scanner scanner = new Scanner(System.in);
         try {
-            String line;
-            while ((line = reader.readLine()) != null) {
+            while (scanner.hasNextLine()) {
+                final String line = scanner.nextLine();
                 try {
                     final String[] parts = line.split(" ");
                     if (parts.length == 0) continue;

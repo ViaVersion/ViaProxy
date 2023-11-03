@@ -27,6 +27,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.util.AttributeKey;
+import net.lenni0451.mcstructs.text.components.StringComponent;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
@@ -35,11 +36,12 @@ import net.raphimc.netminecraft.netty.crypto.AESEncryption;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginCustomPayloadPacket;
-import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket;
+import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket1_20_3;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
+import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
@@ -247,7 +249,7 @@ public class ProxyConnection extends NetClient {
                     PacketTypes.writeString(disconnectPacketData, channel);
                     PacketTypes.writeVarInt(disconnectPacketData, id);
                     disconnectPacketData.writeBytes(data);
-                    this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(messageToJson("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + OpenAuthModConstants.LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    this.c2p.writeAndFlush(new S2CLoginDisconnectPacket1_20_3(new StringComponent("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + OpenAuthModConstants.LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 }
                 break;
             case PLAY:
@@ -275,13 +277,13 @@ public class ProxyConnection extends NetClient {
     }
 
     public void kickClient(final String message) throws CloseAndReturn {
-        Logger.u_err("kick", this.c2p.remoteAddress(), this.getGameProfile(), message.replaceAll("§.", ""));
+        Logger.u_err("proxy kick", this.c2p.remoteAddress(), this.getGameProfile(), ConsoleFormatter.convert(message));
 
         final ChannelFuture future;
         if (this.c2pConnectionState == ConnectionState.STATUS) {
             future = this.c2p.writeAndFlush(new S2CStatusResponsePacket("{\"players\":{\"max\":0,\"online\":0},\"description\":" + new JsonPrimitive(message) + ",\"version\":{\"protocol\":-1,\"name\":\"ViaProxy\"}}"));
         } else if (this.c2pConnectionState == ConnectionState.LOGIN) {
-            future = this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(messageToJson(message)));
+            future = this.c2p.writeAndFlush(new S2CLoginDisconnectPacket1_20_3(new StringComponent(message)));
         } else if (this.c2pConnectionState == ConnectionState.CONFIGURATION) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_CONFIG_DISCONNECT.getId(this.clientVersion.getVersion()));
