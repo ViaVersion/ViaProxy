@@ -114,25 +114,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
         }
 
-        final String[] handshakeParts;
-        if (Options.PLAYER_INFO_FORWARDING) {
-            handshakeParts = new String[3];
-            final String[] receivedParts = packet.address.split("\0");
-            for (int i = 0; i < receivedParts.length && i < handshakeParts.length; i++) {
-                handshakeParts[i] = receivedParts[i];
-            }
-            if (handshakeParts[0] == null) {
-                this.proxyConnection.kickClient("§cMissing hostname in handshake. Ensure that your proxy has player info forwarding enabled.");
-            }
-            if (handshakeParts[1] == null) {
-                this.proxyConnection.kickClient("§cMissing player IP in handshake. Ensure that your proxy has player info forwarding enabled.");
-            }
-            if (handshakeParts[2] == null) {
-                this.proxyConnection.kickClient("§cMissing player UUID in handshake. Ensure that your proxy has player info forwarding enabled.");
-            }
-        } else {
-            handshakeParts = new String[]{packet.address};
-        }
+        final String[] handshakeParts = packet.address.split("\0");
 
         String connectIP = Options.CONNECT_ADDRESS;
         int connectPort = Options.CONNECT_PORT;
