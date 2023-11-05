@@ -12,7 +12,7 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 - Release (1.0.0 - 1.20.2)
 - April Fools (3D Shareware, 20w14infinite)
 - Combat Snapshots (Combat Test 8c)
-- Bedrock Edition 1.20.30 (In development)
+- Bedrock Edition 1.20.40 (In development)
 
 ## Supported Client versions
 - Release (1.7.2 - 1.20.2)
