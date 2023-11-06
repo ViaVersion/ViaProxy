@@ -55,9 +55,9 @@ repositories {
 dependencies {
     include "com.viaversion:viaversion-common:4.9.0-23w44a-SNAPSHOT"
     include("com.viaversion:viabackwards-common:4.9.0-23w44a-SNAPSHOT") {
-        exclude group: "com.viaversion", module: "viaversion"
-        exclude group: "io.netty", module: "netty-all"
-        exclude group: "com.google.guava", module: "guava"
+        exclude group: "com.viaversion"
+        exclude group: "io.netty"
+        exclude group: "com.google.guava"
     }
     include "com.viaversion:viarewind-common:3.0.3-SNAPSHOT"
     include("net.raphimc:ViaLegacy:2.2.21-SNAPSHOT") {
@@ -75,7 +75,6 @@ dependencies {
 
     include "com.google.code.gson:gson:2.10.1"
     include "com.formdev:flatlaf:3.2.5"
-    include "com.google.guava:guava:32.1.3-jre"
     include "org.apache.commons:commons-lang3:3.13.0"
     include "commons-io:commons-io:2.15.0"
     include "net.sf.jopt-simple:jopt-simple:5.0.4"
