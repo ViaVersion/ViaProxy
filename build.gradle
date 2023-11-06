@@ -53,8 +53,8 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion:4.9.0-23w44a-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.9.0-23w43a-SNAPSHOT") {
+    include "com.viaversion:viaversion-common:4.9.0-23w44a-SNAPSHOT"
+    include("com.viaversion:viabackwards-common:4.9.0-23w44a-SNAPSHOT") {
         exclude group: "com.viaversion", module: "viaversion"
         exclude group: "io.netty", module: "netty-all"
         exclude group: "com.google.guava", module: "guava"
