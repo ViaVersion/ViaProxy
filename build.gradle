@@ -54,11 +54,7 @@ repositories {
 
 dependencies {
     include "com.viaversion:viaversion-common:4.9.0-23w44a-SNAPSHOT"
-    include("com.viaversion:viabackwards-common:4.9.0-23w44a-SNAPSHOT") {
-        exclude group: "com.viaversion"
-        exclude group: "io.netty"
-        exclude group: "com.google.guava"
-    }
+    include "com.viaversion:viabackwards-common:4.9.0-23w44a-SNAPSHOT"
     include "com.viaversion:viarewind-common:3.0.3-SNAPSHOT"
     include("net.raphimc:ViaLegacy:2.2.21-SNAPSHOT") {
         exclude group: "net.lenni0451.mcstructs", module: "text"
