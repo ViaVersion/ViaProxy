@@ -170,65 +170,65 @@ public class ArrayHelper {
     }
 
 
-    public String getString(final int index, final String standart) {
+    public String getString(final int index, final String standard) {
         if (!this.isIndexValid(index) || !this.isString(index)) {
-            return standart;
+            return standard;
         }
 
         return this.get(index);
     }
 
-    public boolean getBoolean(final int index, final boolean standart) {
+    public boolean getBoolean(final int index, final boolean standard) {
         if (!this.isIndexValid(index) || !this.isBoolean(index)) {
-            return standart;
+            return standard;
         }
 
         return Boolean.parseBoolean(this.getString(index));
     }
 
-    public char getChar(final int index, final char standart) {
+    public char getChar(final int index, final char standard) {
         if (!this.isIndexValid(index) || !this.isChar(index)) {
-            return standart;
+            return standard;
         }
 
-        return this.getString(index, String.valueOf(standart)).charAt(0);
+        return this.getString(index, String.valueOf(standard)).charAt(0);
     }
 
-    public short getShort(final int index, final short standart) {
+    public short getShort(final int index, final short standard) {
         if (!this.isIndexValid(index) || !this.isShort(index)) {
-            return standart;
+            return standard;
         }
 
         return Short.parseShort(this.get(index));
     }
 
-    public int getInteger(final int index, final int standart) {
+    public int getInteger(final int index, final int standard) {
         if (!this.isIndexValid(index) || !this.isInteger(index)) {
-            return standart;
+            return standard;
         }
 
         return Integer.parseInt(this.get(index));
     }
 
-    public long getLong(final int index, final long standart) {
+    public long getLong(final int index, final long standard) {
         if (!this.isIndexValid(index) || !this.isLong(index)) {
-            return standart;
+            return standard;
         }
 
         return Long.parseLong(this.get(index));
     }
 
-    public float getFloat(final int index, final float standart) {
+    public float getFloat(final int index, final float standard) {
         if (!this.isIndexValid(index) || !this.isFloat(index)) {
-            return standart;
+            return standard;
         }
 
         return Float.parseFloat(this.get(index));
     }
 
-    public double getDouble(final int index, final double standart) {
+    public double getDouble(final int index, final double standard) {
         if (!this.isIndexValid(index) || !this.isDouble(index)) {
-            return standart;
+            return standard;
         }
 
         return Double.parseDouble(this.get(index));
