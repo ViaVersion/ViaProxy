@@ -80,7 +80,7 @@ dependencies {
     include("com.mojang:authlib:3.16.29") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    include "net.lenni0451.classtransform:mixinstranslator:1.12.0"
+    include "net.lenni0451.classtransform:mixinstranslator:1.12.1"
     include "net.lenni0451.classtransform:mixinsdummy:1.12.0"
     include "net.lenni0451.classtransform:additionalclassprovider:1.12.1"
     include "net.lenni0451:Reflect:1.3.0"
