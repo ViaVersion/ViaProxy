@@ -21,7 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.lenni0451.reflect.stream.RStream;
-import net.raphimc.viaproxy.saves.impl.NewAccountsSave;
+import net.raphimc.viaproxy.saves.impl.AccountsSaveV3;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -34,7 +34,7 @@ public class SaveManager {
     private static final File SAVE_FILE = new File("saves.json");
     private static final Gson GSON = new Gson();
 
-    public final NewAccountsSave accountsSave = new NewAccountsSave();
+    public final AccountsSaveV3 accountsSave = new AccountsSaveV3();
     public final UISave uiSave = new UISave();
 
     public SaveManager() {

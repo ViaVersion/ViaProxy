@@ -18,60 +18,58 @@
 package net.raphimc.viaproxy.saves.impl.accounts;
 
 import com.google.gson.JsonObject;
-import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.java.StepMCProfile;
-import net.raphimc.mcauth.step.java.StepPlayerCertificates;
-import net.raphimc.viaproxy.util.logging.Logger;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.java.StepMCProfile;
+import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
+import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
+import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.UUID;
 
 public class MicrosoftAccount extends Account {
 
-    private StepMCProfile.MCProfile mcProfile;
-    private StepPlayerCertificates.PlayerCertificates playerCertificates;
+    public static final AbstractStep<?, StepFullJavaSession.FullJavaSession> DEVICE_CODE_LOGIN = MinecraftAuth.builder()
+            .withClientId(MicrosoftConstants.JAVA_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .deviceCode()
+            .withDeviceToken("Win32")
+            .sisuTitleAuthentication(MicrosoftConstants.JAVA_XSTS_RELYING_PARTY)
+            .buildMinecraftJavaProfileStep(true);
 
-    public MicrosoftAccount(final JsonObject jsonObject) throws Throwable {
-        this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.fromJson(jsonObject.getAsJsonObject("mc_profile"));
-        if (jsonObject.has("player_certificates")) {
-            try {
-                this.playerCertificates = MinecraftAuth.JAVA_PLAYER_CERTIFICATES.fromJson(jsonObject.getAsJsonObject("player_certificates"));
-            } catch (Throwable e) {
-                Logger.LOGGER.warn("Failed to load player certificates for Microsoft account. They will be regenerated.", e);
-            }
-        }
+    private StepFullJavaSession.FullJavaSession javaSession;
+
+    public MicrosoftAccount(final JsonObject jsonObject) {
+        this.javaSession = DEVICE_CODE_LOGIN.fromJson(jsonObject.getAsJsonObject("javaSession"));
     }
 
-    public MicrosoftAccount(final StepMCProfile.MCProfile mcProfile) {
-        this.mcProfile = mcProfile;
+    public MicrosoftAccount(final StepFullJavaSession.FullJavaSession javaSession) {
+        this.javaSession = javaSession;
     }
 
     @Override
     public JsonObject toJson() {
         final JsonObject jsonObject = new JsonObject();
-        jsonObject.add("mc_profile", this.mcProfile.toJson());
-        if (this.playerCertificates != null) {
-            jsonObject.add("player_certificates", this.playerCertificates.toJson());
-        }
+        jsonObject.add("javaSession", DEVICE_CODE_LOGIN.toJson(this.javaSession));
         return jsonObject;
     }
 
     @Override
     public String getName() {
-        return this.mcProfile.name();
+        return this.javaSession.getMcProfile().getName();
     }
 
     @Override
     public UUID getUUID() {
-        return this.mcProfile.id();
+        return this.javaSession.getMcProfile().getId();
     }
 
     public StepMCProfile.MCProfile getMcProfile() {
-        return this.mcProfile;
+        return this.javaSession.getMcProfile();
     }
 
     public StepPlayerCertificates.PlayerCertificates getPlayerCertificates() {
-        return this.playerCertificates;
+        return this.javaSession.getPlayerCertificates();
     }
 
     @Override
@@ -83,18 +81,7 @@ public class MicrosoftAccount extends Account {
     public boolean refresh(CloseableHttpClient httpClient) throws Exception {
         if (!super.refresh(httpClient)) return false;
 
-        this.mcProfile = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcProfile);
-
-        try {
-            if (this.playerCertificates == null) {
-                throw new NullPointerException();
-            }
-            this.playerCertificates = MinecraftAuth.JAVA_PLAYER_CERTIFICATES.refresh(httpClient, this.playerCertificates);
-        } catch (Throwable e) {
-            this.playerCertificates = null;
-            this.playerCertificates = MinecraftAuth.JAVA_PLAYER_CERTIFICATES.getFromInput(httpClient, this.mcProfile.prevResult().prevResult());
-        }
-
+        this.javaSession = DEVICE_CODE_LOGIN.refresh(httpClient, this.javaSession);
         return true;
     }
 

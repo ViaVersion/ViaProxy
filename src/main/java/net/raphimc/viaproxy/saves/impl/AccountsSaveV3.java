@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.saves.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.raphimc.mcauth.util.MicrosoftConstants;
+import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
@@ -31,12 +31,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class NewAccountsSave extends AbstractSave {
+public class AccountsSaveV3 extends AbstractSave {
 
     private List<Account> accounts = new ArrayList<>();
 
-    public NewAccountsSave() {
-        super("new_accounts");
+    public AccountsSaveV3() {
+        super("accountsV3");
     }
 
     @Override
@@ -44,7 +44,7 @@ public class NewAccountsSave extends AbstractSave {
         this.accounts = new ArrayList<>();
         for (JsonElement element : jsonElement.getAsJsonArray()) {
             final JsonObject jsonObject = element.getAsJsonObject();
-            final String type = jsonObject.get("account_type").getAsString();
+            final String type = jsonObject.get("accountType").getAsString();
             final Class<?> clazz = Class.forName(type);
             final Account account = (Account) clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
             this.accounts.add(account);
@@ -56,7 +56,7 @@ public class NewAccountsSave extends AbstractSave {
         final JsonArray array = new JsonArray();
         for (Account account : this.accounts) {
             final JsonObject jsonObject = account.toJson();
-            jsonObject.addProperty("account_type", account.getClass().getName());
+            jsonObject.addProperty("accountType", account.getClass().getName());
             array.add(jsonObject);
         }
         return array;

@@ -18,60 +18,63 @@
 package net.raphimc.viaproxy.saves.impl.accounts;
 
 import com.google.gson.JsonObject;
-import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.bedrock.StepMCChain;
-import net.raphimc.mcauth.step.bedrock.StepPlayFabToken;
-import net.raphimc.viaproxy.util.logging.Logger;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.step.AbstractStep;
+import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
+import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
+import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
+import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
+import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.UUID;
 
 public class BedrockAccount extends Account {
 
-    private StepMCChain.MCChain mcChain;
-    private StepPlayFabToken.PlayFabToken playFabToken;
+    public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> DEVICE_CODE_LOGIN = MinecraftAuth.builder()
+            .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
+            .deviceCode()
+            .withDeviceToken("Android")
+            .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
+            .buildMinecraftBedrockChainStep(true, true);
 
-    public BedrockAccount(final JsonObject jsonObject) throws Exception {
-        this.mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.fromJson(jsonObject.getAsJsonObject("mc_chain"));
-        if (jsonObject.has("play_fab_token")) {
-            try {
-                this.playFabToken = MinecraftAuth.BEDROCK_PLAY_FAB_TOKEN.fromJson(jsonObject.getAsJsonObject("play_fab_token"));
-            } catch (Throwable e) {
-                Logger.LOGGER.warn("Failed to load PlayFab token for Bedrock account. It will be regenerated.", e);
-            }
-        }
+    private StepFullBedrockSession.FullBedrockSession bedrockSession;
+
+    public BedrockAccount(final JsonObject jsonObject) {
+        this.bedrockSession = DEVICE_CODE_LOGIN.fromJson(jsonObject.getAsJsonObject("bedrockSession"));
     }
 
-    public BedrockAccount(final StepMCChain.MCChain mcChain) {
-        this.mcChain = mcChain;
+    public BedrockAccount(final StepFullBedrockSession.FullBedrockSession bedrockSession) {
+        this.bedrockSession = bedrockSession;
     }
 
     @Override
     public JsonObject toJson() {
         final JsonObject jsonObject = new JsonObject();
-        jsonObject.add("mc_chain", this.mcChain.toJson());
-        if (this.playFabToken != null) {
-            jsonObject.add("play_fab_token", this.playFabToken.toJson());
-        }
+        jsonObject.add("bedrockSession", DEVICE_CODE_LOGIN.toJson(this.bedrockSession));
         return jsonObject;
     }
 
     @Override
     public String getName() {
-        return this.mcChain.displayName();
+        return this.bedrockSession.getMcChain().getDisplayName();
     }
 
     @Override
     public UUID getUUID() {
-        return this.mcChain.id();
+        return this.bedrockSession.getMcChain().getId();
     }
 
     public StepMCChain.MCChain getMcChain() {
-        return this.mcChain;
+        return this.bedrockSession.getMcChain();
     }
 
     public StepPlayFabToken.PlayFabToken getPlayFabToken() {
-        return this.playFabToken;
+        return this.bedrockSession.getPlayFabToken();
+    }
+
+    public StepXblXstsToken.XblXsts<?> getRealmsXsts() {
+        return this.bedrockSession.getRealmsXsts();
     }
 
     @Override
@@ -83,18 +86,7 @@ public class BedrockAccount extends Account {
     public boolean refresh(CloseableHttpClient httpClient) throws Exception {
         if (!super.refresh(httpClient)) return false;
 
-        this.mcChain = MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.refresh(httpClient, this.mcChain);
-
-        try {
-            if (this.playFabToken == null) {
-                throw new NullPointerException();
-            }
-            this.playFabToken = MinecraftAuth.BEDROCK_PLAY_FAB_TOKEN.refresh(httpClient, this.playFabToken);
-        } catch (Throwable e) {
-            this.playFabToken = null;
-            this.playFabToken = MinecraftAuth.BEDROCK_PLAY_FAB_TOKEN.getFromInput(httpClient, this.mcChain.prevResult().fullXblSession());
-        }
-
+        this.bedrockSession = DEVICE_CODE_LOGIN.refresh(httpClient, this.bedrockSession);
         return true;
     }
 

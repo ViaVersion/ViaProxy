@@ -18,9 +18,8 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import net.lenni0451.lambdaevents.EventHandler;
-import net.raphimc.mcauth.MinecraftAuth;
-import net.raphimc.mcauth.step.msa.StepMsaDeviceCode;
-import net.raphimc.mcauth.util.MicrosoftConstants;
+import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
@@ -181,7 +180,7 @@ public class AccountsTab extends AUITab {
                     this.addMicrosoftAccountButton.setEnabled(false);
                     this.handleLogin(msaDeviceCodeConsumer -> {
                         try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                            return new MicrosoftAccount(MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
+                            return new MicrosoftAccount(MicrosoftAccount.DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
                         }
                     });
                 });
@@ -193,7 +192,7 @@ public class AccountsTab extends AUITab {
                     this.addBedrockAccountButton.setEnabled(false);
                     this.handleLogin(msaDeviceCodeConsumer -> {
                         try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                            return new BedrockAccount(MinecraftAuth.BEDROCK_DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
+                            return new BedrockAccount(BedrockAccount.DEVICE_CODE_LOGIN.getFromInput(httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
                         }
                     });
                 });

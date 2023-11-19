@@ -25,8 +25,8 @@ import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.raphimc.mcauth.step.bedrock.StepMCChain;
-import net.raphimc.mcauth.step.java.StepPlayerCertificates;
+import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
+import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_20_2;
@@ -66,29 +66,29 @@ public class ExternalInterface {
 
                 if (Options.CHAT_SIGNING && proxyConnection.getServerVersion().isNewerThanOrEqualTo(VersionEnum.r1_19) && account instanceof MicrosoftAccount microsoftAccount) {
                     final StepPlayerCertificates.PlayerCertificates playerCertificates = microsoftAccount.getPlayerCertificates();
-                    final Instant expiresAt = Instant.ofEpochMilli(playerCertificates.expireTimeMs());
-                    final long expiresAtMillis = playerCertificates.expireTimeMs();
-                    final PublicKey publicKey = playerCertificates.publicKey();
+                    final Instant expiresAt = Instant.ofEpochMilli(playerCertificates.getExpireTimeMs());
+                    final long expiresAtMillis = playerCertificates.getExpireTimeMs();
+                    final PublicKey publicKey = playerCertificates.getPublicKey();
                     final byte[] publicKeyBytes = publicKey.getEncoded();
-                    final byte[] keySignature = playerCertificates.publicKeySignature();
-                    final PrivateKey privateKey = playerCertificates.privateKey();
+                    final byte[] keySignature = playerCertificates.getPublicKeySignature();
+                    final PrivateKey privateKey = playerCertificates.getPrivateKey();
                     final UUID uuid = proxyConnection.getGameProfile().getId();
 
                     byte[] loginHelloKeySignature = keySignature;
                     if (proxyConnection.getClientVersion().equals(VersionEnum.r1_19)) {
-                        loginHelloKeySignature = playerCertificates.legacyPublicKeySignature();
+                        loginHelloKeySignature = playerCertificates.getLegacyPublicKeySignature();
                     }
                     proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_20_2(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
 
-                    user.put(new ChatSession1_19_0(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.legacyPublicKeySignature())));
+                    user.put(new ChatSession1_19_0(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.getLegacyPublicKeySignature())));
                     user.put(new ChatSession1_19_1(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                     user.put(new ChatSession1_19_3(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                 } else if (proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
                     final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
 
-                    final UUID deviceId = mcChain.prevResult().initialXblSession().prevResult2().id();
-                    final String playFabId = bedrockAccount.getPlayFabToken().playFabId();
-                    user.put(new AuthChainData(mcChain.mojangJwt(), mcChain.identityJwt(), mcChain.publicKey(), mcChain.privateKey(), deviceId, playFabId));
+                    final UUID deviceId = mcChain.getXblXsts().getInitialXblSession().getXblDeviceToken().getId();
+                    final String playFabId = bedrockAccount.getPlayFabToken().getPlayFabId();
+                    user.put(new AuthChainData(mcChain.getMojangJwt(), mcChain.getIdentityJwt(), mcChain.getPublicKey(), mcChain.getPrivateKey(), deviceId, playFabId));
                 }
             }
 
@@ -116,7 +116,7 @@ public class ExternalInterface {
             }
         } else if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
             try {
-                AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile(), microsoftAccount.getMcProfile().prevResult().prevResult().access_token(), serverIdHash);
+                AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
             } catch (Throwable e) {
                 proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
             }
