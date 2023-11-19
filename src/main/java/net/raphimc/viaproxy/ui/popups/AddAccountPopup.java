@@ -47,6 +47,7 @@ public class AddAccountPopup extends JDialog {
 
         this.initWindow(closeListener);
         this.initComponents();
+        this.pack();
         this.setVisible(true);
     }
 
@@ -81,7 +82,7 @@ public class AddAccountPopup extends JDialog {
             GBC.create(contentPane).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(urlLabel);
 
             JLabel closeInfo = new JLabel("<html><p>" + I18n.get("popup.login_account.instructions.close") + "</p></html>");
-            GBC.create(contentPane).grid(0, 2).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(closeInfo);
+            GBC.create(contentPane).grid(0, 2).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(closeInfo);
         }
         this.setContentPane(contentPane);
     }
