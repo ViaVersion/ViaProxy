@@ -42,6 +42,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class RealmsTab extends AUITab {
 
@@ -100,14 +101,28 @@ public class RealmsTab extends AUITab {
 
         if (this.currentAccount == null) {
             statusLabel.setText(I18n.get("tab.realms.no_account"));
-        } else if (this.currentAccount instanceof MicrosoftAccount account) {
-            final JavaRealmsService realmsService = new JavaRealmsService(HTTP_CLIENT, Iterables.getLast(this.currentSelectedJavaVersion.getProtocol().getIncludedVersions()), account.getMcProfile());
-            this.loadRealms(realmsService, body, statusLabel);
-        } else if (this.currentAccount instanceof BedrockAccount account) {
-            final BedrockRealmsService realmsService = new BedrockRealmsService(HTTP_CLIENT, ProtocolConstants.BEDROCK_VERSION_NAME, account.getRealmsXsts());
-            this.loadRealms(realmsService, body, statusLabel);
         } else {
-            statusLabel.setText(I18n.get("tab.realms.unsupported_account"));
+            statusLabel.setText(I18n.get("tab.realms.refreshing_account"));
+            CompletableFuture.runAsync(() -> {
+                try {
+                    ViaProxy.getSaveManager().accountsSave.ensureRefreshed(this.currentAccount);
+                    SwingUtilities.invokeLater(() -> {
+                        if (this.currentAccount instanceof MicrosoftAccount account) {
+                            final JavaRealmsService realmsService = new JavaRealmsService(HTTP_CLIENT, Iterables.getLast(this.currentSelectedJavaVersion.getProtocol().getIncludedVersions()), account.getMcProfile());
+                            this.loadRealms(realmsService, body, statusLabel);
+                        } else if (this.currentAccount instanceof BedrockAccount account) {
+                            final BedrockRealmsService realmsService = new BedrockRealmsService(HTTP_CLIENT, ProtocolConstants.BEDROCK_VERSION_NAME, account.getRealmsXsts());
+                            this.loadRealms(realmsService, body, statusLabel);
+                        } else {
+                            statusLabel.setText(I18n.get("tab.realms.unsupported_account"));
+                        }
+                    });
+                } catch (Throwable e) {
+                    Logger.LOGGER.error("Failed to refresh account", e);
+                    ViaProxy.getUI().showError(I18n.get("tab.realms.error_account", e.getMessage()));
+                    SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_account_label")));
+                }
+            });
         }
 
         contentPane.setLayout(new BorderLayout());
@@ -142,7 +157,7 @@ public class RealmsTab extends AUITab {
                     final Throwable cause = e.getCause();
                     Logger.LOGGER.error("Failed to get realms worlds", cause);
                     ViaProxy.getUI().showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
-                    SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_label")));
+                    SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_generic_label")));
                     return null;
                 });
             } else {
@@ -152,7 +167,7 @@ public class RealmsTab extends AUITab {
             final Throwable cause = e.getCause();
             Logger.LOGGER.error("Failed to check realms availability", cause);
             ViaProxy.getUI().showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
-            SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_label")));
+            SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_generic_label")));
             return null;
         });
     }
