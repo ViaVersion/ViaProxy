@@ -47,12 +47,12 @@ import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
 
 public class GeneralTab extends AUITab {
 
-    private JTextField serverAddress;
-    private JComboBox<VersionEnum> serverVersion;
-    private JComboBox<String> authMethod;
+    JTextField serverAddress;
+    JComboBox<VersionEnum> serverVersion;
+    JComboBox<String> authMethod;
     private JCheckBox betaCraftAuth;
     private JLabel stateLabel;
-    private JButton stateButton;
+    JButton stateButton;
 
     public GeneralTab(final ViaProxyUI frame) {
         super(frame, "general");

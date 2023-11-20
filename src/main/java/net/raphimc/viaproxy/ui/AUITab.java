@@ -23,7 +23,7 @@ public abstract class AUITab {
 
     protected final ViaProxyUI frame;
     private final String name;
-    private final JPanel contentPane;
+    protected final JPanel contentPane;
 
     public AUITab(final ViaProxyUI frame, final String name) {
         this.frame = frame;
@@ -43,5 +43,8 @@ public abstract class AUITab {
     }
 
     protected abstract void init(final JPanel contentPane);
+
+    protected void onTabOpened() {
+    }
 
 }

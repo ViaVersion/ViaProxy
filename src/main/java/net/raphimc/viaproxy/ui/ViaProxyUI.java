@@ -26,10 +26,7 @@ import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
-import net.raphimc.viaproxy.ui.impl.AccountsTab;
-import net.raphimc.viaproxy.ui.impl.AdvancedTab;
-import net.raphimc.viaproxy.ui.impl.GeneralTab;
-import net.raphimc.viaproxy.ui.impl.UISettingsTab;
+import net.raphimc.viaproxy.ui.impl.*;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -47,12 +44,13 @@ public class ViaProxyUI extends JFrame {
     public static final int BORDER_PADDING = 10;
     public static final int BODY_BLOCK_PADDING = 10;
 
-    private final JTabbedPane contentPane = new JTabbedPane();
+    public final JTabbedPane contentPane = new JTabbedPane();
     private final List<AUITab> tabs = new ArrayList<>();
 
     public final GeneralTab generalTab = new GeneralTab(this);
     public final AdvancedTab advancedTab = new AdvancedTab(this);
     public final AccountsTab accountsTab = new AccountsTab(this);
+    public final RealmsTab realmsTab = new RealmsTab(this);
     public final UISettingsTab uiSettingsTab = new UISettingsTab(this);
 
     private ImageIcon icon;
@@ -114,8 +112,13 @@ public class ViaProxyUI extends JFrame {
                     tab.add(this.contentPane);
                     this.eventManager.register(tab);
                 });
+        this.contentPane.addChangeListener(e -> {
+            int selectedIndex = contentPane.getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < ViaProxyUI.this.tabs.size()) ViaProxyUI.this.tabs.get(selectedIndex).onTabOpened();
+        });
 
         this.contentPane.setEnabledAt(this.contentPane.indexOfTab(this.accountsTab.getName()), false);
+        this.contentPane.setEnabledAt(this.contentPane.indexOfTab(this.realmsTab.getName()), false);
     }
 
     @EventHandler
