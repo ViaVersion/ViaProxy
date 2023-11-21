@@ -88,7 +88,7 @@ dependencies {
     include("net.raphimc.netminecraft:all:2.3.7-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    include("net.raphimc:MinecraftAuth:3.0.0-SNAPSHOT") {
+    include("net.raphimc:MinecraftAuth:3.0.0") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }
