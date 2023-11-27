@@ -30,6 +30,7 @@ import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.util.LazyLoadBase;
 import net.raphimc.netminecraft.util.ServerAddress;
+import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.vialoader.netty.viabedrock.PingEncapsulationCodec;
 import net.raphimc.vialoader.util.VersionEnum;
@@ -62,7 +63,7 @@ public class BedrockProxyConnection extends ProxyConnection {
         bootstrap
                 .option(RakChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000)
                 .option(RakChannelOption.IP_TOS, 0x18)
-                .option(RakChannelOption.RAK_PROTOCOL_VERSION, 11)
+                .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
                 .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
                 .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
                 .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong())
