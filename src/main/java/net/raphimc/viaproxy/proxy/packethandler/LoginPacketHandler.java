@@ -20,12 +20,10 @@ package net.raphimc.viaproxy.proxy.packethandler;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.constants.ConnectionState;
-import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.crypto.AESEncryption;
 import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.IPacket;
-import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
 import net.raphimc.vialoader.util.VersionEnum;
@@ -61,22 +59,15 @@ public class LoginPacketHandler extends PacketHandler {
     private final byte[] verifyToken = new byte[4];
     private LoginState loginState = LoginState.FIRST_PACKET;
 
-    private final int chatSessionUpdateId;
-
     public LoginPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
 
         RANDOM.nextBytes(this.verifyToken);
-        this.chatSessionUpdateId = MCPackets.C2S_CHAT_SESSION_UPDATE.getId(proxyConnection.getClientVersion().getVersion());
     }
 
     @Override
     public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException {
-        if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
-            if (unknownPacket.packetId == this.chatSessionUpdateId && this.proxyConnection.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).get() == null) {
-                return false;
-            }
-        } else if (packet instanceof C2SLoginHelloPacket1_7 loginHelloPacket) {
+        if (packet instanceof C2SLoginHelloPacket1_7 loginHelloPacket) {
             if (this.loginState != LoginState.FIRST_PACKET) throw CloseAndReturn.INSTANCE;
             this.loginState = LoginState.SENT_HELLO;
 
