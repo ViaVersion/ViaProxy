@@ -116,7 +116,6 @@ public class PluginManager {
         final ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
 
         plugin.init(loader, yaml);
-        plugin.registerTransformers(transformerManager);
 
         if (plugin.getDepends().size() > 1) {
             throw new IllegalStateException("Plugin '" + file.getName() + "' has more than one dependency. This is not supported yet.");

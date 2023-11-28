@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.plugins;
 
-import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 
 import java.util.Collections;
@@ -42,13 +41,6 @@ public abstract class ViaProxyPlugin {
 
     public abstract void onEnable();
 
-    public void registerTransformers(final TransformerManager transformerManager) {
-    }
-
-    public final InjectionClassLoader getClassLoader() {
-        return this.classLoader;
-    }
-
     public final String getName() {
         return (String) this.viaProxyYaml.get("name");
     }
@@ -65,7 +57,11 @@ public abstract class ViaProxyPlugin {
         return Collections.unmodifiableList((List<String>) this.viaProxyYaml.getOrDefault("depends", Collections.emptyList()));
     }
 
-    public boolean isEnabled() {
+    public final InjectionClassLoader getClassLoader() {
+        return this.classLoader;
+    }
+
+    public final boolean isEnabled() {
         return this.enabled;
     }
 
