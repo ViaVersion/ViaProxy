@@ -258,7 +258,7 @@ public class RealmsTab extends AUITab {
             }
             generalTab.serverAddress.setText(address);
             generalTab.serverVersion.setSelectedItem(version);
-            generalTab.authMethod.setSelectedIndex(1);
+            generalTab.authMethod.setSelectedIndex(0);
             generalTab.stateButton.doClick();
             ViaProxy.getUI().contentPane.setSelectedIndex(0);
         }

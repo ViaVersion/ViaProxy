@@ -141,7 +141,7 @@ public class GeneralTab extends AUITab {
             JLabel minecraftAccountLabel = new JLabel(I18n.get("tab.general.minecraft_account.label"));
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(minecraftAccountLabel);
 
-            this.authMethod = new JComboBox<>(new String[]{I18n.get("tab.general.minecraft_account.option_no_account"), I18n.get("tab.general.minecraft_account.option_select_account"), I18n.get("tab.general.minecraft_account.option_openauthmod")});
+            this.authMethod = new JComboBox<>(new String[]{I18n.get("tab.general.minecraft_account.option_select_account"), I18n.get("tab.general.minecraft_account.option_no_account"), I18n.get("tab.general.minecraft_account.option_openauthmod")});
             ViaProxy.getSaveManager().uiSave.loadComboBox("auth_method", this.authMethod);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.authMethod);
         }
@@ -266,7 +266,7 @@ public class GeneralTab extends AUITab {
                         Options.MC_ACCOUNT = new OfflineAccount(path[0]);
                         Options.CLASSIC_MP_PASS = path[1];
                     } else { // Normal address
-                        if (authMethod != 1) {
+                        if (authMethod != 0) {
                             Options.MC_ACCOUNT = null;
                         } else if (Options.MC_ACCOUNT == null) {
                             this.frame.accountsTab.markSelected(0);
