@@ -30,6 +30,7 @@ import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.injection.VersionEnumExtension;
 import net.raphimc.viaproxy.plugins.events.ConnectEvent;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
@@ -44,12 +45,14 @@ import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
 import net.raphimc.viaproxy.util.ArrayHelper;
+import net.raphimc.viaproxy.util.ProtocolVersionDetector;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -129,13 +132,8 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             if (arrayHelper.isIndexValid(3)) {
                 classicMpPass = arrayHelper.getString(3);
             }
-            for (VersionEnum v : VersionEnum.getAllVersions()) {
-                if (v.getName().equalsIgnoreCase(versionString)) {
-                    serverVersion = v;
-                    break;
-                }
-            }
-            if (serverVersion == null) throw CloseAndReturn.INSTANCE;
+            serverVersion = VersionEnum.fromProtocolName(versionString);
+            if (serverVersion == VersionEnum.UNKNOWN) throw CloseAndReturn.INSTANCE;
         } else if (Options.SRV_MODE) {
             try {
                 if (handshakeParts[0].toLowerCase().contains(".viaproxy.")) {
@@ -150,13 +148,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                 connectIP = arrayHelper.getAsString(0, arrayHelper.getLength() - 3, "_");
                 connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
                 final String versionString = arrayHelper.get(arrayHelper.getLength() - 1);
-                for (VersionEnum v : VersionEnum.getAllVersions()) {
-                    if (v.getName().replace(" ", "-").equalsIgnoreCase(versionString)) {
-                        serverVersion = v;
-                        break;
-                    }
+                serverVersion = VersionEnum.fromProtocolName(versionString);
+                if (serverVersion == VersionEnum.UNKNOWN) {
+                    serverVersion = VersionEnum.fromProtocolName(versionString.replace("-", " "));
                 }
-                if (serverVersion == null) throw CloseAndReturn.INSTANCE;
+                if (serverVersion == VersionEnum.UNKNOWN) throw CloseAndReturn.INSTANCE;
             } catch (CloseAndReturn e) {
                 this.proxyConnection.kickClient("§cWrong SRV syntax! §6Please use:\n§7ip_port_version.viaproxy.hostname");
             }
@@ -184,6 +180,27 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.kickClient(preConnectEvent.getCancelMessage());
         }
 
+        final UserOptions userOptions = new UserOptions(classicMpPass, Options.MC_ACCOUNT);
+        ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
+
+        if (packet.intendedState == ConnectionState.LOGIN && serverVersion.equals(VersionEnumExtension.AUTO_DETECT)) {
+            CompletableFuture.runAsync(() -> {
+                final VersionEnum detectedVersion = ProtocolVersionDetector.get(serverAddress, clientVersion);
+                this.connect(serverAddress, detectedVersion, clientVersion, packet.intendedState, userOptions, handshakeParts);
+            }).exceptionally(t -> {
+                if (t instanceof ConnectException || t instanceof UnresolvedAddressException) {
+                    this.proxyConnection.kickClient("§cCould not connect to the backend server!");
+                } else {
+                    this.proxyConnection.kickClient("§cAutomatic protocol detection failed!\n§c" + t.getMessage());
+                }
+                return null;
+            });
+        } else {
+            this.connect(serverAddress, serverVersion, clientVersion, packet.intendedState, userOptions, handshakeParts);
+        }
+    }
+
+    private void connect(final ServerAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final ConnectionState intendedState, final UserOptions userOptions, final String[] handshakeParts) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         if (serverVersion.equals(VersionEnum.bedrockLatest)) {
             this.proxyConnection = new BedrockProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
@@ -192,8 +209,8 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
         this.proxyConnection.getC2P().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
         this.proxyConnection.setClientVersion(clientVersion);
-        this.proxyConnection.setC2pConnectionState(packet.intendedState);
-        this.proxyConnection.setUserOptions(new UserOptions(classicMpPass, Options.MC_ACCOUNT));
+        this.proxyConnection.setC2pConnectionState(intendedState);
+        this.proxyConnection.setUserOptions(userOptions);
         this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CustomPayloadPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CompressionPacketHandler(this.proxyConnection));
@@ -207,7 +224,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
 
-        ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
         Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
         ViaProxy.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
 
@@ -219,10 +235,10 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                     }
 
                     handshakeParts[0] = serverAddress.getAddress();
-                    final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), packet.intendedState);
+                    final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), intendedState);
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {
-                            this.proxyConnection.setP2sConnectionState(packet.intendedState);
+                            this.proxyConnection.setP2sConnectionState(intendedState);
                         }
                     });
 
@@ -232,7 +248,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }, (ThrowingChannelFutureListener) f -> {
             if (!f.isSuccess()) {
                 if (f.cause() instanceof ConnectException || f.cause() instanceof UnresolvedAddressException) {
-                    this.proxyConnection.kickClient("§cCould not connect to the backend server!\n§cTry again in a few seconds.");
+                    this.proxyConnection.kickClient("§cCould not connect to the backend server!");
                 } else {
                     Logger.LOGGER.error("Error while connecting to the backend server", f.cause());
                     this.proxyConnection.kickClient("§cAn error occurred while connecting to the backend server: " + f.cause().getMessage() + "\n§cCheck the console for more information.");
