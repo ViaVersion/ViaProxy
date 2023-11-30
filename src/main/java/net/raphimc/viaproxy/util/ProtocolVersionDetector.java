@@ -25,7 +25,7 @@ import net.raphimc.vialoader.util.VersionEnum;
 
 public class ProtocolVersionDetector {
 
-    private static final int TIMEOUT = 1000;
+    private static final int TIMEOUT = 3000;
 
     public static VersionEnum get(final ServerAddress serverAddress, final VersionEnum clientVersion) {
         MCPingResponse response = MCPing

@@ -21,16 +21,12 @@ import com.google.common.collect.ImmutableSet;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionRange;
 import com.viaversion.viaversion.util.Pair;
-import net.raphimc.viaproxy.injection.VersionEnumExtension;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,10 +34,6 @@ import java.util.Set;
 
 @Mixin(value = ProtocolVersion.class, remap = false)
 public abstract class MixinProtocolVersion {
-
-    @Shadow
-    @Final
-    private int version;
 
     @Unique
     private static Set<String> skips;
@@ -95,13 +87,6 @@ public abstract class MixinProtocolVersion {
         }
 
         return ProtocolVersion.register(version, name, versionRange);
-    }
-
-    @Inject(method = "isKnown", at = @At("HEAD"), cancellable = true)
-    private void markAutoDetectAsUnknown(CallbackInfoReturnable<Boolean> cir) {
-        if (VersionEnumExtension.AUTO_DETECT != null && this.version == VersionEnumExtension.AUTO_DETECT.getVersion()) {
-            cir.setReturnValue(false);
-        }
     }
 
 }

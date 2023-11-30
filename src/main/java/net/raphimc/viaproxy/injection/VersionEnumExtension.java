@@ -19,7 +19,10 @@ package net.raphimc.viaproxy.injection;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.reflect.Enums;
+import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.vialoader.util.VersionEnum;
+
+import java.util.Map;
 
 public class VersionEnumExtension {
 
@@ -28,6 +31,7 @@ public class VersionEnumExtension {
 
     static {
         Enums.addEnumInstance(VersionEnum.class, AUTO_DETECT);
+        RStream.of(VersionEnum.class).fields().by("VERSION_REGISTRY").<Map<ProtocolVersion, VersionEnum>>get().put(autoDetect, AUTO_DETECT);
         VersionEnum.SORTED_VERSIONS.add(AUTO_DETECT);
     }
 
