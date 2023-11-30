@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.saves.impl;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.saves.AbstractSave;
 
 import javax.swing.*;
@@ -71,6 +72,17 @@ public class UISave extends AbstractSave {
             try {
                 int index = Integer.parseInt(this.values.get(key));
                 if (index >= 0 && index < comboBox.getItemCount()) comboBox.setSelectedIndex(index);
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+    public void loadComboBoxVersionEnum(final String key, final JComboBox<VersionEnum> comboBox) {
+        if (this.values.containsKey(key)) {
+            try {
+                String value = String.valueOf(this.values.get(key));
+                VersionEnum version = VersionEnum.valueOf(value);
+                comboBox.setSelectedItem(version);
             } catch (Throwable ignored) {
             }
         }

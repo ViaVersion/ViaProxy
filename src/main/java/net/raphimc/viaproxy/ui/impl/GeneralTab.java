@@ -134,7 +134,7 @@ public class GeneralTab extends AUITab {
                     this.betaCraftAuth.setSelected(false);
                 }
             });
-            ViaProxy.getSaveManager().uiSave.loadComboBox("server_version", this.serverVersion);
+            ViaProxy.getSaveManager().uiSave.loadComboBoxVersionEnum("server_version", this.serverVersion);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverVersion);
         }
         {
@@ -191,7 +191,9 @@ public class GeneralTab extends AUITab {
     private void onClose(final UICloseEvent event) {
         UISave save = ViaProxy.getSaveManager().uiSave;
         save.put("server_address", this.serverAddress.getText());
-        save.put("server_version", String.valueOf(this.serverVersion.getSelectedIndex()));
+        if (this.serverVersion.getSelectedItem() instanceof VersionEnum version) {
+            save.put("server_version", version.name());
+        }
         save.put("auth_method", String.valueOf(this.authMethod.getSelectedIndex()));
         save.put("betacraft_auth", String.valueOf(this.betaCraftAuth.isSelected()));
         ViaProxy.getSaveManager().save();
@@ -218,8 +220,8 @@ public class GeneralTab extends AUITab {
     }
 
     private void start() {
-        final Object selectedItem = this.serverVersion.getSelectedItem();
-        if (!(selectedItem instanceof VersionEnum)) {
+        final Object selectedVersion = this.serverVersion.getSelectedItem();
+        if (!(selectedVersion instanceof VersionEnum)) {
             this.frame.showError(I18n.get("tab.general.error.no_server_version_selected"));
             return;
         }
@@ -229,7 +231,7 @@ public class GeneralTab extends AUITab {
 
             this.frame.showWarning("<html><div style='text-align: center;'>" + I18n.get("tab.general.warning.ban_warning.line1") + "<br><b>" + I18n.get("tab.general.warning.risk") + "</b></div></html>");
         }
-        if (VersionEnum.bedrockLatest.equals(selectedItem) && ViaProxy.getSaveManager().uiSave.get("notice.bedrock_warning") == null) {
+        if (VersionEnum.bedrockLatest.equals(selectedVersion) && ViaProxy.getSaveManager().uiSave.get("notice.bedrock_warning") == null) {
             ViaProxy.getSaveManager().uiSave.put("notice.bedrock_warning", "true");
             ViaProxy.getSaveManager().save();
 
