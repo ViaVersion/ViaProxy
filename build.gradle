@@ -53,7 +53,7 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:4.9.0-1.20.3-rc1-SNAPSHOT"
+    include "com.viaversion:viaversion-common:4.9.0-1.20.3-pre1-SNAPSHOT"
     include "com.viaversion:viabackwards-common:4.9.0-1.20.3-rc1-SNAPSHOT"
     include "com.viaversion:viarewind-common:3.0.4-SNAPSHOT"
     include("net.raphimc:ViaLegacy:2.2.21-SNAPSHOT") {
