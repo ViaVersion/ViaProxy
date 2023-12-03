@@ -24,6 +24,7 @@ import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
+import net.raphimc.viaproxy.plugins.events.ProxySessionCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerHandler;
@@ -74,7 +75,8 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
 
     protected void connectToServer(final Channel c2pChannel) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new PassthroughProxy2ServerHandler(), true)).getHandler();
-        this.proxyConnection = new LegacyProxyConnection(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new, c2pChannel);
+        final LegacyProxyConnection proxyConnection = new LegacyProxyConnection(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new, c2pChannel);
+        this.proxyConnection = ViaProxy.EVENT_MANAGER.call(new ProxySessionCreationEvent<>(proxyConnection, true)).getProxySession();
         this.proxyConnection.getC2P().attr(LegacyProxyConnection.LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
         final ServerAddress unresolvedAddress = this.getServerAddress();

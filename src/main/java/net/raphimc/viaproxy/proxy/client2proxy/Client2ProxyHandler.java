@@ -31,10 +31,7 @@ import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.injection.VersionEnumExtension;
-import net.raphimc.viaproxy.plugins.events.ConnectEvent;
-import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
-import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
-import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
+import net.raphimc.viaproxy.plugins.events.*;
 import net.raphimc.viaproxy.protocolhack.viaproxy.ViaBedrockTransferHolder;
 import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
@@ -202,11 +199,13 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
     private void connect(final ServerAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final ConnectionState intendedState, final UserOptions userOptions, final String[] handshakeParts) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
+        final ProxyConnection proxyConnection;
         if (serverVersion.equals(VersionEnum.bedrockLatest)) {
-            this.proxyConnection = new BedrockProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
+            proxyConnection = new BedrockProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
         } else {
-            this.proxyConnection = new ProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
+            proxyConnection = new ProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
         }
+        this.proxyConnection = ViaProxy.EVENT_MANAGER.call(new ProxySessionCreationEvent<>(proxyConnection, false)).getProxySession();
         this.proxyConnection.getC2P().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
         this.proxyConnection.setClientVersion(clientVersion);
         this.proxyConnection.setC2pConnectionState(intendedState);

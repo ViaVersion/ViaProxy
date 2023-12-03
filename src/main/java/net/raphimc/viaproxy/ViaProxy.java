@@ -43,6 +43,7 @@ import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
+import net.raphimc.viaproxy.plugins.events.ViaProxyLoadedEvent;
 import net.raphimc.viaproxy.proxy.EventListener;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
@@ -162,6 +163,7 @@ public class ViaProxy {
                 Thread.sleep(1000);
             }
             ui.eventManager.call(new UIInitEvent());
+            EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
         } else {
             Options.parse(args);
@@ -171,6 +173,7 @@ public class ViaProxy {
             }
             loaderThread.start();
             loaderThread.join();
+            EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
             startProxy();
 
