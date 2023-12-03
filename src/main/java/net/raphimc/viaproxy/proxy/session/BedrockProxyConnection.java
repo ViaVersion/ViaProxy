@@ -18,10 +18,7 @@
 package net.raphimc.viaproxy.proxy.session;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -61,8 +58,8 @@ public class BedrockProxyConnection extends ProxyConnection {
         }
 
         bootstrap
-                .option(RakChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000)
-                .option(RakChannelOption.IP_TOS, 0x18)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000)
+                .option(ChannelOption.IP_TOS, 0x18)
                 .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
                 .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
                 .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
