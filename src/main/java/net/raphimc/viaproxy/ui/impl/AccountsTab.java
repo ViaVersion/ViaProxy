@@ -218,11 +218,13 @@ public class AccountsTab extends AUITab {
         if (!model.isEmpty()) this.markSelected(0);
     }
 
-    private void closePopup() {
-        this.addAccountPopup.markExternalClose();
-        this.addAccountPopup.setVisible(false);
-        this.addAccountPopup.dispose();
-        this.addAccountPopup = null;
+    private void closePopup() { // Might be getting called multiple times
+        if (this.addAccountPopup != null) {
+            this.addAccountPopup.markExternalClose();
+            this.addAccountPopup.setVisible(false);
+            this.addAccountPopup.dispose();
+            this.addAccountPopup = null;
+        }
         this.addMicrosoftAccountButton.setEnabled(true);
         this.addBedrockAccountButton.setEnabled(true);
     }
