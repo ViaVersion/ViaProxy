@@ -6,16 +6,16 @@ Using it is very simple, just run the jar file, and it will start a user interfa
 For a full user guide go to the [Usage for Players](#usage-for-players-gui) section or the [Usage for Server Owners](#usage-for-server-owners-cli) section.
 
 ## Supported Server versions
-- Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
-- Alpha (a1.0.15 - a1.2.6)
+- Release (1.0.0 - 1.20.3)
 - Beta (b1.0 - b1.8.1)
-- Release (1.0.0 - 1.20.2)
+- Alpha (a1.0.15 - a1.2.6)
+- Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
 - April Fools (3D Shareware, 20w14infinite)
 - Combat Snapshots (Combat Test 8c)
-- Bedrock Edition 1.20.40 (In development)
+- Bedrock Edition 1.20.50 (In development)
 
 ## Supported Client versions
-- Release (1.7.2 - 1.20.2)
+- Release (1.7.2 - 1.20.3)
 - Bedrock Edition (Needs the [Geyser plugin](https://github.com/RaphiMC/ViaProxyGeyserPlugin))
 - Classic, Alpha, Beta, Release 1.0 - 1.6.4 (Only passthrough)
 
