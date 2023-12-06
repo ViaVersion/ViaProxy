@@ -65,7 +65,7 @@ dependencies {
         exclude group: "io.jsonwebtoken"
         exclude group: "net.lenni0451.mcstructs", module: "text"
     }
-    include("net.raphimc:ViaLoader:2.2.11-SNAPSHOT") {
+    include("net.raphimc:ViaLoader:2.2.12-SNAPSHOT") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
