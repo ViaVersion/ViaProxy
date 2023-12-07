@@ -27,6 +27,8 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.util.AttributeKey;
+import net.lenni0451.mcstructs.nbt.INbtTag;
+import net.lenni0451.mcstructs.nbt.tags.CompoundTag;
 import net.lenni0451.mcstructs.text.components.StringComponent;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
@@ -287,12 +289,20 @@ public class ProxyConnection extends NetClient {
         } else if (this.c2pConnectionState == ConnectionState.CONFIGURATION) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_CONFIG_DISCONNECT.getId(this.clientVersion.getVersion()));
-            PacketTypes.writeString(disconnectPacket, messageToJson(message));
+            if (this.clientVersion.isOlderThanOrEqualTo(VersionEnum.r1_20_2)) {
+                PacketTypes.writeString(disconnectPacket, messageToJson(message));
+            } else {
+                PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));
+            }
             future = this.c2p.writeAndFlush(disconnectPacket);
         } else if (this.c2pConnectionState == ConnectionState.PLAY) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_DISCONNECT.getId(this.clientVersion.getVersion()));
-            PacketTypes.writeString(disconnectPacket, messageToJson(message));
+            if (this.clientVersion.isOlderThanOrEqualTo(VersionEnum.r1_20_2)) {
+                PacketTypes.writeString(disconnectPacket, messageToJson(message));
+            } else {
+                PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));
+            }
             future = this.c2p.writeAndFlush(disconnectPacket);
         } else {
             future = this.c2p.newSucceededFuture();
@@ -310,6 +320,12 @@ public class ProxyConnection extends NetClient {
         final JsonObject obj = new JsonObject();
         obj.addProperty("text", message);
         return obj.toString();
+    }
+
+    private static INbtTag messageToNbt(final String message) {
+        final CompoundTag tag = new CompoundTag();
+        tag.add("text", new StringComponent(message));
+        return tag;
     }
 
 }
