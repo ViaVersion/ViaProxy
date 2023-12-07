@@ -54,13 +54,13 @@ repositories {
 
 dependencies {
     include "com.viaversion:viaversion-common:4.9.2"
-    include "com.viaversion:viabackwards-common:4.9.1"
+    include "com.viaversion:viabackwards-common:4.9.2-SNAPSHOT"
     include "com.viaversion:viarewind-common:3.0.5"
     include("net.raphimc:ViaLegacy:2.2.21") {
         exclude group: "net.lenni0451.mcstructs", module: "text"
     }
     include "net.raphimc:ViaAprilFools:2.0.10"
-    include("net.raphimc:ViaBedrock:0.0.3-SNAPSHOT") {
+    include("net.raphimc:ViaBedrock:0.0.4-SNAPSHOT") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
         exclude group: "net.lenni0451.mcstructs", module: "text"
