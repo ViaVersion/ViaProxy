@@ -51,7 +51,7 @@ public abstract class MixinProtocolVersion {
         remaps.put("1.18/1.18.1", new Pair<>("1.18-1.18.1", null));
         remaps.put("1.19.1/2", new Pair<>("1.19.1-1.19.2", null));
         remaps.put("1.20/1.20.1", new Pair<>("1.20-1.20.1", null));
-        remaps.put("1.20.3", new Pair<>("1.20.3-1.20.4", null));
+        remaps.put("1.20.3", new Pair<>("1.20.3-1.20.4", new VersionRange("1.20", 3, 4)));
     }
 
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;register(ILjava/lang/String;)Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;"))
@@ -60,6 +60,9 @@ public abstract class MixinProtocolVersion {
         final Pair<String, VersionRange> remapEntry = remaps.get(name);
         if (remapEntry != null) {
             if (remapEntry.key() != null) name = remapEntry.key();
+            if (remapEntry.value() != null) {
+                return ProtocolVersion.register(version, name, remapEntry.value());
+            }
         }
 
         return ProtocolVersion.register(version, name);
@@ -72,6 +75,9 @@ public abstract class MixinProtocolVersion {
         final Pair<String, VersionRange> remapEntry = remaps.get(name);
         if (remapEntry != null) {
             if (remapEntry.key() != null) name = remapEntry.key();
+            if (remapEntry.value() != null) {
+                return ProtocolVersion.register(version, snapshotVersion, name, remapEntry.value());
+            }
         }
 
         return ProtocolVersion.register(version, snapshotVersion, name);
