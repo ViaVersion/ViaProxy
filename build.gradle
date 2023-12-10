@@ -53,8 +53,8 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:4.9.2"
-    include "com.viaversion:viabackwards-common:4.9.2-20231208.084014-2"
+    include "com.viaversion:viaversion-common:4.9.3-SNAPSHOT"
+    include "com.viaversion:viabackwards-common:4.9.2-SNAPSHOT"
     include "com.viaversion:viarewind-common:3.0.5"
     include("net.raphimc:ViaLegacy:2.2.22-SNAPSHOT") {
         exclude group: "net.lenni0451.mcstructs", module: "text"
