@@ -59,7 +59,7 @@ dependencies {
 ```
 
 ## Usage for Players (GUI)
-![ViaProxy GUI](https://i.imgur.com/eTnl2ZH.png)
+![ViaProxy GUI](https://i.imgur.com/RaDWkbK.png)
 1. Download the latest version from the [Releases section](#executable-jar-file)
 2. Put the jar file into a folder (ViaProxy will generate config files and store some data there)
 3. Run the jar file
