@@ -56,9 +56,14 @@ public class ExternalInterface {
 
     public static void fillPlayerData(final ProxyConnection proxyConnection) {
         Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Filling player data");
+        final Account account = proxyConnection.getUserOptions().account();
+        
+        if (account != null && Options.VERIFY_USERNAMES && !account.getName().equals(proxyConnection.getGameProfile().getName())) {
+            proxyConnection.kickClient("§cUsername mismatch! You are logging in as " + proxyConnection.getGameProfile().getName() + " but the selected account in the proxy is " + account.getName() + ".");
+        }
+
         try {
-            if (proxyConnection.getUserOptions().account() != null) {
-                final Account account = proxyConnection.getUserOptions().account();
+            if (account != null) {
                 ViaProxy.getSaveManager().accountsSave.ensureRefreshed(account);
 
                 proxyConnection.setGameProfile(account.getGameProfile());
