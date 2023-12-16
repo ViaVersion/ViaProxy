@@ -50,6 +50,7 @@ public class AdvancedTab extends AUITab {
     JCheckBox legacySkinLoading;
     JCheckBox chatSigning;
     JCheckBox ignorePacketTranslationErrors;
+    JCheckBox verifyUsernames;
     JButton viaVersionDumpButton;
     JButton uploadLogsButton;
 
@@ -115,6 +116,13 @@ public class AdvancedTab extends AUITab {
             this.ignorePacketTranslationErrors.setSelected(false);
             ViaProxy.getSaveManager().uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.ignorePacketTranslationErrors);
+        }
+        {
+            this.verifyUsernames = new JCheckBox(I18n.get("tab.advanced.verify_usernames.label"));
+            this.verifyUsernames.setToolTipText(I18n.get("tab.advanced.verify_usernames.tooltip"));
+            this.verifyUsernames.setSelected(false);
+            ViaProxy.getSaveManager().uiSave.loadCheckBox("verify_usernames", this.verifyUsernames);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.verifyUsernames);
         }
 
         parent.add(body, BorderLayout.NORTH);
@@ -199,6 +207,7 @@ public class AdvancedTab extends AUITab {
         save.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
         save.put("chat_signing", String.valueOf(this.chatSigning.isSelected()));
         save.put("ignore_packet_translation_errors", String.valueOf(this.ignorePacketTranslationErrors.isSelected()));
+        save.put("verify_usernames", String.valueOf(this.verifyUsernames.isSelected()));
         ViaProxy.getSaveManager().save();
     }
 

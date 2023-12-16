@@ -46,6 +46,7 @@ public class Options {
     public static boolean ONLINE_MODE;
     public static boolean OPENAUTHMOD_AUTH;
     public static boolean BETACRAFT_AUTH;
+    public static boolean VERIFY_USERNAMES;
     public static Account MC_ACCOUNT;
     public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
     public static boolean IGNORE_PACKET_TRANSLATION_ERRORS;
@@ -78,6 +79,7 @@ public class Options {
         final OptionSpec<VersionEnum> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new VersionEnumConverter()).required();
         final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Use OpenAuthMod for joining online mode servers");
         final OptionSpec<Integer> guiAccountIndex = parser.acceptsAll(asList("gui_account_index", "gui_account"), "Use an account from the ViaProxy GUI for joining online mode servers (Specify -1 for instructions)").withRequiredArg().ofType(Integer.class);
+        final OptionSpec<Void> verifyUsernames = parser.acceptsAll(asList("vu", "verify_username"), "Verify username against selected account before proxying");
         final OptionSpec<Void> betaCraftAuth = parser.accepts("betacraft_auth", "Use BetaCraft authentication for classic servers");
         final OptionSpec<String> resourcePackUrl = parser.acceptsAll(asList("resource_pack_url", "resource_pack", "rpu", "rp"), "URL of a resource pack which clients can optionally download").withRequiredArg().ofType(String.class);
         final OptionSpec<String> proxyUrl = parser.acceptsAll(asList("proxy_url", "proxy"), "URL of a SOCKS(4/5)/HTTP(S) proxy which will be used for backend TCP connections").withRequiredArg().ofType(String.class);
@@ -101,6 +103,7 @@ public class Options {
             SRV_MODE = options.has(srvMode);
             INTERNAL_SRV_MODE = options.has(iSrvMode);
             ONLINE_MODE = options.has(proxyOnlineMode);
+            VERIFY_USERNAMES = options.has(verifyUsernames);
             CONNECT_ADDRESS = options.valueOf(connectAddress);
             PROTOCOL_VERSION = options.valueOf(version);
             if (options.has(connectPort)) {
