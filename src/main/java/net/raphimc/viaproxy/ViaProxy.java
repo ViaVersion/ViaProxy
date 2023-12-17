@@ -52,6 +52,7 @@ import net.raphimc.viaproxy.tasks.LoaderTask;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
+import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -189,7 +190,7 @@ public class ViaProxy {
             Logger.LOGGER.info("Starting proxy server");
             currentProxyServer = new NetServer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler(), Client2ProxyChannelInitializer::new);
             EVENT_MANAGER.call(new ProxyStartEvent());
-            Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS);
+            Logger.LOGGER.info("Binding proxy server to " + AddressUtil.toString(Options.BIND_ADDRESS));
             currentProxyServer.bind(Options.BIND_ADDRESS, false);
         } catch (Throwable e) {
             currentProxyServer = null;
