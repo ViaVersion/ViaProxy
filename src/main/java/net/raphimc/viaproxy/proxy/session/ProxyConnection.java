@@ -41,7 +41,7 @@ import net.raphimc.netminecraft.packet.impl.login.S2CLoginCustomPayloadPacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket1_20_3;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
-import net.raphimc.netminecraft.util.ServerAddress;
+import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
@@ -49,6 +49,7 @@ import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.util.logging.Logger;
 
+import java.net.SocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class ProxyConnection extends NetClient {
     private final AtomicInteger customPayloadId = new AtomicInteger(0);
     private final Map<Integer, CompletableFuture<ByteBuf>> customPayloadListener = new ConcurrentHashMap<>();
 
-    private ServerAddress serverAddress;
+    private SocketAddress serverAddress;
 
     private VersionEnum serverVersion;
     private VersionEnum clientVersion;
@@ -101,18 +102,18 @@ public class ProxyConnection extends NetClient {
 
     @Override
     @Deprecated
-    public ChannelFuture connect(final ServerAddress serverAddress) {
+    public ChannelFuture connect(final SocketAddress address) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void initialize(final Bootstrap bootstrap) {
+    public void initialize(final ChannelType channelType, final Bootstrap bootstrap) {
         bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
         bootstrap.attr(PROXY_CONNECTION_ATTRIBUTE_KEY, this);
-        super.initialize(bootstrap);
+        super.initialize(channelType, bootstrap);
     }
 
-    public ChannelFuture connectToServer(final ServerAddress serverAddress, final VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(final SocketAddress serverAddress, final VersionEnum targetVersion) {
         this.serverAddress = serverAddress;
         this.serverVersion = targetVersion;
         return super.connect(serverAddress);
@@ -126,7 +127,7 @@ public class ProxyConnection extends NetClient {
         return this.packetHandlers;
     }
 
-    public ServerAddress getServerAddress() {
+    public SocketAddress getServerAddress() {
         return this.serverAddress;
     }
 

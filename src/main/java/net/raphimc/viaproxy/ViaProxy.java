@@ -44,7 +44,6 @@ import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
 import net.raphimc.viaproxy.plugins.events.ViaProxyLoadedEvent;
-import net.raphimc.viaproxy.proxy.EventListener;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -139,7 +138,6 @@ public class ViaProxy {
 
         SAVE_MANAGER = new SaveManager();
         PLUGIN_MANAGER = new PluginManager();
-        EVENT_MANAGER.register(EventListener.class);
 
         final Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
         final Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
@@ -191,8 +189,8 @@ public class ViaProxy {
             Logger.LOGGER.info("Starting proxy server");
             currentProxyServer = new NetServer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler(), Client2ProxyChannelInitializer::new);
             EVENT_MANAGER.call(new ProxyStartEvent());
-            Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS + ":" + Options.BIND_PORT);
-            currentProxyServer.bind(Options.BIND_ADDRESS, Options.BIND_PORT, false);
+            Logger.LOGGER.info("Binding proxy server to " + Options.BIND_ADDRESS);
+            currentProxyServer.bind(Options.BIND_ADDRESS, false);
         } catch (Throwable e) {
             currentProxyServer = null;
             throw e;

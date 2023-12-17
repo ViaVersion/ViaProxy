@@ -77,7 +77,7 @@ dependencies {
 6. Have fun!
 
 Here is an example command to allow players to join on yourserverip:25568 and connect to a beta 1.7.3 server running on port 25565:
-``java -jar ViaProxy-whateverversion.jar --bind_port 25568 --target_ip 127.0.0.1 --target_port 25565 --version b1.7-b1.7.3``
+``java -jar ViaProxy-whateverversion.jar --bind_address 0.0.0.0:25568 --target_ip 127.0.0.1:25565 --version b1.7-b1.7.3``
 
 ### Configuring the protocol translation
 To change the protocol translation settings/features you can look into the ViaProtocolHack folder.

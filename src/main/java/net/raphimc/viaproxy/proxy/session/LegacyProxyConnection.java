@@ -21,8 +21,9 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.util.AttributeKey;
 import net.raphimc.netminecraft.netty.connection.NetClient;
-import net.raphimc.netminecraft.util.ServerAddress;
+import net.raphimc.netminecraft.util.ChannelType;
 
+import java.net.SocketAddress;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,7 +32,7 @@ public class LegacyProxyConnection extends NetClient {
     public static final AttributeKey<LegacyProxyConnection> LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY = AttributeKey.valueOf("legacy_proxy_connection");
 
     private final Channel c2p;
-    private ServerAddress serverAddress;
+    private SocketAddress serverAddress;
 
     public LegacyProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, final Channel c2p) {
         super(handlerSupplier, channelInitializerSupplier);
@@ -43,14 +44,14 @@ public class LegacyProxyConnection extends NetClient {
     }
 
     @Override
-    public void initialize(final Bootstrap bootstrap) {
+    public void initialize(final ChannelType channelType, final Bootstrap bootstrap) {
         bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
         bootstrap.attr(LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY, this);
-        super.initialize(bootstrap);
+        super.initialize(channelType, bootstrap);
     }
 
     @Override
-    public ChannelFuture connect(final ServerAddress serverAddress) {
+    public ChannelFuture connect(final SocketAddress serverAddress) {
         this.serverAddress = serverAddress;
         return super.connect(serverAddress);
     }
@@ -59,7 +60,7 @@ public class LegacyProxyConnection extends NetClient {
         return this.c2p;
     }
 
-    public ServerAddress getServerAddress() {
+    public SocketAddress getServerAddress() {
         return this.serverAddress;
     }
 

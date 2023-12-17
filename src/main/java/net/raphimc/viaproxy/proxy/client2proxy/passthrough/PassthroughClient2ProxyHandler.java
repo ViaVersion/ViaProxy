@@ -19,13 +19,10 @@ package net.raphimc.viaproxy.proxy.client2proxy.passthrough;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import net.raphimc.netminecraft.util.ServerAddress;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxySessionCreationEvent;
-import net.raphimc.viaproxy.plugins.events.ResolveSrvEvent;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.passthrough.PassthroughProxy2ServerHandler;
 import net.raphimc.viaproxy.proxy.session.LegacyProxyConnection;
@@ -33,8 +30,10 @@ import net.raphimc.viaproxy.proxy.util.ChannelUtil;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
 import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
 import net.raphimc.viaproxy.proxy.util.ThrowingChannelFutureListener;
+import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
+import java.net.SocketAddress;
 import java.util.function.Supplier;
 
 public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -79,22 +78,10 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         this.proxyConnection = ViaProxy.EVENT_MANAGER.call(new ProxySessionCreationEvent<>(proxyConnection, true)).getProxySession();
         this.proxyConnection.getC2P().attr(LegacyProxyConnection.LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 
-        final ServerAddress unresolvedAddress = this.getServerAddress();
-        final VersionEnum serverVersion = Options.PROTOCOL_VERSION;
-
-        final ResolveSrvEvent resolveSrvEvent = ViaProxy.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, unresolvedAddress.getAddress(), unresolvedAddress.getPort()));
-        final String connectIP = resolveSrvEvent.getHost();
-        final int connectPort = resolveSrvEvent.getPort();
-
-        final ServerAddress serverAddress;
-        if (resolveSrvEvent.isCancelled() || serverVersion.isOlderThan(VersionEnum.r1_3_1tor1_3_2) || serverVersion.equals(VersionEnum.bedrockLatest)) {
-            serverAddress = new ServerAddress(connectIP, connectPort);
-        } else {
-            serverAddress = ServerAddress.fromSRV(connectIP + ":" + connectPort);
-        }
+        final SocketAddress serverAddress = this.getServerAddress();
 
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
-        Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), null, "[Legacy <-> Legacy] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
+        Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), null, "[Legacy <-> Legacy] Connecting to " + AddressUtil.toString(serverAddress));
 
         this.proxyConnection.connect(serverAddress).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
@@ -115,8 +102,8 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         });
     }
 
-    protected ServerAddress getServerAddress() {
-        return new ServerAddress(Options.CONNECT_ADDRESS, Options.CONNECT_PORT);
+    protected SocketAddress getServerAddress() {
+        return Options.CONNECT_ADDRESS;
     }
 
 }

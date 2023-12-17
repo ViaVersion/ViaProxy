@@ -19,18 +19,21 @@ package net.raphimc.viaproxy.util;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.mcping.MCPing;
+import net.lenni0451.mcping.pings.sockets.impl.factories.SocketChannelSocketFactory;
 import net.lenni0451.mcping.responses.MCPingResponse;
-import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
+
+import java.net.SocketAddress;
 
 public class ProtocolVersionDetector {
 
     private static final int TIMEOUT = 3000;
 
-    public static VersionEnum get(final ServerAddress serverAddress, final VersionEnum clientVersion) {
+    public static VersionEnum get(final SocketAddress serverAddress, final VersionEnum clientVersion) {
         MCPingResponse response = MCPing
                 .pingModern(clientVersion.getOriginalVersion())
-                .address(serverAddress.getAddress(), serverAddress.getPort())
+                .tcpSocketFactory(new SocketChannelSocketFactory())
+                .address(AddressUtil.toJ16UnixSocketAddress(serverAddress))
                 .noResolve()
                 .timeout(TIMEOUT, TIMEOUT)
                 .getSync();
@@ -40,7 +43,8 @@ public class ProtocolVersionDetector {
         } else { // Else ping again with protocol id -1 to get the protocol id of the server
             response = MCPing
                     .pingModern(-1)
-                    .address(serverAddress.getAddress(), serverAddress.getPort())
+                    .tcpSocketFactory(new SocketChannelSocketFactory())
+                    .address(AddressUtil.toJ16UnixSocketAddress(serverAddress))
                     .noResolve()
                     .timeout(TIMEOUT, TIMEOUT)
                     .getSync();

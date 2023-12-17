@@ -17,12 +17,10 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
-import com.google.common.net.HostAndPort;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.plugins.events.GetDefaultPortEvent;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
 import net.raphimc.viaproxy.ui.AUITab;
@@ -30,6 +28,7 @@ import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
+import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -39,6 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -258,16 +258,22 @@ public class GeneralTab extends AUITab {
                 try {
                     if (serverAddress.startsWith("mc://")) { // ClassiCube Direct URL
                         final URI uri = new URI(serverAddress);
-                        serverAddress = uri.getHost() + ":" + uri.getPort();
 
                         final String[] path = uri.getPath().substring(1).split("/");
                         if (path.length < 2) {
                             throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_classicube_url"));
                         }
 
+                        Options.CONNECT_ADDRESS = new InetSocketAddress(uri.getHost(), uri.getPort());
                         Options.MC_ACCOUNT = new OfflineAccount(path[0]);
                         Options.CLASSIC_MP_PASS = path[1];
-                    } else { // Normal address
+                    } else {
+                        try {
+                            Options.CONNECT_ADDRESS = AddressUtil.parse(serverAddress, serverVersion);
+                        } catch (Throwable t) {
+                            throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_server_address"));
+                        }
+
                         if (authMethod != 0) {
                             Options.MC_ACCOUNT = null;
                         } else if (Options.MC_ACCOUNT == null) {
@@ -276,15 +282,7 @@ public class GeneralTab extends AUITab {
                         Options.CLASSIC_MP_PASS = null;
                     }
 
-                    try {
-                        HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
-                        Options.CONNECT_ADDRESS = hostAndPort.getHost();
-                        Options.CONNECT_PORT = hostAndPort.getPortOrDefault(ViaProxy.EVENT_MANAGER.call(new GetDefaultPortEvent(serverVersion, 25565)).getDefaultPort());
-                    } catch (Throwable t) {
-                        throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_server_address"));
-                    }
-
-                    Options.BIND_PORT = bindPort;
+                    Options.BIND_ADDRESS = new InetSocketAddress("0.0.0.0", bindPort);
                     Options.ONLINE_MODE = proxyOnlineMode;
                     Options.PROTOCOL_VERSION = serverVersion;
                     Options.BETACRAFT_AUTH = betaCraftAuth;

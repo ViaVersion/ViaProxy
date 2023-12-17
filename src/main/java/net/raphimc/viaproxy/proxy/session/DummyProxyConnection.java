@@ -25,9 +25,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
-import net.raphimc.netminecraft.util.ServerAddress;
+import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.vialoader.util.VersionEnum;
 
+import java.net.SocketAddress;
 import java.security.Key;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,17 +39,17 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public void initialize(Bootstrap bootstrap) {
+    public void initialize(ChannelType channelType, Bootstrap bootstrap) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ChannelFuture connectToServer(ServerAddress serverAddress, VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(SocketAddress serverAddress, VersionEnum targetVersion) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ServerAddress getServerAddress() {
+    public SocketAddress getServerAddress() {
         throw new UnsupportedOperationException();
     }
 

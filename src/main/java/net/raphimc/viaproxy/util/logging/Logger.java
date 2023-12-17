@@ -19,12 +19,12 @@ package net.raphimc.viaproxy.util.logging;
 
 import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import net.raphimc.viaproxy.util.AddressUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.fusesource.jansi.AnsiConsole;
 
 import java.io.PrintStream;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Locale;
 
@@ -60,8 +60,7 @@ public class Logger {
     }
 
     public static void u_log(final Level level, final String title, final SocketAddress address, final GameProfile gameProfile, final String msg) {
-        final InetSocketAddress socketAddress = (InetSocketAddress) address;
-        LOGGER.log(level, "[" + title.toUpperCase(Locale.ROOT) + "] (" + socketAddress.getAddress().getHostAddress() + " | " + (gameProfile != null ? gameProfile.getName() : "null") + ") " + msg);
+        LOGGER.log(level, "[" + title.toUpperCase(Locale.ROOT) + "] (" + AddressUtil.toString(address) + " | " + (gameProfile != null ? gameProfile.getName() : "null") + ") " + msg);
     }
 
 }

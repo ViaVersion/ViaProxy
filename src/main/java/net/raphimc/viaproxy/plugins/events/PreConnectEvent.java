@@ -18,32 +18,41 @@
 package net.raphimc.viaproxy.plugins.events;
 
 import io.netty.channel.Channel;
-import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
 
+import java.net.SocketAddress;
+
 public class PreConnectEvent extends EventCancellable {
 
-    private final ServerAddress serverAddress;
-    private final VersionEnum serverVersion;
+    private SocketAddress serverAddress;
+    private VersionEnum serverVersion;
     private final VersionEnum clientVersion;
     private final Channel clientChannel;
 
     private String cancelMessage = "§cCould not connect to the backend server! (Server is blacklisted)";
 
-    public PreConnectEvent(final ServerAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final Channel clientChannel) {
+    public PreConnectEvent(final SocketAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final Channel clientChannel) {
         this.serverAddress = serverAddress;
         this.serverVersion = serverVersion;
         this.clientVersion = clientVersion;
         this.clientChannel = clientChannel;
     }
 
-    public ServerAddress getServerAddress() {
+    public SocketAddress getServerAddress() {
         return this.serverAddress;
+    }
+
+    public void setServerAddress(final SocketAddress serverAddress) {
+        this.serverAddress = serverAddress;
     }
 
     public VersionEnum getServerVersion() {
         return this.serverVersion;
+    }
+
+    public void setServerVersion(final VersionEnum serverVersion) {
+        this.serverVersion = serverVersion;
     }
 
     public VersionEnum getClientVersion() {

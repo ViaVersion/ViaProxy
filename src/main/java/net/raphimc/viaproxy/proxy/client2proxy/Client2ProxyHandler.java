@@ -26,12 +26,14 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
-import net.raphimc.netminecraft.util.ServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.injection.VersionEnumExtension;
-import net.raphimc.viaproxy.plugins.events.*;
+import net.raphimc.viaproxy.plugins.events.ConnectEvent;
+import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
+import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
+import net.raphimc.viaproxy.plugins.events.ProxySessionCreationEvent;
 import net.raphimc.viaproxy.protocolhack.viaproxy.ViaBedrockTransferHolder;
 import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
@@ -41,12 +43,14 @@ import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
+import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.ProtocolVersionDetector;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -116,21 +120,19 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
         final String[] handshakeParts = packet.address.split("\0");
 
-        String connectIP = Options.CONNECT_ADDRESS;
-        int connectPort = Options.CONNECT_PORT;
+        SocketAddress serverAddress = Options.CONNECT_ADDRESS;
         VersionEnum serverVersion = Options.PROTOCOL_VERSION;
         String classicMpPass = Options.CLASSIC_MP_PASS;
 
         if (Options.INTERNAL_SRV_MODE) {
             final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
-            connectIP = arrayHelper.get(0);
-            connectPort = arrayHelper.getInteger(1);
-            final String versionString = arrayHelper.get(2);
-            if (arrayHelper.isIndexValid(3)) {
-                classicMpPass = arrayHelper.getString(3);
-            }
+            final String versionString = arrayHelper.get(1);
             serverVersion = VersionEnum.fromProtocolName(versionString);
             if (serverVersion == VersionEnum.UNKNOWN) throw CloseAndReturn.INSTANCE;
+            serverAddress = AddressUtil.parse(arrayHelper.get(0), serverVersion);
+            if (arrayHelper.isIndexValid(2)) {
+                classicMpPass = arrayHelper.getString(2);
+            }
         } else if (Options.SRV_MODE) {
             try {
                 if (handshakeParts[0].toLowerCase().contains(".viaproxy.")) {
@@ -142,48 +144,39 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                 if (arrayHelper.getLength() < 3) {
                     throw CloseAndReturn.INSTANCE;
                 }
-                connectIP = arrayHelper.getAsString(0, arrayHelper.getLength() - 3, "_");
-                connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
                 final String versionString = arrayHelper.get(arrayHelper.getLength() - 1);
                 serverVersion = VersionEnum.fromProtocolName(versionString);
                 if (serverVersion == VersionEnum.UNKNOWN) {
                     serverVersion = VersionEnum.fromProtocolName(versionString.replace("-", " "));
                 }
                 if (serverVersion == VersionEnum.UNKNOWN) throw CloseAndReturn.INSTANCE;
+                final String connectIP = arrayHelper.getAsString(0, arrayHelper.getLength() - 3, "_");
+                final int connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
+                serverAddress = AddressUtil.parse(connectIP + ":" + connectPort, serverVersion);
             } catch (CloseAndReturn e) {
                 this.proxyConnection.kickClient("§cWrong SRV syntax! §6Please use:\n§7ip_port_version.viaproxy.hostname");
             }
         }
 
         if (serverVersion.equals(VersionEnum.bedrockLatest) && packet.intendedState == ConnectionState.LOGIN && ViaBedrockTransferHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
-            final InetSocketAddress newAddress = ViaBedrockTransferHolder.removeTempRedirect(this.proxyConnection.getC2P());
-            connectIP = newAddress.getHostString();
-            connectPort = newAddress.getPort();
-        }
-
-        final ResolveSrvEvent resolveSrvEvent = ViaProxy.EVENT_MANAGER.call(new ResolveSrvEvent(serverVersion, connectIP, connectPort));
-        connectIP = resolveSrvEvent.getHost();
-        connectPort = resolveSrvEvent.getPort();
-
-        final ServerAddress serverAddress;
-        if (resolveSrvEvent.isCancelled() || serverVersion.isOlderThan(VersionEnum.r1_3_1tor1_3_2) || serverVersion.equals(VersionEnum.bedrockLatest)) {
-            serverAddress = new ServerAddress(connectIP, connectPort);
-        } else {
-            serverAddress = ServerAddress.fromSRV(connectIP + ":" + connectPort);
+            serverAddress = ViaBedrockTransferHolder.removeTempRedirect(this.proxyConnection.getC2P());
         }
 
         final PreConnectEvent preConnectEvent = new PreConnectEvent(serverAddress, serverVersion, clientVersion, this.proxyConnection.getC2P());
         if (ViaProxy.EVENT_MANAGER.call(preConnectEvent).isCancelled()) {
             this.proxyConnection.kickClient(preConnectEvent.getCancelMessage());
         }
+        serverAddress = preConnectEvent.getServerAddress();
+        serverVersion = preConnectEvent.getServerVersion();
 
         final UserOptions userOptions = new UserOptions(classicMpPass, Options.MC_ACCOUNT);
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
         if (packet.intendedState == ConnectionState.LOGIN && serverVersion.equals(VersionEnumExtension.AUTO_DETECT)) {
+            SocketAddress finalServerAddress = serverAddress;
             CompletableFuture.runAsync(() -> {
-                final VersionEnum detectedVersion = ProtocolVersionDetector.get(serverAddress, clientVersion);
-                this.connect(serverAddress, detectedVersion, clientVersion, packet.intendedState, userOptions, handshakeParts);
+                final VersionEnum detectedVersion = ProtocolVersionDetector.get(finalServerAddress, clientVersion);
+                this.connect(finalServerAddress, detectedVersion, clientVersion, packet.intendedState, userOptions, handshakeParts);
             }).exceptionally(t -> {
                 if (t instanceof ConnectException || t instanceof UnresolvedAddressException) {
                     this.proxyConnection.kickClient("§cCould not connect to the backend server!");
@@ -197,7 +190,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
     }
 
-    private void connect(final ServerAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final ConnectionState intendedState, final UserOptions userOptions, final String[] handshakeParts) {
+    private void connect(final SocketAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final ConnectionState intendedState, final UserOptions userOptions, final String[] handshakeParts) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         final ProxyConnection proxyConnection;
         if (serverVersion.equals(VersionEnum.bedrockLatest)) {
@@ -223,7 +216,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
 
-        Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + serverAddress.getAddress() + ":" + serverAddress.getPort());
+        Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + AddressUtil.toString(serverAddress));
         ViaProxy.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
 
         this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {
@@ -233,8 +226,18 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                         this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                     }
 
-                    handshakeParts[0] = serverAddress.getAddress();
-                    final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), serverAddress.getPort(), intendedState);
+                    final String address;
+                    final int port;
+                    if (serverAddress instanceof InetSocketAddress inetSocketAddress) {
+                        address = inetSocketAddress.getHostString();
+                        port = inetSocketAddress.getPort();
+                    } else {
+                        address = AddressUtil.toString(serverAddress);
+                        port = 25565;
+                    }
+
+                    handshakeParts[0] = address;
+                    final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), port, intendedState);
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {
                             this.proxyConnection.setP2sConnectionState(intendedState);

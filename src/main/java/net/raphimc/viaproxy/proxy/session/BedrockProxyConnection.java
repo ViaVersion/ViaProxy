@@ -19,14 +19,11 @@ package net.raphimc.viaproxy.proxy.session;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollDatagramChannel;
-import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.channel.socket.DatagramChannel;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.netminecraft.util.LazyLoadBase;
-import net.raphimc.netminecraft.util.ServerAddress;
+import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.vialoader.netty.viabedrock.PingEncapsulationCodec;
@@ -35,6 +32,7 @@ import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -46,18 +44,15 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public void initialize(Bootstrap bootstrap) {
-        if (Epoll.isAvailable()) {
-            bootstrap
-                    .group(LazyLoadBase.CLIENT_EPOLL_EVENTLOOP.getValue())
-                    .channelFactory(RakChannelFactory.client(EpollDatagramChannel.class));
-        } else {
-            bootstrap
-                    .group(LazyLoadBase.CLIENT_NIO_EVENTLOOP.getValue())
-                    .channelFactory(RakChannelFactory.client(NioDatagramChannel.class));
+    public void initialize(final ChannelType channelType, final Bootstrap bootstrap) {
+        if (!DatagramChannel.class.isAssignableFrom(channelType.udpClientChannelClass())) {
+            throw new IllegalArgumentException("Channel type must be a DatagramChannel");
         }
+        final Class<? extends DatagramChannel> channelClass = (Class<? extends DatagramChannel>) channelType.udpClientChannelClass();
 
         bootstrap
+                .group(channelType.clientEventLoopGroup().get())
+                .channelFactory(RakChannelFactory.client(channelClass))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000)
                 .option(ChannelOption.IP_TOS, 0x18)
                 .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
@@ -71,7 +66,11 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public ChannelFuture connectToServer(ServerAddress serverAddress, VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(final SocketAddress serverAddress, final VersionEnum targetVersion) {
+        if (!(serverAddress instanceof InetSocketAddress)) {
+            throw new IllegalArgumentException("Server address must be an InetSocketAddress");
+        }
+
         if (this.getC2pConnectionState() == ConnectionState.STATUS) {
             RStream.of(this).withSuper().fields().by("serverAddress").set(serverAddress);
             RStream.of(this).withSuper().fields().by("serverVersion").set(targetVersion);
@@ -81,11 +80,11 @@ public class BedrockProxyConnection extends ProxyConnection {
         }
     }
 
-    private ChannelFuture ping(final ServerAddress serverAddress) {
-        if (this.channelFuture == null) this.initialize(new Bootstrap());
+    private ChannelFuture ping(final SocketAddress address) {
+        if (this.channelFuture == null) this.initialize(ChannelType.get(address), new Bootstrap());
 
         this.channelFuture.channel().eventLoop().submit(() -> {
-            this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(serverAddress.toSocketAddress()));
+            this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(((InetSocketAddress) address)));
             this.getChannel().pipeline().remove(VLPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
             this.getChannel().pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
         });

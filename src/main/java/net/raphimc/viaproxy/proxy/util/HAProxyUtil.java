@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.proxy.util;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.handler.codec.haproxy.*;
 import net.raphimc.vialoader.util.VersionEnum;
 
@@ -29,40 +30,35 @@ import java.util.List;
 public class HAProxyUtil {
 
     public static HAProxyMessage createMessage(final Channel sourceChannel, final Channel targetChannel, final VersionEnum clientVersion) {
-        final InetSocketAddress sourceAddress = (InetSocketAddress) sourceChannel.remoteAddress();
-        final InetSocketAddress targetAddress = (InetSocketAddress) targetChannel.remoteAddress();
-        final HAProxyProxiedProtocol protocol = sourceAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
         final List<HAProxyTLV> tlvs = new ArrayList<>();
         if (clientVersion != null) {
             tlvs.add(new HAProxyTLV((byte) 0xE0, Unpooled.buffer().writeInt(clientVersion.getOriginalVersion())));
         }
 
-        final String sourceAddressString = sourceAddress.getAddress().getHostAddress();
-        final String targetAddressString = protocol.addressFamily().equals(HAProxyProxiedProtocol.AddressFamily.AF_IPv6) ? getIPv6Address(targetAddress.getHostString()).getHostAddress() : getIPv4Address(targetAddress.getHostString()).getHostAddress();
-
-        return new HAProxyMessage(HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, protocol, sourceAddressString, targetAddressString, sourceAddress.getPort(), targetAddress.getPort(), tlvs);
-    }
-
-    private static Inet6Address getIPv6Address(final String host) {
-        try {
-            final InetAddress[] addresses = InetAddress.getAllByName(host);
-            for (InetAddress addr : addresses) {
-                if (addr instanceof Inet6Address) {
-                    return (Inet6Address) addr;
-                }
+        if (sourceChannel.remoteAddress() instanceof InetSocketAddress sourceAddress && targetChannel.remoteAddress() instanceof InetSocketAddress targetAddress) {
+            final HAProxyProxiedProtocol protocol = sourceAddress.getAddress() instanceof Inet4Address ? HAProxyProxiedProtocol.TCP4 : HAProxyProxiedProtocol.TCP6;
+            final String sourceAddressString = sourceAddress.getAddress().getHostAddress();
+            final String targetAddressString;
+            if (protocol.addressFamily().equals(HAProxyProxiedProtocol.AddressFamily.AF_IPv4)) {
+                targetAddressString = getInetAddress(targetAddress.getHostString(), Inet4Address.class).getHostAddress();
+            } else {
+                targetAddressString = getInetAddress(targetAddress.getHostString(), Inet6Address.class).getHostAddress();
             }
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
+
+            return new HAProxyMessage(HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, protocol, sourceAddressString, targetAddressString, sourceAddress.getPort(), targetAddress.getPort(), tlvs);
+        } else if (targetChannel.remoteAddress() instanceof DomainSocketAddress targetAddress) {
+            return new HAProxyMessage(HAProxyProtocolVersion.V2, HAProxyCommand.PROXY, HAProxyProxiedProtocol.UNIX_STREAM, "", targetAddress.path(), 0, 0, tlvs);
+        } else {
+            throw new IllegalArgumentException("Unsupported address type: " + targetChannel.remoteAddress().getClass().getName());
         }
-        return null;
     }
 
-    private static Inet4Address getIPv4Address(final String host) {
+    private static <T extends InetAddress> T getInetAddress(final String host, final Class<T> addressClass) {
         try {
             final InetAddress[] addresses = InetAddress.getAllByName(host);
             for (InetAddress addr : addresses) {
-                if (addr instanceof Inet4Address) {
-                    return (Inet4Address) addr;
+                if (addressClass.isInstance(addr)) {
+                    return (T) addr;
                 }
             }
         } catch (UnknownHostException e) {
