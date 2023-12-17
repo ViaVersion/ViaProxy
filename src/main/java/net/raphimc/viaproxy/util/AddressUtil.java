@@ -19,12 +19,12 @@ package net.raphimc.viaproxy.util;
 
 import com.google.common.net.HostAndPort;
 import io.netty.channel.unix.DomainSocketAddress;
+import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.util.MinecraftServerAddress;
 import net.raphimc.vialoader.util.VersionEnum;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.UnixDomainSocketAddress;
 
 public class AddressUtil {
 
@@ -77,7 +77,7 @@ public class AddressUtil {
     public static SocketAddress toJ16UnixSocketAddress(final SocketAddress address) {
         try {
             if (address instanceof DomainSocketAddress domainSocketAddress) {
-                return UnixDomainSocketAddress.of(domainSocketAddress.path());
+                return RStream.of("java.net.UnixDomainSocketAddress").methods().by("of", String.class).invokeArgs(domainSocketAddress.path());
             }
         } catch (Throwable ignored) {
         }
