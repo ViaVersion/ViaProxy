@@ -53,8 +53,8 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:4.9.3-SNAPSHOT"
-    include "com.viaversion:viabackwards-common:4.9.2-SNAPSHOT"
+    include "com.viaversion:viaversion-common:4.10.0-23w51b-SNAPSHOT"
+    include "com.viaversion:viabackwards-common:4.10.0-23w51b-SNAPSHOT"
     include "com.viaversion:viarewind-common:3.0.5"
     include("net.raphimc:ViaLegacy:2.2.22-SNAPSHOT") {
         exclude group: "net.lenni0451.mcstructs", module: "text"
@@ -65,7 +65,7 @@ dependencies {
         exclude group: "io.jsonwebtoken"
         exclude group: "net.lenni0451.mcstructs", module: "text"
     }
-    include("net.raphimc:ViaLoader:2.2.12") {
+    include("net.raphimc:ViaLoader:2.2.13-SNAPSHOT") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
