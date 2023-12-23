@@ -64,9 +64,10 @@ dependencies {
 2. Put the jar file into a folder (ViaProxy will generate config files and store some data there)
 3. Run the jar file
 4. Fill in the required fields like server address and version
-5. Click on "Start"
-6. Join with your Minecraft client on the displayed address
-7. Have fun!
+5. If you want to join online mode servers, add your Minecraft account in the Accounts tab
+6. Click on "Start"
+7. Join with your Minecraft client on the displayed address
+8. Have fun!
 
 ## Usage for Server owners (CLI)
 1. Download the latest version from the [Releases section](#executable-jar-file)
