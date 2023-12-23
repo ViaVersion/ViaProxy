@@ -81,7 +81,7 @@ Here is an example command to allow players to join on yourserverip:25568 and co
 ``java -jar ViaProxy-whateverversion.jar --bind_address 0.0.0.0:25568 --target_ip 127.0.0.1:25565 --version b1.7-b1.7.3``
 
 ### Configuring the protocol translation
-To change the protocol translation settings/features you can look into the ViaProtocolHack folder.
+To change the protocol translation settings/features you can look into the ViaLoader folder.
 You will find 5 config files there:
 - viaversion.yml (ViaVersion)
 - viabackwards.yml (ViaBackwards)
