@@ -92,9 +92,10 @@ You will find 5 config files there:
 ### Developer Plugin API
 ViaProxy has a plugin API which allows you to create plugins for ViaProxy.  
 Documentation and examples:
-- [NoLocalConnections](https://github.com/Lenni0451/NoLocalConnections)
-- [ViaProxyMultiLaunch](https://github.com/Lenni0451/ViaProxyMultiLaunch)
-- [ViaProxyGeyserPlugin](https://github.com/RaphiMC/ViaProxyGeyserPlugin)
+- [NoLocalConnections](https://github.com/ViaVersionAddons/NoLocalConnections)
+- [ViaProxyMultiLaunch](https://github.com/ViaVersionAddons/ViaProxyMultiLaunch)
+- [ViaProxyGeyserPlugin](https://github.com/ViaVersionAddons/ViaProxyGeyserPlugin)
+- [ViaProxyRakNetProviders](https://github.com/ViaVersionAddons/ViaProxyRakNetProviders)
 
 ## Contributing
 Contributions in the form of pull requests are always welcome.
