@@ -66,8 +66,8 @@ public class ViaProxyUI extends JFrame {
         this.initWindow();
         this.initTabs();
 
-        FlatInspector.install("ctrl shift alt X");
-        FlatUIDefaultsInspector.install("ctrl shift alt Y");
+        FlatInspector.install("ctrl shift I");
+        FlatUIDefaultsInspector.install("ctrl shift O");
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
