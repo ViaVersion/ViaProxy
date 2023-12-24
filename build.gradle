@@ -71,6 +71,7 @@ dependencies {
 
     include "com.google.code.gson:gson:2.10.1"
     include "com.formdev:flatlaf:3.2.5"
+    include "com.formdev:flatlaf-extras:3.2.5"
     include "org.apache.commons:commons-lang3:3.14.0"
     include "commons-io:commons-io:2.15.1"
     include "net.sf.jopt-simple:jopt-simple:5.0.4"
@@ -103,6 +104,10 @@ dependencies {
         exclude group: "io.netty"
     }
     include "gs.mclo:api:3.0.1"
+    include "org.lz4:lz4-pure-java:1.8.0"
+    include("org.iq80.leveldb:leveldb:0.12") {
+        exclude group: "com.google.guava"
+    }
 }
 
 sourceSets {

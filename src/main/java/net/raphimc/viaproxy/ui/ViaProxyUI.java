@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.ui;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.extras.FlatInspector;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
@@ -64,6 +65,7 @@ public class ViaProxyUI extends JFrame {
         this.initWindow();
         this.initTabs();
 
+        FlatInspector.install("ctrl shift alt X");
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(10_000);
         SwingUtilities.updateComponentTreeUI(this);
