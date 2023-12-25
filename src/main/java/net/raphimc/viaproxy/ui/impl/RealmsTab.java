@@ -231,7 +231,7 @@ public class RealmsTab extends AUITab {
                     SwingUtilities.invokeLater(() -> {
                         join.setEnabled(true);
                         join.setText(I18n.get("tab.realms.join"));
-                        if (realmsService instanceof JavaRealmsService javaRealmsService && cause instanceof RealmsResponseException realmsResponseException && realmsResponseException.getRealmsErrorCode() == RealmsResponseException.TOS_NOT_ACCEPTED) {
+                        if (realmsService instanceof JavaRealmsService javaRealmsService && cause instanceof RealmsResponseException realmsResponseException && realmsResponseException.getErrorCode() == RealmsResponseException.TOS_NOT_ACCEPTED) {
                             final int chosen = JOptionPane.showConfirmDialog(ViaProxy.getUI(), I18n.get("tab.realms.accept_tos", "https://aka.ms/MinecraftRealmsTerms"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                             if (chosen == JOptionPane.YES_OPTION) {
                                 javaRealmsService.acceptTos();
