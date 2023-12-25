@@ -4,6 +4,7 @@ plugins {
     id "java"
     id "application"
     id "maven-publish"
+    id "idea"
     id "net.raphimc.class-token-replacer" version "1.0.0"
     id "net.raphimc.java-downgrader" version "1.1.1"
 }
@@ -192,6 +193,14 @@ publishing {
                     url = "https://github.com/ViaVersion/ViaProxy.git"
                 }
             }
+        }
+    }
+}
+
+idea {
+    module {
+        ["run"].each {
+            excludeDirs << file("$it")
         }
     }
 }
