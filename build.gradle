@@ -90,7 +90,7 @@ dependencies {
     include("net.raphimc.netminecraft:all:2.4.0-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    include("net.raphimc:MinecraftAuth:3.0.2") {
+    include("net.raphimc:MinecraftAuth:3.1.0-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }
@@ -102,10 +102,6 @@ dependencies {
         exclude group: "io.netty"
     }
     include "gs.mclo:api:3.0.1"
-    include "org.lz4:lz4-pure-java:1.8.0"
-    include("org.iq80.leveldb:leveldb:0.12") {
-        exclude group: "com.google.guava"
-    }
 }
 
 sourceSets {

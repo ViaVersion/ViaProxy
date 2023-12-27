@@ -29,6 +29,7 @@ import io.netty.channel.*;
 import io.netty.util.AttributeKey;
 import net.lenni0451.mcstructs.nbt.INbtTag;
 import net.lenni0451.mcstructs.nbt.tags.CompoundTag;
+import net.lenni0451.mcstructs.nbt.tags.StringTag;
 import net.lenni0451.mcstructs.text.components.StringComponent;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
@@ -325,7 +326,7 @@ public class ProxyConnection extends NetClient {
 
     private static INbtTag messageToNbt(final String message) {
         final CompoundTag tag = new CompoundTag();
-        tag.add("text", new StringComponent(message));
+        tag.add("text", new StringTag(message));
         return tag;
     }
 
