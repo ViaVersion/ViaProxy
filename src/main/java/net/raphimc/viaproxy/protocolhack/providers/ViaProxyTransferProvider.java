@@ -29,7 +29,7 @@ public class ViaProxyTransferProvider extends TransferProvider {
 
     @Override
     public void connectToServer(UserConnection user, InetSocketAddress newAddress) {
-        ViaBedrockTransferHolder.addTempRedirect(user.getChannel(), newAddress);
+        ViaBedrockTransferHolder.addTempRedirect(ProxyConnection.fromChannel(user.getChannel()).getC2P(), newAddress);
         try {
             ProxyConnection.fromUserConnection(user).kickClient("§aThe server transferred you to another server §7(§e" + newAddress.getHostName() + ":" + newAddress.getPort() + "§7)§a. Please reconnect to ViaProxy.");
         } catch (CloseAndReturn ignored) {
