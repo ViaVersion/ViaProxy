@@ -54,10 +54,10 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:4.10.0-23w51b-20231229.155255-7"
-    include "com.viaversion:viabackwards-common:4.10.0-23w51b-20231227.185146-3"
+    include "com.viaversion:viaversion-common:4.10.0-23w51b-SNAPSHOT"
+    include "com.viaversion:viabackwards-common:4.10.0-23w51b-SNAPSHOT"
     include "com.viaversion:viarewind-common:3.0.6-20231231.235115-8"
-    include "net.raphimc:ViaLegacy:2.2.22-20231227.192812-15"
+    include "net.raphimc:ViaLegacy:2.2.22-SNAPSHOT"
     include "net.raphimc:ViaAprilFools:2.0.10"
     include("net.raphimc:ViaBedrock:0.0.4-SNAPSHOT") {
         exclude group: "io.netty"
