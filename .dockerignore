@@ -1,0 +1,17 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+*.log.gz
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Project files
+/.idea/*
+!/.idea/copyright/
+/.gradle/
+/build/
+/out/
+/run/
