@@ -1,6 +1,7 @@
 FROM --platform=$BUILDPLATFORM eclipse-temurin:17-jdk as builder
 WORKDIR /build
-RUN apk add git
+RUN apt-get update && apt-get install -y \
+    git
 COPY . .
 RUN ./gradlew build
 
