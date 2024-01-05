@@ -7,5 +7,6 @@ RUN ./gradlew build
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=builder /build/build/libs/ViaProxy-*.jar .
+COPY --from=builder /build/build/libs/ViaProxy-*.jar ViaProxy.jar
+RUN ls
 ENTRYPOINT ["java", "-jar", "ViaProxy.jar"]
