@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
@@ -30,7 +31,6 @@ import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
-import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.TFunction;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -67,7 +67,7 @@ public class AccountsTab extends AUITab {
         int gridy = 0;
         {
             JLabel infoLabel = new JLabel("<html><p>" + I18n.get("tab.accounts.description.line1") + "</p><br><p>" + I18n.get("tab.accounts.description.line2") + "</p></html>");
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(infoLabel);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(infoLabel);
         }
         {
             JScrollPane scrollPane = new JScrollPane();
@@ -156,7 +156,7 @@ public class AccountsTab extends AUITab {
                 contextMenu.add(moveDown);
             }
             this.accountsList.setComponentPopupMenu(contextMenu);
-            GBC.create(body).grid(0, gridy++).weight(1, 1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.BOTH).add(scrollPane);
+            GBC.create(body).grid(0, gridy++).weight(1, 1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.BOTH).add(scrollPane);
         }
         {
             final JPanel addButtons = new JPanel();
@@ -202,9 +202,9 @@ public class AccountsTab extends AUITab {
             JPanel border = new JPanel();
             border.setLayout(new GridBagLayout());
             border.setBorder(BorderFactory.createTitledBorder(I18n.get("tab.accounts.add.title")));
-            GBC.create(border).grid(0, 0).weightx(1).insets(2, 4, 4, 4).fill(GridBagConstraints.HORIZONTAL).add(addButtons);
+            GBC.create(border).grid(0, 0).weightx(1).insets(2, 4, 4, 4).fill(GBC.HORIZONTAL).add(addButtons);
 
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(border);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GBC.HORIZONTAL).add(border);
         }
 
         contentPane.setLayout(new BorderLayout());

@@ -17,10 +17,10 @@
  */
 package net.raphimc.viaproxy.ui.popups;
 
+import net.lenni0451.commons.swing.GBC;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
-import net.raphimc.viaproxy.util.GBC;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,7 +70,7 @@ public class AddAccountPopup extends JDialog {
         contentPane.setLayout(new GridBagLayout());
         {
             JLabel browserLabel = new JLabel("<html><p>" + I18n.get("popup.login_account.instructions.browser") + "</p></html>");
-            GBC.create(contentPane).grid(0, 0).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(browserLabel);
+            GBC.create(contentPane).grid(0, 0).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(browserLabel);
 
             JLabel urlLabel = new JLabel("<html><a href=\"\">" + this.deviceCode.getDirectVerificationUri() + "</a></html>");
             urlLabel.addMouseListener(new MouseAdapter() {
@@ -79,10 +79,10 @@ public class AddAccountPopup extends JDialog {
                     AddAccountPopup.this.parent.openURL(AddAccountPopup.this.deviceCode.getDirectVerificationUri());
                 }
             });
-            GBC.create(contentPane).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(urlLabel);
+            GBC.create(contentPane).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(urlLabel);
 
             JLabel closeInfo = new JLabel("<html><p>" + I18n.get("popup.login_account.instructions.close") + "</p></html>");
-            GBC.create(contentPane).grid(0, 2).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(closeInfo);
+            GBC.create(contentPane).grid(0, 2).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GBC.HORIZONTAL).add(closeInfo);
         }
         this.setContentPane(contentPane);
     }

@@ -18,6 +18,8 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import com.google.common.collect.Iterables;
+import net.lenni0451.commons.swing.GBC;
+import net.lenni0451.commons.swing.layouts.VerticalLayout;
 import net.raphimc.minecraftauth.responsehandler.exception.RealmsResponseException;
 import net.raphimc.minecraftauth.service.realms.AbstractRealmsService;
 import net.raphimc.minecraftauth.service.realms.BedrockRealmsService;
@@ -34,8 +36,6 @@ import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
-import net.raphimc.viaproxy.util.GBC;
-import net.raphimc.viaproxy.util.PaddedVerticalLayout;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -139,7 +139,7 @@ public class RealmsTab extends AUITab {
                     body.remove(statusLabel);
                     this.addHeader(body, realmsService instanceof JavaRealmsService);
                     final JPanel realmsPanel = new JPanel();
-                    realmsPanel.setLayout(new PaddedVerticalLayout(5, 5));
+                    realmsPanel.setLayout(new VerticalLayout(5, 5));
                     if (worlds.isEmpty()) {
                         JLabel label = new JLabel(I18n.get("tab.realms.no_worlds"));
                         label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -173,7 +173,7 @@ public class RealmsTab extends AUITab {
     }
 
     private void addHeader(final JPanel parent, final boolean showType) {
-        GBC.create(parent).grid(0, 0).weightx(1).insets(5, 5, 5, 5).fill(GridBagConstraints.HORIZONTAL).add(new JLabel(I18n.get("tab.realms.account", this.currentAccount.getDisplayString())));
+        GBC.create(parent).grid(0, 0).weightx(1).insets(5, 5, 5, 5).fill(GBC.HORIZONTAL).add(new JLabel(I18n.get("tab.realms.account", this.currentAccount.getDisplayString())));
         if (showType && LATEST_JAVA_SNAPSHOT != null) {
             JComboBox<String> type = new JComboBox<>();
             type.addItem(I18n.get("tab.realms.release"));
@@ -186,7 +186,7 @@ public class RealmsTab extends AUITab {
                     this.reinit();
                 }
             });
-            GBC.create(parent).grid(1, 0).insets(5, 0, 5, 5).anchor(GridBagConstraints.LINE_END).add(type);
+            GBC.create(parent).grid(1, 0).insets(5, 0, 5, 5).anchor(GBC.LINE_END).add(type);
         }
     }
 
@@ -207,9 +207,9 @@ public class RealmsTab extends AUITab {
             if (!world.getOwnerName().isEmpty()) nameString += world.getOwnerName() + " - ";
             String versionString = "";
             if (!world.getActiveVersion().isEmpty()) versionString += " - " + world.getActiveVersion();
-            GBC.create(panel).grid(0, 0).weightx(1).insets(5, 5, 0, 5).fill(GridBagConstraints.HORIZONTAL).add(new JLabel(nameString + world.getName() + " (" + world.getState() + ")"));
-            GBC.create(panel).grid(1, 0).insets(5, 5, 0, 5).anchor(GridBagConstraints.LINE_END).add(new JLabel(world.getWorldType() + versionString));
-            GBC.create(panel).grid(0, 1).insets(5, 5, 0, 5).fill(GridBagConstraints.HORIZONTAL).add(new JLabel(world.getMotd()));
+            GBC.create(panel).grid(0, 0).weightx(1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(nameString + world.getName() + " (" + world.getState() + ")"));
+            GBC.create(panel).grid(1, 0).insets(5, 5, 0, 5).anchor(GBC.LINE_END).add(new JLabel(world.getWorldType() + versionString));
+            GBC.create(panel).grid(0, 1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(world.getMotd()));
             final JButton join = new JButton(I18n.get("tab.realms.join"));
             if (world.isExpired()) {
                 join.setEnabled(false);
@@ -218,7 +218,7 @@ public class RealmsTab extends AUITab {
                 join.setEnabled(false);
                 join.setToolTipText(I18n.get("tab.realms.incompatible"));
             }
-            GBC.create(panel).grid(1, 1).insets(5, 0, 5, 5).anchor(GridBagConstraints.LINE_END).add(join);
+            GBC.create(panel).grid(1, 1).insets(5, 0, 5, 5).anchor(GBC.LINE_END).add(join);
             join.addActionListener(event -> {
                 join.setEnabled(false);
                 join.setText(I18n.get("tab.realms.joining"));
