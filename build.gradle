@@ -56,7 +56,7 @@ repositories {
 dependencies {
     include "com.viaversion:viaversion-common:4.10.0-23w51b-SNAPSHOT"
     include "com.viaversion:viabackwards-common:4.10.0-23w51b-SNAPSHOT"
-    include "com.viaversion:viarewind-common:3.0.6-SNAPSHOT"
+    include "com.viaversion:viarewind-common:3.0.6-20240102.175411-12"
     include "net.raphimc:ViaLegacy:2.2.22-SNAPSHOT"
     include "net.raphimc:ViaAprilFools:2.0.10"
     include("net.raphimc:ViaBedrock:0.0.4-SNAPSHOT") {
@@ -91,7 +91,7 @@ dependencies {
     include("net.raphimc.netminecraft:all:2.4.0-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    include("net.raphimc:MinecraftAuth:3.1.0-SNAPSHOT") {
+    include("net.raphimc:MinecraftAuth:3.1.0") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }
