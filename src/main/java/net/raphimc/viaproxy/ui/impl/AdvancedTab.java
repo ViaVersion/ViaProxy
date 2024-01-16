@@ -20,6 +20,7 @@ package net.raphimc.viaproxy.ui.impl;
 import com.viaversion.viaversion.util.DumpUtil;
 import gs.mclo.api.MclogsClient;
 import gs.mclo.api.response.UploadLogResponse;
+import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.UISave;
@@ -28,7 +29,6 @@ import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
-import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
@@ -73,48 +73,48 @@ public class AdvancedTab extends AUITab {
         {
             JLabel bindPortLabel = new JLabel(I18n.get("tab.advanced.bind_port.label"));
             bindPortLabel.setToolTipText(I18n.get("tab.advanced.bind_port.tooltip"));
-            GBC.create(body).grid(0, gridy++).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(bindPortLabel);
+            GBC.create(body).grid(0, gridy++).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(bindPortLabel);
 
             this.bindPort = new JSpinner(new SpinnerNumberModel(25568, 1, 65535, 1));
             this.bindPort.setToolTipText(I18n.get("tab.advanced.bind_port.tooltip"));
             ViaProxy.getSaveManager().uiSave.loadSpinner("bind_port", this.bindPort);
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.bindPort);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.bindPort);
         }
         {
             JLabel proxyLabel = new JLabel(I18n.get("tab.advanced.proxy_url.label"));
             proxyLabel.setToolTipText(I18n.get("tab.advanced.proxy_url.tooltip"));
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(proxyLabel);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(proxyLabel);
 
             this.proxy = new JTextField();
             this.proxy.setToolTipText(I18n.get("tab.advanced.proxy_url.tooltip"));
             ViaProxy.getSaveManager().uiSave.loadTextField("proxy", this.proxy);
-            GBC.create(body).grid(0, gridy++).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.proxy);
+            GBC.create(body).grid(0, gridy++).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.proxy);
         }
         {
             this.proxyOnlineMode = new JCheckBox(I18n.get("tab.advanced.proxy_online_mode.label"));
             this.proxyOnlineMode.setToolTipText(I18n.get("tab.advanced.proxy_online_mode.tooltip"));
             ViaProxy.getSaveManager().uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.proxyOnlineMode);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.proxyOnlineMode);
         }
         {
             this.legacySkinLoading = new JCheckBox(I18n.get("tab.advanced.legacy_skin_loading.label"));
             this.legacySkinLoading.setToolTipText(I18n.get("tab.advanced.legacy_skin_loading.tooltip"));
             ViaProxy.getSaveManager().uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.legacySkinLoading);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.legacySkinLoading);
         }
         {
             this.chatSigning = new JCheckBox(I18n.get("tab.advanced.chat_signing.label"));
             this.chatSigning.setToolTipText(I18n.get("tab.advanced.chat_signing.tooltip"));
             this.chatSigning.setSelected(true);
             ViaProxy.getSaveManager().uiSave.loadCheckBox("chat_signing", this.chatSigning);
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.chatSigning);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.chatSigning);
         }
         {
             this.ignorePacketTranslationErrors = new JCheckBox(I18n.get("tab.advanced.ignore_packet_translation_errors.label"));
             this.ignorePacketTranslationErrors.setToolTipText(I18n.get("tab.advanced.ignore_packet_translation_errors.tooltip"));
             this.ignorePacketTranslationErrors.setSelected(false);
             ViaProxy.getSaveManager().uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.ignorePacketTranslationErrors);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.ignorePacketTranslationErrors);
         }
 
         parent.add(body, BorderLayout.NORTH);
@@ -178,7 +178,7 @@ public class AdvancedTab extends AUITab {
 
         JPanel padding = new JPanel();
         padding.setLayout(new GridBagLayout());
-        GBC.create(padding).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(footer);
+        GBC.create(padding).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GBC.HORIZONTAL).add(footer);
 
         container.add(padding, BorderLayout.SOUTH);
     }
