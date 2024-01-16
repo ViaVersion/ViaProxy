@@ -127,7 +127,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         if (Options.INTERNAL_SRV_MODE) {
             final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
             final String versionString = arrayHelper.get(1);
-            serverVersion = VersionEnum.fromProtocolName(versionString);
+            try {
+                final int versionInteger = Integer.parseInt(versionString);
+                serverVersion = VersionEnum.fromProtocolId(versionInteger);
+            } catch (NumberFormatException e) {
+                serverVersion = VersionEnum.fromProtocolName(versionString);
+            }
             if (serverVersion == VersionEnum.UNKNOWN) throw CloseAndReturn.INSTANCE;
             serverAddress = AddressUtil.parse(arrayHelper.get(0), serverVersion);
             if (arrayHelper.isIndexValid(2)) {
