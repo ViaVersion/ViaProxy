@@ -19,9 +19,9 @@ package net.raphimc.viaproxy.protocolhack.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import net.raphimc.viabedrock.protocol.providers.TransferProvider;
-import net.raphimc.viaproxy.protocolhack.viaproxy.ViaBedrockTransferHolder;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
+import net.raphimc.viaproxy.proxy.util.TransferDataHolder;
 
 import java.net.InetSocketAddress;
 
@@ -29,7 +29,7 @@ public class ViaProxyTransferProvider extends TransferProvider {
 
     @Override
     public void connectToServer(UserConnection user, InetSocketAddress newAddress) {
-        ViaBedrockTransferHolder.addTempRedirect(ProxyConnection.fromChannel(user.getChannel()).getC2P(), newAddress);
+        TransferDataHolder.addTempRedirect(ProxyConnection.fromChannel(user.getChannel()).getC2P(), newAddress);
         try {
             ProxyConnection.fromUserConnection(user).kickClient("§aThe server transferred you to another server §7(§e" + newAddress.getHostName() + ":" + newAddress.getPort() + "§7)§a. Please reconnect to ViaProxy.");
         } catch (CloseAndReturn ignored) {

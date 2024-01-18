@@ -24,6 +24,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.raphimc.netminecraft.constants.ConnectionState;
+import net.raphimc.netminecraft.constants.IntendedState;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
 import net.raphimc.vialoader.util.VersionEnum;
@@ -34,7 +35,6 @@ import net.raphimc.viaproxy.plugins.events.ConnectEvent;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxySessionCreationEvent;
-import net.raphimc.viaproxy.protocolhack.viaproxy.ViaBedrockTransferHolder;
 import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
@@ -112,7 +112,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
 
         this.proxyConnection.setClientVersion(clientVersion);
-        this.proxyConnection.setC2pConnectionState(packet.intendedState);
+        this.proxyConnection.setC2pConnectionState(packet.intendedState.getConnectionState());
 
         if (clientVersion == VersionEnum.UNKNOWN || !VersionEnum.OFFICIAL_SUPPORTED_PROTOCOLS.contains(clientVersion)) {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
@@ -158,8 +158,8 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
-        if (serverVersion.equals(VersionEnum.bedrockLatest) && packet.intendedState == ConnectionState.LOGIN && ViaBedrockTransferHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
-            serverAddress = ViaBedrockTransferHolder.removeTempRedirect(this.proxyConnection.getC2P());
+        if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && TransferDataHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
+            serverAddress = TransferDataHolder.removeTempRedirect(this.proxyConnection.getC2P());
         }
 
         final PreConnectEvent preConnectEvent = new PreConnectEvent(serverAddress, serverVersion, clientVersion, this.proxyConnection.getC2P());
@@ -172,7 +172,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         final UserOptions userOptions = new UserOptions(classicMpPass, Options.MC_ACCOUNT);
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
-        if (packet.intendedState == ConnectionState.LOGIN && serverVersion.equals(VersionEnumExtension.AUTO_DETECT)) {
+        if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && serverVersion.equals(VersionEnumExtension.AUTO_DETECT)) {
             SocketAddress finalServerAddress = serverAddress;
             CompletableFuture.runAsync(() -> {
                 final VersionEnum detectedVersion = ProtocolVersionDetector.get(finalServerAddress, clientVersion);
@@ -190,7 +190,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
     }
 
-    private void connect(final SocketAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final ConnectionState intendedState, final UserOptions userOptions, final String[] handshakeParts) {
+    private void connect(final SocketAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final IntendedState intendedState, final UserOptions userOptions, final String[] handshakeParts) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         final ProxyConnection proxyConnection;
         if (serverVersion.equals(VersionEnum.bedrockLatest)) {
@@ -201,12 +201,15 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection = ViaProxy.EVENT_MANAGER.call(new ProxySessionCreationEvent<>(proxyConnection, false)).getProxySession();
         this.proxyConnection.getC2P().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
         this.proxyConnection.setClientVersion(clientVersion);
-        this.proxyConnection.setC2pConnectionState(intendedState);
+        this.proxyConnection.setC2pConnectionState(intendedState.getConnectionState());
         this.proxyConnection.setUserOptions(userOptions);
         this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CustomPayloadPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CompressionPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new LoginPacketHandler(this.proxyConnection));
+        if (clientVersion.isNewerThanOrEqualTo(VersionEnum.r1_20_5)) {
+            this.proxyConnection.getPacketHandlers().add(new TransferPacketHandler(this.proxyConnection));
+        }
         if (clientVersion.isNewerThanOrEqualTo(VersionEnum.r1_20_2) || serverVersion.isNewerThanOrEqualTo(VersionEnum.r1_20_2)) {
             this.proxyConnection.getPacketHandlers().add(new ConfigurationPacketHandler(this.proxyConnection));
         }
@@ -240,7 +243,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                     final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), port, intendedState);
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {
-                            this.proxyConnection.setP2sConnectionState(intendedState);
+                            this.proxyConnection.setP2sConnectionState(intendedState.getConnectionState());
                         }
                     });
 
