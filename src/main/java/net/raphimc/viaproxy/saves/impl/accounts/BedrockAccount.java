@@ -25,7 +25,6 @@ import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
 import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
 import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.UUID;
 
@@ -83,10 +82,10 @@ public class BedrockAccount extends Account {
     }
 
     @Override
-    public boolean refresh(CloseableHttpClient httpClient) throws Exception {
-        if (!super.refresh(httpClient)) return false;
+    public boolean refresh() throws Exception {
+        if (!super.refresh()) return false;
 
-        this.bedrockSession = DEVICE_CODE_LOGIN.refresh(httpClient, this.bedrockSession);
+        this.bedrockSession = DEVICE_CODE_LOGIN.refresh(MinecraftAuth.createHttpClient(), this.bedrockSession);
         return true;
     }
 

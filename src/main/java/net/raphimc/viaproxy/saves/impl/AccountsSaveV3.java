@@ -20,12 +20,10 @@ package net.raphimc.viaproxy.saves.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,10 +82,8 @@ public class AccountsSaveV3 extends AbstractSave {
 
     public void ensureRefreshed(final Account account) throws Throwable {
         synchronized (this) {
-            try (final CloseableHttpClient httpClient = MicrosoftConstants.createHttpClient()) {
-                if (account.refresh(httpClient)) {
-                    ViaProxy.getSaveManager().save();
-                }
+            if (account.refresh()) {
+                ViaProxy.getSaveManager().save();
             }
         }
     }

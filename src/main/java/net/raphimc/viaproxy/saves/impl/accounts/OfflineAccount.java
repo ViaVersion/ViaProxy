@@ -18,7 +18,6 @@
 package net.raphimc.viaproxy.saves.impl.accounts;
 
 import com.google.gson.JsonObject;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -62,7 +61,7 @@ public class OfflineAccount extends Account {
     }
 
     @Override
-    public boolean refresh(CloseableHttpClient httpClient) {
+    public boolean refresh() {
         return false;
     }
 

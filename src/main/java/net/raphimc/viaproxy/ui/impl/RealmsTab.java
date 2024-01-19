@@ -20,12 +20,12 @@ package net.raphimc.viaproxy.ui.impl;
 import com.google.common.collect.Iterables;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.commons.swing.layouts.VerticalLayout;
-import net.raphimc.minecraftauth.responsehandler.exception.RealmsResponseException;
+import net.raphimc.minecraftauth.MinecraftAuth;
+import net.raphimc.minecraftauth.responsehandler.exception.RealmsRequestException;
 import net.raphimc.minecraftauth.service.realms.AbstractRealmsService;
 import net.raphimc.minecraftauth.service.realms.BedrockRealmsService;
 import net.raphimc.minecraftauth.service.realms.JavaRealmsService;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
-import net.raphimc.minecraftauth.util.MicrosoftConstants;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
@@ -37,7 +37,6 @@ import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.util.logging.Logger;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,7 +47,6 @@ public class RealmsTab extends AUITab {
 
     private static final VersionEnum LATEST_JAVA_RELEASE;
     private static final VersionEnum LATEST_JAVA_SNAPSHOT;
-    private static final CloseableHttpClient HTTP_CLIENT = MicrosoftConstants.createHttpClient();
 
     static {
         VersionEnum latestVersion = null;
@@ -108,10 +106,10 @@ public class RealmsTab extends AUITab {
                     ViaProxy.getSaveManager().accountsSave.ensureRefreshed(this.currentAccount);
                     SwingUtilities.invokeLater(() -> {
                         if (this.currentAccount instanceof MicrosoftAccount account) {
-                            final JavaRealmsService realmsService = new JavaRealmsService(HTTP_CLIENT, Iterables.getLast(this.currentSelectedJavaVersion.getProtocol().getIncludedVersions()), account.getMcProfile());
+                            final JavaRealmsService realmsService = new JavaRealmsService(MinecraftAuth.createHttpClient(), Iterables.getLast(this.currentSelectedJavaVersion.getProtocol().getIncludedVersions()), account.getMcProfile());
                             this.loadRealms(realmsService, body, statusLabel);
                         } else if (this.currentAccount instanceof BedrockAccount account) {
-                            final BedrockRealmsService realmsService = new BedrockRealmsService(HTTP_CLIENT, ProtocolConstants.BEDROCK_VERSION_NAME, account.getRealmsXsts());
+                            final BedrockRealmsService realmsService = new BedrockRealmsService(MinecraftAuth.createHttpClient(), ProtocolConstants.BEDROCK_VERSION_NAME, account.getRealmsXsts());
                             this.loadRealms(realmsService, body, statusLabel);
                         } else {
                             statusLabel.setText(I18n.get("tab.realms.unsupported_account"));
@@ -231,7 +229,7 @@ public class RealmsTab extends AUITab {
                     SwingUtilities.invokeLater(() -> {
                         join.setEnabled(true);
                         join.setText(I18n.get("tab.realms.join"));
-                        if (realmsService instanceof JavaRealmsService javaRealmsService && cause instanceof RealmsResponseException realmsResponseException && realmsResponseException.getErrorCode() == RealmsResponseException.TOS_NOT_ACCEPTED) {
+                        if (realmsService instanceof JavaRealmsService javaRealmsService && cause instanceof RealmsRequestException realmsRequestException && realmsRequestException.getErrorCode() == RealmsRequestException.TOS_NOT_ACCEPTED) {
                             final int chosen = JOptionPane.showConfirmDialog(ViaProxy.getUI(), I18n.get("tab.realms.accept_tos", "https://aka.ms/MinecraftRealmsTerms"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                             if (chosen == JOptionPane.YES_OPTION) {
                                 javaRealmsService.acceptTos();

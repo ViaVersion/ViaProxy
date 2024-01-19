@@ -19,7 +19,6 @@ package net.raphimc.viaproxy.saves.impl.accounts;
 
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.UUID;
 
@@ -42,7 +41,7 @@ public abstract class Account {
 
     public abstract String getDisplayString();
 
-    public boolean refresh(final CloseableHttpClient httpClient) throws Exception {
+    public boolean refresh() throws Exception {
         if (System.currentTimeMillis() - this.lastRefresh < 10_000L) {
             return false;
         }

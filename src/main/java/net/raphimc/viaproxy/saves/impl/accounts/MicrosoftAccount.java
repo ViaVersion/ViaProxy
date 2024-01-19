@@ -24,7 +24,6 @@ import net.raphimc.minecraftauth.step.java.StepMCProfile;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.util.MicrosoftConstants;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.UUID;
 
@@ -78,10 +77,10 @@ public class MicrosoftAccount extends Account {
     }
 
     @Override
-    public boolean refresh(CloseableHttpClient httpClient) throws Exception {
-        if (!super.refresh(httpClient)) return false;
+    public boolean refresh() throws Exception {
+        if (!super.refresh()) return false;
 
-        this.javaSession = DEVICE_CODE_LOGIN.refresh(httpClient, this.javaSession);
+        this.javaSession = DEVICE_CODE_LOGIN.refresh(MinecraftAuth.createHttpClient(), this.javaSession);
         return true;
     }
 
