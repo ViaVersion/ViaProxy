@@ -108,6 +108,7 @@ public class ViaProxy {
         Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
         Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
         Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
+        Logger.LOGGER.info("Working directory: " + System.getProperty("user.dir"));
 
         if (System.getProperty("ignoreSystemRequirements") == null) {
             if ("32".equals(System.getProperty("sun.arch.data.model")) && Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
