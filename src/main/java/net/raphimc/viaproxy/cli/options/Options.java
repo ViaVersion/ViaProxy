@@ -48,6 +48,7 @@ public class Options {
     public static Account MC_ACCOUNT;
     public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
     public static boolean IGNORE_PACKET_TRANSLATION_ERRORS;
+    public static String CUSTOM_HOSTNAME;
 
     // GUI only config options
     public static String CLASSIC_MP_PASS;
@@ -57,7 +58,7 @@ public class Options {
     // CLI only config options
     public static int COMPRESSION_THRESHOLD = 256;
     public static boolean SRV_MODE; // Example: lenni0451.net_25565_1.8.x.viaproxy.127.0.0.1.nip.io
-    public static boolean INTERNAL_SRV_MODE; // Example: ip:port\7version\7mppass
+    public static boolean INTERNAL_SRV_MODE; // Example: ip:port\7version\7mppass\7customHostname
     public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
     public static boolean SERVER_HAPROXY_PROTOCOL;
     public static boolean LEGACY_CLIENT_PASSTHROUGH;
@@ -81,6 +82,7 @@ public class Options {
         final OptionSpec<Void> serverHaProxyProtocol = parser.acceptsAll(asList("server-haproxy-protocol", "server-haproxy"), "Send HAProxy protocol messages to the backend server");
         final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server (No protocol translation)");
         final OptionSpec<Void> ignorePacketTranslationErrors = parser.acceptsAll(List.of("ignore-packet-translation-errors"), "Enabling this will prevent getting disconnected from the server when a packet translation error occurs and instead only print the error in the console. This may cause issues depending on the type of packet which failed to translate");
+        final OptionSpec<String> customHostname = parser.acceptsAll(List.of("custom_hostname"), "Custom hostname to use during connecting").withOptionalArg().ofType(String.class);
         ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options;
@@ -137,6 +139,9 @@ public class Options {
             SERVER_HAPROXY_PROTOCOL = options.has(serverHaProxyProtocol);
             LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
             IGNORE_PACKET_TRANSLATION_ERRORS = options.has(ignorePacketTranslationErrors);
+            if (options.has(customHostname)) {
+                CUSTOM_HOSTNAME = options.valueOf(customHostname);
+            }
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
         } catch (OptionException e) {
             Logger.LOGGER.error("Error parsing options: " + e.getMessage());

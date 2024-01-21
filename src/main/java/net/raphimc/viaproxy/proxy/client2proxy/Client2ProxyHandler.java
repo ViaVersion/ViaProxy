@@ -123,6 +123,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         SocketAddress serverAddress = Options.CONNECT_ADDRESS;
         VersionEnum serverVersion = Options.PROTOCOL_VERSION;
         String classicMpPass = Options.CLASSIC_MP_PASS;
+        String customHostname = Options.CUSTOM_HOSTNAME;
 
         if (Options.INTERNAL_SRV_MODE) {
             final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
@@ -137,6 +138,9 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             serverAddress = AddressUtil.parse(arrayHelper.get(0), serverVersion);
             if (arrayHelper.isIndexValid(2)) {
                 classicMpPass = arrayHelper.getString(2);
+            }
+            if (arrayHelper.isIndexValid(3)) {
+                customHostname = arrayHelper.getString(3);
             }
         } else if (Options.SRV_MODE) {
             try {
@@ -179,9 +183,10 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
         if (packet.intendedState == ConnectionState.LOGIN && serverVersion.equals(VersionEnumExtension.AUTO_DETECT)) {
             SocketAddress finalServerAddress = serverAddress;
+            String finalCustomHostname = customHostname;
             CompletableFuture.runAsync(() -> {
                 final VersionEnum detectedVersion = ProtocolVersionDetector.get(finalServerAddress, clientVersion);
-                this.connect(finalServerAddress, detectedVersion, clientVersion, packet.intendedState, userOptions, handshakeParts);
+                this.connect(finalServerAddress, detectedVersion, clientVersion, packet.intendedState, userOptions, handshakeParts, finalCustomHostname);
             }).exceptionally(t -> {
                 if (t instanceof ConnectException || t instanceof UnresolvedAddressException) {
                     this.proxyConnection.kickClient("§cCould not connect to the backend server!");
@@ -191,11 +196,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                 return null;
             });
         } else {
-            this.connect(serverAddress, serverVersion, clientVersion, packet.intendedState, userOptions, handshakeParts);
+            this.connect(serverAddress, serverVersion, clientVersion, packet.intendedState, userOptions, handshakeParts, customHostname);
         }
     }
 
-    private void connect(final SocketAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final ConnectionState intendedState, final UserOptions userOptions, final String[] handshakeParts) {
+    private void connect(final SocketAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final ConnectionState intendedState, final UserOptions userOptions, final String[] handshakeParts, final String customHostname) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         final ProxyConnection proxyConnection;
         if (serverVersion.equals(VersionEnum.bedrockLatest)) {
@@ -242,7 +247,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                     }
 
                     handshakeParts[0] = address;
-                    final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), port, intendedState);
+                    final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), customHostname == null ? String.join("\0", handshakeParts) : customHostname, port, intendedState);
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {
                             this.proxyConnection.setP2sConnectionState(intendedState);

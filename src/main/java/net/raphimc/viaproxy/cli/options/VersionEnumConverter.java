@@ -25,7 +25,13 @@ public class VersionEnumConverter implements ValueConverter<VersionEnum> {
 
     @Override
     public VersionEnum convert(String s) {
-        final VersionEnum version = VersionEnum.fromProtocolName(s);
+        VersionEnum version;
+        try {
+            final int versionInteger = Integer.parseInt(s);
+            version = VersionEnum.fromProtocolId(versionInteger);
+        } catch (NumberFormatException e) {
+            version = VersionEnum.fromProtocolName(s);
+        }
         if (version == VersionEnum.UNKNOWN) {
             throw new ValueConversionException("Unable to find version '" + s + "'");
         }
