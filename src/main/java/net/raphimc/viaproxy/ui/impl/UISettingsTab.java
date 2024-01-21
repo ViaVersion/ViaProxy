@@ -17,11 +17,11 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import net.lenni0451.commons.swing.GBC;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
-import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -46,7 +46,7 @@ public class UISettingsTab extends AUITab {
         int gridy = 0;
         {
             JLabel languageLabel = new JLabel(I18n.get("tab.ui_settings.language.label"));
-            GBC.create(body).grid(0, gridy++).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).anchor(GridBagConstraints.NORTHWEST).add(languageLabel);
+            GBC.create(body).grid(0, gridy++).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).anchor(GBC.NORTHWEST).add(languageLabel);
 
             JComboBox<String> language = new JComboBox<>(I18n.getAvailableLocales().toArray(new String[0]));
             language.setRenderer(new DefaultListCellRenderer() {
@@ -74,7 +74,7 @@ public class UISettingsTab extends AUITab {
                     System.exit(1);
                 }
             });
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(language);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(language);
         }
 
         contentPane.setLayout(new BorderLayout());

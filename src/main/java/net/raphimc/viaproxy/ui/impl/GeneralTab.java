@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
@@ -29,7 +30,6 @@ import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.AddressUtil;
-import net.raphimc.viaproxy.util.GBC;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -83,14 +83,14 @@ public class GeneralTab extends AUITab {
             }
         });
         discord.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        GBC.create(header).grid(0, 0).width(0).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(discord);
+        GBC.create(header).grid(0, 0).width(0).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(discord);
 
         JLabel title = new JLabel("ViaProxy");
         title.setFont(title.getFont().deriveFont(30F));
-        GBC.create(header).grid(1, 0).weightx(1).width(0).insets(BORDER_PADDING, 0, 0, 0).anchor(GridBagConstraints.CENTER).add(title);
+        GBC.create(header).grid(1, 0).weightx(1).width(0).insets(BORDER_PADDING, 0, 0, 0).anchor(GBC.CENTER).add(title);
 
         JLabel copyright = new JLabel("© RK_01 & Lenni0451");
-        GBC.create(header).grid(2, 0).width(0).insets(BORDER_PADDING, 0, 0, BORDER_PADDING).anchor(GridBagConstraints.NORTHEAST).add(copyright);
+        GBC.create(header).grid(2, 0).width(0).insets(BORDER_PADDING, 0, 0, BORDER_PADDING).anchor(GBC.NORTHEAST).add(copyright);
 
         parent.add(header, BorderLayout.NORTH);
     }
@@ -103,16 +103,16 @@ public class GeneralTab extends AUITab {
         {
             JLabel serverAddressLabel = new JLabel(I18n.get("tab.general.server_address.label"));
             serverAddressLabel.setToolTipText(I18n.get("tab.general.server_address.tooltip"));
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(serverAddressLabel);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(serverAddressLabel);
 
             this.serverAddress = new JTextField();
             this.serverAddress.setToolTipText(I18n.get("tab.general.server_address.tooltip"));
             ViaProxy.getSaveManager().uiSave.loadTextField("server_address", this.serverAddress);
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverAddress);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.serverAddress);
         }
         {
             JLabel serverVersionLabel = new JLabel(I18n.get("tab.general.server_version.label"));
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(serverVersionLabel);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(serverVersionLabel);
 
             this.serverVersion = new JComboBox<>(VersionEnum.SORTED_VERSIONS.toArray(new VersionEnum[0]));
             this.serverVersion.setRenderer(new DefaultListCellRenderer() {
@@ -135,21 +135,21 @@ public class GeneralTab extends AUITab {
                 }
             });
             ViaProxy.getSaveManager().uiSave.loadComboBoxVersionEnum("server_version", this.serverVersion);
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.serverVersion);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.serverVersion);
         }
         {
             JLabel minecraftAccountLabel = new JLabel(I18n.get("tab.general.minecraft_account.label"));
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(minecraftAccountLabel);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(minecraftAccountLabel);
 
             this.authMethod = new JComboBox<>(new String[]{I18n.get("tab.general.minecraft_account.option_select_account"), I18n.get("tab.general.minecraft_account.option_no_account"), I18n.get("tab.general.minecraft_account.option_openauthmod")});
             ViaProxy.getSaveManager().uiSave.loadComboBox("auth_method", this.authMethod);
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GridBagConstraints.HORIZONTAL).add(this.authMethod);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.authMethod);
         }
         {
             this.betaCraftAuth = new JCheckBox(I18n.get("tab.general.betacraft_auth.label"));
             this.betaCraftAuth.setToolTipText(I18n.get("tab.general.betacraft_auth.tooltip"));
             ViaProxy.getSaveManager().uiSave.loadCheckBox("betacraft_auth", this.betaCraftAuth);
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GridBagConstraints.NORTHWEST).add(this.betaCraftAuth);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.betaCraftAuth);
             // Simulate user action on serverVersion to update betaCraftAuth
             final ActionEvent fakeAction = new ActionEvent(this.serverVersion, ActionEvent.ACTION_PERFORMED, "");
             for (ActionListener listener : this.serverVersion.getActionListeners()) {
@@ -166,7 +166,7 @@ public class GeneralTab extends AUITab {
 
         this.stateLabel = new JLabel("");
         this.stateLabel.setVisible(false);
-        GBC.create(footer).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateLabel);
+        GBC.create(footer).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).anchor(GBC.WEST).fill(GBC.HORIZONTAL).add(this.stateLabel);
 
         this.stateButton = new JButton(I18n.get("tab.general.state.loading"));
         this.stateButton.addActionListener(event -> {
@@ -174,7 +174,7 @@ public class GeneralTab extends AUITab {
             else if (this.stateButton.getText().equalsIgnoreCase(I18n.get("tab.general.state.stop"))) this.stop();
         });
         this.stateButton.setEnabled(false);
-        GBC.create(footer).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).anchor(GridBagConstraints.WEST).fill(GridBagConstraints.HORIZONTAL).add(this.stateButton);
+        GBC.create(footer).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).anchor(GBC.WEST).fill(GBC.HORIZONTAL).add(this.stateButton);
 
         parent.add(footer, BorderLayout.SOUTH);
     }
