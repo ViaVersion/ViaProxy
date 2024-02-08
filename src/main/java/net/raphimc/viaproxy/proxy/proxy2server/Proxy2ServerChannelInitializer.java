@@ -79,6 +79,10 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
         channel.pipeline().addLast(new ViaProxyVLPipeline(user, proxyConnection.getServerVersion()));
         channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
+        if (proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
+            channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
+            channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
+        }
 
         if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();

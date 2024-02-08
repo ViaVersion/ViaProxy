@@ -20,9 +20,9 @@ package net.raphimc.viaproxy.protocolhack.providers;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.Channel;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.viabedrock.netty.AesEncryption;
-import net.raphimc.viabedrock.netty.SnappyCompression;
-import net.raphimc.viabedrock.netty.ZLibCompression;
+import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
+import net.raphimc.viabedrock.netty.AesEncryptionCodec;
+import net.raphimc.viabedrock.netty.CompressionCodec;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
 import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -32,22 +32,16 @@ import javax.crypto.SecretKey;
 public class ViaProxyNettyPipelineProvider extends NettyPipelineProvider {
 
     @Override
-    public void enableCompression(UserConnection user, int threshold, int algorithm) {
+    public void enableCompression(UserConnection user, ProtocolCompression protocolCompression) {
         final ProxyConnection proxyConnection = ProxyConnection.fromUserConnection(user);
         final Channel channel = proxyConnection.getChannel();
 
+        if (channel.pipeline().names().contains(MCPipeline.COMPRESSION_HANDLER_NAME)) {
+            throw new IllegalStateException("Compression already enabled");
+        }
+
         try {
-            channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
-            switch (algorithm) {
-                case 0:
-                    channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.COMPRESSION_HANDLER_NAME, new ZLibCompression());
-                    break;
-                case 1:
-                    channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.COMPRESSION_HANDLER_NAME, new SnappyCompression());
-                    break;
-                default:
-                    throw new IllegalStateException("Invalid compression algorithm: " + algorithm);
-            }
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.COMPRESSION_HANDLER_NAME, new CompressionCodec(protocolCompression));
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -58,9 +52,12 @@ public class ViaProxyNettyPipelineProvider extends NettyPipelineProvider {
         final ProxyConnection proxyConnection = ProxyConnection.fromUserConnection(user);
         final Channel channel = proxyConnection.getChannel();
 
+        if (channel.pipeline().names().contains(MCPipeline.ENCRYPTION_HANDLER_NAME)) {
+            throw new IllegalStateException("Encryption already enabled");
+        }
+
         try {
-            channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
-            channel.pipeline().addAfter(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryption(key));
+            channel.pipeline().addAfter(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryptionCodec(key));
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
