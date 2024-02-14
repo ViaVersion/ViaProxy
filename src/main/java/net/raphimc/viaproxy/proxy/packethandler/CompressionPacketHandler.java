@@ -57,7 +57,7 @@ public class CompressionPacketHandler extends PacketHandler {
                 return false;
             }
         } else if (packet instanceof S2CLoginSuccessPacket1_7) {
-            if (this.proxyConnection.getClientVersion().newerThanOrEquals(ProtocolVersion.v1_8)) {
+            if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
                 if (Options.COMPRESSION_THRESHOLD > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
                     ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
                     this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(Options.COMPRESSION_THRESHOLD)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {

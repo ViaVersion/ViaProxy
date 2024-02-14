@@ -59,7 +59,7 @@ public class CustomPayloadPacketHandler extends PacketHandler {
                 return false;
             }
         } else if (packet instanceof C2SLoginKeyPacket1_7 loginKeyPacket) {
-            if (this.proxyConnection.getClientVersion().olderThanOrEquals(ProtocolVersion.v1_12_2) && new String(loginKeyPacket.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
+            if (this.proxyConnection.getClientVersion().olderThanOrEqualTo(ProtocolVersion.v1_12_2) && new String(loginKeyPacket.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
                 final ByteBuf byteBuf = Unpooled.wrappedBuffer(loginKeyPacket.encryptedSecretKey);
                 this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);
                 return false;

@@ -25,7 +25,7 @@ public class ViaProxyClassicWorldHeightProvider extends ClassicWorldHeightProvid
 
     @Override
     public short getMaxChunkSectionCount(UserConnection user) {
-        if (user.getProtocolInfo().protocolVersion().newerThanOrEquals(ProtocolVersion.v1_17)) {
+        if (user.getProtocolInfo().protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_17)) {
             return 64;
         }
         return 16;

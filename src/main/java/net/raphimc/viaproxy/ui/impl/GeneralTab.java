@@ -129,7 +129,7 @@ public class GeneralTab extends AUITab {
             this.serverVersion.addActionListener(event -> {
                 if (this.betaCraftAuth == null) return; // This is called when the JComboBox is created (before betaCraftAuth is set)
                 if (!(this.serverVersion.getSelectedItem() instanceof ProtocolVersion selectedVersion)) return;
-                if (selectedVersion.olderThanOrEquals(LegacyProtocolVersion.c0_28toc0_30)) {
+                if (selectedVersion.olderThanOrEqualTo(LegacyProtocolVersion.c0_28toc0_30)) {
                     this.betaCraftAuth.setEnabled(true);
                 } else {
                     this.betaCraftAuth.setEnabled(false);

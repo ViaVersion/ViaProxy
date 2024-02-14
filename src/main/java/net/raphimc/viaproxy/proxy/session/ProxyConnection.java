@@ -246,7 +246,7 @@ public class ProxyConnection extends NetClient {
 
         switch (this.c2pConnectionState) {
             case LOGIN:
-                if (this.clientVersion.newerThanOrEquals(ProtocolVersion.v1_13)) {
+                if (this.clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_13)) {
                     this.c2p.writeAndFlush(new S2CLoginCustomPayloadPacket(id, channel, PacketTypes.readReadableBytes(data))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 } else {
                     final ByteBuf disconnectPacketData = Unpooled.buffer();
@@ -291,7 +291,7 @@ public class ProxyConnection extends NetClient {
         } else if (this.c2pConnectionState == ConnectionState.CONFIGURATION) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_CONFIG_DISCONNECT.getId(this.clientVersion.getVersion()));
-            if (this.clientVersion.olderThanOrEquals(ProtocolVersion.v1_20_2)) {
+            if (this.clientVersion.olderThanOrEqualTo(ProtocolVersion.v1_20_2)) {
                 PacketTypes.writeString(disconnectPacket, messageToJson(message));
             } else {
                 PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));
@@ -300,7 +300,7 @@ public class ProxyConnection extends NetClient {
         } else if (this.c2pConnectionState == ConnectionState.PLAY) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_DISCONNECT.getId(this.clientVersion.getVersion()));
-            if (this.clientVersion.olderThanOrEquals(ProtocolVersion.v1_20_2)) {
+            if (this.clientVersion.olderThanOrEqualTo(ProtocolVersion.v1_20_2)) {
                 PacketTypes.writeString(disconnectPacket, messageToJson(message));
             } else {
                 PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));

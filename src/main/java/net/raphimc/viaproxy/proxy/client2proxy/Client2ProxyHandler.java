@@ -207,13 +207,13 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.getPacketHandlers().add(new CustomPayloadPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new CompressionPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new LoginPacketHandler(this.proxyConnection));
-        if (clientVersion.newerThanOrEquals(ProtocolVersion.v1_20_5)) {
+        if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
             this.proxyConnection.getPacketHandlers().add(new TransferPacketHandler(this.proxyConnection));
         }
-        if (clientVersion.newerThanOrEquals(ProtocolVersion.v1_20_2) || serverVersion.newerThanOrEquals(ProtocolVersion.v1_20_2)) {
+        if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2) || serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2)) {
             this.proxyConnection.getPacketHandlers().add(new ConfigurationPacketHandler(this.proxyConnection));
         }
-        if (clientVersion.newerThanOrEquals(ProtocolVersion.v1_19_3) && serverVersion.newerThanOrEquals(ProtocolVersion.v1_19_3)) {
+        if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_3) && serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_3)) {
             this.proxyConnection.getPacketHandlers().add(new ChatSignaturePacketHandler(this.proxyConnection));
         }
         this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));

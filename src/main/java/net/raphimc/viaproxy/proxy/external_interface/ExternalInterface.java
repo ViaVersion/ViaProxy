@@ -65,7 +65,7 @@ public class ExternalInterface {
                 proxyConnection.setGameProfile(account.getGameProfile());
                 final UserConnection user = proxyConnection.getUserConnection();
 
-                if (Options.CHAT_SIGNING && proxyConnection.getServerVersion().newerThanOrEquals(ProtocolVersion.v1_19) && account instanceof MicrosoftAccount microsoftAccount) {
+                if (Options.CHAT_SIGNING && proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && account instanceof MicrosoftAccount microsoftAccount) {
                     final StepPlayerCertificates.PlayerCertificates playerCertificates = microsoftAccount.getPlayerCertificates();
                     final Instant expiresAt = Instant.ofEpochMilli(playerCertificates.getExpireTimeMs());
                     final long expiresAtMillis = playerCertificates.getExpireTimeMs();

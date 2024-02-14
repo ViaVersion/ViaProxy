@@ -150,7 +150,7 @@ public class LoginPacketHandler extends PacketHandler {
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginKeyPacket.serverId, publicKey, secretKey)).toString(16);
 
             boolean auth = true;
-            if (this.proxyConnection.getServerVersion().olderThanOrEquals(LegacyProtocolVersion.r1_6_4)) {
+            if (this.proxyConnection.getServerVersion().olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)) {
                 auth = this.proxyConnection.getUserConnection().get(ProtocolMetadataStorage.class).authenticate;
             }
             if (auth) {
@@ -161,12 +161,12 @@ public class LoginPacketHandler extends PacketHandler {
             final byte[] encryptedNonce = CryptUtil.encryptData(publicKey, loginKeyPacket.nonce);
 
             final C2SLoginKeyPacket1_19_3 loginKey = new C2SLoginKeyPacket1_19_3(encryptedSecretKey, encryptedNonce);
-            if (this.proxyConnection.getServerVersion().newerThanOrEquals(ProtocolVersion.v1_19) && this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
+            if (this.proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
                 ExternalInterface.signNonce(loginKeyPacket.nonce, loginKey, this.proxyConnection);
             }
             this.proxyConnection.getChannel().writeAndFlush(loginKey).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
-            if (this.proxyConnection.getServerVersion().newerThanOrEquals(ProtocolVersion.v1_7_1)) {
+            if (this.proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_1)) {
                 this.proxyConnection.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(secretKey));
             } else {
                 this.proxyConnection.setKeyForPreNettyEncryption(secretKey);
@@ -174,7 +174,7 @@ public class LoginPacketHandler extends PacketHandler {
 
             return false;
         } else if (packet instanceof S2CLoginSuccessPacket1_7 loginSuccessPacket) {
-            final ConnectionState nextState = this.proxyConnection.getClientVersion().newerThanOrEquals(ProtocolVersion.v1_20_2) ? ConnectionState.CONFIGURATION : ConnectionState.PLAY;
+            final ConnectionState nextState = this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_2) ? ConnectionState.CONFIGURATION : ConnectionState.PLAY;
 
             this.proxyConnection.setGameProfile(new GameProfile(loginSuccessPacket.uuid, loginSuccessPacket.name));
             Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Connected successfully! Switching to " + nextState + " state");
