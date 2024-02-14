@@ -17,16 +17,16 @@
  */
 package net.raphimc.viaproxy.cli.options;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import joptsimple.ValueConversionException;
 import joptsimple.ValueConverter;
-import net.raphimc.vialoader.util.VersionEnum;
 
-public class VersionEnumConverter implements ValueConverter<VersionEnum> {
+public class ProtocolVersionConverter implements ValueConverter<ProtocolVersion> {
 
     @Override
-    public VersionEnum convert(String s) {
-        final VersionEnum version = VersionEnum.fromProtocolName(s);
-        if (version == VersionEnum.UNKNOWN) {
+    public ProtocolVersion convert(String s) {
+        final ProtocolVersion version = ProtocolVersion.getClosest(s);
+        if (version == null) {
             throw new ValueConversionException("Unable to find version '" + s + "'");
         }
 
@@ -34,14 +34,14 @@ public class VersionEnumConverter implements ValueConverter<VersionEnum> {
     }
 
     @Override
-    public Class<VersionEnum> valueType() {
-        return VersionEnum.class;
+    public Class<ProtocolVersion> valueType() {
+        return ProtocolVersion.class;
     }
 
     @Override
     public String valuePattern() {
         StringBuilder s = new StringBuilder();
-        for (VersionEnum version : VersionEnum.getAllVersions()) {
+        for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
             s.append((s.isEmpty()) ? "" : ", ").append(version.getName());
         }
         return "[" + s + "]";

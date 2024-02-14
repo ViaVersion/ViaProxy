@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.packethandler;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -28,7 +29,6 @@ import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginCompressionPacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginSuccessPacket1_7;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ChannelUtil;
@@ -57,7 +57,7 @@ public class CompressionPacketHandler extends PacketHandler {
                 return false;
             }
         } else if (packet instanceof S2CLoginSuccessPacket1_7) {
-            if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_8)) {
+            if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
                 if (Options.COMPRESSION_THRESHOLD > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
                     ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
                     this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(Options.COMPRESSION_THRESHOLD)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {

@@ -15,20 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
-import net.raphimc.netminecraft.constants.MCPipeline;
+import net.raphimc.viabedrock.protocol.providers.TransferProvider;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
+import net.raphimc.viaproxy.proxy.util.TransferDataHolder;
 
-public class ViaProxyCompressionProvider extends CompressionProvider {
+import java.net.InetSocketAddress;
+
+public class ViaProxyTransferProvider extends TransferProvider {
 
     @Override
-    public void handlePlayCompression(UserConnection user, int threshold) {
-        if (!user.isClientSide()) {
-            throw new IllegalStateException("PLAY state Compression packet is unsupported");
+    public void connectToServer(UserConnection user, InetSocketAddress newAddress) {
+        TransferDataHolder.addTempRedirect(ProxyConnection.fromChannel(user.getChannel()).getC2P(), newAddress);
+        try {
+            ProxyConnection.fromUserConnection(user).kickClient("§aThe server transferred you to another server §7(§e" + newAddress.getHostName() + ":" + newAddress.getPort() + "§7)§a. Please reconnect to ViaProxy.");
+        } catch (CloseAndReturn ignored) {
         }
-        user.getChannel().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(threshold);
     }
 
 }

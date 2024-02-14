@@ -15,21 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicWorldHeightProvider;
-import net.raphimc.vialoader.util.VersionEnum;
-import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import com.viaversion.viaversion.api.minecraft.item.Item;
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.HandItemProvider;
 
-public class ViaProxyClassicWorldHeightProvider extends ClassicWorldHeightProvider {
+public class ViaProxyHandItemProvider extends HandItemProvider {
 
     @Override
-    public short getMaxChunkSectionCount(UserConnection user) {
-        if (ProxyConnection.fromUserConnection(user).getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_17)) {
-            return 64;
-        }
-        return 16;
+    public Item getHandItem(final UserConnection info) {
+        return null;
     }
 
 }

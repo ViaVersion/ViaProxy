@@ -18,17 +18,19 @@
 package net.raphimc.viaproxy.util;
 
 import com.google.common.net.HostAndPort;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.unix.DomainSocketAddress;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.util.MinecraftServerAddress;
-import net.raphimc.vialoader.util.VersionEnum;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 public class AddressUtil {
 
-    public static SocketAddress parse(final String serverAddress, final VersionEnum version) {
+    public static SocketAddress parse(final String serverAddress, final ProtocolVersion version) {
         if (serverAddress.startsWith("file:///") || serverAddress.startsWith("unix:///")) { // Unix Socket
             final String filePath = serverAddress.substring(7);
 
@@ -42,7 +44,7 @@ public class AddressUtil {
                 port = hostAndPort.getPort();
             }
 
-            if (version == null || version.isOlderThan(VersionEnum.r1_3_1tor1_3_2) || version.equals(VersionEnum.bedrockLatest)) {
+            if (version == null || version.olderThan(LegacyProtocolVersion.r1_3_1tor1_3_2) || version.equals(BedrockProtocolVersion.bedrockLatest)) {
                 return new InetSocketAddress(hostAndPort.getHost(), port);
             } else {
                 return MinecraftServerAddress.ofResolved(hostAndPort.getHost(), port);
@@ -60,8 +62,8 @@ public class AddressUtil {
         }
     }
 
-    public static int getDefaultPort(final VersionEnum version) {
-        if (VersionEnum.bedrockLatest.equals(version)) {
+    public static int getDefaultPort(final ProtocolVersion version) {
+        if (version.equals(BedrockProtocolVersion.bedrockLatest)) {
             return 19132;
         }
 

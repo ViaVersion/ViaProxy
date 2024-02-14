@@ -15,15 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.tasks;
+package net.raphimc.viaproxy.protocoltranslator.providers;
 
-import net.raphimc.viaproxy.protocolhack.ProtocolHack;
+import com.viaversion.viaversion.api.connection.UserConnection;
+import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
+import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
-public class LoaderTask implements Runnable {
+public class ViaProxyOldAuthProvider extends OldAuthProvider {
 
     @Override
-    public void run() {
-        ProtocolHack.init();
+    public void sendAuthRequest(final UserConnection user, final String serverId) throws Throwable {
+        ExternalInterface.joinServer(serverId, ProxyConnection.fromUserConnection(user));
     }
 
 }

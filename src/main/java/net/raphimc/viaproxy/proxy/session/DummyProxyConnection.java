@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.proxy.session;
 
 import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -26,7 +27,6 @@ import io.netty.channel.ChannelFuture;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
 import net.raphimc.netminecraft.util.ChannelType;
-import net.raphimc.vialoader.util.VersionEnum;
 
 import java.net.SocketAddress;
 import java.security.Key;
@@ -44,7 +44,7 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public ChannelFuture connectToServer(SocketAddress serverAddress, VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(SocketAddress serverAddress, ProtocolVersion targetVersion) {
         throw new UnsupportedOperationException();
     }
 
@@ -54,7 +54,7 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public VersionEnum getServerVersion() {
+    public ProtocolVersion getServerVersion() {
         throw new UnsupportedOperationException();
     }
 

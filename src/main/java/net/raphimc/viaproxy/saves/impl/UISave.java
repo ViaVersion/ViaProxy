@@ -19,7 +19,7 @@ package net.raphimc.viaproxy.saves.impl;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.raphimc.vialoader.util.VersionEnum;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.raphimc.viaproxy.saves.AbstractSave;
 
 import javax.swing.*;
@@ -77,12 +77,14 @@ public class UISave extends AbstractSave {
         }
     }
 
-    public void loadComboBoxVersionEnum(final String key, final JComboBox<VersionEnum> comboBox) {
+    public void loadComboBoxProtocolVersion(final String key, final JComboBox<ProtocolVersion> comboBox) {
         if (this.values.containsKey(key)) {
             try {
-                String value = String.valueOf(this.values.get(key));
-                VersionEnum version = VersionEnum.valueOf(value);
-                comboBox.setSelectedItem(version);
+                String value = this.values.get(key);
+                ProtocolVersion version = ProtocolVersion.getClosest(value);
+                if (version != null) {
+                    comboBox.setSelectedItem(version);
+                }
             } catch (Throwable ignored) {
             }
         }

@@ -21,7 +21,6 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.mcping.MCPing;
 import net.lenni0451.mcping.pings.sockets.impl.factories.SocketChannelSocketFactory;
 import net.lenni0451.mcping.responses.MCPingResponse;
-import net.raphimc.vialoader.util.VersionEnum;
 
 import java.net.SocketAddress;
 
@@ -29,7 +28,7 @@ public class ProtocolVersionDetector {
 
     private static final int TIMEOUT = 3000;
 
-    public static VersionEnum get(final SocketAddress serverAddress, final VersionEnum clientVersion) {
+    public static ProtocolVersion get(final SocketAddress serverAddress, final ProtocolVersion clientVersion) {
         MCPingResponse response = MCPing
                 .pingModern(clientVersion.getOriginalVersion())
                 .tcpSocketFactory(new SocketChannelSocketFactory())
@@ -50,7 +49,7 @@ public class ProtocolVersionDetector {
                     .getSync();
 
             if (ProtocolVersion.isRegistered(response.version.protocol)) { // If the protocol is registered, we can use it
-                return VersionEnum.fromProtocolId(response.version.protocol);
+                return ProtocolVersion.getProtocol(response.version.protocol);
             } else {
                 throw new RuntimeException("Unsupported protocol version: " + response.version.protocol);
             }

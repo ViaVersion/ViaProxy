@@ -23,6 +23,7 @@ import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_0;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_1;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
@@ -31,8 +32,8 @@ import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_20_2;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
@@ -64,7 +65,7 @@ public class ExternalInterface {
                 proxyConnection.setGameProfile(account.getGameProfile());
                 final UserConnection user = proxyConnection.getUserConnection();
 
-                if (Options.CHAT_SIGNING && proxyConnection.getServerVersion().isNewerThanOrEqualTo(VersionEnum.r1_19) && account instanceof MicrosoftAccount microsoftAccount) {
+                if (Options.CHAT_SIGNING && proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && account instanceof MicrosoftAccount microsoftAccount) {
                     final StepPlayerCertificates.PlayerCertificates playerCertificates = microsoftAccount.getPlayerCertificates();
                     final Instant expiresAt = Instant.ofEpochMilli(playerCertificates.getExpireTimeMs());
                     final long expiresAtMillis = playerCertificates.getExpireTimeMs();
@@ -75,7 +76,7 @@ public class ExternalInterface {
                     final UUID uuid = proxyConnection.getGameProfile().getId();
 
                     byte[] loginHelloKeySignature = keySignature;
-                    if (proxyConnection.getClientVersion().equals(VersionEnum.r1_19)) {
+                    if (proxyConnection.getClientVersion().equals(ProtocolVersion.v1_19)) {
                         loginHelloKeySignature = playerCertificates.getLegacyPublicKeySignature();
                     }
                     proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_20_2(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
@@ -83,7 +84,7 @@ public class ExternalInterface {
                     user.put(new ChatSession1_19_0(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.getLegacyPublicKeySignature())));
                     user.put(new ChatSession1_19_1(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                     user.put(new ChatSession1_19_3(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
-                } else if (proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
+                } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
                     final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
 
                     final UUID deviceId = mcChain.getXblXsts().getInitialXblSession().getXblDeviceToken().getId();

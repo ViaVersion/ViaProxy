@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.proxy.packethandler;
 
 import com.mojang.authlib.GameProfile;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
@@ -25,8 +26,8 @@ import net.raphimc.netminecraft.netty.crypto.AESEncryption;
 import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.cli.options.Options;
@@ -149,7 +150,7 @@ public class LoginPacketHandler extends PacketHandler {
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginKeyPacket.serverId, publicKey, secretKey)).toString(16);
 
             boolean auth = true;
-            if (this.proxyConnection.getServerVersion().isOlderThanOrEqualTo(VersionEnum.r1_6_4)) {
+            if (this.proxyConnection.getServerVersion().olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)) {
                 auth = this.proxyConnection.getUserConnection().get(ProtocolMetadataStorage.class).authenticate;
             }
             if (auth) {
@@ -160,12 +161,12 @@ public class LoginPacketHandler extends PacketHandler {
             final byte[] encryptedNonce = CryptUtil.encryptData(publicKey, loginKeyPacket.nonce);
 
             final C2SLoginKeyPacket1_19_3 loginKey = new C2SLoginKeyPacket1_19_3(encryptedSecretKey, encryptedNonce);
-            if (this.proxyConnection.getServerVersion().isNewerThanOrEqualTo(VersionEnum.r1_19) && this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
+            if (this.proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
                 ExternalInterface.signNonce(loginKeyPacket.nonce, loginKey, this.proxyConnection);
             }
             this.proxyConnection.getChannel().writeAndFlush(loginKey).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
-            if (this.proxyConnection.getServerVersion().isNewerThanOrEqualTo(VersionEnum.r1_7_2tor1_7_5)) {
+            if (this.proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
                 this.proxyConnection.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(secretKey));
             } else {
                 this.proxyConnection.setKeyForPreNettyEncryption(secretKey);
@@ -173,7 +174,7 @@ public class LoginPacketHandler extends PacketHandler {
 
             return false;
         } else if (packet instanceof S2CLoginSuccessPacket1_7 loginSuccessPacket) {
-            final ConnectionState nextState = this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_20_2) ? ConnectionState.CONFIGURATION : ConnectionState.PLAY;
+            final ConnectionState nextState = this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_2) ? ConnectionState.CONFIGURATION : ConnectionState.PLAY;
 
             this.proxyConnection.setGameProfile(new GameProfile(loginSuccessPacket.uuid, loginSuccessPacket.name));
             Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Connected successfully! Switching to " + nextState + " state");

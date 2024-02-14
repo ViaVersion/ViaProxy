@@ -17,11 +17,11 @@
  */
 package net.raphimc.viaproxy.proxy.util;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.handler.codec.haproxy.*;
-import net.raphimc.vialoader.util.VersionEnum;
 
 import java.net.*;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.List;
 
 public class HAProxyUtil {
 
-    public static HAProxyMessage createMessage(final Channel sourceChannel, final Channel targetChannel, final VersionEnum clientVersion) {
+    public static HAProxyMessage createMessage(final Channel sourceChannel, final Channel targetChannel, final ProtocolVersion clientVersion) {
         final List<HAProxyTLV> tlvs = new ArrayList<>();
         if (clientVersion != null) {
             tlvs.add(new HAProxyTLV((byte) 0xE0, Unpooled.buffer().writeInt(clientVersion.getOriginalVersion())));

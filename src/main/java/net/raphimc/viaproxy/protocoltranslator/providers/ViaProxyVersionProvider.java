@@ -15,18 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
-import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.protocols.base.BaseVersionProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
-public class ViaProxyOldAuthProvider extends OldAuthProvider {
+public class ViaProxyVersionProvider extends BaseVersionProvider {
 
     @Override
-    public void sendAuthRequest(final UserConnection user, final String serverId) throws Throwable {
-        ExternalInterface.joinServer(serverId, ProxyConnection.fromUserConnection(user));
+    public ProtocolVersion getClosestServerProtocol(UserConnection connection) throws Exception {
+        if (connection.isClientSide()) {
+            return ProxyConnection.fromUserConnection(connection).getServerVersion();
+        } else {
+            return super.getClosestServerProtocol(connection);
+        }
     }
 
 }

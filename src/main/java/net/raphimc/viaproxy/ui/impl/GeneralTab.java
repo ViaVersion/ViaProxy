@@ -17,9 +17,12 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.raphimc.vialoader.util.VersionEnum;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
+import net.raphimc.vialoader.util.ProtocolVersionList;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.UISave;
@@ -48,7 +51,7 @@ import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
 public class GeneralTab extends AUITab {
 
     JTextField serverAddress;
-    JComboBox<VersionEnum> serverVersion;
+    JComboBox<ProtocolVersion> serverVersion;
     JComboBox<String> authMethod;
     private JCheckBox betaCraftAuth;
     private JLabel stateLabel;
@@ -114,11 +117,11 @@ public class GeneralTab extends AUITab {
             JLabel serverVersionLabel = new JLabel(I18n.get("tab.general.server_version.label"));
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(serverVersionLabel);
 
-            this.serverVersion = new JComboBox<>(VersionEnum.SORTED_VERSIONS.toArray(new VersionEnum[0]));
+            this.serverVersion = new JComboBox<>(ProtocolVersionList.getProtocolsNewToOld().toArray(new ProtocolVersion[0]));
             this.serverVersion.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                    if (value instanceof VersionEnum version) {
+                    if (value instanceof ProtocolVersion version) {
                         value = version.getName();
                     }
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -126,15 +129,15 @@ public class GeneralTab extends AUITab {
             });
             this.serverVersion.addActionListener(event -> {
                 if (this.betaCraftAuth == null) return; // This is called when the JComboBox is created (before betaCraftAuth is set)
-                if (!(this.serverVersion.getSelectedItem() instanceof VersionEnum selectedVersion)) return;
-                if (selectedVersion.isOlderThanOrEqualTo(VersionEnum.c0_28toc0_30)) {
+                if (!(this.serverVersion.getSelectedItem() instanceof ProtocolVersion selectedVersion)) return;
+                if (selectedVersion.olderThanOrEqualTo(LegacyProtocolVersion.c0_28toc0_30)) {
                     this.betaCraftAuth.setEnabled(true);
                 } else {
                     this.betaCraftAuth.setEnabled(false);
                     this.betaCraftAuth.setSelected(false);
                 }
             });
-            ViaProxy.getSaveManager().uiSave.loadComboBoxVersionEnum("server_version", this.serverVersion);
+            ViaProxy.getSaveManager().uiSave.loadComboBoxProtocolVersion("server_version", this.serverVersion);
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.serverVersion);
         }
         {
@@ -191,8 +194,8 @@ public class GeneralTab extends AUITab {
     private void onClose(final UICloseEvent event) {
         UISave save = ViaProxy.getSaveManager().uiSave;
         save.put("server_address", this.serverAddress.getText());
-        if (this.serverVersion.getSelectedItem() instanceof VersionEnum version) {
-            save.put("server_version", version.name());
+        if (this.serverVersion.getSelectedItem() instanceof ProtocolVersion version) {
+            save.put("server_version", version.getName());
         }
         save.put("auth_method", String.valueOf(this.authMethod.getSelectedIndex()));
         save.put("betacraft_auth", String.valueOf(this.betaCraftAuth.isSelected()));
@@ -221,7 +224,7 @@ public class GeneralTab extends AUITab {
 
     private void start() {
         final Object selectedVersion = this.serverVersion.getSelectedItem();
-        if (!(selectedVersion instanceof VersionEnum)) {
+        if (!(selectedVersion instanceof ProtocolVersion)) {
             this.frame.showError(I18n.get("tab.general.error.no_server_version_selected"));
             return;
         }
@@ -231,7 +234,7 @@ public class GeneralTab extends AUITab {
 
             this.frame.showWarning("<html><div style='text-align: center;'>" + I18n.get("tab.general.warning.ban_warning.line1") + "<br><b>" + I18n.get("tab.general.warning.risk") + "</b></div></html>");
         }
-        if (VersionEnum.bedrockLatest.equals(selectedVersion) && ViaProxy.getSaveManager().uiSave.get("notice.bedrock_warning") == null) {
+        if (selectedVersion.equals(BedrockProtocolVersion.bedrockLatest) && ViaProxy.getSaveManager().uiSave.get("notice.bedrock_warning") == null) {
             ViaProxy.getSaveManager().uiSave.put("notice.bedrock_warning", "true");
             ViaProxy.getSaveManager().save();
 
@@ -244,7 +247,7 @@ public class GeneralTab extends AUITab {
 
         new Thread(() -> {
             String serverAddress = this.serverAddress.getText().trim();
-            final VersionEnum serverVersion = (VersionEnum) this.serverVersion.getSelectedItem();
+            final ProtocolVersion serverVersion = (ProtocolVersion) this.serverVersion.getSelectedItem();
             final int bindPort = (int) ViaProxy.getUI().advancedTab.bindPort.getValue();
             final int authMethod = this.authMethod.getSelectedIndex();
             final boolean betaCraftAuth = this.betaCraftAuth.isSelected();

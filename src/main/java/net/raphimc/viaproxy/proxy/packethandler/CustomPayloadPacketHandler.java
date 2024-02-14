@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.packethandler;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -27,7 +28,6 @@ import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginCustomPayloadPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_7;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
@@ -59,7 +59,7 @@ public class CustomPayloadPacketHandler extends PacketHandler {
                 return false;
             }
         } else if (packet instanceof C2SLoginKeyPacket1_7 loginKeyPacket) {
-            if (this.proxyConnection.getClientVersion().isOlderThanOrEqualTo(VersionEnum.r1_12_2) && new String(loginKeyPacket.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
+            if (this.proxyConnection.getClientVersion().olderThanOrEqualTo(ProtocolVersion.v1_12_2) && new String(loginKeyPacket.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
                 final ByteBuf byteBuf = Unpooled.wrappedBuffer(loginKeyPacket.encryptedSecretKey);
                 this.proxyConnection.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);
                 return false;

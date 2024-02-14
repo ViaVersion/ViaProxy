@@ -15,20 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
-import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import io.netty.channel.ChannelHandlerContext;
+import net.raphimc.vialoader.netty.ViaCodec;
+import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.util.logging.Logger;
 
-public class ViaProxyEncryptionProvider extends EncryptionProvider {
+public class ViaProxyViaCodec extends ViaCodec {
+
+    public ViaProxyViaCodec(UserConnection user) {
+        super(user);
+    }
 
     @Override
-    public void enableDecryption(UserConnection user) {
-        try {
-            ProxyConnection.fromUserConnection(user).enablePreNettyEncryption();
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (Options.IGNORE_PACKET_TRANSLATION_ERRORS) {
+            try {
+                super.channelRead(ctx, msg);
+            } catch (Throwable e) {
+                Logger.LOGGER.error("ProtocolTranslator packet translation error occurred", e);
+            }
+        } else {
+            super.channelRead(ctx, msg);
         }
     }
 

@@ -15,28 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.plugins.events;
+package net.raphimc.viaproxy.protocoltranslator.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
+import net.raphimc.vialoader.impl.platform.ViaLegacyPlatformImpl;
+import net.raphimc.viaproxy.ViaProxy;
 
-public class ProtocolHackInitEvent {
+public class ViaProxyViaLegacyPlatformImpl extends ViaLegacyPlatformImpl {
 
-    private final List<Supplier<?>> additionalPlatformSuppliers = new ArrayList<>();
-
-    public ProtocolHackInitEvent(final Supplier<?>... additionalPlatformSuppliers) {
-        for (final Supplier<?> platformSupplier : additionalPlatformSuppliers) {
-            this.registerPlatform(platformSupplier);
-        }
-    }
-
-    public void registerPlatform(final Supplier<?> platformSupplier) {
-        this.additionalPlatformSuppliers.add(platformSupplier);
-    }
-
-    public List<Supplier<?>> getPlatformSuppliers() {
-        return this.additionalPlatformSuppliers;
+    @Override
+    public String getCpeAppName() {
+        return "ViaProxy " + ViaProxy.VERSION;
     }
 
 }

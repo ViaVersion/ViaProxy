@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.impl;
+package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
@@ -32,7 +32,7 @@ import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.G
 import net.raphimc.vialoader.impl.viaversion.VLLoader;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
-import net.raphimc.viaproxy.protocolhack.providers.*;
+import net.raphimc.viaproxy.protocoltranslator.providers.*;
 
 public class ViaProxyVLLoader extends VLLoader {
 
