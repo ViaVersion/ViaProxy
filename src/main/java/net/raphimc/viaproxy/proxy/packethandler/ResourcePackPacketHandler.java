@@ -79,7 +79,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
                         }
                     }
                     this.proxyConnection.getC2P().writeAndFlush(resourcePackPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_1)) {
+                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
                     final byte[] data = Options.RESOURCE_PACK_URL.getBytes(StandardCharsets.UTF_8);
 
                     final ByteBuf customPayloadPacket = Unpooled.buffer();
