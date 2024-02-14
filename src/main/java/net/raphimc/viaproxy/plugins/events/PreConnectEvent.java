@@ -17,8 +17,8 @@
  */
 package net.raphimc.viaproxy.plugins.events;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.Channel;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.plugins.events.types.EventCancellable;
 
 import java.net.SocketAddress;
@@ -26,13 +26,13 @@ import java.net.SocketAddress;
 public class PreConnectEvent extends EventCancellable {
 
     private SocketAddress serverAddress;
-    private VersionEnum serverVersion;
-    private final VersionEnum clientVersion;
+    private ProtocolVersion serverVersion;
+    private final ProtocolVersion clientVersion;
     private final Channel clientChannel;
 
     private String cancelMessage = "§cCould not connect to the backend server! (Server is blacklisted)";
 
-    public PreConnectEvent(final SocketAddress serverAddress, final VersionEnum serverVersion, final VersionEnum clientVersion, final Channel clientChannel) {
+    public PreConnectEvent(final SocketAddress serverAddress, final ProtocolVersion serverVersion, final ProtocolVersion clientVersion, final Channel clientChannel) {
         this.serverAddress = serverAddress;
         this.serverVersion = serverVersion;
         this.clientVersion = clientVersion;
@@ -47,15 +47,15 @@ public class PreConnectEvent extends EventCancellable {
         this.serverAddress = serverAddress;
     }
 
-    public VersionEnum getServerVersion() {
+    public ProtocolVersion getServerVersion() {
         return this.serverVersion;
     }
 
-    public void setServerVersion(final VersionEnum serverVersion) {
+    public void setServerVersion(final ProtocolVersion serverVersion) {
         this.serverVersion = serverVersion;
     }
 
-    public VersionEnum getClientVersion() {
+    public ProtocolVersion getClientVersion() {
         return this.clientVersion;
     }
 

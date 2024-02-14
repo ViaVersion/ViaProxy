@@ -38,7 +38,6 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
 import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.injection.VersionEnumExtension;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
@@ -136,7 +135,6 @@ public class ViaProxy {
         ConsoleHandler.hookConsole();
         ClassLoaderPriorityUtil.loadOverridingJars();
         ViaProxy.loadNetty();
-        VersionEnumExtension.init();
 
         SAVE_MANAGER = new SaveManager();
         PLUGIN_MANAGER = new PluginManager();

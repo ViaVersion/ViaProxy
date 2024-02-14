@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import com.google.common.collect.Iterables;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.commons.swing.layouts.VerticalLayout;
 import net.raphimc.minecraftauth.MinecraftAuth;
@@ -26,8 +27,8 @@ import net.raphimc.minecraftauth.service.realms.AbstractRealmsService;
 import net.raphimc.minecraftauth.service.realms.BedrockRealmsService;
 import net.raphimc.minecraftauth.service.realms.JavaRealmsService;
 import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
@@ -45,17 +46,18 @@ import java.util.concurrent.CompletableFuture;
 
 public class RealmsTab extends AUITab {
 
-    private static final VersionEnum LATEST_JAVA_RELEASE;
-    private static final VersionEnum LATEST_JAVA_SNAPSHOT;
+    private static final ProtocolVersion LATEST_JAVA_RELEASE;
+    private static final ProtocolVersion LATEST_JAVA_SNAPSHOT;
 
     static {
-        VersionEnum latestVersion = null;
-        VersionEnum latestSnapshotVersion = null;
-        for (int i = VersionEnum.OFFICIAL_SUPPORTED_PROTOCOLS.size() - 1; i >= 0; i--) {
-            VersionEnum version = VersionEnum.OFFICIAL_SUPPORTED_PROTOCOLS.get(i);
-            if (version.getProtocol().isSnapshot() && latestSnapshotVersion == null) {
+        ProtocolVersion latestVersion = null;
+        ProtocolVersion latestSnapshotVersion = null;
+        final List<ProtocolVersion> supportedVersions = ProtocolVersion.getProtocols();
+        for (int i = supportedVersions.size() - 1; i >= 0; i--) {
+            ProtocolVersion version = supportedVersions.get(i);
+            if (version.isSnapshot() && latestSnapshotVersion == null) {
                 latestSnapshotVersion = version;
-            } else if (!version.getProtocol().isSnapshot()) {
+            } else if (!version.isSnapshot()) {
                 latestVersion = version;
                 break;
             }
@@ -66,7 +68,7 @@ public class RealmsTab extends AUITab {
     }
 
     private Account currentAccount = Options.MC_ACCOUNT;
-    private VersionEnum currentSelectedJavaVersion = LATEST_JAVA_RELEASE;
+    private ProtocolVersion currentSelectedJavaVersion = LATEST_JAVA_RELEASE;
 
     public RealmsTab(final ViaProxyUI frame) {
         super(frame, "realms");
@@ -106,7 +108,7 @@ public class RealmsTab extends AUITab {
                     ViaProxy.getSaveManager().accountsSave.ensureRefreshed(this.currentAccount);
                     SwingUtilities.invokeLater(() -> {
                         if (this.currentAccount instanceof MicrosoftAccount account) {
-                            final JavaRealmsService realmsService = new JavaRealmsService(MinecraftAuth.createHttpClient(), Iterables.getLast(this.currentSelectedJavaVersion.getProtocol().getIncludedVersions()), account.getMcProfile());
+                            final JavaRealmsService realmsService = new JavaRealmsService(MinecraftAuth.createHttpClient(), Iterables.getLast(this.currentSelectedJavaVersion.getIncludedVersions()), account.getMcProfile());
                             this.loadRealms(realmsService, body, statusLabel);
                         } else if (this.currentAccount instanceof BedrockAccount account) {
                             final BedrockRealmsService realmsService = new BedrockRealmsService(MinecraftAuth.createHttpClient(), ProtocolConstants.BEDROCK_VERSION_NAME, account.getRealmsXsts());
@@ -176,9 +178,9 @@ public class RealmsTab extends AUITab {
             JComboBox<String> type = new JComboBox<>();
             type.addItem(I18n.get("tab.realms.release"));
             type.addItem(I18n.get("tab.realms.snapshot"));
-            type.setSelectedIndex(this.currentSelectedJavaVersion.getProtocol().isSnapshot() ? 1 : 0);
+            type.setSelectedIndex(this.currentSelectedJavaVersion.isSnapshot() ? 1 : 0);
             type.addActionListener(e -> {
-                VersionEnum selected = type.getSelectedIndex() == 0 ? LATEST_JAVA_RELEASE : LATEST_JAVA_SNAPSHOT;
+                ProtocolVersion selected = type.getSelectedIndex() == 0 ? LATEST_JAVA_RELEASE : LATEST_JAVA_SNAPSHOT;
                 if (selected != this.currentSelectedJavaVersion) {
                     this.currentSelectedJavaVersion = selected;
                     this.reinit();
@@ -223,7 +225,7 @@ public class RealmsTab extends AUITab {
                 realmsService.joinWorld(world).thenAccept(address -> SwingUtilities.invokeLater(() -> {
                     join.setEnabled(true);
                     join.setText(I18n.get("tab.realms.join"));
-                    this.setServerAddressAndStartViaProxy(address, realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : VersionEnum.bedrockLatest);
+                    this.setServerAddressAndStartViaProxy(address, realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : BedrockProtocolVersion.bedrockLatest);
                 })).exceptionally(e -> {
                     final Throwable cause = e.getCause();
                     SwingUtilities.invokeLater(() -> {
@@ -248,7 +250,7 @@ public class RealmsTab extends AUITab {
         }
     }
 
-    private void setServerAddressAndStartViaProxy(final String address, final VersionEnum version) {
+    private void setServerAddressAndStartViaProxy(final String address, final ProtocolVersion version) {
         final GeneralTab generalTab = ViaProxy.getUI().generalTab;
         if (generalTab.stateButton.isEnabled()) {
             if (!generalTab.stateButton.getText().equals(I18n.get("tab.general.state.start"))) {

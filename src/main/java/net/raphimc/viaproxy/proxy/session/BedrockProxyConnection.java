@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.session;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.DatagramChannel;
@@ -27,7 +28,6 @@ import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.vialoader.netty.viabedrock.PingEncapsulationCodec;
-import net.raphimc.vialoader.util.VersionEnum;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 
@@ -66,7 +66,7 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public ChannelFuture connectToServer(final SocketAddress serverAddress, final VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(final SocketAddress serverAddress, final ProtocolVersion targetVersion) {
         if (!(serverAddress instanceof InetSocketAddress)) {
             throw new IllegalArgumentException("Server address must be an InetSocketAddress");
         }

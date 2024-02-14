@@ -19,7 +19,7 @@ package net.raphimc.viaproxy.injection.mixins;
 
 import com.google.common.collect.ImmutableSet;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.protocol.version.VersionRange;
+import com.viaversion.viaversion.api.protocol.version.SubVersionRange;
 import com.viaversion.viaversion.util.Pair;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,7 +39,7 @@ public abstract class MixinProtocolVersion {
     private static Set<String> skips;
 
     @Unique
-    private static Map<String, Pair<String, VersionRange>> remaps;
+    private static Map<String, Pair<String, SubVersionRange>> remaps;
 
     @Inject(method = "<clinit>", at = @At("HEAD"))
     private static void initMaps(CallbackInfo ci) {
@@ -58,7 +58,7 @@ public abstract class MixinProtocolVersion {
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;register(ILjava/lang/String;)Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;"))
     private static ProtocolVersion unregisterAndRenameVersions(int version, String name) {
         if (skips.contains(name)) return null;
-        final Pair<String, VersionRange> remapEntry = remaps.get(name);
+        final Pair<String, SubVersionRange> remapEntry = remaps.get(name);
         if (remapEntry != null) {
             if (remapEntry.key() != null) name = remapEntry.key();
             if (remapEntry.value() != null) {
@@ -73,7 +73,7 @@ public abstract class MixinProtocolVersion {
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;register(IILjava/lang/String;)Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;"), require = 0)
     private static ProtocolVersion unregisterAndRenameVersions(int version, int snapshotVersion, String name) {
         if (skips.contains(name)) return null;
-        final Pair<String, VersionRange> remapEntry = remaps.get(name);
+        final Pair<String, SubVersionRange> remapEntry = remaps.get(name);
         if (remapEntry != null) {
             if (remapEntry.key() != null) name = remapEntry.key();
         }
@@ -81,10 +81,10 @@ public abstract class MixinProtocolVersion {
         return ProtocolVersion.register(version, snapshotVersion, name);
     }
 
-    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;register(ILjava/lang/String;Lcom/viaversion/viaversion/api/protocol/version/VersionRange;)Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;"))
-    private static ProtocolVersion unregisterAndRenameVersions(int version, String name, VersionRange versionRange) {
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;register(ILjava/lang/String;Lcom/viaversion/viaversion/api/protocol/version/SubVersionRange;)Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;"))
+    private static ProtocolVersion unregisterAndRenameVersions(int version, String name, SubVersionRange versionRange) {
         if (skips.contains(name)) return null;
-        final Pair<String, VersionRange> remapEntry = remaps.get(name);
+        final Pair<String, SubVersionRange> remapEntry = remaps.get(name);
         if (remapEntry != null) {
             if (remapEntry.key() != null) name = remapEntry.key();
             if (remapEntry.value() != null) versionRange = remapEntry.value();

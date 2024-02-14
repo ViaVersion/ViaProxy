@@ -31,8 +31,8 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.codec.NoReadFlowControlHandler;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialoader.netty.VLPipeline;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
@@ -67,7 +67,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         new ProtocolPipelineImpl(user);
         proxyConnection.setUserConnection(user);
 
-        if (Options.PROXY_URL != null && !proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
+        if (Options.PROXY_URL != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
             channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, this.getProxyHandler());
         }
         if (Options.SERVER_HAPROXY_PROTOCOL) {
@@ -79,7 +79,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
         channel.pipeline().addLast(new ViaProxyVLPipeline(user, proxyConnection.getServerVersion()));
         channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
-        if (proxyConnection.getServerVersion().equals(VersionEnum.bedrockLatest)) {
+        if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
             channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
             channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
         }

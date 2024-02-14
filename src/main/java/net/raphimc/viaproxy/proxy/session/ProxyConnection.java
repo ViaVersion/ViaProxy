@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.proxy.session;
 
 import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.libs.gson.JsonPrimitive;
 import io.netty.bootstrap.Bootstrap;
@@ -43,7 +44,6 @@ import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket1_20_3
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.netminecraft.util.ChannelType;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
@@ -75,8 +75,8 @@ public class ProxyConnection extends NetClient {
 
     private SocketAddress serverAddress;
 
-    private VersionEnum serverVersion;
-    private VersionEnum clientVersion;
+    private ProtocolVersion serverVersion;
+    private ProtocolVersion clientVersion;
 
     private GameProfile gameProfile;
     private C2SLoginHelloPacket1_7 loginHelloPacket;
@@ -114,7 +114,7 @@ public class ProxyConnection extends NetClient {
         super.initialize(channelType, bootstrap);
     }
 
-    public ChannelFuture connectToServer(final SocketAddress serverAddress, final VersionEnum targetVersion) {
+    public ChannelFuture connectToServer(final SocketAddress serverAddress, final ProtocolVersion targetVersion) {
         this.serverAddress = serverAddress;
         this.serverVersion = targetVersion;
         return super.connect(serverAddress);
@@ -132,15 +132,15 @@ public class ProxyConnection extends NetClient {
         return this.serverAddress;
     }
 
-    public VersionEnum getServerVersion() {
+    public ProtocolVersion getServerVersion() {
         return this.serverVersion;
     }
 
-    public VersionEnum getClientVersion() {
+    public ProtocolVersion getClientVersion() {
         return this.clientVersion;
     }
 
-    public void setClientVersion(final VersionEnum clientVersion) {
+    public void setClientVersion(final ProtocolVersion clientVersion) {
         this.clientVersion = clientVersion;
     }
 
@@ -246,7 +246,7 @@ public class ProxyConnection extends NetClient {
 
         switch (this.c2pConnectionState) {
             case LOGIN:
-                if (this.clientVersion.isNewerThanOrEqualTo(VersionEnum.r1_13)) {
+                if (this.clientVersion.newerThanOrEquals(ProtocolVersion.v1_13)) {
                     this.c2p.writeAndFlush(new S2CLoginCustomPayloadPacket(id, channel, PacketTypes.readReadableBytes(data))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 } else {
                     final ByteBuf disconnectPacketData = Unpooled.buffer();
@@ -291,7 +291,7 @@ public class ProxyConnection extends NetClient {
         } else if (this.c2pConnectionState == ConnectionState.CONFIGURATION) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_CONFIG_DISCONNECT.getId(this.clientVersion.getVersion()));
-            if (this.clientVersion.isOlderThanOrEqualTo(VersionEnum.r1_20_2)) {
+            if (this.clientVersion.olderThanOrEquals(ProtocolVersion.v1_20_2)) {
                 PacketTypes.writeString(disconnectPacket, messageToJson(message));
             } else {
                 PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));
@@ -300,7 +300,7 @@ public class ProxyConnection extends NetClient {
         } else if (this.c2pConnectionState == ConnectionState.PLAY) {
             final ByteBuf disconnectPacket = Unpooled.buffer();
             PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_DISCONNECT.getId(this.clientVersion.getVersion()));
-            if (this.clientVersion.isOlderThanOrEqualTo(VersionEnum.r1_20_2)) {
+            if (this.clientVersion.olderThanOrEquals(ProtocolVersion.v1_20_2)) {
                 PacketTypes.writeString(disconnectPacket, messageToJson(message));
             } else {
                 PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));

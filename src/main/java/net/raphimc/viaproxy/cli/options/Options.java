@@ -17,11 +17,11 @@
  */
 package net.raphimc.viaproxy.cli.options;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
 import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
@@ -41,7 +41,7 @@ public class Options {
 
     public static SocketAddress BIND_ADDRESS;
     public static SocketAddress CONNECT_ADDRESS;
-    public static VersionEnum PROTOCOL_VERSION;
+    public static ProtocolVersion PROTOCOL_VERSION;
     public static boolean ONLINE_MODE;
     public static boolean OPENAUTHMOD_AUTH;
     public static boolean BETACRAFT_AUTH;
@@ -68,7 +68,7 @@ public class Options {
 
         final OptionSpec<String> bindAddress = parser.acceptsAll(asList("bind_address", "bind_ip", "ba"), "The address the proxy should bind to").withRequiredArg().ofType(String.class).defaultsTo("0.0.0.0:25568");
         final OptionSpec<String> connectAddress = parser.acceptsAll(asList("connect_address", "target_ip", "ca", "a"), "The address of the target server").withRequiredArg().ofType(String.class).required();
-        final OptionSpec<VersionEnum> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new VersionEnumConverter()).required();
+        final OptionSpec<ProtocolVersion> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new ProtocolVersionConverter()).required();
         final OptionSpec<Void> srvMode = parser.acceptsAll(asList("srv_mode", "srv", "s"), "Enable srv mode");
         final OptionSpec<Void> iSrvMode = parser.acceptsAll(asList("internal_srv_mode", "isrv"), "Enable internal srv mode").availableUnless(srvMode);
         final OptionSpec<Void> proxyOnlineMode = parser.acceptsAll(asList("online_mode", "om", "o"), "Enable proxy online mode");

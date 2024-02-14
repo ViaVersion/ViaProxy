@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.proxy.packethandler;
 
 import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.libs.gson.JsonElement;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -27,7 +28,6 @@ import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
-import net.raphimc.vialoader.util.VersionEnum;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
@@ -63,12 +63,12 @@ public class ResourcePackPacketHandler extends PacketHandler {
     private void sendResourcePack() {
         if (Options.RESOURCE_PACK_URL != null) {
             this.proxyConnection.getChannel().eventLoop().schedule(() -> {
-                if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_8)) {
+                if (this.proxyConnection.getClientVersion().newerThanOrEquals(ProtocolVersion.v1_8)) {
                     final ByteBuf resourcePackPacket = Unpooled.buffer();
                     PacketTypes.writeVarInt(resourcePackPacket, MCPackets.S2C_RESOURCE_PACK.getId(this.proxyConnection.getClientVersion().getVersion()));
                     PacketTypes.writeString(resourcePackPacket, Options.RESOURCE_PACK_URL); // url
                     PacketTypes.writeString(resourcePackPacket, ""); // hash
-                    if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_17)) {
+                    if (this.proxyConnection.getClientVersion().newerThanOrEquals(ProtocolVersion.v1_17)) {
                         resourcePackPacket.writeBoolean(Via.getConfig().isForcedUse1_17ResourcePack()); // required
                         final JsonElement promptMessage = Via.getConfig().get1_17ResourcePackPrompt();
                         if (promptMessage != null) {
@@ -79,7 +79,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
                         }
                     }
                     this.proxyConnection.getC2P().writeAndFlush(resourcePackPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                } else if (this.proxyConnection.getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_7_2tor1_7_5)) {
+                } else if (this.proxyConnection.getClientVersion().newerThanOrEquals(ProtocolVersion.v1_7_1)) {
                     final byte[] data = Options.RESOURCE_PACK_URL.getBytes(StandardCharsets.UTF_8);
 
                     final ByteBuf customPayloadPacket = Unpooled.buffer();

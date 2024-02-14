@@ -18,15 +18,14 @@
 package net.raphimc.viaproxy.protocolhack.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicWorldHeightProvider;
-import net.raphimc.vialoader.util.VersionEnum;
-import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 public class ViaProxyClassicWorldHeightProvider extends ClassicWorldHeightProvider {
 
     @Override
     public short getMaxChunkSectionCount(UserConnection user) {
-        if (ProxyConnection.fromUserConnection(user).getClientVersion().isNewerThanOrEqualTo(VersionEnum.r1_17)) {
+        if (user.getProtocolInfo().protocolVersion().newerThanOrEquals(ProtocolVersion.v1_17)) {
             return 64;
         }
         return 16;
