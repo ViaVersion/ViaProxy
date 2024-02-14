@@ -112,7 +112,7 @@ public class PluginManager {
         if (!ViaProxyPlugin.class.isAssignableFrom(mainClass)) {
             throw new IllegalStateException("Class '" + mainClass.getName() + "' from '" + file.getName() + "' does not extend ViaProxyPlugin");
         }
-        final Object instance = mainClass.newInstance();
+        final Object instance = mainClass.getDeclaredConstructor().newInstance();
         final ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
 
         plugin.init(loader, yaml);

@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.ui.impl;
 
 import com.google.common.collect.Iterables;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.api.protocol.version.VersionType;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.commons.swing.layouts.VerticalLayout;
 import net.raphimc.minecraftauth.MinecraftAuth;
@@ -54,7 +55,8 @@ public class RealmsTab extends AUITab {
         ProtocolVersion latestSnapshotVersion = null;
         final List<ProtocolVersion> supportedVersions = ProtocolVersion.getProtocols();
         for (int i = supportedVersions.size() - 1; i >= 0; i--) {
-            ProtocolVersion version = supportedVersions.get(i);
+            final ProtocolVersion version = supportedVersions.get(i);
+            if (version.getVersionType() != VersionType.RELEASE) continue;
             if (version.isSnapshot() && latestSnapshotVersion == null) {
                 latestSnapshotVersion = version;
             } else if (!version.isSnapshot()) {
