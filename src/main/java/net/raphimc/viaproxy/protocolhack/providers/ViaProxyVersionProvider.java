@@ -26,8 +26,11 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
 
     @Override
     public ProtocolVersion getClosestServerProtocol(UserConnection connection) throws Exception {
-        if (connection.isClientSide()) return ProxyConnection.fromUserConnection(connection).getServerVersion();
-        return super.getClosestServerProtocol(connection);
+        if (connection.isClientSide()) {
+            return ProxyConnection.fromUserConnection(connection).getServerVersion();
+        } else {
+            return super.getClosestServerProtocol(connection);
+        }
     }
 
 }
