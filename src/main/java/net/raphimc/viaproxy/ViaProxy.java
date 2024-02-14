@@ -43,11 +43,11 @@ import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
 import net.raphimc.viaproxy.plugins.events.ViaProxyLoadedEvent;
+import net.raphimc.viaproxy.protocolhack.ProtocolHack;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.SaveManager;
-import net.raphimc.viaproxy.tasks.LoaderTask;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UIInitEvent;
@@ -59,6 +59,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.InvocationTargetException;
 
 public class ViaProxy {
 
@@ -100,7 +101,7 @@ public class ViaProxy {
         injectedMain("Runtime Agent", args);
     }
 
-    public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException {
+    public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException, InvocationTargetException {
         Logger.setup();
 
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
@@ -135,16 +136,15 @@ public class ViaProxy {
         ConsoleHandler.hookConsole();
         ClassLoaderPriorityUtil.loadOverridingJars();
         ViaProxy.loadNetty();
+        ProtocolHack.init();
 
         SAVE_MANAGER = new SaveManager();
         PLUGIN_MANAGER = new PluginManager();
 
-        final Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
         final Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
 
         if (hasUI) {
-            loaderThread.start();
-            SwingUtilities.invokeLater(() -> {
+            SwingUtilities.invokeAndWait(() -> {
                 try {
                     ui = new ViaProxyUI();
                 } catch (Throwable e) {
@@ -155,11 +155,6 @@ public class ViaProxy {
             if (System.getProperty("skipUpdateCheck") == null) {
                 updateCheckThread.start();
             }
-            loaderThread.join();
-            while (ui == null) {
-                Logger.LOGGER.info("Waiting for UI to be initialized...");
-                Thread.sleep(1000);
-            }
             ui.eventManager.call(new UIInitEvent());
             EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
@@ -169,8 +164,6 @@ public class ViaProxy {
             if (System.getProperty("skipUpdateCheck") == null) {
                 updateCheckThread.start();
             }
-            loaderThread.start();
-            loaderThread.join();
             EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
             startProxy();
