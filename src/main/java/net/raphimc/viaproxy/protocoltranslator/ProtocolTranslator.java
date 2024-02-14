@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack;
+package net.raphimc.viaproxy.protocoltranslator;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
@@ -25,10 +25,10 @@ import net.raphimc.vialoader.impl.platform.ViaBackwardsPlatformImpl;
 import net.raphimc.vialoader.impl.platform.ViaBedrockPlatformImpl;
 import net.raphimc.vialoader.impl.platform.ViaRewindPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.plugins.events.ProtocolHackInitEvent;
-import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVLLoader;
-import net.raphimc.viaproxy.protocolhack.impl.ViaProxyViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.protocolhack.impl.ViaProxyViaVersionPlatformImpl;
+import net.raphimc.viaproxy.plugins.events.ProtocolTranslatorInitEvent;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLLoader;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatformImpl;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaVersionPlatformImpl;
 
 import java.io.File;
 import java.util.Comparator;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class ProtocolHack {
+public class ProtocolTranslator {
 
     public static final ProtocolVersion AUTO_DETECT_PROTOCOL = new ProtocolVersion(VersionType.SPECIAL, -2, -1, "Auto Detect (1.7+ servers)", null) {
         @Override
@@ -60,7 +60,7 @@ public class ProtocolHack {
 
     public static void init() {
         patchConfigs();
-        final Supplier<?>[] platformSuppliers = ViaProxy.EVENT_MANAGER.call(new ProtocolHackInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaProxyViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
+        final Supplier<?>[] platformSuppliers = ViaProxy.EVENT_MANAGER.call(new ProtocolTranslatorInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaProxyViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
         ViaLoader.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVLLoader(), null, null, platformSuppliers);
         ProtocolVersion.register(AUTO_DETECT_PROTOCOL);
     }

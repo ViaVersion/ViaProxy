@@ -43,7 +43,7 @@ import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
 import net.raphimc.viaproxy.plugins.events.ViaProxyLoadedEvent;
-import net.raphimc.viaproxy.protocolhack.ProtocolHack;
+import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -136,7 +136,7 @@ public class ViaProxy {
         ConsoleHandler.hookConsole();
         ClassLoaderPriorityUtil.loadOverridingJars();
         ViaProxy.loadNetty();
-        ProtocolHack.init();
+        ProtocolTranslator.init();
 
         SAVE_MANAGER = new SaveManager();
         PLUGIN_MANAGER = new PluginManager();

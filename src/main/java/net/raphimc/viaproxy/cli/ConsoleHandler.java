@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.cli;
 import com.viaversion.viaversion.api.Via;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ConsoleCommandEvent;
-import net.raphimc.viaproxy.protocolhack.viaproxy.ConsoleCommandSender;
+import net.raphimc.viaproxy.protocoltranslator.viaproxy.ConsoleCommandSender;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.logging.Logger;
 

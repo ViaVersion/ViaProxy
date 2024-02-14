@@ -15,20 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicWorldHeightProvider;
+import io.netty.channel.ChannelHandler;
+import net.raphimc.netminecraft.constants.MCPipeline;
+import net.raphimc.vialoader.netty.VLPipeline;
 
-public class ViaProxyClassicWorldHeightProvider extends ClassicWorldHeightProvider {
+public class ViaProxyVLPipeline extends VLPipeline {
+
+    public ViaProxyVLPipeline(UserConnection user, ProtocolVersion version) {
+        super(user, version);
+    }
 
     @Override
-    public short getMaxChunkSectionCount(UserConnection user) {
-        if (user.getProtocolInfo().protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_17)) {
-            return 64;
-        }
-        return 16;
+    public ChannelHandler createViaCodec() {
+        return new ViaProxyViaCodec(this.user);
+    }
+
+    @Override
+    protected String compressionCodecName() {
+        return MCPipeline.COMPRESSION_HANDLER_NAME;
+    }
+
+    @Override
+    protected String packetCodecName() {
+        return MCPipeline.PACKET_CODEC_HANDLER_NAME;
+    }
+
+    @Override
+    protected String lengthCodecName() {
+        return MCPipeline.SIZER_HANDLER_NAME;
     }
 
 }

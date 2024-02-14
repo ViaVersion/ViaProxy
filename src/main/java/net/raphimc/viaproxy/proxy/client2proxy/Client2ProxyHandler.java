@@ -34,7 +34,7 @@ import net.raphimc.viaproxy.plugins.events.ConnectEvent;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxySessionCreationEvent;
-import net.raphimc.viaproxy.protocolhack.ProtocolHack;
+import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
@@ -172,7 +172,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         final UserOptions userOptions = new UserOptions(classicMpPass, Options.MC_ACCOUNT);
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
-        if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && serverVersion.equals(ProtocolHack.AUTO_DETECT_PROTOCOL)) {
+        if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && serverVersion.equals(ProtocolTranslator.AUTO_DETECT_PROTOCOL)) {
             SocketAddress finalServerAddress = serverAddress;
             CompletableFuture.runAsync(() -> {
                 final ProtocolVersion detectedVersion = ProtocolVersionDetector.get(finalServerAddress, clientVersion);

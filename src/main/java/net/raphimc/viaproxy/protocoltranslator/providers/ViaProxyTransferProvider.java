@@ -15,20 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
+import net.raphimc.viabedrock.protocol.providers.TransferProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
+import net.raphimc.viaproxy.proxy.util.TransferDataHolder;
 
-public class ViaProxyEncryptionProvider extends EncryptionProvider {
+import java.net.InetSocketAddress;
+
+public class ViaProxyTransferProvider extends TransferProvider {
 
     @Override
-    public void enableDecryption(UserConnection user) {
+    public void connectToServer(UserConnection user, InetSocketAddress newAddress) {
+        TransferDataHolder.addTempRedirect(ProxyConnection.fromChannel(user.getChannel()).getC2P(), newAddress);
         try {
-            ProxyConnection.fromUserConnection(user).enablePreNettyEncryption();
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+            ProxyConnection.fromUserConnection(user).kickClient("§aThe server transferred you to another server §7(§e" + newAddress.getHostName() + ":" + newAddress.getPort() + "§7)§a. Please reconnect to ViaProxy.");
+        } catch (CloseAndReturn ignored) {
         }
     }
 

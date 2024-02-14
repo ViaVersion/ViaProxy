@@ -15,31 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.impl;
+package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import io.netty.channel.ChannelHandlerContext;
-import net.raphimc.vialoader.netty.ViaCodec;
-import net.raphimc.viaproxy.cli.options.Options;
-import net.raphimc.viaproxy.util.logging.Logger;
+import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
+import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
-public class ViaProxyViaCodec extends ViaCodec {
-
-    public ViaProxyViaCodec(UserConnection user) {
-        super(user);
-    }
+public class ViaProxyOldAuthProvider extends OldAuthProvider {
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (Options.IGNORE_PACKET_TRANSLATION_ERRORS) {
-            try {
-                super.channelRead(ctx, msg);
-            } catch (Throwable e) {
-                Logger.LOGGER.error("ProtocolHack packet translation error occurred", e);
-            }
-        } else {
-            super.channelRead(ctx, msg);
-        }
+    public void sendAuthRequest(final UserConnection user, final String serverId) throws Throwable {
+        ExternalInterface.joinServer(serverId, ProxyConnection.fromUserConnection(user));
     }
 
 }

@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.injection.mixins;
 
 import com.viaversion.viaversion.util.Config;
-import net.raphimc.viaproxy.protocolhack.ConfigPatcher;
+import net.raphimc.viaproxy.protocoltranslator.ConfigPatcher;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

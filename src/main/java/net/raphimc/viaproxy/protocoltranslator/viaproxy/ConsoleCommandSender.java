@@ -15,18 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.protocoltranslator.viaproxy;
 
-import com.viaversion.viaversion.api.connection.UserConnection;
-import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
-import net.raphimc.viaproxy.proxy.external_interface.ExternalInterface;
-import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.command.ViaCommandSender;
 
-public class ViaProxyOldAuthProvider extends OldAuthProvider {
+import java.util.UUID;
+
+public class ConsoleCommandSender implements ViaCommandSender {
+
+    private static final UUID CONSOLE_UUID = new UUID(0, 0);
 
     @Override
-    public void sendAuthRequest(final UserConnection user, final String serverId) throws Throwable {
-        ExternalInterface.joinServer(serverId, ProxyConnection.fromUserConnection(user));
+    public boolean hasPermission(String permission) {
+        return true;
+    }
+
+    @Override
+    public void sendMessage(String msg) {
+        Via.getPlatform().sendMessage(null, msg);
+    }
+
+    @Override
+    public UUID getUUID() {
+        return CONSOLE_UUID;
+    }
+
+    @Override
+    public String getName() {
+        return "Console";
     }
 
 }

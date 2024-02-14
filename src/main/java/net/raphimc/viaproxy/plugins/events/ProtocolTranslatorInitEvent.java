@@ -15,17 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.providers;
+package net.raphimc.viaproxy.plugins.events;
 
-import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.api.minecraft.item.Item;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.HandItemProvider;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
-public class ViaProxyHandItemProvider extends HandItemProvider {
+public class ProtocolTranslatorInitEvent {
 
-    @Override
-    public Item getHandItem(final UserConnection info) {
-        return null;
+    private final List<Supplier<?>> additionalPlatformSuppliers = new ArrayList<>();
+
+    public ProtocolTranslatorInitEvent(final Supplier<?>... additionalPlatformSuppliers) {
+        for (final Supplier<?> platformSupplier : additionalPlatformSuppliers) {
+            this.registerPlatform(platformSupplier);
+        }
+    }
+
+    public void registerPlatform(final Supplier<?> platformSupplier) {
+        this.additionalPlatformSuppliers.add(platformSupplier);
+    }
+
+    public List<Supplier<?>> getPlatformSuppliers() {
+        return this.additionalPlatformSuppliers;
     }
 
 }

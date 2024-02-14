@@ -15,16 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.protocolhack.impl;
+package net.raphimc.viaproxy.protocoltranslator.providers;
 
-import net.raphimc.vialoader.impl.platform.ViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.ViaProxy;
+import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.api.minecraft.item.Item;
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.HandItemProvider;
 
-public class ViaProxyViaLegacyPlatformImpl extends ViaLegacyPlatformImpl {
+public class ViaProxyHandItemProvider extends HandItemProvider {
 
     @Override
-    public String getCpeAppName() {
-        return "ViaProxy " + ViaProxy.VERSION;
+    public Item getHandItem(final UserConnection info) {
+        return null;
     }
 
 }

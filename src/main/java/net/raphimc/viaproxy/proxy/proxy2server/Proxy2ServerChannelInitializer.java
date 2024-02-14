@@ -37,7 +37,7 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.protocolhack.impl.ViaProxyVLPipeline;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.net.InetSocketAddress;
