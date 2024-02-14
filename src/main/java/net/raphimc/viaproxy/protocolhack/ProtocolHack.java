@@ -31,13 +31,32 @@ import net.raphimc.viaproxy.protocolhack.impl.ViaProxyViaLegacyPlatformImpl;
 import net.raphimc.viaproxy.protocolhack.impl.ViaProxyViaVersionPlatformImpl;
 
 import java.io.File;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class ProtocolHack {
 
-    public static final ProtocolVersion AUTO_DETECT_PROTOCOL = new ProtocolVersion(VersionType.SPECIAL, -2, -1, "Auto Detect (1.7+ servers)", null);
+    public static final ProtocolVersion AUTO_DETECT_PROTOCOL = new ProtocolVersion(VersionType.SPECIAL, -2, -1, "Auto Detect (1.7+ servers)", null) {
+        @Override
+        protected Comparator<ProtocolVersion> customComparator() {
+            return (o1, o2) -> {
+                if (o1 == AUTO_DETECT_PROTOCOL) {
+                    return 1;
+                } else if (o2 == AUTO_DETECT_PROTOCOL) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            };
+        }
+
+        @Override
+        public boolean isKnown() {
+            return false;
+        }
+    };
 
     public static void init() {
         patchConfigs();
