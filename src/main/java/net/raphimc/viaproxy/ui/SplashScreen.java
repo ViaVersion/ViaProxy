@@ -93,15 +93,12 @@ public class SplashScreen extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             if (g instanceof Graphics2D g2d) {
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-                g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
                 g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             }
 
             g.setColor(Color.WHITE);
-            g.drawRect(0, 5, this.getWidth(), this.getHeight() - 5);
-            g.drawRect(1, 6, this.getWidth() - 2, this.getHeight() - 7);
+            g.fillRect(0, 5, this.getWidth(), this.getHeight() - 5);
             g.setColor(new Color(0, 69, 104));
             g.fillRect(2, 7, this.getWidth() - 4, this.getHeight() - 9);
 
