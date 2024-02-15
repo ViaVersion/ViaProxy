@@ -17,8 +17,8 @@
  */
 package net.raphimc.viaproxy.ui;
 
+import net.raphimc.viabedrock.api.util.FileSystemUtil;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.util.FileSystemUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;

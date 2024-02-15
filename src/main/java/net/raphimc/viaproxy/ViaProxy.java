@@ -150,7 +150,6 @@ public class ViaProxy {
             }
         }
 
-
         ConsoleHandler.hookConsole();
         ViaProxy.loadNetty();
         ClassLoaderPriorityUtil.loadOverridingJars();
