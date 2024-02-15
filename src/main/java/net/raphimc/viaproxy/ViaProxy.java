@@ -104,9 +104,24 @@ public class ViaProxy {
     }
 
     public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException, InvocationTargetException {
-        Logger.setup();
-
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
+        final SplashScreen splashScreen;
+        final Consumer<String> progressConsumer;
+        if (hasUI) {
+            final float progressStep = 1F / 6F;
+            splashScreen = new SplashScreen();
+            progressConsumer = (text) -> {
+                splashScreen.setProgress(splashScreen.getProgress() + progressStep);
+                splashScreen.setText(text);
+            };
+        } else {
+            splashScreen = null;
+            progressConsumer = text -> {
+            };
+        }
+        progressConsumer.accept("Initializing ViaProxy");
+
+        Logger.setup();
         Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
         Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
         Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
@@ -135,25 +150,9 @@ public class ViaProxy {
             }
         }
 
-        final SplashScreen splashScreen;
-        final Consumer<String> progressConsumer;
-        if (hasUI) {
-            final float progressStep = 1F / 7F;
-            splashScreen = new SplashScreen();
-            progressConsumer = (text) -> {
-                splashScreen.setProgress(splashScreen.getProgress() + progressStep);
-                splashScreen.setText(text);
-            };
-        } else {
-            splashScreen = null;
-            progressConsumer = text -> {
-            };
-        }
-        progressConsumer.accept("Initializing ViaProxy");
 
         ConsoleHandler.hookConsole();
         ViaProxy.loadNetty();
-        progressConsumer.accept("Loading Overriding Jars");
         ClassLoaderPriorityUtil.loadOverridingJars();
         progressConsumer.accept("Loading Protocol Translators");
         ProtocolTranslator.init();
