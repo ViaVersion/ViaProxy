@@ -69,7 +69,7 @@ public class RealmsTab extends AUITab {
         LATEST_JAVA_SNAPSHOT = latestSnapshotVersion;
     }
 
-    private Account currentAccount = Options.MC_ACCOUNT;
+    private Account currentAccount = null;
     private ProtocolVersion currentSelectedJavaVersion = LATEST_JAVA_RELEASE;
 
     public RealmsTab(final ViaProxyUI frame) {

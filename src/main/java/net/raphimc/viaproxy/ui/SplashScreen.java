@@ -49,6 +49,10 @@ public class SplashScreen extends JFrame {
         this.setContentPane(contentPane);
     }
 
+    public float getProgress() {
+        return this.progressPanel.progress;
+    }
+
     public void setProgress(final float progress) {
         this.progressPanel.progress = Math.max(0, Math.min(1, progress));
         this.progressPanel.repaint();

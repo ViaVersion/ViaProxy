@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy;
 
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -31,12 +30,12 @@ import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
-import net.lenni0451.reflect.*;
+import net.lenni0451.reflect.Agents;
+import net.lenni0451.reflect.ClassLoaders;
+import net.lenni0451.reflect.JavaBypass;
+import net.lenni0451.reflect.Methods;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
-import net.raphimc.viaaprilfools.api.AprilFoolsProtocolVersion;
-import net.raphimc.viabedrock.api.BedrockProtocolVersion;
-import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
@@ -44,14 +43,14 @@ import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
 import net.raphimc.viaproxy.plugins.events.ViaProxyLoadedEvent;
+import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.SaveManager;
-import net.raphimc.viaproxy.tasks.LoaderTask;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
+import net.raphimc.viaproxy.ui.SplashScreen;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
-import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -61,6 +60,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class ViaProxy {
 
@@ -134,45 +135,57 @@ public class ViaProxy {
             }
         }
 
-        ConsoleHandler.hookConsole();
-        ClassLoaderPriorityUtil.loadOverridingJars();
-        ViaProxy.loadNetty();
-        Classes.ensureInitialized(ProtocolVersion.class);
-        Classes.ensureInitialized(LegacyProtocolVersion.class);
-        Classes.ensureInitialized(AprilFoolsProtocolVersion.class);
-        Classes.ensureInitialized(BedrockProtocolVersion.class);
+        final SplashScreen splashScreen;
+        final Consumer<String> progressConsumer;
+        if (hasUI) {
+            final float progressStep = 1F / 7F;
+            splashScreen = new SplashScreen();
+            progressConsumer = (text) -> {
+                splashScreen.setProgress(splashScreen.getProgress() + progressStep);
+                splashScreen.setText(text);
+            };
+        } else {
+            splashScreen = null;
+            progressConsumer = text -> {
+            };
+        }
+        progressConsumer.accept("Initializing ViaProxy");
 
+        ConsoleHandler.hookConsole();
+        ViaProxy.loadNetty();
+        progressConsumer.accept("Loading Overriding Jars");
+        ClassLoaderPriorityUtil.loadOverridingJars();
+        progressConsumer.accept("Loading Protocol Translators");
+        ProtocolTranslator.init();
+
+        progressConsumer.accept("Loading Saves");
         SAVE_MANAGER = new SaveManager();
+        progressConsumer.accept("Loading Plugins");
         PLUGIN_MANAGER = new PluginManager();
 
-        final Thread loaderThread = new Thread(new LoaderTask(), "ViaLoader");
-        final Thread updateCheckThread = new Thread(new UpdateCheckTask(hasUI), "UpdateCheck");
-
         if (hasUI) {
-            loaderThread.start();
+            progressConsumer.accept("Loading GUI");
             SwingUtilities.invokeAndWait(() -> {
                 try {
                     ui = new ViaProxyUI();
+                    progressConsumer.accept("Done");
+                    splashScreen.dispose();
                 } catch (Throwable e) {
                     Logger.LOGGER.fatal("Failed to initialize UI", e);
                     System.exit(1);
                 }
             });
             if (System.getProperty("skipUpdateCheck") == null) {
-                updateCheckThread.start();
+                CompletableFuture.runAsync(new UpdateCheckTask(true));
             }
-            loaderThread.join();
-            ui.eventManager.call(new UIInitEvent());
             EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
         } else {
             Options.parse(args);
 
             if (System.getProperty("skipUpdateCheck") == null) {
-                updateCheckThread.start();
+                CompletableFuture.runAsync(new UpdateCheckTask(false));
             }
-            loaderThread.start();
-            loaderThread.join();
             EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
             startProxy();

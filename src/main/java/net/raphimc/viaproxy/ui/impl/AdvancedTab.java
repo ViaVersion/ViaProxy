@@ -28,7 +28,6 @@ import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
-import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
@@ -141,7 +140,6 @@ public class AdvancedTab extends AUITab {
                     SwingUtilities.invokeLater(() -> this.viaVersionDumpButton.setEnabled(true));
                 });
             });
-            this.viaVersionDumpButton.setEnabled(false);
             footer.add(this.viaVersionDumpButton);
         }
         {
@@ -181,13 +179,6 @@ public class AdvancedTab extends AUITab {
         GBC.create(padding).grid(0, 0).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GBC.HORIZONTAL).add(footer);
 
         container.add(padding, BorderLayout.SOUTH);
-    }
-
-    @EventHandler
-    private void onInit(final UIInitEvent event) {
-        SwingUtilities.invokeLater(() -> {
-            this.viaVersionDumpButton.setEnabled(true);
-        });
     }
 
     @EventHandler

@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.lambdaevents.EventHandler;
@@ -31,7 +32,6 @@ import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
-import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -180,14 +180,16 @@ public class GeneralTab extends AUITab {
         GBC.create(footer).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).anchor(GBC.WEST).fill(GBC.HORIZONTAL).add(this.stateButton);
 
         parent.add(footer, BorderLayout.SOUTH);
-    }
 
-    @EventHandler
-    private void setReady(final UIInitEvent event) {
-        SwingUtilities.invokeLater(() -> {
-            this.stateButton.setText(I18n.get("tab.general.state.start"));
-            this.stateButton.setEnabled(true);
+        final Timer timer = new Timer(100, null);
+        timer.addActionListener(event -> {
+            if (Via.getManager().getProtocolManager().hasLoadedMappings()) {
+                this.stateButton.setText(I18n.get("tab.general.state.start"));
+                this.stateButton.setEnabled(true);
+                timer.stop();
+            }
         });
+        timer.start();
     }
 
     @EventHandler

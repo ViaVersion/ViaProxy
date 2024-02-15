@@ -20,14 +20,12 @@ package net.raphimc.viaproxy.ui;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
-import net.lenni0451.lambdaevents.EventHandler;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
 import net.lenni0451.reflect.JavaBypass;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
-import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.ui.impl.*;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -120,16 +118,6 @@ public class ViaProxyUI extends JFrame {
             int selectedIndex = contentPane.getSelectedIndex();
             if (selectedIndex >= 0 && selectedIndex < ViaProxyUI.this.tabs.size()) ViaProxyUI.this.tabs.get(selectedIndex).onTabOpened();
         });
-
-        this.contentPane.setEnabledAt(this.contentPane.indexOfTab(this.accountsTab.getName()), false);
-        this.contentPane.setEnabledAt(this.contentPane.indexOfTab(this.realmsTab.getName()), false);
-    }
-
-    @EventHandler
-    private void onInit(final UIInitEvent event) {
-        for (int i = 0; i < this.contentPane.getTabCount(); i++) {
-            this.contentPane.setEnabledAt(i, true);
-        }
     }
 
     public void openURL(final String url) {

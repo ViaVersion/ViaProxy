@@ -18,7 +18,6 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import net.lenni0451.commons.swing.GBC;
-import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.viaproxy.ViaProxy;
@@ -29,7 +28,6 @@ import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyUI;
-import net.raphimc.viaproxy.ui.events.UIInitEvent;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
 import net.raphimc.viaproxy.util.TFunction;
 
@@ -204,10 +202,7 @@ public class AccountsTab extends AUITab {
 
         contentPane.setLayout(new BorderLayout());
         contentPane.add(body, BorderLayout.CENTER);
-    }
 
-    @EventHandler
-    private void onInit(final UIInitEvent event) {
         ViaProxy.getSaveManager().accountsSave.getAccounts().forEach(this::addAccount);
         DefaultListModel<Account> model = (DefaultListModel<Account>) this.accountsList.getModel();
         if (!model.isEmpty()) this.markSelected(0);
