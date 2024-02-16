@@ -47,6 +47,7 @@ public class PluginManager {
 
     public PluginManager() {
         this.loadPlugins();
+        Runtime.getRuntime().addShutdownHook(new Thread(this::unloadPlugins));
     }
 
     public List<ViaProxyPlugin> getPlugins() {
@@ -84,7 +85,7 @@ public class PluginManager {
 
         for (ViaProxyPlugin plugin : this.plugins) {
             if (!plugin.isEnabled()) {
-                enablePlugin(plugin);
+                this.enablePlugin(plugin);
             }
         }
     }
@@ -127,13 +128,13 @@ public class PluginManager {
 
     private void enablePlugin(final ViaProxyPlugin plugin) {
         for (String depend : plugin.getDepends()) {
-            final ViaProxyPlugin dependPlugin = getPlugin(depend);
+            final ViaProxyPlugin dependPlugin = this.getPlugin(depend);
             if (dependPlugin == null) {
                 Logger.LOGGER.error("Plugin '" + plugin.getName() + "' depends on '" + depend + "' which is not loaded");
                 return;
             }
             if (!dependPlugin.isEnabled()) {
-                enablePlugin(dependPlugin);
+                this.enablePlugin(dependPlugin);
             }
 
             RStream.of(plugin.getClassLoader()).fields().by("parent").set(dependPlugin.getClassLoader());
@@ -144,6 +145,34 @@ public class PluginManager {
             Logger.LOGGER.info("Enabled plugin '" + plugin.getName() + "'");
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to enable plugin '" + plugin.getName() + "'", e);
+        }
+    }
+
+    private void unloadPlugins() {
+        for (ViaProxyPlugin plugin : this.plugins) {
+            if (plugin.isEnabled()) {
+                this.disablePlugin(plugin);
+            }
+        }
+    }
+
+    private void disablePlugin(final ViaProxyPlugin plugin) {
+        for (String depend : plugin.getDepends()) {
+            final ViaProxyPlugin dependPlugin = this.getPlugin(depend);
+            if (dependPlugin == null) {
+                Logger.LOGGER.error("Plugin '" + plugin.getName() + "' depends on '" + depend + "' which is not loaded");
+                return;
+            }
+            if (dependPlugin.isEnabled()) {
+                this.disablePlugin(dependPlugin);
+            }
+        }
+
+        try {
+            plugin.disable();
+            Logger.LOGGER.info("Disabled plugin '" + plugin.getName() + "'");
+        } catch (Throwable e) {
+            Logger.LOGGER.error("Failed to disable plugin '" + plugin.getName() + "'", e);
         }
     }
 

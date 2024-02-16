@@ -41,6 +41,17 @@ public abstract class ViaProxyPlugin {
 
     public abstract void onEnable();
 
+    final void disable() {
+        try {
+            this.onDisable();
+        } finally {
+            this.enabled = false;
+        }
+    }
+
+    public void onDisable() {
+    }
+
     public final String getName() {
         return (String) this.viaProxyYaml.get("name");
     }
