@@ -68,8 +68,8 @@ dependencies {
     }
 
     include "com.google.code.gson:gson:2.10.1"
-    include "com.formdev:flatlaf:3.3"
-    include "com.formdev:flatlaf-extras:3.3"
+    include "com.formdev:flatlaf:3.4"
+    include "com.formdev:flatlaf-extras:3.4"
     include "org.apache.commons:commons-lang3:3.14.0"
     include "commons-io:commons-io:2.15.1"
     include "net.sf.jopt-simple:jopt-simple:5.0.4"
