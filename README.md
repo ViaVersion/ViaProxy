@@ -16,14 +16,15 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 
 ## Supported Client versions
 - Release (1.7.2 - 1.20.5)
-- Bedrock Edition (Needs the [Geyser plugin](https://github.com/RaphiMC/ViaProxyGeyserPlugin))
+- Bedrock Edition (Needs the [Geyser plugin](https://geysermc.org/download))
 - Classic, Alpha, Beta, Release 1.0 - 1.6.4 (Only passthrough)
 
 ViaProxy supports joining to any of the listed server version from any of the listed client versions.
 
 ## Special Features
 - Support for joining online mode servers
-- Support for joining on servers which have chat signing enabled from all listed client versions.
+- Support for joining on servers which have chat signing enabled from all listed client versions
+- Allows joining Minecraft Realms with any supported client version
 
 ## Releases
 ### Executable Jar File
