@@ -34,11 +34,11 @@ import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class CustomPayloadPacketHandler extends PacketHandler {
+public class OpenAuthModPacketHandler extends PacketHandler {
 
     private final int customPayloadId;
 
-    public CustomPayloadPacketHandler(ProxyConnection proxyConnection) {
+    public OpenAuthModPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
 
         this.customPayloadId = MCPackets.C2S_PLUGIN_MESSAGE.getId(proxyConnection.getClientVersion().getVersion());
