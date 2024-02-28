@@ -153,13 +153,13 @@ public class ViaProxy {
         ConsoleHandler.hookConsole();
         ViaProxy.loadNetty();
         ClassLoaderPriorityUtil.loadOverridingJars();
-        progressConsumer.accept("Loading Protocol Translators");
-        ProtocolTranslator.init();
 
-        progressConsumer.accept("Loading Saves");
-        SAVE_MANAGER = new SaveManager();
         progressConsumer.accept("Loading Plugins");
         PLUGIN_MANAGER = new PluginManager();
+        progressConsumer.accept("Loading Protocol Translators");
+        ProtocolTranslator.init();
+        progressConsumer.accept("Loading Saves");
+        SAVE_MANAGER = new SaveManager();
 
         if (hasUI) {
             progressConsumer.accept("Loading GUI");
