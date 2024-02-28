@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.proxy.packethandler;
 
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.util.Key;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -51,8 +50,7 @@ public class BrandCustomPayloadPacketHandler extends PacketHandler {
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
         if (packet instanceof UnknownPacket unknownPacket
                 && (unknownPacket.packetId == this.customPayloadId && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY
-                || unknownPacket.packetId == this.configCustomPayloadId && this.proxyConnection.getP2sConnectionState() == ConnectionState.CONFIGURATION)
-                && this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
+                || unknownPacket.packetId == this.configCustomPayloadId && this.proxyConnection.getP2sConnectionState() == ConnectionState.CONFIGURATION)) {
             final ByteBuf data = Unpooled.wrappedBuffer(unknownPacket.data);
             final String channel = PacketTypes.readString(data, Short.MAX_VALUE); // channel
             if (Key.namespaced(channel).equals(BRAND_CHANNEL) || channel.equals(LEGACY_BRAND_CHANNEL)) {
