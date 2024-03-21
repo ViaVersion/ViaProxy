@@ -80,7 +80,7 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
     include "net.lenni0451.classtransform:mixinstranslator:1.13.0"
-    include "net.lenni0451.classtransform:mixinsdummy:1.13.0"
+    include "net.lenni0451.classtransform:mixinsdummy:1.13.1"
     include "net.lenni0451.classtransform:additionalclassprovider:1.13.0"
     include "net.lenni0451:Reflect:1.3.2"
     include "net.lenni0451:LambdaEvents:2.4.1"
