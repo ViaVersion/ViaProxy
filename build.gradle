@@ -102,7 +102,7 @@ dependencies {
     include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
         exclude group: "io.netty"
     }
-    include "gs.mclo:api:3.0.1"
+    include "gs.mclo:api:4.0.1"
 }
 
 sourceSets {
