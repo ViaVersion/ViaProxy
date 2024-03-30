@@ -48,6 +48,7 @@ public class Options {
     public static Account MC_ACCOUNT;
     public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
     public static boolean IGNORE_PACKET_TRANSLATION_ERRORS;
+    public static boolean ALLOW_BETA_PINGING;
 
     // GUI only config options
     public static String CLASSIC_MP_PASS;
@@ -81,6 +82,7 @@ public class Options {
         final OptionSpec<Void> serverHaProxyProtocol = parser.acceptsAll(asList("server-haproxy-protocol", "server-haproxy"), "Send HAProxy protocol messages to the backend server");
         final OptionSpec<Void> legacyClientPassthrough = parser.acceptsAll(asList("legacy_client_passthrough", "legacy_passthrough"), "Allow <= 1.6.4 clients to connect to the backend server (No protocol translation)");
         final OptionSpec<Void> ignorePacketTranslationErrors = parser.acceptsAll(List.of("ignore-packet-translation-errors"), "Enabling this will prevent getting disconnected from the server when a packet translation error occurs and instead only print the error in the console. This may cause issues depending on the type of packet which failed to translate");
+        final OptionSpec<Void> allowBetaPinging = parser.acceptsAll(List.of("allow-beta-pinging"), "Enabling this will allow you to ping <= b1.7.3 servers. This may cause issues with servers that block too frequent connections");
         ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(parser));
 
         final OptionSet options;
@@ -137,6 +139,7 @@ public class Options {
             SERVER_HAPROXY_PROTOCOL = options.has(serverHaProxyProtocol);
             LEGACY_CLIENT_PASSTHROUGH = options.has(legacyClientPassthrough);
             IGNORE_PACKET_TRANSLATION_ERRORS = options.has(ignorePacketTranslationErrors);
+            ALLOW_BETA_PINGING = options.has(allowBetaPinging);
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
         } catch (OptionException e) {
             Logger.LOGGER.error("Error parsing options: " + e.getMessage());

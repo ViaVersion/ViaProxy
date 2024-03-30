@@ -28,6 +28,7 @@ import net.raphimc.netminecraft.constants.IntendedState;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.ConnectEvent;
@@ -156,6 +157,10 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             } catch (CloseAndReturn e) {
                 this.proxyConnection.kickClient("§cWrong SRV syntax! §6Please use:\n§7ip_port_version.viaproxy.hostname");
             }
+        }
+
+        if (!Options.ALLOW_BETA_PINGING && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3)) {
+            this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
         }
 
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && TransferDataHolder.hasTempRedirect(this.proxyConnection.getC2P())) {

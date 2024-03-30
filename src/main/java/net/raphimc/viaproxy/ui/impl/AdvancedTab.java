@@ -49,6 +49,7 @@ public class AdvancedTab extends AUITab {
     JCheckBox legacySkinLoading;
     JCheckBox chatSigning;
     JCheckBox ignorePacketTranslationErrors;
+    JCheckBox allowBetaPinging;
     JButton viaVersionDumpButton;
     JButton uploadLogsButton;
 
@@ -114,6 +115,13 @@ public class AdvancedTab extends AUITab {
             this.ignorePacketTranslationErrors.setSelected(false);
             ViaProxy.getSaveManager().uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.ignorePacketTranslationErrors);
+        }
+        {
+            this.allowBetaPinging = new JCheckBox(I18n.get("tab.advanced.allow_beta_pinging.label"));
+            this.allowBetaPinging.setToolTipText(I18n.get("tab.advanced.allow_beta_pinging.tooltip"));
+            this.allowBetaPinging.setSelected(false);
+            ViaProxy.getSaveManager().uiSave.loadCheckBox("allow_beta_pinging", this.allowBetaPinging);
+            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.allowBetaPinging);
         }
 
         parent.add(body, BorderLayout.NORTH);
@@ -190,6 +198,7 @@ public class AdvancedTab extends AUITab {
         save.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
         save.put("chat_signing", String.valueOf(this.chatSigning.isSelected()));
         save.put("ignore_packet_translation_errors", String.valueOf(this.ignorePacketTranslationErrors.isSelected()));
+        save.put("allow_beta_pinging", String.valueOf(this.allowBetaPinging.isSelected()));
         ViaProxy.getSaveManager().save();
     }
 
