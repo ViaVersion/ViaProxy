@@ -159,7 +159,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
-        if (!Options.ALLOW_BETA_PINGING && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3)) {
+        if (packet.intendedState.getConnectionState() == ConnectionState.STATUS && !Options.ALLOW_BETA_PINGING && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3)) {
             this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
         }
 
