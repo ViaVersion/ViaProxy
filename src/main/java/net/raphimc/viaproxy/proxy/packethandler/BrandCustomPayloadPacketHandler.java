@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.packethandler;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.util.Key;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -54,7 +55,17 @@ public class BrandCustomPayloadPacketHandler extends PacketHandler {
             final ByteBuf data = Unpooled.wrappedBuffer(unknownPacket.data);
             final String channel = PacketTypes.readString(data, Short.MAX_VALUE); // channel
             if (Key.namespaced(channel).equals(BRAND_CHANNEL) || channel.equals(LEGACY_BRAND_CHANNEL)) {
-                final String brand = PacketTypes.readString(data, Short.MAX_VALUE);
+
+                String brand;
+                try {
+                    brand = PacketTypes.readString(data, Short.MAX_VALUE);
+                } catch (Exception e) {
+                    if (this.proxyConnection.getServerVersion().newerThan(ProtocolVersion.v1_20)) {
+                        throw e;
+                    } else { // <=1.20 clients ignore errors
+                        brand = "Unknown";
+                    }
+                }
                 final String newBrand = "ViaProxy (" + this.proxyConnection.getClientVersion().getName() + ") -> " + brand + " §r(" + this.proxyConnection.getServerVersion().getName() + ")";
 
                 final ByteBuf newCustomPayloadData = Unpooled.buffer();
