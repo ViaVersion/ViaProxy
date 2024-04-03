@@ -21,6 +21,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.mcping.MCPing;
 import net.lenni0451.mcping.pings.sockets.impl.factories.SocketChannelSocketFactory;
 import net.lenni0451.mcping.responses.MCPingResponse;
+import net.raphimc.vialoader.util.ProtocolVersionList;
 
 import java.net.SocketAddress;
 
@@ -51,7 +52,14 @@ public class ProtocolVersionDetector {
             if (ProtocolVersion.isRegistered(response.version.protocol)) { // If the protocol is registered, we can use it
                 return ProtocolVersion.getProtocol(response.version.protocol);
             } else {
-                throw new RuntimeException("Unsupported protocol version: " + response.version.protocol);
+                for (ProtocolVersion protocolVersion : ProtocolVersionList.getProtocolsNewToOld()) {
+                    for (String version : protocolVersion.getIncludedVersions()) {
+                        if (response.version.name.contains(version)) {
+                            return protocolVersion;
+                        }
+                    }
+                }
+                throw new RuntimeException("Unable to detect the server version\nServer sent an invalid protocol id: " + response.version.protocol + " (" + response.version.name + "§r)");
             }
         }
     }
