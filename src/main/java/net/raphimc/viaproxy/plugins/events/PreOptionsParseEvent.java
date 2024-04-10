@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.plugins.events;
 
 import joptsimple.OptionParser;
 
+@Deprecated(forRemoval = true)
 public class PreOptionsParseEvent {
 
     private final OptionParser parser;

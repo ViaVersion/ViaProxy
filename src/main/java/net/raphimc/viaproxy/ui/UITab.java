@@ -19,14 +19,14 @@ package net.raphimc.viaproxy.ui;
 
 import javax.swing.*;
 
-public abstract class AUITab {
+public abstract class UITab {
 
-    protected final ViaProxyUI frame;
+    protected final ViaProxyWindow viaProxyWindow;
     private final String name;
     protected final JPanel contentPane;
 
-    public AUITab(final ViaProxyUI frame, final String name) {
-        this.frame = frame;
+    public UITab(final ViaProxyWindow viaProxyWindow, final String name) {
+        this.viaProxyWindow = viaProxyWindow;
         this.name = I18n.get("tab." + name + ".name");
         this.contentPane = new JPanel();
 

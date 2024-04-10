@@ -22,6 +22,7 @@ import joptsimple.OptionDescriptor;
 import joptsimple.internal.Classes;
 import joptsimple.internal.Strings;
 
+@Deprecated(forRemoval = true)
 public class BetterHelpFormatter extends BuiltinHelpFormatter {
 
     public BetterHelpFormatter() {

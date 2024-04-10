@@ -44,19 +44,21 @@ import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
 import net.raphimc.viaproxy.plugins.events.ViaProxyLoadedEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
+import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.SaveManager;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.SplashScreen;
-import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
@@ -69,13 +71,15 @@ public class ViaProxy {
     public static final String IMPL_VERSION = "${impl_version}";
 
     public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
-    private static /*final*/ SaveManager SAVE_MANAGER;
     private static /*final*/ PluginManager PLUGIN_MANAGER;
+    private static /*final*/ SaveManager SAVE_MANAGER;
+    private static /*final*/ ViaProxyConfig CONFIG;
     private static /*final*/ ChannelGroup CLIENT_CHANNELS;
 
     private static Instrumentation instrumentation;
     private static NetServer currentProxyServer;
-    private static ViaProxyUI ui;
+    private static ViaProxyWindow viaProxyWindow;
+    private static JFrame foregroundWindow;
 
     public static void agentmain(final String args, final Instrumentation instrumentation) {
         ViaProxy.instrumentation = instrumentation;
@@ -105,15 +109,20 @@ public class ViaProxy {
 
     public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException, InvocationTargetException {
         final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
+        final boolean legacyCLI = args.length > 0 && args[0].startsWith("-");
         final SplashScreen splashScreen;
         final Consumer<String> progressConsumer;
         if (hasUI) {
-            final float progressStep = 1F / 6F;
-            splashScreen = new SplashScreen();
+            final float progressStep = 1F / 7F;
+            foregroundWindow = splashScreen = new SplashScreen();
             progressConsumer = (text) -> {
                 splashScreen.setProgress(splashScreen.getProgress() + progressStep);
                 splashScreen.setText(text);
             };
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+                ViaProxyWindow.showException(e);
+                System.exit(1);
+            });
         } else {
             splashScreen = null;
             progressConsumer = text -> {
@@ -154,18 +163,29 @@ public class ViaProxy {
         ViaProxy.loadNetty();
         ClassLoaderPriorityUtil.loadOverridingJars();
 
+        final File viaProxyConfigFile;
+        if (!hasUI && !legacyCLI) {
+            viaProxyConfigFile = new File(args[0]);
+        } else {
+            viaProxyConfigFile = new File("viaproxy.yml");
+        }
+        final boolean firstStart = !viaProxyConfigFile.exists();
+
         progressConsumer.accept("Loading Plugins");
         PLUGIN_MANAGER = new PluginManager();
         progressConsumer.accept("Loading Protocol Translators");
         ProtocolTranslator.init();
         progressConsumer.accept("Loading Saves");
         SAVE_MANAGER = new SaveManager();
+        progressConsumer.accept("Loading Config");
+        CONFIG = new ViaProxyConfig(viaProxyConfigFile);
+        CONFIG.reload();
 
         if (hasUI) {
             progressConsumer.accept("Loading GUI");
             SwingUtilities.invokeAndWait(() -> {
                 try {
-                    ui = new ViaProxyUI();
+                    foregroundWindow = viaProxyWindow = new ViaProxyWindow();
                     progressConsumer.accept("Done");
                     splashScreen.dispose();
                 } catch (Throwable e) {
@@ -179,7 +199,12 @@ public class ViaProxy {
             EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
         } else {
-            Options.parse(args);
+            if (legacyCLI) {
+                Options.parse(args);
+            } else if (firstStart) {
+                Logger.LOGGER.info("This is the first start of ViaProxy. Please configure the settings in the " + viaProxyConfigFile.getName() + " file and restart ViaProxy.");
+                System.exit(0);
+            }
 
             if (System.getProperty("skipUpdateCheck") == null) {
                 CompletableFuture.runAsync(new UpdateCheckTask(false));
@@ -202,8 +227,8 @@ public class ViaProxy {
             Logger.LOGGER.info("Starting proxy server");
             currentProxyServer = new NetServer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler(), Client2ProxyChannelInitializer::new);
             EVENT_MANAGER.call(new ProxyStartEvent());
-            Logger.LOGGER.info("Binding proxy server to " + AddressUtil.toString(Options.BIND_ADDRESS));
-            currentProxyServer.bind(Options.BIND_ADDRESS, false);
+            Logger.LOGGER.info("Binding proxy server to " + AddressUtil.toString(CONFIG.getBindAddress()));
+            currentProxyServer.bind(CONFIG.getBindAddress(), false);
         } catch (Throwable e) {
             currentProxyServer = null;
             throw e;
@@ -236,12 +261,16 @@ public class ViaProxy {
         CLIENT_CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     }
 
+    public static PluginManager getPluginManager() {
+        return PLUGIN_MANAGER;
+    }
+
     public static SaveManager getSaveManager() {
         return SAVE_MANAGER;
     }
 
-    public static PluginManager getPluginManager() {
-        return PLUGIN_MANAGER;
+    public static ViaProxyConfig getConfig() {
+        return CONFIG;
     }
 
     public static ChannelGroup getConnectedClients() {
@@ -252,8 +281,12 @@ public class ViaProxy {
         return currentProxyServer;
     }
 
-    public static ViaProxyUI getUI() {
-        return ui;
+    public static ViaProxyWindow getViaProxyWindow() {
+        return viaProxyWindow;
+    }
+
+    public static JFrame getForegroundWindow() {
+        return foregroundWindow;
     }
 
 }

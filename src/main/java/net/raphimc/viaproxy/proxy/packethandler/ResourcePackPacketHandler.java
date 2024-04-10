@@ -28,7 +28,7 @@ import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
-import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.nio.charset.StandardCharsets;
@@ -61,12 +61,12 @@ public class ResourcePackPacketHandler extends PacketHandler {
     }
 
     private void sendResourcePack() {
-        if (Options.RESOURCE_PACK_URL != null) {
+        if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getChannel().eventLoop().schedule(() -> {
                 if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
                     final ByteBuf resourcePackPacket = Unpooled.buffer();
                     PacketTypes.writeVarInt(resourcePackPacket, MCPackets.S2C_RESOURCE_PACK.getId(this.proxyConnection.getClientVersion().getVersion()));
-                    PacketTypes.writeString(resourcePackPacket, Options.RESOURCE_PACK_URL); // url
+                    PacketTypes.writeString(resourcePackPacket, ViaProxy.getConfig().getResourcePackUrl()); // url
                     PacketTypes.writeString(resourcePackPacket, ""); // hash
                     if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_17)) {
                         resourcePackPacket.writeBoolean(Via.getConfig().isForcedUse1_17ResourcePack()); // required
@@ -80,7 +80,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
                     }
                     this.proxyConnection.getC2P().writeAndFlush(resourcePackPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
-                    final byte[] data = Options.RESOURCE_PACK_URL.getBytes(StandardCharsets.UTF_8);
+                    final byte[] data = ViaProxy.getConfig().getResourcePackUrl().getBytes(StandardCharsets.UTF_8);
 
                     final ByteBuf customPayloadPacket = Unpooled.buffer();
                     PacketTypes.writeVarInt(customPayloadPacket, MCPackets.S2C_PLUGIN_MESSAGE.getId(this.proxyConnection.getClientVersion().getVersion()));

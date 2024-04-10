@@ -31,9 +31,10 @@ import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatformImp
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaVersionPlatformImpl;
 
 import java.io.File;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class ProtocolTranslator {
@@ -67,25 +68,41 @@ public class ProtocolTranslator {
 
     private static void patchConfigs() {
         final File configFolder = new File("ViaLoader");
+        configFolder.mkdirs();
 
-        final File viaVersionConfig = new File(configFolder, "viaversion.yml");
-        final Map<String, Object> viaVersionPatches = new HashMap<>();
-        viaVersionPatches.put("1_13-tab-complete-delay", 5);
-        viaVersionPatches.put("no-delay-shield-blocking", true);
-        viaVersionPatches.put("chunk-border-fix", true);
-        new ConfigPatcher(viaVersionConfig, viaVersionPatches);
+        try {
+            final File viaVersionConfig = new File(configFolder, "viaversion.yml");
+            Files.writeString(viaVersionConfig.toPath(), """
+                    1_13-tab-complete-delay: 5
+                    no-delay-shield-blocking: true
+                    chunk-border-fix: true
+                    """, StandardOpenOption.CREATE_NEW);
+        } catch (FileAlreadyExistsException ignored) {
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to patch ViaVersion config", e);
+        }
 
-        final File viaBackwardsConfig = new File(configFolder, "viabackwards.yml");
-        final Map<String, Object> viaBackwardsPatches = new HashMap<>();
-        viaBackwardsPatches.put("fix-1_13-face-player", true);
-        viaBackwardsPatches.put("handle-pings-as-inv-acknowledgements", true);
-        new ConfigPatcher(viaBackwardsConfig, viaBackwardsPatches);
+        try {
+            final File viaBackwardsConfig = new File(configFolder, "viabackwards.yml");
+            Files.writeString(viaBackwardsConfig.toPath(), """
+                    fix-1_13-face-player: 5
+                    handle-pings-as-inv-acknowledgements: true
+                    """, StandardOpenOption.CREATE_NEW);
+        } catch (FileAlreadyExistsException ignored) {
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to patch ViaBackwards config", e);
+        }
 
-        final File viaRewindConfig = new File(configFolder, "viarewind.yml");
-        final Map<String, Object> viaRewindPatches = new HashMap<>();
-        viaRewindPatches.put("replace-adventure", true);
-        viaRewindPatches.put("replace-particles", true);
-        new ConfigPatcher(viaRewindConfig, viaRewindPatches);
+        try {
+            final File viaRewindConfig = new File(configFolder, "viarewind.yml");
+            Files.writeString(viaRewindConfig.toPath(), """
+                    replace-adventure: true
+                    replace-particles: true
+                    """, StandardOpenOption.CREATE_NEW);
+        } catch (FileAlreadyExistsException ignored) {
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to patch ViaRewind config", e);
+        }
     }
 
 }

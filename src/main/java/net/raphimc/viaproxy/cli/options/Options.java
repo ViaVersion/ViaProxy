@@ -25,6 +25,7 @@ import joptsimple.OptionSpec;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
 import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
+import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -37,33 +38,37 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
+@Deprecated(forRemoval = true)
 public class Options {
 
     public static SocketAddress BIND_ADDRESS;
     public static SocketAddress CONNECT_ADDRESS;
     public static ProtocolVersion PROTOCOL_VERSION;
     public static boolean ONLINE_MODE;
-    public static boolean OPENAUTHMOD_AUTH;
     public static boolean BETACRAFT_AUTH;
     public static Account MC_ACCOUNT;
-    public static URI PROXY_URL; // Example: type://address:port or type://username:password@address:port
+    public static URI PROXY_URL;
     public static boolean IGNORE_PACKET_TRANSLATION_ERRORS;
     public static boolean ALLOW_BETA_PINGING;
 
-    // GUI only config options
-    public static String CLASSIC_MP_PASS;
-    public static Boolean LEGACY_SKIN_LOADING;
     public static boolean CHAT_SIGNING;
 
-    // CLI only config options
     public static int COMPRESSION_THRESHOLD = 256;
-    public static boolean SRV_MODE; // Example: lenni0451.net_25565_1.8.x.viaproxy.127.0.0.1.nip.io
-    public static boolean INTERNAL_SRV_MODE; // Example: ip:port\7version\7mppass
-    public static String RESOURCE_PACK_URL; // Example: http://example.com/resourcepack.zip
+    public static boolean SRV_MODE;
+    public static String RESOURCE_PACK_URL;
     public static boolean SERVER_HAPROXY_PROTOCOL;
     public static boolean LEGACY_CLIENT_PASSTHROUGH;
 
     public static void parse(final String[] args) throws IOException {
+        Logger.LOGGER.fatal("===============================================================================================================");
+        Logger.LOGGER.fatal("ViaProxy CLI is deprecated and will be removed in the future. Please use the config file instead. See the ViaProxy README on GitHub for more information.");
+        Logger.LOGGER.fatal("Waiting 10 seconds before continuing...");
+        Logger.LOGGER.fatal("===============================================================================================================");
+        try {
+            Thread.sleep(10000);
+        } catch (Throwable ignored) {
+        }
+
         final OptionParser parser = new OptionParser();
         final OptionSpec<Void> help = parser.acceptsAll(asList("help", "h", "?"), "Get a list of all arguments").forHelp();
 
@@ -71,7 +76,6 @@ public class Options {
         final OptionSpec<String> connectAddress = parser.acceptsAll(asList("connect_address", "target_ip", "ca", "a"), "The address of the target server").withRequiredArg().ofType(String.class).required();
         final OptionSpec<ProtocolVersion> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new ProtocolVersionConverter()).required();
         final OptionSpec<Void> srvMode = parser.acceptsAll(asList("srv_mode", "srv", "s"), "Enable srv mode");
-        final OptionSpec<Void> iSrvMode = parser.acceptsAll(asList("internal_srv_mode", "isrv"), "Enable internal srv mode").availableUnless(srvMode);
         final OptionSpec<Void> proxyOnlineMode = parser.acceptsAll(asList("online_mode", "om", "o"), "Enable proxy online mode");
         final OptionSpec<Integer> compressionThreshold = parser.acceptsAll(asList("compression_threshold", "ct", "c"), "The threshold for packet compression").withRequiredArg().ofType(Integer.class).defaultsTo(COMPRESSION_THRESHOLD);
         final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Use OpenAuthMod for joining online mode servers");
@@ -99,10 +103,8 @@ public class Options {
             BIND_ADDRESS = AddressUtil.parse(options.valueOf(bindAddress), null);
             CONNECT_ADDRESS = AddressUtil.parse(options.valueOf(connectAddress), PROTOCOL_VERSION);
             SRV_MODE = options.has(srvMode);
-            INTERNAL_SRV_MODE = options.has(iSrvMode);
             ONLINE_MODE = options.has(proxyOnlineMode);
             COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
-            OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
             if (options.has(guiAccountIndex)) {
                 final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
                 final int index = options.valueOf(guiAccountIndex);
@@ -141,12 +143,49 @@ public class Options {
             IGNORE_PACKET_TRANSLATION_ERRORS = options.has(ignorePacketTranslationErrors);
             ALLOW_BETA_PINGING = options.has(allowBetaPinging);
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
+            putToConfig(ViaProxy.getConfig());
         } catch (OptionException e) {
             Logger.LOGGER.error("Error parsing options: " + e.getMessage());
             parser.formatHelpWith(new BetterHelpFormatter());
             parser.printHelpOn(Logger.SYSOUT);
             System.exit(1);
         }
+    }
+
+    public static void putToConfig(final ViaProxyConfig config) {
+        config.setBindAddress(BIND_ADDRESS);
+        config.setTargetAddress(CONNECT_ADDRESS);
+        config.setTargetVersion(PROTOCOL_VERSION);
+        config.setProxyOnlineMode(ONLINE_MODE);
+        config.setBetacraftAuth(BETACRAFT_AUTH);
+        config.setAccount(MC_ACCOUNT);
+        config.setBackendProxyUrl(PROXY_URL);
+        config.setBackendHaProxy(SERVER_HAPROXY_PROTOCOL);
+        config.setChatSigning(CHAT_SIGNING);
+        config.setCompressionThreshold(COMPRESSION_THRESHOLD);
+        config.setResourcePackUrl(RESOURCE_PACK_URL);
+        config.setSrvMode(SRV_MODE);
+        config.setAllowBetaPinging(ALLOW_BETA_PINGING);
+        config.setIgnoreProtocolTranslationErrors(IGNORE_PACKET_TRANSLATION_ERRORS);
+        config.setAllowLegacyClientPassthrough(LEGACY_CLIENT_PASSTHROUGH);
+    }
+
+    public static void loadFromConfig(final ViaProxyConfig config) {
+        BIND_ADDRESS = config.getBindAddress();
+        CONNECT_ADDRESS = config.getTargetAddress();
+        PROTOCOL_VERSION = config.getTargetVersion();
+        ONLINE_MODE = config.isProxyOnlineMode();
+        BETACRAFT_AUTH = config.useBetacraftAuth();
+        MC_ACCOUNT = config.getAccount();
+        PROXY_URL = config.getBackendProxyUrl();
+        SERVER_HAPROXY_PROTOCOL = config.useBackendHaProxy();
+        CHAT_SIGNING = config.shouldSignChat();
+        COMPRESSION_THRESHOLD = config.getCompressionThreshold();
+        ALLOW_BETA_PINGING = config.shouldAllowBetaPinging();
+        IGNORE_PACKET_TRANSLATION_ERRORS = config.shouldIgnoreProtocolTranslationErrors();
+        LEGACY_CLIENT_PASSTHROUGH = config.shouldAllowLegacyClientPassthrough();
+        RESOURCE_PACK_URL = config.getResourcePackUrl();
+        SRV_MODE = config.isSrvMode();
     }
 
 }

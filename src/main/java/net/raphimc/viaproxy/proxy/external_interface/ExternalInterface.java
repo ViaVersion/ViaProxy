@@ -35,8 +35,8 @@ import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
+import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
@@ -65,7 +65,7 @@ public class ExternalInterface {
                 proxyConnection.setGameProfile(account.getGameProfile());
                 final UserConnection user = proxyConnection.getUserConnection();
 
-                if (Options.CHAT_SIGNING && proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && account instanceof MicrosoftAccount microsoftAccount) {
+                if (ViaProxy.getConfig().shouldSignChat() && proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && account instanceof MicrosoftAccount microsoftAccount) {
                     final StepPlayerCertificates.PlayerCertificates playerCertificates = microsoftAccount.getPlayerCertificates();
                     final Instant expiresAt = Instant.ofEpochMilli(playerCertificates.getExpireTimeMs());
                     final long expiresAtMillis = playerCertificates.getExpireTimeMs();
@@ -107,7 +107,7 @@ public class ExternalInterface {
 
     public static void joinServer(final String serverIdHash, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException {
         Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Trying to join online mode server");
-        if (Options.OPENAUTHMOD_AUTH) {
+        if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {
             try {
                 final ByteBuf response = proxyConnection.sendCustomPayload(OpenAuthModConstants.JOIN_CHANNEL, PacketTypes.writeString(Unpooled.buffer(), serverIdHash)).get(6, TimeUnit.SECONDS);
                 if (response == null) throw new TimeoutException();
@@ -130,7 +130,7 @@ public class ExternalInterface {
         Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Requesting nonce signature");
         final UserConnection user = proxyConnection.getUserConnection();
 
-        if (Options.OPENAUTHMOD_AUTH) {
+        if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {
             try {
                 final ByteBuf response = proxyConnection.sendCustomPayload(OpenAuthModConstants.SIGN_NONCE_CHANNEL, PacketTypes.writeByteArray(Unpooled.buffer(), nonce)).get(5, TimeUnit.SECONDS);
                 if (response == null) throw new TimeoutException();

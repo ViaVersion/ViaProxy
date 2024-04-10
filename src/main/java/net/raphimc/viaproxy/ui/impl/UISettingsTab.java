@@ -19,9 +19,9 @@ package net.raphimc.viaproxy.ui.impl;
 
 import net.lenni0451.commons.swing.GBC;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
-import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.UITab;
+import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -30,11 +30,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 
-public class UISettingsTab extends AUITab {
+public class UISettingsTab extends UITab {
 
-    public UISettingsTab(final ViaProxyUI frame) {
+    public UISettingsTab(final ViaProxyWindow frame) {
         super(frame, "ui_settings");
     }
 
@@ -63,14 +63,14 @@ public class UISettingsTab extends AUITab {
                 if (!(language.getSelectedItem() instanceof String locale)) return;
                 if (locale.equals(I18n.getCurrentLocale())) return;
                 I18n.setLocale(locale);
-                ViaProxy.getUI().showInfo(I18n.get("tab.ui_settings.language.success", I18n.get("language.name"), locale));
+                ViaProxyWindow.showInfo(I18n.get("tab.ui_settings.language.success", I18n.get("language.name"), locale));
                 try {
                     final File f = new File(ViaProxy.class.getProtectionDomain().getCodeSource().getLocation().toURI());
                     Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                     System.exit(0);
                 } catch (URISyntaxException | IOException e) {
                     Logger.LOGGER.error("Could not start the ViaProxy jar", e);
-                    ViaProxy.getUI().showException(e);
+                    ViaProxyWindow.showException(e);
                     System.exit(1);
                 }
             });

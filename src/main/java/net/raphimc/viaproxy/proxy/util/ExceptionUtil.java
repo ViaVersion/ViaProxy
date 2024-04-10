@@ -61,8 +61,8 @@ public class ExceptionUtil {
 
     public static String prettyPrint(Throwable t) {
         final StringBuilder msg = new StringBuilder();
-        if (t instanceof EncoderException) t = t.getCause();
-        if (t instanceof DecoderException) t = t.getCause();
+        if (t instanceof EncoderException && t.getCause() != null) t = t.getCause();
+        if (t instanceof DecoderException && t.getCause() != null) t = t.getCause();
         while (t != null) {
             msg.append("\n");
             msg.append("§c").append(t.getClass().getSimpleName()).append("§7: §f").append(t.getMessage());

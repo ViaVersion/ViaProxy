@@ -24,6 +24,7 @@ import com.google.gson.JsonParser;
 import com.vdurmont.semver4j.Semver;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.I18n;
+import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.ui.popups.DownloadPopup;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -45,6 +46,7 @@ public class UpdateCheckTask implements Runnable {
     }
 
     @Override
+    @SuppressWarnings("UnreachableCode")
     public void run() {
         if (VERSION.startsWith("$")) return; // Dev env check
         try {
@@ -95,26 +97,26 @@ public class UpdateCheckTask implements Runnable {
     }
 
     private void showUpdateWarning(final String latestVersion) {
-        JOptionPane.showMessageDialog(ViaProxy.getUI(), I18n.get("popup.update.info", VERSION, latestVersion), "ViaProxy", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(ViaProxy.getForegroundWindow(), I18n.get("popup.update.info", VERSION, latestVersion), "ViaProxy", JOptionPane.WARNING_MESSAGE);
     }
 
     private void showUpdateQuestion(final String name, final String downloadUrl, final String latestVersion) {
-        int chosen = JOptionPane.showConfirmDialog(ViaProxy.getUI(), I18n.get("popup.update.info", VERSION, latestVersion) + "\n\n" + I18n.get("popup.update.question"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        int chosen = JOptionPane.showConfirmDialog(ViaProxy.getForegroundWindow(), I18n.get("popup.update.info", VERSION, latestVersion) + "\n\n" + I18n.get("popup.update.question"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (chosen == JOptionPane.YES_OPTION) {
             File f = new File(name);
-            new DownloadPopup(ViaProxy.getUI(), downloadUrl, f, () -> SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(ViaProxy.getUI(), I18n.get("popup.update.success"), "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
+            new DownloadPopup(ViaProxy.getForegroundWindow(), downloadUrl, f, () -> SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(ViaProxy.getForegroundWindow(), I18n.get("popup.update.success"), "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
                 try {
                     Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
                     System.exit(0);
                 } catch (IOException e) {
                     Logger.LOGGER.error("Could not start the new ViaProxy jar", e);
-                    ViaProxy.getUI().showException(e);
+                    ViaProxyWindow.showException(e);
                 }
             }), t -> {
                 if (t != null) {
                     Logger.LOGGER.error("Could not download the latest version of ViaProxy", t);
-                    ViaProxy.getUI().showException(t);
+                    ViaProxyWindow.showException(t);
                 }
             });
         }

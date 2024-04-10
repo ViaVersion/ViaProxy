@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.ui.popups;
 import net.lenni0451.commons.swing.GBC;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.viaproxy.ui.I18n;
-import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.ViaProxyWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,16 +30,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
 
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BODY_BLOCK_PADDING;
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BODY_BLOCK_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 
 public class AddAccountPopup extends JDialog {
 
-    private final ViaProxyUI parent;
+    private final ViaProxyWindow parent;
     private final StepMsaDeviceCode.MsaDeviceCode deviceCode;
     private boolean externalClose;
 
-    public AddAccountPopup(final ViaProxyUI parent, final StepMsaDeviceCode.MsaDeviceCode deviceCode, final Consumer<AddAccountPopup> popupConsumer, final Runnable closeListener) {
+    public AddAccountPopup(final ViaProxyWindow parent, final StepMsaDeviceCode.MsaDeviceCode deviceCode, final Consumer<AddAccountPopup> popupConsumer, final Runnable closeListener) {
         super(parent, true);
         this.parent = parent;
         this.deviceCode = deviceCode;
@@ -76,7 +76,7 @@ public class AddAccountPopup extends JDialog {
             urlLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    AddAccountPopup.this.parent.openURL(AddAccountPopup.this.deviceCode.getDirectVerificationUri());
+                    ViaProxyWindow.openURL(AddAccountPopup.this.deviceCode.getDirectVerificationUri());
                 }
             });
             GBC.create(contentPane).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(urlLabel);

@@ -24,7 +24,7 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicMPPassProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_3_1_2to1_2_4_5.providers.OldAuthProvider;
 import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.HandshakeStorage;
-import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.net.InetAddress;
@@ -39,7 +39,7 @@ public class ViaProxyClassicMPPassProvider extends ClassicMPPassProvider {
         final String mppass = ProxyConnection.fromUserConnection(user).getUserOptions().classicMpPass();
         if (mppass != null && !mppass.isEmpty() && !mppass.equals("0")) {
             return mppass;
-        } else if (Options.BETACRAFT_AUTH) {
+        } else if (ViaProxy.getConfig().useBetacraftAuth()) {
             final HandshakeStorage handshakeStorage = user.get(HandshakeStorage.class);
             return getBetacraftMpPass(user, user.getProtocolInfo().getUsername(), handshakeStorage.getHostname(), handshakeStorage.getPort());
         } else {

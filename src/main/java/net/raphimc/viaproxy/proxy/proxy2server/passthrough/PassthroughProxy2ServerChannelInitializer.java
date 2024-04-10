@@ -22,7 +22,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
@@ -42,10 +41,10 @@ public class PassthroughProxy2ServerChannelInitializer extends Proxy2ServerChann
             return;
         }
 
-        if (Options.PROXY_URL != null) {
+        if (ViaProxy.getConfig().getBackendProxyUrl() != null) {
             channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, this.getProxyHandler());
         }
-        if (Options.SERVER_HAPROXY_PROTOCOL) {
+        if (ViaProxy.getConfig().useBackendHaProxy()) {
             channel.pipeline().addLast(VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
         }
 

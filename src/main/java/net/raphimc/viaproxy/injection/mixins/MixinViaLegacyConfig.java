@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.injection.mixins;
 
 import net.raphimc.vialegacy.ViaLegacyConfig;
-import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.ViaProxy;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,15 +29,15 @@ public abstract class MixinViaLegacyConfig {
 
     @Inject(method = "isLegacySkinLoading", at = @At("HEAD"), cancellable = true)
     private void makeGUIConfigurable1(final CallbackInfoReturnable<Boolean> cir) {
-        if (Options.LEGACY_SKIN_LOADING != null) {
-            cir.setReturnValue(Options.LEGACY_SKIN_LOADING);
+        if (ViaProxy.getViaProxyWindow() != null) {
+            cir.setReturnValue(ViaProxy.getViaProxyWindow().advancedTab.legacySkinLoading.isSelected());
         }
     }
 
     @Inject(method = "isLegacySkullLoading", at = @At("HEAD"), cancellable = true)
     private void makeGUIConfigurable2(final CallbackInfoReturnable<Boolean> cir) {
-        if (Options.LEGACY_SKIN_LOADING != null) {
-            cir.setReturnValue(Options.LEGACY_SKIN_LOADING);
+        if (ViaProxy.getViaProxyWindow() != null) {
+            cir.setReturnValue(ViaProxy.getViaProxyWindow().advancedTab.legacySkinLoading.isSelected());
         }
     }
 

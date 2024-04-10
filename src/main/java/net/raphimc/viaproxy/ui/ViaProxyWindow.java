@@ -37,7 +37,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ViaProxyUI extends JFrame {
+public class ViaProxyWindow extends JFrame {
 
     public final LambdaManager eventManager = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
 
@@ -45,7 +45,7 @@ public class ViaProxyUI extends JFrame {
     public static final int BODY_BLOCK_PADDING = 10;
 
     public final JTabbedPane contentPane = new JTabbedPane();
-    private final List<AUITab> tabs = new ArrayList<>();
+    private final List<UITab> tabs = new ArrayList<>();
 
     public final GeneralTab generalTab = new GeneralTab(this);
     public final AdvancedTab advancedTab = new AdvancedTab(this);
@@ -55,8 +55,8 @@ public class ViaProxyUI extends JFrame {
 
     private ImageIcon icon;
 
-    public ViaProxyUI() {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> this.showException(e));
+    public ViaProxyWindow() {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> showException(e));
         this.eventManager.register(this);
 
         this.setLookAndFeel();
@@ -94,7 +94,9 @@ public class ViaProxyUI extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                ViaProxyUI.this.eventManager.call(new UICloseEvent());
+                ViaProxyWindow.this.eventManager.call(new UICloseEvent());
+                ViaProxy.getConfig().save();
+                ViaProxy.getSaveManager().save();
             }
         });
         this.setSize(500, 360);
@@ -107,49 +109,49 @@ public class ViaProxyUI extends JFrame {
         RStream
                 .of(this)
                 .fields()
-                .filter(field -> AUITab.class.isAssignableFrom(field.type()))
+                .filter(field -> UITab.class.isAssignableFrom(field.type()))
                 .forEach(field -> {
-                    final AUITab tab = field.get();
+                    final UITab tab = field.get();
                     this.tabs.add(field.get());
                     tab.add(this.contentPane);
                     this.eventManager.register(tab);
                 });
         this.contentPane.addChangeListener(e -> {
             int selectedIndex = contentPane.getSelectedIndex();
-            if (selectedIndex >= 0 && selectedIndex < ViaProxyUI.this.tabs.size()) ViaProxyUI.this.tabs.get(selectedIndex).onTabOpened();
+            if (selectedIndex >= 0 && selectedIndex < ViaProxyWindow.this.tabs.size()) ViaProxyWindow.this.tabs.get(selectedIndex).onTabOpened();
         });
     }
 
-    public void openURL(final String url) {
+    public static void openURL(final String url) {
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (Throwable t) {
-            this.showInfo(I18n.get("generic.could_not_open_url", url));
+            showInfo(I18n.get("generic.could_not_open_url", url));
         }
     }
 
-    public void showException(final Throwable t) {
+    public static void showException(final Throwable t) {
         Logger.LOGGER.error("Caught exception in thread " + Thread.currentThread().getName(), t);
         StringBuilder builder = new StringBuilder("An error occurred:\n");
         builder.append("[").append(t.getClass().getSimpleName()).append("] ").append(t.getMessage()).append("\n");
         for (StackTraceElement element : t.getStackTrace()) builder.append(element.toString()).append("\n");
-        this.showError(builder.toString());
+        showError(builder.toString());
     }
 
-    public void showInfo(final String message) {
-        this.showNotification(message, JOptionPane.INFORMATION_MESSAGE);
+    public static void showInfo(final String message) {
+        showNotification(message, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public void showWarning(final String message) {
-        this.showNotification(message, JOptionPane.WARNING_MESSAGE);
+    public static void showWarning(final String message) {
+        showNotification(message, JOptionPane.WARNING_MESSAGE);
     }
 
-    public void showError(final String message) {
-        this.showNotification(message, JOptionPane.ERROR_MESSAGE);
+    public static void showError(final String message) {
+        showNotification(message, JOptionPane.ERROR_MESSAGE);
     }
 
-    public void showNotification(final String message, final int type) {
-        JOptionPane.showMessageDialog(this, message, "ViaProxy", type);
+    public static void showNotification(final String message, final int type) {
+        JOptionPane.showMessageDialog(ViaProxy.getForegroundWindow(), message, "ViaProxy", type);
     }
 
 }

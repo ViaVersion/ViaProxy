@@ -21,6 +21,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import joptsimple.ValueConversionException;
 import joptsimple.ValueConverter;
 
+@Deprecated(forRemoval = true)
 public class ProtocolVersionConverter implements ValueConverter<ProtocolVersion> {
 
     @Override

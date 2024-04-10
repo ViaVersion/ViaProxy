@@ -30,7 +30,6 @@ import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.ConnectEvent;
 import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
@@ -44,6 +43,7 @@ import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
+import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.ProtocolVersionDetector;
@@ -121,20 +121,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
         final String[] handshakeParts = packet.address.split("\0");
 
-        SocketAddress serverAddress = Options.CONNECT_ADDRESS;
-        ProtocolVersion serverVersion = Options.PROTOCOL_VERSION;
-        String classicMpPass = Options.CLASSIC_MP_PASS;
+        SocketAddress serverAddress = ViaProxy.getConfig().getTargetAddress();
+        ProtocolVersion serverVersion = ViaProxy.getConfig().getTargetVersion();
+        String classicMpPass = ViaProxy.getConfig().getAccount() instanceof ClassicAccount classicAccount ? classicAccount.getMppass() : null;
 
-        if (Options.INTERNAL_SRV_MODE) {
-            final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
-            final String versionString = arrayHelper.get(1);
-            serverVersion = ProtocolVersion.getClosest(versionString);
-            if (serverVersion == null) throw CloseAndReturn.INSTANCE;
-            serverAddress = AddressUtil.parse(arrayHelper.get(0), serverVersion);
-            if (arrayHelper.isIndexValid(2)) {
-                classicMpPass = arrayHelper.getString(2);
-            }
-        } else if (Options.SRV_MODE) {
+        if (ViaProxy.getConfig().isSrvMode()) {
             try {
                 if (handshakeParts[0].toLowerCase().contains(".viaproxy.")) {
                     handshakeParts[0] = handshakeParts[0].substring(0, handshakeParts[0].toLowerCase().lastIndexOf(".viaproxy."));
@@ -159,7 +150,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             }
         }
 
-        if (packet.intendedState.getConnectionState() == ConnectionState.STATUS && !Options.ALLOW_BETA_PINGING && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3)) {
+        if (packet.intendedState.getConnectionState() == ConnectionState.STATUS && !ViaProxy.getConfig().shouldAllowBetaPinging() && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3)) {
             this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
         }
 
@@ -174,7 +165,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         serverAddress = preConnectEvent.getServerAddress();
         serverVersion = preConnectEvent.getServerVersion();
 
-        final UserOptions userOptions = new UserOptions(classicMpPass, Options.MC_ACCOUNT);
+        final UserOptions userOptions = new UserOptions(classicMpPass, ViaProxy.getConfig().getAccount());
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && serverVersion.equals(ProtocolTranslator.AUTO_DETECT_PROTOCOL)) {
@@ -233,7 +224,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
                 f.channel().eventLoop().submit(() -> { // Reschedule so the packets get sent after the channel is fully initialized and active
-                    if (Options.SERVER_HAPROXY_PROTOCOL) {
+                    if (ViaProxy.getConfig().useBackendHaProxy()) {
                         this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                     }
 

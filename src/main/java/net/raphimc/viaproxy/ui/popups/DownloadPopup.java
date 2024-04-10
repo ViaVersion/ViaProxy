@@ -20,7 +20,6 @@ package net.raphimc.viaproxy.ui.popups;
 import net.lenni0451.commons.swing.GBC;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.I18n;
-import net.raphimc.viaproxy.ui.ViaProxyUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,11 +34,11 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.function.Consumer;
 
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 
 public class DownloadPopup extends JDialog {
 
-    private final ViaProxyUI parent;
+    private final JFrame parent;
     private final String url;
     private final File file;
     private final Runnable finishListener;
@@ -48,7 +47,7 @@ public class DownloadPopup extends JDialog {
     private JProgressBar progressBar;
     private Thread downloadThread;
 
-    public DownloadPopup(final ViaProxyUI parent, final String url, final File file, final Runnable finishListener, final Consumer<Throwable> stopConsumer) {
+    public DownloadPopup(final JFrame parent, final String url, final File file, final Runnable finishListener, final Consumer<Throwable> stopConsumer) {
         super(parent, true);
         this.parent = parent;
         this.url = url;

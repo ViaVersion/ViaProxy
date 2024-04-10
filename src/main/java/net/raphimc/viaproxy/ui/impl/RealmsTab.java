@@ -31,13 +31,12 @@ import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
-import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
-import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.UITab;
+import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -45,7 +44,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class RealmsTab extends AUITab {
+public class RealmsTab extends UITab {
 
     private static final ProtocolVersion LATEST_JAVA_RELEASE;
     private static final ProtocolVersion LATEST_JAVA_SNAPSHOT;
@@ -72,14 +71,14 @@ public class RealmsTab extends AUITab {
     private Account currentAccount = null;
     private ProtocolVersion currentSelectedJavaVersion = LATEST_JAVA_RELEASE;
 
-    public RealmsTab(final ViaProxyUI frame) {
+    public RealmsTab(final ViaProxyWindow frame) {
         super(frame, "realms");
     }
 
     @Override
     protected void onTabOpened() {
-        if (Options.MC_ACCOUNT != this.currentAccount) {
-            this.currentAccount = Options.MC_ACCOUNT;
+        if (ViaProxy.getConfig().getAccount() != this.currentAccount) {
+            this.currentAccount = ViaProxy.getConfig().getAccount();
             this.reinit();
         }
     }
@@ -121,7 +120,7 @@ public class RealmsTab extends AUITab {
                     });
                 } catch (Throwable e) {
                     Logger.LOGGER.error("Failed to refresh account", e);
-                    ViaProxy.getUI().showError(I18n.get("tab.realms.error_account", e.getMessage()));
+                    ViaProxyWindow.showError(I18n.get("tab.realms.error_account", e.getMessage()));
                     SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_account_label")));
                 }
             });
@@ -158,7 +157,7 @@ public class RealmsTab extends AUITab {
                 })).exceptionally(e -> {
                     final Throwable cause = e.getCause();
                     Logger.LOGGER.error("Failed to get realms worlds", cause);
-                    ViaProxy.getUI().showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
+                    ViaProxyWindow.showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
                     SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_generic_label")));
                     return null;
                 });
@@ -168,7 +167,7 @@ public class RealmsTab extends AUITab {
         }).exceptionally(e -> {
             final Throwable cause = e.getCause();
             Logger.LOGGER.error("Failed to check realms availability", cause);
-            ViaProxy.getUI().showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
+            ViaProxyWindow.showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
             SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.error_generic_label")));
             return null;
         });
@@ -234,14 +233,14 @@ public class RealmsTab extends AUITab {
                         join.setEnabled(true);
                         join.setText(I18n.get("tab.realms.join"));
                         if (realmsService instanceof JavaRealmsService javaRealmsService && cause instanceof RealmsRequestException realmsRequestException && realmsRequestException.getErrorCode() == RealmsRequestException.TOS_NOT_ACCEPTED) {
-                            final int chosen = JOptionPane.showConfirmDialog(ViaProxy.getUI(), I18n.get("tab.realms.accept_tos", "https://aka.ms/MinecraftRealmsTerms"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                            final int chosen = JOptionPane.showConfirmDialog(this.viaProxyWindow, I18n.get("tab.realms.accept_tos", "https://aka.ms/MinecraftRealmsTerms"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                             if (chosen == JOptionPane.YES_OPTION) {
                                 javaRealmsService.acceptTos();
                                 join.doClick();
                             }
                         } else {
                             Logger.LOGGER.error("Failed to join realm", cause);
-                            ViaProxy.getUI().showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
+                            ViaProxyWindow.showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
                         }
                     });
                     return null;
@@ -253,7 +252,7 @@ public class RealmsTab extends AUITab {
     }
 
     private void setServerAddressAndStartViaProxy(final String address, final ProtocolVersion version) {
-        final GeneralTab generalTab = ViaProxy.getUI().generalTab;
+        final GeneralTab generalTab = this.viaProxyWindow.generalTab;
         if (generalTab.stateButton.isEnabled()) {
             if (!generalTab.stateButton.getText().equals(I18n.get("tab.general.state.start"))) {
                 generalTab.stateButton.doClick(); // Stop the running proxy
@@ -262,7 +261,7 @@ public class RealmsTab extends AUITab {
             generalTab.serverVersion.setSelectedItem(version);
             generalTab.authMethod.setSelectedIndex(0);
             generalTab.stateButton.doClick();
-            ViaProxy.getUI().contentPane.setSelectedIndex(0);
+            this.viaProxyWindow.contentPane.setSelectedIndex(0);
         }
     }
 

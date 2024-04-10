@@ -34,7 +34,6 @@ import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLPipeline;
@@ -67,10 +66,10 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         new ProtocolPipelineImpl(user);
         proxyConnection.setUserConnection(user);
 
-        if (Options.PROXY_URL != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
+        if (ViaProxy.getConfig().getBackendProxyUrl() != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
             channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, this.getProxyHandler());
         }
-        if (Options.SERVER_HAPROXY_PROTOCOL) {
+        if (ViaProxy.getConfig().useBackendHaProxy()) {
             channel.pipeline().addLast(VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
         }
 
@@ -90,7 +89,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
     }
 
     protected ProxyHandler getProxyHandler() {
-        final URI proxyUrl = Options.PROXY_URL;
+        final URI proxyUrl = ViaProxy.getConfig().getBackendProxyUrl();
         final InetSocketAddress proxyAddress = new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort());
         final String username = proxyUrl.getUserInfo() != null ? proxyUrl.getUserInfo().split(":")[0] : null;
         final String password = proxyUrl.getUserInfo() != null && proxyUrl.getUserInfo().contains(":") ? proxyUrl.getUserInfo().split(":")[1] : null;

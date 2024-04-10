@@ -21,13 +21,12 @@ import net.lenni0451.commons.swing.GBC;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
-import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
-import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.UITab;
+import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.ui.popups.AddAccountPopup;
 import net.raphimc.viaproxy.util.TFunction;
 
@@ -40,10 +39,10 @@ import java.awt.event.MouseEvent;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BODY_BLOCK_PADDING;
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BODY_BLOCK_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 
-public class AccountsTab extends AUITab {
+public class AccountsTab extends UITab {
 
     private JList<Account> accountsList;
     private JButton addMicrosoftAccountButton;
@@ -52,7 +51,7 @@ public class AccountsTab extends AUITab {
     private AddAccountPopup addAccountPopup;
     private Thread addThread;
 
-    public AccountsTab(final ViaProxyUI frame) {
+    public AccountsTab(final ViaProxyWindow frame) {
         super(frame, "accounts");
     }
 
@@ -100,7 +99,7 @@ public class AccountsTab extends AUITab {
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                     DefaultListCellRenderer component = (DefaultListCellRenderer) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                     Account account = (Account) value;
-                    if (Options.MC_ACCOUNT == account) {
+                    if (ViaProxy.getConfig().getAccount() == account) {
                         component.setText("<html><span style=\"color:rgb(0, 180, 0)\"><b>" + account.getDisplayString() + "</b></span></html>");
                     } else {
                         component.setText(account.getDisplayString());
@@ -126,7 +125,7 @@ public class AccountsTab extends AUITab {
                         Account removed = model.remove(index);
                         ViaProxy.getSaveManager().accountsSave.removeAccount(removed);
                         ViaProxy.getSaveManager().save();
-                        if (Options.MC_ACCOUNT == removed) {
+                        if (ViaProxy.getConfig().getAccount() == removed) {
                             if (model.isEmpty()) this.markSelected(-1);
                             else this.markSelected(0);
                         }
@@ -162,7 +161,7 @@ public class AccountsTab extends AUITab {
             {
                 JButton addOfflineAccountButton = new JButton(I18n.get("tab.accounts.add_offline.label"));
                 addOfflineAccountButton.addActionListener(event -> {
-                    String username = JOptionPane.showInputDialog(this.frame, I18n.get("tab.accounts.add_offline.enter_username"), I18n.get("tab.accounts.add.title"), JOptionPane.PLAIN_MESSAGE);
+                    String username = JOptionPane.showInputDialog(this.viaProxyWindow, I18n.get("tab.accounts.add_offline.enter_username"), I18n.get("tab.accounts.add.title"), JOptionPane.PLAIN_MESSAGE);
                     if (username != null && !username.trim().isEmpty()) {
                         Account account = ViaProxy.getSaveManager().accountsSave.addAccount(username);
                         ViaProxy.getSaveManager().save();
@@ -226,11 +225,11 @@ public class AccountsTab extends AUITab {
 
     public void markSelected(final int index) {
         if (index < 0 || index >= this.accountsList.getModel().getSize()) {
-            Options.MC_ACCOUNT = null;
+            ViaProxy.getConfig().setAccount(null);
             return;
         }
 
-        Options.MC_ACCOUNT = ViaProxy.getSaveManager().accountsSave.getAccounts().get(index);
+        ViaProxy.getConfig().setAccount(ViaProxy.getSaveManager().accountsSave.getAccounts().get(index));
         this.accountsList.repaint();
     }
 
@@ -265,7 +264,7 @@ public class AccountsTab extends AUITab {
     private void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, Account> requestHandler) {
         this.addThread = new Thread(() -> {
             try {
-                final Account account = requestHandler.apply(msaDeviceCode -> SwingUtilities.invokeLater(() -> new AddAccountPopup(this.frame, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
+                final Account account = requestHandler.apply(msaDeviceCode -> SwingUtilities.invokeLater(() -> new AddAccountPopup(this.viaProxyWindow, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
                     this.closePopup();
                     this.addThread.interrupt();
                 })));
@@ -274,18 +273,18 @@ public class AccountsTab extends AUITab {
                     ViaProxy.getSaveManager().accountsSave.addAccount(account);
                     ViaProxy.getSaveManager().save();
                     this.addAccount(account);
-                    this.frame.showInfo(I18n.get("tab.accounts.add.success", account.getName()));
+                    ViaProxyWindow.showInfo(I18n.get("tab.accounts.add.success", account.getName()));
                 });
             } catch (InterruptedException ignored) {
             } catch (TimeoutException e) {
                 SwingUtilities.invokeLater(() -> {
                     this.closePopup();
-                    this.frame.showError(I18n.get("tab.accounts.add.timeout", "60"));
+                    ViaProxyWindow.showError(I18n.get("tab.accounts.add.timeout", "60"));
                 });
             } catch (Throwable t) {
                 SwingUtilities.invokeLater(() -> {
                     this.closePopup();
-                    this.frame.showException(t);
+                    ViaProxyWindow.showException(t);
                 });
             }
         }, "Add Account Thread");

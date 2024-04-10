@@ -15,21 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.plugins.events;
+package net.raphimc.viaproxy.saves.impl.accounts;
 
-import joptsimple.OptionSet;
+import com.google.gson.JsonObject;
 
-@Deprecated(forRemoval = true)
-public class PostOptionsParseEvent {
+public class ClassicAccount extends OfflineAccount {
 
-    private final OptionSet options;
+    private final String mppass;
 
-    public PostOptionsParseEvent(final OptionSet options) {
-        this.options = options;
+    public ClassicAccount(JsonObject jsonObject) {
+        super(jsonObject);
+        this.mppass = jsonObject.get("mppass").getAsString();
     }
 
-    public OptionSet getOptions() {
-        return this.options;
+    public ClassicAccount(final String name, final String mppass) {
+        super(name);
+        this.mppass = mppass;
+    }
+
+    @Override
+    public JsonObject toJson() {
+        final JsonObject jsonObject = super.toJson();
+        jsonObject.addProperty("mppass", this.mppass);
+        return jsonObject;
+    }
+
+    public String getMppass() {
+        return this.mppass;
     }
 
 }

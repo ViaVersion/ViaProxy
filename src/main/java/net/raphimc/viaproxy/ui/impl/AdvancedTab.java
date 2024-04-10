@@ -23,10 +23,9 @@ import gs.mclo.api.response.UploadLogResponse;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.saves.impl.UISave;
-import net.raphimc.viaproxy.ui.AUITab;
 import net.raphimc.viaproxy.ui.I18n;
-import net.raphimc.viaproxy.ui.ViaProxyUI;
+import net.raphimc.viaproxy.ui.UITab;
+import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -38,22 +37,22 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BODY_BLOCK_PADDING;
-import static net.raphimc.viaproxy.ui.ViaProxyUI.BORDER_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BODY_BLOCK_PADDING;
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 
-public class AdvancedTab extends AUITab {
+public class AdvancedTab extends UITab {
 
-    JSpinner bindPort;
+    JTextField bindAddress;
     JTextField proxy;
     JCheckBox proxyOnlineMode;
-    JCheckBox legacySkinLoading;
+    public JCheckBox legacySkinLoading;
     JCheckBox chatSigning;
     JCheckBox ignorePacketTranslationErrors;
     JCheckBox allowBetaPinging;
     JButton viaVersionDumpButton;
     JButton uploadLogsButton;
 
-    public AdvancedTab(final ViaProxyUI frame) {
+    public AdvancedTab(final ViaProxyWindow frame) {
         super(frame, "advanced");
     }
 
@@ -71,14 +70,15 @@ public class AdvancedTab extends AUITab {
 
         int gridy = 0;
         {
-            JLabel bindPortLabel = new JLabel(I18n.get("tab.advanced.bind_port.label"));
-            bindPortLabel.setToolTipText(I18n.get("tab.advanced.bind_port.tooltip"));
+            JLabel bindPortLabel = new JLabel(I18n.get("tab.advanced.bind_address.label"));
+            bindPortLabel.setToolTipText(I18n.get("tab.advanced.bind_address.tooltip"));
             GBC.create(body).grid(0, gridy++).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(bindPortLabel);
 
-            this.bindPort = new JSpinner(new SpinnerNumberModel(25568, 1, 65535, 1));
-            this.bindPort.setToolTipText(I18n.get("tab.advanced.bind_port.tooltip"));
-            ViaProxy.getSaveManager().uiSave.loadSpinner("bind_port", this.bindPort);
-            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.bindPort);
+            this.bindAddress = new JTextField();
+            this.bindAddress.setToolTipText(I18n.get("tab.advanced.bind_address.tooltip"));
+            this.bindAddress.setText("0.0.0.0:25568");
+            ViaProxy.getSaveManager().uiSave.loadTextField("bind_address", this.bindAddress);
+            GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.bindAddress);
         }
         {
             JLabel proxyLabel = new JLabel(I18n.get("tab.advanced.proxy_url.label"));
@@ -93,7 +93,7 @@ public class AdvancedTab extends AUITab {
         {
             this.proxyOnlineMode = new JCheckBox(I18n.get("tab.advanced.proxy_online_mode.label"));
             this.proxyOnlineMode.setToolTipText(I18n.get("tab.advanced.proxy_online_mode.tooltip"));
-            ViaProxy.getSaveManager().uiSave.loadCheckBox("proxy_online_mode", this.proxyOnlineMode);
+            this.proxyOnlineMode.setSelected(ViaProxy.getConfig().isProxyOnlineMode());
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.proxyOnlineMode);
         }
         {
@@ -105,22 +105,21 @@ public class AdvancedTab extends AUITab {
         {
             this.chatSigning = new JCheckBox(I18n.get("tab.advanced.chat_signing.label"));
             this.chatSigning.setToolTipText(I18n.get("tab.advanced.chat_signing.tooltip"));
-            this.chatSigning.setSelected(true);
-            ViaProxy.getSaveManager().uiSave.loadCheckBox("chat_signing", this.chatSigning);
+            this.chatSigning.setSelected(ViaProxy.getConfig().shouldSignChat());
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.chatSigning);
         }
         {
             this.ignorePacketTranslationErrors = new JCheckBox(I18n.get("tab.advanced.ignore_packet_translation_errors.label"));
             this.ignorePacketTranslationErrors.setToolTipText(I18n.get("tab.advanced.ignore_packet_translation_errors.tooltip"));
             this.ignorePacketTranslationErrors.setSelected(false);
-            ViaProxy.getSaveManager().uiSave.loadCheckBox("ignore_packet_translation_errors", this.ignorePacketTranslationErrors);
+            this.ignorePacketTranslationErrors.setSelected(ViaProxy.getConfig().shouldIgnoreProtocolTranslationErrors());
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.ignorePacketTranslationErrors);
         }
         {
             this.allowBetaPinging = new JCheckBox(I18n.get("tab.advanced.allow_beta_pinging.label"));
             this.allowBetaPinging.setToolTipText(I18n.get("tab.advanced.allow_beta_pinging.tooltip"));
             this.allowBetaPinging.setSelected(false);
-            ViaProxy.getSaveManager().uiSave.loadCheckBox("allow_beta_pinging", this.allowBetaPinging);
+            this.allowBetaPinging.setSelected(ViaProxy.getConfig().shouldAllowBetaPinging());
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.allowBetaPinging);
         }
 
@@ -138,12 +137,12 @@ public class AdvancedTab extends AUITab {
                 DumpUtil.postDump(null).whenComplete((url, e) -> {
                     if (e != null) {
                         Logger.LOGGER.error("Failed to create ViaVersion dump", e);
-                        SwingUtilities.invokeLater(() -> ViaProxy.getUI().showError(e.getMessage()));
+                        SwingUtilities.invokeLater(() -> ViaProxyWindow.showError(e.getMessage()));
                     } else {
-                        ViaProxy.getUI().openURL(url);
+                        ViaProxyWindow.openURL(url);
                         final StringSelection stringSelection = new StringSelection(url);
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
-                        SwingUtilities.invokeLater(() -> ViaProxy.getUI().showInfo(I18n.get("tab.advanced.create_viaversion_dump.success")));
+                        SwingUtilities.invokeLater(() -> ViaProxyWindow.showInfo(I18n.get("tab.advanced.create_viaversion_dump.success")));
                     }
                     SwingUtilities.invokeLater(() -> this.viaVersionDumpButton.setEnabled(true));
                 });
@@ -163,18 +162,18 @@ public class AdvancedTab extends AUITab {
                     final MclogsClient mclogsClient = new MclogsClient("ViaProxy", ViaProxy.VERSION);
                     final UploadLogResponse apiResponse = mclogsClient.uploadLog(logFile.toPath());
                     if (apiResponse.isSuccess()) {
-                        ViaProxy.getUI().openURL(apiResponse.getUrl());
+                        ViaProxyWindow.openURL(apiResponse.getUrl());
                         final StringSelection selection = new StringSelection(apiResponse.getUrl());
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
-                        ViaProxy.getUI().showInfo("<html>" + I18n.get("tab.advanced.upload_latest_log.success", "<a href=\"\">" + apiResponse.getUrl() + "</a>") + "</html>");
+                        ViaProxyWindow.showInfo("<html>" + I18n.get("tab.advanced.upload_latest_log.success", "<a href=\"\">" + apiResponse.getUrl() + "</a>") + "</html>");
                     } else {
-                        ViaProxy.getUI().showError(I18n.get("tab.advanced.upload_latest_log.error_generic", apiResponse.getError()));
+                        ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", apiResponse.getError()));
                     }
                 } catch (FileNotFoundException e) {
-                    ViaProxy.getUI().showError(I18n.get("tab.advanced.upload_latest_log.error_not_found"));
+                    ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_not_found"));
                 } catch (Throwable e) {
                     Logger.LOGGER.error("Failed to upload log file", e);
-                    ViaProxy.getUI().showError(I18n.get("tab.advanced.upload_latest_log.error_generic", e.getMessage()));
+                    ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", e.getMessage()));
                 } finally {
                     this.uploadLogsButton.setEnabled(true);
                 }
@@ -189,17 +188,15 @@ public class AdvancedTab extends AUITab {
         container.add(padding, BorderLayout.SOUTH);
     }
 
-    @EventHandler
-    private void onClose(final UICloseEvent event) {
-        UISave save = ViaProxy.getSaveManager().uiSave;
-        save.put("bind_port", String.valueOf(this.bindPort.getValue()));
-        save.put("proxy", this.proxy.getText());
-        save.put("proxy_online_mode", String.valueOf(this.proxyOnlineMode.isSelected()));
-        save.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
-        save.put("chat_signing", String.valueOf(this.chatSigning.isSelected()));
-        save.put("ignore_packet_translation_errors", String.valueOf(this.ignorePacketTranslationErrors.isSelected()));
-        save.put("allow_beta_pinging", String.valueOf(this.allowBetaPinging.isSelected()));
-        ViaProxy.getSaveManager().save();
+    @EventHandler(events = UICloseEvent.class)
+    void applyGuiState() {
+        ViaProxy.getSaveManager().uiSave.put("bind_address", this.bindAddress.getText());
+        ViaProxy.getSaveManager().uiSave.put("proxy", this.proxy.getText());
+        ViaProxy.getConfig().setProxyOnlineMode(this.proxyOnlineMode.isSelected());
+        ViaProxy.getSaveManager().uiSave.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
+        ViaProxy.getConfig().setChatSigning(this.chatSigning.isSelected());
+        ViaProxy.getConfig().setIgnoreProtocolTranslationErrors(this.ignorePacketTranslationErrors.isSelected());
+        ViaProxy.getConfig().setAllowBetaPinging(this.allowBetaPinging.isSelected());
     }
 
 }

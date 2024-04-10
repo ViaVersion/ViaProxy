@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.protocoltranslator.impl;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.ChannelHandlerContext;
 import net.raphimc.vialoader.netty.ViaCodec;
-import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 public class ViaProxyViaCodec extends ViaCodec {
@@ -31,7 +31,7 @@ public class ViaProxyViaCodec extends ViaCodec {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (Options.IGNORE_PACKET_TRANSLATION_ERRORS) {
+        if (ViaProxy.getConfig().shouldIgnoreProtocolTranslationErrors()) {
             try {
                 super.channelRead(ctx, msg);
             } catch (Throwable e) {
