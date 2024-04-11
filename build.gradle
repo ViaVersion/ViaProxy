@@ -99,7 +99,7 @@ dependencies {
         exclude group: "org.ow2.asm", module: "asm-commons"
         exclude group: "net.lenni0451.classtransform", module: "additionalclassprovider"
     }
-    include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR1-SNAPSHOT") {
+    include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR2-SNAPSHOT") {
         exclude group: "io.netty"
     }
     include "gs.mclo:api:3.0.1"
