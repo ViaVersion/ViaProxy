@@ -26,6 +26,11 @@ public class ClassLoaderPriorityUtil {
 
     public static void loadOverridingJars() {
         final File jarsFolder = new File("jars");
+        if (!jarsFolder.exists()) {
+            jarsFolder.mkdir();
+            return;
+        }
+
         if (jarsFolder.isDirectory()) {
             for (File file : jarsFolder.listFiles()) {
                 try {
