@@ -44,6 +44,7 @@ public class Options {
     public static SocketAddress BIND_ADDRESS;
     public static SocketAddress CONNECT_ADDRESS;
     public static ProtocolVersion PROTOCOL_VERSION;
+    public static boolean OPENAUTHMOD_AUTH;
     public static boolean ONLINE_MODE;
     public static boolean BETACRAFT_AUTH;
     public static Account MC_ACCOUNT;
@@ -55,6 +56,7 @@ public class Options {
 
     public static int COMPRESSION_THRESHOLD = 256;
     public static boolean SRV_MODE;
+    public static boolean INTERNAL_SRV_MODE;
     public static String RESOURCE_PACK_URL;
     public static boolean SERVER_HAPROXY_PROTOCOL;
     public static boolean LEGACY_CLIENT_PASSTHROUGH;
@@ -76,6 +78,7 @@ public class Options {
         final OptionSpec<String> connectAddress = parser.acceptsAll(asList("connect_address", "target_ip", "ca", "a"), "The address of the target server").withRequiredArg().ofType(String.class).required();
         final OptionSpec<ProtocolVersion> version = parser.acceptsAll(asList("version", "v"), "The version of the target server").withRequiredArg().withValuesConvertedBy(new ProtocolVersionConverter()).required();
         final OptionSpec<Void> srvMode = parser.acceptsAll(asList("srv_mode", "srv", "s"), "Enable srv mode");
+        final OptionSpec<Void> iSrvMode = parser.acceptsAll(asList("internal_srv_mode", "isrv"), "Enable internal srv mode").availableUnless(srvMode);
         final OptionSpec<Void> proxyOnlineMode = parser.acceptsAll(asList("online_mode", "om", "o"), "Enable proxy online mode");
         final OptionSpec<Integer> compressionThreshold = parser.acceptsAll(asList("compression_threshold", "ct", "c"), "The threshold for packet compression").withRequiredArg().ofType(Integer.class).defaultsTo(COMPRESSION_THRESHOLD);
         final OptionSpec<Void> openAuthModAuth = parser.acceptsAll(asList("openauthmod_auth", "oam_auth"), "Use OpenAuthMod for joining online mode servers");
@@ -103,6 +106,8 @@ public class Options {
             BIND_ADDRESS = AddressUtil.parse(options.valueOf(bindAddress), null);
             CONNECT_ADDRESS = AddressUtil.parse(options.valueOf(connectAddress), PROTOCOL_VERSION);
             SRV_MODE = options.has(srvMode);
+            INTERNAL_SRV_MODE = options.has(iSrvMode);
+            OPENAUTHMOD_AUTH = options.has(openAuthModAuth);
             ONLINE_MODE = options.has(proxyOnlineMode);
             COMPRESSION_THRESHOLD = options.valueOf(compressionThreshold);
             if (options.has(guiAccountIndex)) {
@@ -164,10 +169,11 @@ public class Options {
         config.setChatSigning(CHAT_SIGNING);
         config.setCompressionThreshold(COMPRESSION_THRESHOLD);
         config.setResourcePackUrl(RESOURCE_PACK_URL);
-        config.setSrvMode(SRV_MODE);
+        config.setWildcardDomainHandling(SRV_MODE ? ViaProxyConfig.WildcardDomainHandling.PUBLIC : INTERNAL_SRV_MODE ? ViaProxyConfig.WildcardDomainHandling.INTERNAL : ViaProxyConfig.WildcardDomainHandling.NONE);
         config.setAllowBetaPinging(ALLOW_BETA_PINGING);
         config.setIgnoreProtocolTranslationErrors(IGNORE_PACKET_TRANSLATION_ERRORS);
         config.setAllowLegacyClientPassthrough(LEGACY_CLIENT_PASSTHROUGH);
+        config.setAuthMethod(OPENAUTHMOD_AUTH ? ViaProxyConfig.AuthMethod.OPENAUTHMOD : ViaProxyConfig.AuthMethod.NONE);
     }
 
     public static void loadFromConfig(final ViaProxyConfig config) {
@@ -185,7 +191,8 @@ public class Options {
         IGNORE_PACKET_TRANSLATION_ERRORS = config.shouldIgnoreProtocolTranslationErrors();
         LEGACY_CLIENT_PASSTHROUGH = config.shouldAllowLegacyClientPassthrough();
         RESOURCE_PACK_URL = config.getResourcePackUrl();
-        SRV_MODE = config.isSrvMode();
+        SRV_MODE = config.getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.PUBLIC;
+        INTERNAL_SRV_MODE = config.getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.INTERNAL;
     }
 
 }

@@ -35,6 +35,7 @@ import net.raphimc.viaproxy.plugins.events.PreConnectEvent;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxySessionCreationEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
+import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
@@ -125,7 +126,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         ProtocolVersion serverVersion = ViaProxy.getConfig().getTargetVersion();
         String classicMpPass = ViaProxy.getConfig().getAccount() instanceof ClassicAccount classicAccount ? classicAccount.getMppass() : null;
 
-        if (ViaProxy.getConfig().isSrvMode()) {
+        if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.PUBLIC) {
             try {
                 if (handshakeParts[0].toLowerCase().contains(".viaproxy.")) {
                     handshakeParts[0] = handshakeParts[0].substring(0, handshakeParts[0].toLowerCase().lastIndexOf(".viaproxy."));
@@ -146,7 +147,19 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                 final int connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
                 serverAddress = AddressUtil.parse(connectIP + ":" + connectPort, serverVersion);
             } catch (CloseAndReturn e) {
-                this.proxyConnection.kickClient("§cWrong SRV syntax! §6Please use:\n§7ip_port_version.viaproxy.hostname");
+                this.proxyConnection.kickClient("§cWrong wildcard syntax! §6Please use:\n§7address_port_version.viaproxy.hostname");
+            }
+        } else if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.INTERNAL) {
+            final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
+            final String versionString = arrayHelper.get(1);
+            serverVersion = ProtocolVersion.getClosest(versionString);
+            if (serverVersion == null) {
+                serverVersion = ProtocolVersion.getClosest(versionString.replace("-", " "));
+            }
+            if (serverVersion == null) throw CloseAndReturn.INSTANCE;
+            serverAddress = AddressUtil.parse(arrayHelper.get(0), serverVersion);
+            if (arrayHelper.isIndexValid(2)) {
+                classicMpPass = arrayHelper.getString(2);
             }
         }
 

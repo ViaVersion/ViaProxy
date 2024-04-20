@@ -53,7 +53,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private boolean ignoreProtocolTranslationErrors;
     private boolean allowLegacyClientPassthrough;
     private String resourcePackUrl;
-    private boolean srvMode;
+    private WildcardDomainHandling wildcardDomainHandling;
 
     public ViaProxyConfig(final File configFile) {
         super(configFile);
@@ -103,7 +103,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.ignoreProtocolTranslationErrors = this.getBoolean("ignore-protocol-translation-errors", false);
         this.allowLegacyClientPassthrough = this.getBoolean("allow-legacy-client-passthrough", false);
         this.resourcePackUrl = this.getString("resource-pack-url", "");
-        this.srvMode = this.getBoolean("srv-mode", false);
+        this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", "none"));
     }
 
     @Override
@@ -265,13 +265,13 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.set("resource-pack-url", resourcePackUrl);
     }
 
-    public boolean isSrvMode() {
-        return this.srvMode;
+    public WildcardDomainHandling getWildcardDomainHandling() {
+        return this.wildcardDomainHandling;
     }
 
-    public void setSrvMode(final boolean srvMode) {
-        this.srvMode = srvMode;
-        this.set("srv-mode", srvMode);
+    public void setWildcardDomainHandling(final WildcardDomainHandling wildcardDomainHandling) {
+        this.wildcardDomainHandling = wildcardDomainHandling;
+        this.set("wildcard-domain-handling", wildcardDomainHandling.name().toLowerCase(Locale.ROOT));
     }
 
     public enum AuthMethod {
@@ -307,6 +307,33 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
 
         public String getGuiTranslationKey() {
             return this.guiTranslationKey;
+        }
+
+    }
+
+    public enum WildcardDomainHandling {
+
+        /**
+         * No wildcard domain handling
+         */
+        NONE,
+        /**
+         * Public wildcard domain handling
+         */
+        PUBLIC,
+        /**
+         * Iternal wildcard domain handling
+         */
+        INTERNAL;
+
+        public static WildcardDomainHandling byName(String name) {
+            for (WildcardDomainHandling mode : values()) {
+                if (mode.name().equalsIgnoreCase(name)) {
+                    return mode;
+                }
+            }
+
+            return NONE;
         }
 
     }
