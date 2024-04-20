@@ -15,37 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.cli.options;
+package net.raphimc.viaproxy.util;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import joptsimple.ValueConversionException;
-import joptsimple.ValueConverter;
 
-@Deprecated(forRemoval = true)
-public class ProtocolVersionConverter implements ValueConverter<ProtocolVersion> {
+public class ProtocolVersionUtil {
 
-    @Override
-    public ProtocolVersion convert(String s) {
-        final ProtocolVersion version = ProtocolVersion.getClosest(s);
+    public static ProtocolVersion fromNameLenient(final String name) {
+        final ProtocolVersion version = ProtocolVersion.getClosest(name);
         if (version == null) {
-            throw new ValueConversionException("Unable to find version '" + s + "'");
+            return ProtocolVersion.getClosest(name.replace("-", " "));
         }
-
         return version;
-    }
-
-    @Override
-    public Class<ProtocolVersion> valueType() {
-        return ProtocolVersion.class;
-    }
-
-    @Override
-    public String valuePattern() {
-        StringBuilder s = new StringBuilder();
-        for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
-            s.append((s.isEmpty()) ? "" : ", ").append(version.getName());
-        }
-        return "[" + s + "]";
     }
 
 }

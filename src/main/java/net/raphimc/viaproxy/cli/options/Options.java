@@ -23,6 +23,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.cli.BetterHelpFormatter;
+import net.raphimc.viaproxy.cli.ProtocolVersionConverter;
 import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
 import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
@@ -63,7 +65,7 @@ public class Options {
 
     public static void parse(final String[] args) throws IOException {
         Logger.LOGGER.fatal("===============================================================================================================");
-        Logger.LOGGER.fatal("ViaProxy CLI is deprecated and will be removed in the future. Please use the config file instead. See the ViaProxy README on GitHub for more information.");
+        Logger.LOGGER.fatal("You are using the old ViaProxy CLI which is deprecated and will be removed in the next version of ViaProxy. Please use the new CLI or config file instead. See the ViaProxy README on GitHub for more information.");
         Logger.LOGGER.fatal("Waiting 10 seconds before continuing...");
         Logger.LOGGER.fatal("===============================================================================================================");
         try {

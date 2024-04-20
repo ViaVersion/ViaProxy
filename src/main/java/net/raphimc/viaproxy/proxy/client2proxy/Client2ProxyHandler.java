@@ -48,6 +48,7 @@ import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.ArrayHelper;
 import net.raphimc.viaproxy.util.ProtocolVersionDetector;
+import net.raphimc.viaproxy.util.ProtocolVersionUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.ConnectException;
@@ -138,24 +139,18 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                     throw CloseAndReturn.INSTANCE;
                 }
                 final String versionString = arrayHelper.get(arrayHelper.getLength() - 1);
-                serverVersion = ProtocolVersion.getClosest(versionString);
-                if (serverVersion == null) {
-                    serverVersion = ProtocolVersion.getClosest(versionString.replace("-", " "));
-                }
+                serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
                 if (serverVersion == null) throw CloseAndReturn.INSTANCE;
                 final String connectIP = arrayHelper.getAsString(0, arrayHelper.getLength() - 3, "_");
                 final int connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
                 serverAddress = AddressUtil.parse(connectIP + ":" + connectPort, serverVersion);
             } catch (CloseAndReturn e) {
-                this.proxyConnection.kickClient("§cWrong wildcard syntax! §6Please use:\n§7address_port_version.viaproxy.hostname");
+                this.proxyConnection.kickClient("§cWrong domain syntax! §6Please use:\n§7address_port_version.viaproxy.hostname");
             }
         } else if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.INTERNAL) {
             final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
             final String versionString = arrayHelper.get(1);
-            serverVersion = ProtocolVersion.getClosest(versionString);
-            if (serverVersion == null) {
-                serverVersion = ProtocolVersion.getClosest(versionString.replace("-", " "));
-            }
+            serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
             if (serverVersion == null) throw CloseAndReturn.INSTANCE;
             serverAddress = AddressUtil.parse(arrayHelper.get(0), serverVersion);
             if (arrayHelper.isIndexValid(2)) {

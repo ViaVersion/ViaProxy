@@ -15,20 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.plugins.events;
+package net.raphimc.viaproxy.cli;
 
-import joptsimple.OptionParser;
-
-public class PreOptionsParseEvent {
-
-    private final OptionParser parser;
-
-    public PreOptionsParseEvent(final OptionParser parser) {
-        this.parser = parser;
-    }
-
-    public OptionParser getParser() {
-        return this.parser;
-    }
-
+public class HelpRequestedException extends RuntimeException {
 }

@@ -19,14 +19,24 @@ package net.raphimc.viaproxy.protocoltranslator.viaproxy;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.util.Config;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.cli.BetterHelpFormatter;
+import net.raphimc.viaproxy.cli.HelpRequestedException;
+import net.raphimc.viaproxy.cli.ProtocolVersionConverter;
 import net.raphimc.viaproxy.cli.options.Options;
+import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
+import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,48 +48,73 @@ import java.util.Map;
 
 public class ViaProxyConfig extends Config implements com.viaversion.viaversion.api.configuration.Config {
 
-    private SocketAddress bindAddress;
-    private SocketAddress targetAddress;
-    private ProtocolVersion targetVersion;
-    private boolean proxyOnlineMode;
-    private AuthMethod authMethod;
-    private Account account;
-    private boolean betacraftAuth;
-    private URI backendProxyUrl;
-    private boolean backendHaProxy;
-    private boolean chatSigning;
-    private int compressionThreshold;
-    private boolean allowBetaPinging;
-    private boolean ignoreProtocolTranslationErrors;
-    private boolean allowLegacyClientPassthrough;
-    private String resourcePackUrl;
-    private WildcardDomainHandling wildcardDomainHandling;
+    private OptionParser optionParser;
+    private final OptionSpec<Void> optionHelp;
+    private final OptionSpec<String> optionBindAddress;
+    private final OptionSpec<String> optionTargetAddress;
+    private final OptionSpec<ProtocolVersion> optionTargetVersion;
+    private final OptionSpec<Boolean> optionProxyOnlineMode;
+    private final OptionSpec<AuthMethod> optionAuthMethod;
+    private final OptionSpec<Boolean> optionBetacraftAuth;
+    private final OptionSpec<String> optionBackendProxyUrl;
+    private final OptionSpec<Boolean> optionBackendHaProxy;
+    private final OptionSpec<Boolean> optionChatSigning;
+    private final OptionSpec<Integer> optionCompressionThreshold;
+    private final OptionSpec<Boolean> optionAllowBetaPinging;
+    private final OptionSpec<Boolean> optionIgnoreProtocolTranslationErrors;
+    private final OptionSpec<Boolean> optionAllowLegacyClientPassthrough;
+    private final OptionSpec<String> optionResourcePackUrl;
+    private final OptionSpec<WildcardDomainHandling> optionWildcardDomainHandling;
+
+    private SocketAddress bindAddress = AddressUtil.parse("0.0.0.0:25568", null);
+    private SocketAddress targetAddress = AddressUtil.parse("127.0.0.1:25565", null);
+    private ProtocolVersion targetVersion = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
+    private boolean proxyOnlineMode = false;
+    private AuthMethod authMethod = AuthMethod.NONE;
+    private Account account = null;
+    private boolean betacraftAuth = false;
+    private URI backendProxyUrl = null;
+    private boolean backendHaProxy = false;
+    private boolean chatSigning = true;
+    private int compressionThreshold = 256;
+    private boolean allowBetaPinging = false;
+    private boolean ignoreProtocolTranslationErrors = false;
+    private boolean allowLegacyClientPassthrough = false;
+    private String resourcePackUrl = "";
+    private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
 
     public ViaProxyConfig(final File configFile) {
         super(configFile);
+
+        this.optionParser = new OptionParser();
+        this.optionHelp = this.optionParser.accepts("help").forHelp();
+        this.optionBindAddress = this.optionParser.accepts("bind-address").withRequiredArg().ofType(String.class).defaultsTo(AddressUtil.toString(this.bindAddress));
+        this.optionTargetAddress = this.optionParser.accepts("target-address").withRequiredArg().ofType(String.class).defaultsTo(AddressUtil.toString(this.targetAddress));
+        this.optionTargetVersion = this.optionParser.accepts("target-version").withRequiredArg().withValuesConvertedBy(new ProtocolVersionConverter()).defaultsTo(this.targetVersion);
+        this.optionProxyOnlineMode = this.optionParser.accepts("proxy-online-mode").withRequiredArg().ofType(Boolean.class).defaultsTo(this.proxyOnlineMode);
+        this.optionAuthMethod = this.optionParser.accepts("auth-method").withRequiredArg().ofType(AuthMethod.class).defaultsTo(this.authMethod);
+        this.optionBetacraftAuth = this.optionParser.accepts("betacraft-auth").withRequiredArg().ofType(Boolean.class).defaultsTo(this.betacraftAuth);
+        this.optionBackendProxyUrl = this.optionParser.accepts("backend-proxy-url").withRequiredArg().ofType(String.class).defaultsTo("");
+        this.optionBackendHaProxy = this.optionParser.accepts("backend-haproxy").withRequiredArg().ofType(Boolean.class).defaultsTo(this.backendHaProxy);
+        this.optionChatSigning = this.optionParser.accepts("chat-signing").withRequiredArg().ofType(Boolean.class).defaultsTo(this.chatSigning);
+        this.optionCompressionThreshold = this.optionParser.accepts("compression-threshold").withRequiredArg().ofType(Integer.class).defaultsTo(this.compressionThreshold);
+        this.optionAllowBetaPinging = this.optionParser.accepts("allow-beta-pinging").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowBetaPinging);
+        this.optionIgnoreProtocolTranslationErrors = this.optionParser.accepts("ignore-protocol-translation-errors").withRequiredArg().ofType(Boolean.class).defaultsTo(this.ignoreProtocolTranslationErrors);
+        this.optionAllowLegacyClientPassthrough = this.optionParser.accepts("allow-legacy-client-passthrough").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowLegacyClientPassthrough);
+        this.optionResourcePackUrl = this.optionParser.accepts("resource-pack-url").withRequiredArg().ofType(String.class).defaultsTo(this.resourcePackUrl);
+        this.optionWildcardDomainHandling = this.optionParser.accepts("wildcard-domain-handling").withRequiredArg().ofType(WildcardDomainHandling.class).defaultsTo(this.wildcardDomainHandling);
     }
 
     @Override
     public void reload() {
         super.reload();
-        this.loadFields();
-    }
 
-    private void loadFields() {
-        this.bindAddress = AddressUtil.parse(this.getString("bind-address", "0.0.0.0:25568"), null);
-        this.targetVersion = ProtocolVersion.getClosest(this.getString("target-version", ProtocolTranslator.AUTO_DETECT_PROTOCOL.getName()));
-        if (this.targetVersion == null) {
-            this.targetVersion = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
-            Logger.LOGGER.info("Invalid target version: " + this.getString("target-version", "") + ". Defaulting to auto detect.");
-            Logger.LOGGER.info("=== Supported Protocol Versions ===");
-            for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
-                Logger.LOGGER.info(version.getName());
-            }
-            Logger.LOGGER.info("===================================");
-        }
-        this.targetAddress = AddressUtil.parse(this.getString("target-address", "127.0.0.1:25565"), this.targetVersion);
-        this.proxyOnlineMode = this.getBoolean("proxy-online-mode", false);
-        this.authMethod = AuthMethod.byName(this.getString("auth-method", "none"));
+        this.bindAddress = AddressUtil.parse(this.getString("bind-address", AddressUtil.toString(this.bindAddress)), null);
+        this.targetVersion = ProtocolVersion.getClosest(this.getString("target-version", this.targetVersion.getName()));
+        this.checkTargetVersion();
+        this.targetAddress = AddressUtil.parse(this.getString("target-address", AddressUtil.toString(this.targetAddress)), this.targetVersion);
+        this.proxyOnlineMode = this.getBoolean("proxy-online-mode", this.proxyOnlineMode);
+        this.authMethod = AuthMethod.byName(this.getString("auth-method", this.authMethod.name()));
         final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
         final int accountIndex = this.getInt("minecraft-account-index", 0);
         if (this.authMethod == AuthMethod.ACCOUNT && accountIndex >= 0 && accountIndex < accounts.size()) {
@@ -87,23 +122,54 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         } else {
             this.account = null;
         }
-        this.betacraftAuth = this.getBoolean("betacraft-auth", false);
-        final String proxyUrl = this.getString("backend-proxy-url", "");
-        if (!proxyUrl.isBlank()) {
-            try {
-                this.backendProxyUrl = new URI(proxyUrl);
-            } catch (URISyntaxException e) {
-                throw new IllegalArgumentException("Invalid proxy url: " + proxyUrl + ". Proxy url format: type://address:port or type://username:password@address:port");
+        this.betacraftAuth = this.getBoolean("betacraft-auth", this.betacraftAuth);
+        this.backendProxyUrl = this.parseProxyUrl(this.getString("backend-proxy-url", ""));
+        this.backendHaProxy = this.getBoolean("backend-haproxy", this.backendHaProxy);
+        this.chatSigning = this.getBoolean("chat-signing", this.chatSigning);
+        this.compressionThreshold = this.getInt("compression-threshold", this.compressionThreshold);
+        this.allowBetaPinging = this.getBoolean("allow-beta-pinging", this.allowBetaPinging);
+        this.ignoreProtocolTranslationErrors = this.getBoolean("ignore-protocol-translation-errors", this.ignoreProtocolTranslationErrors);
+        this.allowLegacyClientPassthrough = this.getBoolean("allow-legacy-client-passthrough", this.allowLegacyClientPassthrough);
+        this.resourcePackUrl = this.getString("resource-pack-url", this.resourcePackUrl);
+        this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", this.wildcardDomainHandling.name()));
+        Options.loadFromConfig(this);
+    }
+
+    public void loadFromArguments(final String[] args) throws IOException {
+        try {
+            ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(this.optionParser));
+            final OptionSet options = this.optionParser.parse(args);
+            if (options.has(this.optionHelp)) {
+                throw new HelpRequestedException();
             }
+            this.bindAddress = AddressUtil.parse(options.valueOf(this.optionBindAddress), null);
+            this.targetVersion = options.valueOf(this.optionTargetVersion);
+            this.checkTargetVersion();
+            this.targetAddress = AddressUtil.parse(options.valueOf(this.optionTargetAddress), this.targetVersion);
+            this.proxyOnlineMode = options.valueOf(this.optionProxyOnlineMode);
+            this.authMethod = options.valueOf(this.optionAuthMethod);
+            this.betacraftAuth = options.valueOf(this.optionBetacraftAuth);
+            this.backendProxyUrl = this.parseProxyUrl(options.valueOf(this.optionBackendProxyUrl));
+            this.backendHaProxy = options.valueOf(this.optionBackendHaProxy);
+            this.chatSigning = options.valueOf(this.optionChatSigning);
+            this.compressionThreshold = options.valueOf(this.optionCompressionThreshold);
+            this.allowBetaPinging = options.valueOf(this.optionAllowBetaPinging);
+            this.ignoreProtocolTranslationErrors = options.valueOf(this.optionIgnoreProtocolTranslationErrors);
+            this.allowLegacyClientPassthrough = options.valueOf(this.optionAllowLegacyClientPassthrough);
+            this.resourcePackUrl = options.valueOf(this.optionResourcePackUrl);
+            this.wildcardDomainHandling = options.valueOf(this.optionWildcardDomainHandling);
+            ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
+            Options.loadFromConfig(this);
+            return;
+        } catch (OptionException e) {
+            Logger.LOGGER.error("Error parsing CLI options: " + e.getMessage());
+        } catch (HelpRequestedException ignored) {
         }
-        this.backendHaProxy = this.getBoolean("backend-haproxy", false);
-        this.chatSigning = this.getBoolean("chat-signing", true);
-        this.compressionThreshold = this.getInt("compression-threshold", 256);
-        this.allowBetaPinging = this.getBoolean("allow-beta-pinging", false);
-        this.ignoreProtocolTranslationErrors = this.getBoolean("ignore-protocol-translation-errors", false);
-        this.allowLegacyClientPassthrough = this.getBoolean("allow-legacy-client-passthrough", false);
-        this.resourcePackUrl = this.getString("resource-pack-url", "");
-        this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", "none"));
+
+        this.optionParser.formatHelpWith(new BetterHelpFormatter());
+        this.optionParser.printHelpOn(Logger.SYSOUT);
+        Logger.LOGGER.info("For a more detailed explanation of the options, please refer to the viaproxy.yml file.");
+        System.exit(1);
     }
 
     @Override
@@ -272,6 +338,30 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setWildcardDomainHandling(final WildcardDomainHandling wildcardDomainHandling) {
         this.wildcardDomainHandling = wildcardDomainHandling;
         this.set("wildcard-domain-handling", wildcardDomainHandling.name().toLowerCase(Locale.ROOT));
+    }
+
+    private void checkTargetVersion() {
+        if (this.targetVersion == null) {
+            this.targetVersion = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
+            Logger.LOGGER.info("Invalid target version: " + this.getString("target-version", "") + ". Defaulting to auto detect.");
+            Logger.LOGGER.info("=== Supported Protocol Versions ===");
+            for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
+                Logger.LOGGER.info(version.getName());
+            }
+            Logger.LOGGER.info("===================================");
+        }
+    }
+
+    private URI parseProxyUrl(final String proxyUrl) {
+        if (!proxyUrl.isBlank()) {
+            try {
+                return new URI(proxyUrl);
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("Invalid proxy url: " + proxyUrl + ". Proxy url format: type://address:port or type://username:password@address:port");
+            }
+        }
+
+        return null;
     }
 
     public enum AuthMethod {

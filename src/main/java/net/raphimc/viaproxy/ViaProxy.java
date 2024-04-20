@@ -108,11 +108,54 @@ public class ViaProxy {
     }
 
     public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException, InvocationTargetException {
-        final boolean hasUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
-        final boolean legacyCLI = args.length > 0 && args[0].startsWith("-");
+        Logger.setup();
+
+        final boolean useUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
+        final boolean useConfig = args.length > 0 && args[0].equals("config");
+        final boolean useCLI = args.length > 0 && args[0].equals("cli");
+        final boolean useLegacyCLI = args.length > 0 && args[0].startsWith("-");
+        if (!useUI && !useConfig && !useCLI && !useLegacyCLI) {
+            String fileName = "ViaProxy.jar";
+            try {
+                fileName = new File(ViaProxy.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getName();
+            } catch (Throwable ignored) {
+            }
+            Logger.LOGGER.info("Usage: java -jar " + fileName + " | Starts ViaProxy in graphical mode if available");
+            Logger.LOGGER.info("Usage: java -jar " + fileName + " config <config file> | Starts ViaProxy with the specified config file");
+            Logger.LOGGER.info("Usage: java -jar " + fileName + " cli --help | Starts ViaProxy in CLI mode");
+            System.exit(1);
+        }
+
+        Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", useUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
+        Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
+        Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
+        Logger.LOGGER.info("Working directory: " + System.getProperty("user.dir"));
+        if (System.getProperty("ignoreSystemRequirements") == null) {
+            if ("32".equals(System.getProperty("sun.arch.data.model")) && Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
+                Logger.LOGGER.fatal("ViaProxy is not able to run on 32bit Java.");
+                if (useUI) {
+                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run on 32bit Java. Please install 64bit Java", "ViaProxy", JOptionPane.ERROR_MESSAGE);
+                }
+                System.exit(1);
+            }
+
+            if (Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
+                Logger.LOGGER.fatal("ViaProxy is not able to run with less than 256MB of RAM.");
+                if (useUI) {
+                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run with less than 256MB of RAM.", "ViaProxy", JOptionPane.ERROR_MESSAGE);
+                }
+                System.exit(1);
+            } else if (Runtime.getRuntime().maxMemory() < 512 * 1024 * 1024) {
+                Logger.LOGGER.warn("ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.");
+                if (useUI) {
+                    JOptionPane.showMessageDialog(null, "ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.", "ViaProxy", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        }
+
         final SplashScreen splashScreen;
         final Consumer<String> progressConsumer;
-        if (hasUI) {
+        if (useUI) {
             final float progressStep = 1F / 7F;
             foregroundWindow = splashScreen = new SplashScreen();
             progressConsumer = (text) -> {
@@ -130,42 +173,13 @@ public class ViaProxy {
         }
         progressConsumer.accept("Initializing ViaProxy");
 
-        Logger.setup();
-        Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", hasUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
-        Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
-        Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
-        Logger.LOGGER.info("Working directory: " + System.getProperty("user.dir"));
-
-        if (System.getProperty("ignoreSystemRequirements") == null) {
-            if ("32".equals(System.getProperty("sun.arch.data.model")) && Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
-                Logger.LOGGER.fatal("ViaProxy is not able to run on 32bit Java.");
-                if (hasUI) {
-                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run on 32bit Java. Please install 64bit Java", "ViaProxy", JOptionPane.ERROR_MESSAGE);
-                }
-                System.exit(1);
-            }
-
-            if (Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
-                Logger.LOGGER.fatal("ViaProxy is not able to run with less than 256MB of RAM.");
-                if (hasUI) {
-                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run with less than 256MB of RAM.", "ViaProxy", JOptionPane.ERROR_MESSAGE);
-                }
-                System.exit(1);
-            } else if (Runtime.getRuntime().maxMemory() < 512 * 1024 * 1024) {
-                Logger.LOGGER.warn("ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.");
-                if (hasUI) {
-                    JOptionPane.showMessageDialog(null, "ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.", "ViaProxy", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        }
-
         ConsoleHandler.hookConsole();
         ViaProxy.loadNetty();
         ClassLoaderPriorityUtil.loadOverridingJars();
 
         final File viaProxyConfigFile;
-        if (!hasUI && !legacyCLI) {
-            viaProxyConfigFile = new File(args[0]);
+        if (useConfig) {
+            viaProxyConfigFile = new File(args[1]);
         } else {
             viaProxyConfigFile = new File("viaproxy.yml");
         }
@@ -181,7 +195,7 @@ public class ViaProxy {
         CONFIG = new ViaProxyConfig(viaProxyConfigFile);
         CONFIG.reload();
 
-        if (hasUI) {
+        if (useUI) {
             progressConsumer.accept("Loading GUI");
             SwingUtilities.invokeAndWait(() -> {
                 try {
@@ -199,7 +213,11 @@ public class ViaProxy {
             EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
         } else {
-            if (legacyCLI) {
+            if (useCLI) {
+                final String[] cliArgs = new String[args.length - 1];
+                System.arraycopy(args, 1, cliArgs, 0, cliArgs.length);
+                CONFIG.loadFromArguments(cliArgs);
+            } else if (useLegacyCLI) {
                 Options.parse(args);
             } else if (firstStart) {
                 Logger.LOGGER.info("This is the first start of ViaProxy. Please configure the settings in the " + viaProxyConfigFile.getName() + " file and restart ViaProxy.");
