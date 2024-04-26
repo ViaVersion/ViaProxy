@@ -3,7 +3,7 @@ Standalone proxy which allows players to join EVERY Minecraft server version (Cl
 
 To download the latest version, go to the [Releases section](#executable-jar-file) and download the latest version.  
 Using it is very simple, just run the jar file, and it will start a user interface where everything can be configured.  
-For a full user guide go to the [Usage for Players](#usage-for-players-gui) section or the [Usage for Server Owners](#usage-for-server-owners-cli) section.
+For a full user guide go to the [Usage for Players](#usage-for-players-gui) section or the [Usage for Server Owners](#usage-for-server-owners-config) section.
 
 ## Supported Server versions
 - Release (1.0.0 - 1.20.5)
@@ -24,6 +24,7 @@ ViaProxy supports joining to any of the listed server version from any of the li
 ## Special Features
 - Support for joining online mode servers
 - Support for joining on servers which have chat signing enabled from all listed client versions
+- Supports transfer and cookies for <=1.20.4 clients on 1.20.5+ servers
 - Allows joining Minecraft Realms with any supported client version
 
 ## Releases
@@ -70,19 +71,27 @@ dependencies {
 7. Join with your Minecraft client on the displayed address
 8. Have fun!
 
+## Usage for Server owners (Config)
+1. Download the latest version from the [Releases section](#executable-jar-file)
+2. Put the jar file into a folder (ViaProxy will generate config files and store some data there)
+3. Run the jar file (Using ``java -jar ViaProxy-whateverversion.jar config viaproxy.yml``)
+4. ViaProxy now generates a config file called ``viaproxy.yml`` in the same folder and exits
+5. Open the config file and configure the proxy (Most important options are at the top)
+6. Start the proxy using the start command and test whether it works (Join using the server's public address and the bind port you configured)
+7. Have fun!
+
 ## Usage for Server owners (CLI)
 1. Download the latest version from the [Releases section](#executable-jar-file)
 2. Put the jar file into a folder (ViaProxy will generate config files and store some data there)
-3. Run the jar file (Using java -jar ViaProxy-whateverversion.jar --help)
-4. Look at the available config options and use those you need just like you would in the GUI
-5. Start the proxy using the start command and test whether it works (Join using the server's public address and the bind port you configured)
-6. Have fun!
-
-Here is an example command to allow players to join on yourserverip:25568 and connect to a beta 1.7.3 server running on port 25565:
-``java -jar ViaProxy-whateverversion.jar --bind_address 0.0.0.0:25568 --target_ip 127.0.0.1:25565 --version b1.7-b1.7.3``
+3. Run the jar file (Using ``java -jar ViaProxy-whateverversion.jar cli --help``)
+4. ViaProxy will print the CLI usage and exit
+5. Configure the proxy and optionally put the finished start command into a script
+6. Start the proxy using the start command and test whether it works (Join using the server's public address and the bind port you configured)
+7. Have fun!
 
 ### Configuring the protocol translation
-To change the protocol translation settings/features you can look into the ViaLoader folder.
+To change ViaProxy settings you can check out the ``viaproxy.yml`` config file. Most of the settings are configurable via the GUI.  
+To change the protocol translation settings/features you can look into the ``ViaLoader`` folder.
 You will find 5 config files there:
 - viaversion.yml (ViaVersion)
 - viabackwards.yml (ViaBackwards)

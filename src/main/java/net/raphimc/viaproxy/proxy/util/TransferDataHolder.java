@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.util;
 
+import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.storage.CookieStorage;
 import io.netty.channel.Channel;
 
 import java.net.InetAddress;
@@ -27,21 +28,30 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransferDataHolder {
 
     private static final Map<InetAddress, InetSocketAddress> TEMP_REDIRECTS = new ConcurrentHashMap<>();
+    private static final Map<InetAddress, CookieStorage> COOKIE_STORAGES = new ConcurrentHashMap<>();
 
     public static void addTempRedirect(final Channel channel, final InetSocketAddress redirect) {
         TEMP_REDIRECTS.put(getChannelAddress(channel), redirect);
+    }
+
+    public static void addCookieStorage(final Channel channel, final CookieStorage cookieStorage) {
+        COOKIE_STORAGES.put(getChannelAddress(channel), cookieStorage);
     }
 
     public static InetSocketAddress removeTempRedirect(final Channel channel) {
         return TEMP_REDIRECTS.remove(getChannelAddress(channel));
     }
 
+    public static CookieStorage removeCookieStorage(final Channel channel) {
+        return COOKIE_STORAGES.remove(getChannelAddress(channel));
+    }
+
     public static boolean hasTempRedirect(final Channel channel) {
         return TEMP_REDIRECTS.containsKey(getChannelAddress(channel));
     }
 
-    public static InetSocketAddress getTempRedirect(final Channel channel) {
-        return TEMP_REDIRECTS.get(getChannelAddress(channel));
+    public static boolean hasCookieStorage(final Channel channel) {
+        return COOKIE_STORAGES.containsKey(getChannelAddress(channel));
     }
 
     private static InetAddress getChannelAddress(final Channel channel) {

@@ -45,6 +45,9 @@ public class ViaProxyVLLoader extends VLLoader {
         Via.getManager().getProviders().use(HandItemProvider.class, new ViaProxyHandItemProvider());
         Via.getManager().getProviders().use(VersionProvider.class, new ViaProxyVersionProvider());
 
+        // ViaBackwards
+        Via.getManager().getProviders().use(com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider.class, new ViaProxyTransferProvider());
+
         // ViaLegacy
         Via.getManager().getProviders().use(GameProfileFetcher.class, new ViaProxyGameProfileFetcher());
         Via.getManager().getProviders().use(EncryptionProvider.class, new ViaProxyEncryptionProvider());

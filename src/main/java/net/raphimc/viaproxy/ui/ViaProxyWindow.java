@@ -84,7 +84,7 @@ public class ViaProxyWindow extends JFrame {
     }
 
     private void loadIcons() {
-        this.icon = new ImageIcon(this.getClass().getClassLoader().getResource("assets/icons/icon.png"));
+        this.icon = new ImageIcon(this.getClass().getClassLoader().getResource("assets/viaproxy/icons/icon.png"));
     }
 
     private void initWindow() {

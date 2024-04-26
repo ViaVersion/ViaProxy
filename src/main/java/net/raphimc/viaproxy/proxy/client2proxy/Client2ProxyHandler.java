@@ -18,6 +18,8 @@
 package net.raphimc.viaproxy.proxy.client2proxy;
 
 import com.google.common.collect.Lists;
+import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.storage.CookieStorage;
+import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -251,6 +253,10 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {
                             this.proxyConnection.setP2sConnectionState(intendedState.getConnectionState());
+                            final UserConnection userConnection = this.proxyConnection.getUserConnection();
+                            if (userConnection.has(CookieStorage.class) && TransferDataHolder.hasCookieStorage(this.proxyConnection.getC2P())) {
+                                userConnection.get(CookieStorage.class).cookies().putAll(TransferDataHolder.removeCookieStorage(this.proxyConnection.getC2P()).cookies());
+                            }
                         }
                     });
 

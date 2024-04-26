@@ -111,7 +111,7 @@ public class ViaProxy {
         Logger.setup();
 
         final boolean useUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
-        final boolean useConfig = args.length > 0 && args[0].equals("config");
+        final boolean useConfig = args.length == 2 && args[0].equals("config");
         final boolean useCLI = args.length > 0 && args[0].equals("cli");
         final boolean useLegacyCLI = args.length > 0 && args[0].startsWith("-");
         if (!useUI && !useConfig && !useCLI && !useLegacyCLI) {

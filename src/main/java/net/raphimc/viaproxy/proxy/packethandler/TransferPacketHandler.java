@@ -23,6 +23,7 @@ import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigTransfer1_20_5;
 import net.raphimc.viaproxy.ViaProxy;
@@ -51,6 +52,7 @@ public class TransferPacketHandler extends PacketHandler {
                 this.handleTransfer(transfer);
 
                 final ByteBuf transferToViaProxy = Unpooled.buffer();
+                PacketTypes.writeVarInt(transferToViaProxy, this.transferId);
                 this.createTransferPacket().write(transferToViaProxy);
                 this.proxyConnection.getC2P().writeAndFlush(transferToViaProxy).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 return false;
