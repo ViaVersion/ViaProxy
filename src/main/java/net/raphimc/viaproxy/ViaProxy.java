@@ -37,7 +37,6 @@ import net.lenni0451.reflect.Methods;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetServer;
 import net.raphimc.viaproxy.cli.ConsoleHandler;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.PluginManager;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyHandlerCreationEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
@@ -113,8 +112,7 @@ public class ViaProxy {
         final boolean useUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         final boolean useConfig = args.length == 2 && args[0].equals("config");
         final boolean useCLI = args.length > 0 && args[0].equals("cli");
-        final boolean useLegacyCLI = args.length > 0 && args[0].startsWith("-");
-        if (!useUI && !useConfig && !useCLI && !useLegacyCLI) {
+        if (!useUI && !useConfig && !useCLI) {
             String fileName = "ViaProxy.jar";
             try {
                 fileName = new File(ViaProxy.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getName();
@@ -217,8 +215,6 @@ public class ViaProxy {
                 final String[] cliArgs = new String[args.length - 1];
                 System.arraycopy(args, 1, cliArgs, 0, cliArgs.length);
                 CONFIG.loadFromArguments(cliArgs);
-            } else if (useLegacyCLI) {
-                Options.parse(args);
             } else if (firstStart) {
                 Logger.LOGGER.info("This is the first start of ViaProxy. Please configure the settings in the " + viaProxyConfigFile.getName() + " file and restart ViaProxy.");
                 System.exit(0);

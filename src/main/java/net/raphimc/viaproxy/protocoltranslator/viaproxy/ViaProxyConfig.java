@@ -27,7 +27,6 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.BetterHelpFormatter;
 import net.raphimc.viaproxy.cli.HelpRequestedException;
 import net.raphimc.viaproxy.cli.ProtocolVersionConverter;
-import net.raphimc.viaproxy.cli.options.Options;
 import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
 import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
@@ -132,7 +131,6 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.allowLegacyClientPassthrough = this.getBoolean("allow-legacy-client-passthrough", this.allowLegacyClientPassthrough);
         this.resourcePackUrl = this.getString("resource-pack-url", this.resourcePackUrl);
         this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", this.wildcardDomainHandling.name()));
-        Options.loadFromConfig(this);
     }
 
     public void loadFromArguments(final String[] args) throws IOException {
@@ -159,7 +157,6 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.resourcePackUrl = options.valueOf(this.optionResourcePackUrl);
             this.wildcardDomainHandling = options.valueOf(this.optionWildcardDomainHandling);
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
-            Options.loadFromConfig(this);
             return;
         } catch (OptionException e) {
             Logger.LOGGER.error("Error parsing CLI options: " + e.getMessage());
@@ -189,7 +186,6 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     @Override
     public void set(String path, Object value) {
         super.set(path, value);
-        Options.loadFromConfig(this);
     }
 
     public SocketAddress getBindAddress() {
