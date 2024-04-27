@@ -150,7 +150,8 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.authMethod = options.valueOf(this.optionAuthMethod);
             final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
             final int accountIndex = options.valueOf(this.optionMinecraftAccountIndex);
-            if (this.authMethod == AuthMethod.ACCOUNT && accountIndex >= 0 && accountIndex < accounts.size()) {
+            if (options.has(this.optionMinecraftAccountIndex) && accountIndex >= 0 && accountIndex < accounts.size()) {
+                this.authMethod = AuthMethod.ACCOUNT;
                 this.account = accounts.get(accountIndex);
             } else {
                 this.account = null;
