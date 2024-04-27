@@ -175,7 +175,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
 
         this.optionParser.formatHelpWith(new BetterHelpFormatter());
         this.optionParser.printHelpOn(Logger.SYSOUT);
-        Logger.LOGGER.info("For a more detailed explanation of the options, please refer to the viaproxy.yml file.");
+        Logger.LOGGER.info("For a more detailed description of the options, please refer to the viaproxy.yml file.");
         System.exit(1);
     }
 

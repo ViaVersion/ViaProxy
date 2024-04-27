@@ -17,15 +17,18 @@
  */
 package net.raphimc.viaproxy.cli;
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import joptsimple.BuiltinHelpFormatter;
 import joptsimple.OptionDescriptor;
 import joptsimple.internal.Classes;
 import joptsimple.internal.Strings;
 
+import java.util.List;
+
 public class BetterHelpFormatter extends BuiltinHelpFormatter {
 
     public BetterHelpFormatter() {
-        super(80, 2);
+        super(120, 2);
     }
 
     @Override
@@ -38,6 +41,22 @@ public class BetterHelpFormatter extends BuiltinHelpFormatter {
             }
         }
         return !Strings.isNullOrEmpty(indicator) && !String.class.getName().equals(indicator) ? Classes.shortNameOf(indicator) : "String";
+    }
+
+    @Override
+    protected String createDefaultValuesDisplay(List<?> defaultValues) {
+        if (defaultValues.size() == 1) {
+            Object value = defaultValues.get(0);
+            if (value instanceof ProtocolVersion version) {
+                return version.getName();
+            } else if (value instanceof String) {
+                return "\"" + value + "\"";
+            }
+
+            return value.toString();
+        }
+
+        return defaultValues.toString();
     }
 
 }
