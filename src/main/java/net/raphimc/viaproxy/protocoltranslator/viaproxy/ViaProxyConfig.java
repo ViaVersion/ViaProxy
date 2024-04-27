@@ -54,6 +54,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<ProtocolVersion> optionTargetVersion;
     private final OptionSpec<Boolean> optionProxyOnlineMode;
     private final OptionSpec<AuthMethod> optionAuthMethod;
+    private final OptionSpec<Integer> optionMinecraftAccountIndex;
     private final OptionSpec<Boolean> optionBetacraftAuth;
     private final OptionSpec<String> optionBackendProxyUrl;
     private final OptionSpec<Boolean> optionBackendHaProxy;
@@ -92,6 +93,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionTargetVersion = this.optionParser.accepts("target-version").withRequiredArg().withValuesConvertedBy(new ProtocolVersionConverter()).defaultsTo(this.targetVersion);
         this.optionProxyOnlineMode = this.optionParser.accepts("proxy-online-mode").withRequiredArg().ofType(Boolean.class).defaultsTo(this.proxyOnlineMode);
         this.optionAuthMethod = this.optionParser.accepts("auth-method").withRequiredArg().ofType(AuthMethod.class).defaultsTo(this.authMethod);
+        this.optionMinecraftAccountIndex = this.optionParser.accepts("minecraft-account-index").withRequiredArg().ofType(Integer.class).defaultsTo(0);
         this.optionBetacraftAuth = this.optionParser.accepts("betacraft-auth").withRequiredArg().ofType(Boolean.class).defaultsTo(this.betacraftAuth);
         this.optionBackendProxyUrl = this.optionParser.accepts("backend-proxy-url").withRequiredArg().ofType(String.class).defaultsTo("");
         this.optionBackendHaProxy = this.optionParser.accepts("backend-haproxy").withRequiredArg().ofType(Boolean.class).defaultsTo(this.backendHaProxy);
@@ -146,6 +148,13 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.targetAddress = AddressUtil.parse(options.valueOf(this.optionTargetAddress), this.targetVersion);
             this.proxyOnlineMode = options.valueOf(this.optionProxyOnlineMode);
             this.authMethod = options.valueOf(this.optionAuthMethod);
+            final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
+            final int accountIndex = options.valueOf(this.optionMinecraftAccountIndex);
+            if (this.authMethod == AuthMethod.ACCOUNT && accountIndex >= 0 && accountIndex < accounts.size()) {
+                this.account = accounts.get(accountIndex);
+            } else {
+                this.account = null;
+            }
             this.betacraftAuth = options.valueOf(this.optionBetacraftAuth);
             this.backendProxyUrl = this.parseProxyUrl(options.valueOf(this.optionBackendProxyUrl));
             this.backendHaProxy = options.valueOf(this.optionBackendHaProxy);
