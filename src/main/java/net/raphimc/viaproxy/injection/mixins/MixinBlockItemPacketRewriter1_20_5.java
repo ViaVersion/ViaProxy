@@ -39,19 +39,20 @@ import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.Serverb
 import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.rewriter.BlockItemPacketRewriter1_20_5;
 import com.viaversion.viaversion.rewriter.ItemRewriter;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
-import net.raphimc.viaproxy.injection.interfaces.IBlockItemPacketRewriter1_20_5;
+import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyMappingDataLoader;
-import net.raphimc.viaproxy.util.logging.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 
 @Mixin(value = BlockItemPacketRewriter1_20_5.class, remap = false)
-public abstract class MixinBlockItemPacketRewriter1_20_5 extends ItemRewriter<ClientboundPacket1_20_3, ServerboundPacket1_20_5, Protocol1_20_5To1_20_3> implements IBlockItemPacketRewriter1_20_5 {
+public abstract class MixinBlockItemPacketRewriter1_20_5 extends ItemRewriter<ClientboundPacket1_20_3, ServerboundPacket1_20_5, Protocol1_20_5To1_20_3> {
 
     @Unique
     private final Set<String> foodItems_b1_7_3 = new HashSet<>();
@@ -69,8 +70,8 @@ public abstract class MixinBlockItemPacketRewriter1_20_5 extends ItemRewriter<Cl
         super(null, null, null, null, null);
     }
 
-    @Override
-    public void onMappingDataLoaded() {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void loadItemMappings(Protocol1_20_5To1_20_3 protocol, CallbackInfo ci) {
         this.foodItems_b1_7_3.add("minecraft:apple");
         this.foodItems_b1_7_3.add("minecraft:mushroom_stew");
         this.foodItems_b1_7_3.add("minecraft:bread");
@@ -81,26 +82,12 @@ public abstract class MixinBlockItemPacketRewriter1_20_5 extends ItemRewriter<Cl
         this.foodItems_b1_7_3.add("minecraft:cooked_cod");
         this.foodItems_b1_7_3.add("minecraft:cookie");
 
-        this.armorMaxDamage_b1_8_1.put("minecraft:leather_helmet", 33);
-        this.armorMaxDamage_b1_8_1.put("minecraft:leather_chestplate", 48);
-        this.armorMaxDamage_b1_8_1.put("minecraft:leather_leggings", 45);
-        this.armorMaxDamage_b1_8_1.put("minecraft:leather_boots", 39);
-        this.armorMaxDamage_b1_8_1.put("minecraft:chainmail_helmet", 66);
-        this.armorMaxDamage_b1_8_1.put("minecraft:chainmail_chestplate", 96);
-        this.armorMaxDamage_b1_8_1.put("minecraft:chainmail_leggings", 90);
-        this.armorMaxDamage_b1_8_1.put("minecraft:chainmail_boots", 78);
-        this.armorMaxDamage_b1_8_1.put("minecraft:iron_helmet", 132);
-        this.armorMaxDamage_b1_8_1.put("minecraft:iron_chestplate", 192);
-        this.armorMaxDamage_b1_8_1.put("minecraft:iron_leggings", 180);
-        this.armorMaxDamage_b1_8_1.put("minecraft:iron_boots", 156);
-        this.armorMaxDamage_b1_8_1.put("minecraft:diamond_helmet", 264);
-        this.armorMaxDamage_b1_8_1.put("minecraft:diamond_chestplate", 384);
-        this.armorMaxDamage_b1_8_1.put("minecraft:diamond_leggings", 360);
-        this.armorMaxDamage_b1_8_1.put("minecraft:diamond_boots", 312);
-        this.armorMaxDamage_b1_8_1.put("minecraft:golden_helmet", 66);
-        this.armorMaxDamage_b1_8_1.put("minecraft:golden_chestplate", 96);
-        this.armorMaxDamage_b1_8_1.put("minecraft:golden_leggings", 90);
-        this.armorMaxDamage_b1_8_1.put("minecraft:golden_boots", 78);
+        final JsonObject armorMaxDamages = ViaProxyMappingDataLoader.INSTANCE.loadData("armor-damages-b1.8.1.json");
+        for (Map.Entry<String, JsonElement> entry : armorMaxDamages.entrySet()) {
+            final String item = entry.getKey();
+            final int maxDamage = entry.getValue().getAsInt();
+            this.armorMaxDamage_b1_8_1.put(item, maxDamage);
+        }
 
         this.swordItems1_8.add("minecraft:wooden_sword");
         this.swordItems1_8.add("minecraft:stone_sword");
@@ -108,47 +95,37 @@ public abstract class MixinBlockItemPacketRewriter1_20_5 extends ItemRewriter<Cl
         this.swordItems1_8.add("minecraft:golden_sword");
         this.swordItems1_8.add("minecraft:diamond_sword");
 
-        final JsonObject itemToolComponents = ViaProxyMappingDataLoader.INSTANCE.loadData("item-tool-components.json");
-        for (Map.Entry<String, JsonElement> entry : itemToolComponents.entrySet()) {
-            int attempts = 0;
-            while (ProtocolVersion.getClosest(entry.getKey()) == null) {
-                try {
-                    Thread.sleep(100);
-                    if (attempts++ > 100) { // 10 seconds
-                        Logger.LOGGER.warn("Failed to load item-tool-components.json after 10 seconds. Skipping entry.");
-                        break;
+        ViaProxy.EVENT_MANAGER.registerRunnable(() -> {
+            final JsonObject itemToolComponents = ViaProxyMappingDataLoader.INSTANCE.loadData("item-tool-components.json");
+            for (Map.Entry<String, JsonElement> entry : itemToolComponents.entrySet()) {
+                final ProtocolVersion version = ProtocolVersion.getClosest(entry.getKey());
+                if (version == null) {
+                    throw new IllegalStateException("Unknown protocol version: " + entry.getKey());
+                }
+                final Map<String, ToolProperties> toolProperties = new HashMap<>();
+                final JsonArray toolComponents = entry.getValue().getAsJsonArray();
+                for (JsonElement toolComponent : toolComponents) {
+                    final JsonObject toolComponentObject = toolComponent.getAsJsonObject();
+                    final String item = toolComponentObject.get("item").getAsString();
+                    final float defaultMiningSpeed = toolComponentObject.get("default_mining_speed").getAsFloat();
+                    final int damagePerBlock = toolComponentObject.get("damage_per_block").getAsInt();
+                    final int[] suitableFor = this.blockJsonArrayToIds(version, toolComponentObject.getAsJsonArray("suitable_for"));
+                    final List<ToolRule> toolRules = new ArrayList<>();
+                    final JsonArray miningSpeeds = toolComponentObject.getAsJsonArray("mining_speeds");
+                    for (JsonElement miningSpeed : miningSpeeds) {
+                        final JsonObject miningSpeedObject = miningSpeed.getAsJsonObject();
+                        final int[] blocks = this.blockJsonArrayToIds(version, miningSpeedObject.getAsJsonArray("blocks"));
+                        final float speed = miningSpeedObject.get("speed").getAsFloat();
+                        toolRules.add(new ToolRule(HolderSet.of(blocks), speed, null));
                     }
-                } catch (InterruptedException e) {
-                    break;
+                    if (suitableFor.length > 0) {
+                        toolRules.add(new ToolRule(HolderSet.of(suitableFor), null, true));
+                    }
+                    toolProperties.put(item, new ToolProperties(toolRules.toArray(new ToolRule[0]), defaultMiningSpeed, damagePerBlock));
                 }
+                this.toolDataChanges.put(version, toolProperties);
             }
-            final ProtocolVersion version = ProtocolVersion.getClosest(entry.getKey());
-            if (version == null) { // Only happens if the timeout above is reached or the thread is interrupted
-                continue;
-            }
-            final Map<String, ToolProperties> toolProperties = new HashMap<>();
-            final JsonArray toolComponents = entry.getValue().getAsJsonArray();
-            for (JsonElement toolComponent : toolComponents) {
-                final JsonObject toolComponentObject = toolComponent.getAsJsonObject();
-                final String item = toolComponentObject.get("item").getAsString();
-                final float defaultMiningSpeed = toolComponentObject.get("default_mining_speed").getAsFloat();
-                final int damagePerBlock = toolComponentObject.get("damage_per_block").getAsInt();
-                final int[] suitableFor = this.blockJsonArrayToIds(version, toolComponentObject.getAsJsonArray("suitable_for"));
-                final List<ToolRule> toolRules = new ArrayList<>();
-                final JsonArray miningSpeeds = toolComponentObject.getAsJsonArray("mining_speeds");
-                for (JsonElement miningSpeed : miningSpeeds) {
-                    final JsonObject miningSpeedObject = miningSpeed.getAsJsonObject();
-                    final int[] blocks = this.blockJsonArrayToIds(version, miningSpeedObject.getAsJsonArray("blocks"));
-                    final float speed = miningSpeedObject.get("speed").getAsFloat();
-                    toolRules.add(new ToolRule(HolderSet.of(blocks), speed, null));
-                }
-                if (suitableFor.length > 0) {
-                    toolRules.add(new ToolRule(HolderSet.of(suitableFor), null, true));
-                }
-                toolProperties.put(item, new ToolProperties(toolRules.toArray(new ToolRule[0]), defaultMiningSpeed, damagePerBlock));
-            }
-            this.toolDataChanges.put(version, toolProperties);
-        }
+        }, ViaLoadingEvent.class);
     }
 
     @Inject(method = "toStructuredItem", at = @At("RETURN"))
