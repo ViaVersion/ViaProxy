@@ -37,6 +37,7 @@ import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.UITab;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
+import net.raphimc.viaproxy.util.StringUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -205,12 +206,12 @@ public class RealmsTab extends UITab {
             panel.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Table.gridColor")));
 
             String nameString = "";
-            if (!world.getOwnerName().isEmpty()) nameString += world.getOwnerName() + " - ";
+            if (world.getOwnerName() != null) nameString += world.getOwnerName() + " - ";
             String versionString = "";
             if (!world.getActiveVersion().isEmpty()) versionString += " - " + world.getActiveVersion();
-            GBC.create(panel).grid(0, 0).weightx(1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(nameString + world.getName() + " (" + world.getState() + ")"));
+            GBC.create(panel).grid(0, 0).weightx(1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(nameString + StringUtil.emptyIfNull(world.getName()) + " (" + world.getState() + ")"));
             GBC.create(panel).grid(1, 0).insets(5, 5, 0, 5).anchor(GBC.LINE_END).add(new JLabel(world.getWorldType() + versionString));
-            GBC.create(panel).grid(0, 1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(world.getMotd()));
+            GBC.create(panel).grid(0, 1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(StringUtil.emptyIfNull(world.getMotd())));
             final JButton join = new JButton(I18n.get("tab.realms.join"));
             if (world.isExpired()) {
                 join.setEnabled(false);
