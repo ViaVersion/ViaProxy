@@ -12,7 +12,7 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
 - April Fools (3D Shareware, 20w14infinite)
 - Combat Snapshots (Combat Test 8c)
-- Bedrock Edition 1.20.70 ([Some features are missing](https://github.com/RaphiMC/ViaBedrock#features))
+- Bedrock Edition 1.20.80 ([Some features are missing](https://github.com/RaphiMC/ViaBedrock#features))
 
 ## Supported Client versions
 - Release (1.7.2 - 1.20.6)

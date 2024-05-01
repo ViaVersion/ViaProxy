@@ -17,20 +17,21 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.providers;
 
+import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider;
 import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.storage.CookieStorage;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.Channel;
-import net.raphimc.viabedrock.protocol.providers.TransferProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.proxy.util.TransferDataHolder;
 
 import java.net.InetSocketAddress;
 
-public class ViaProxyTransferProvider extends TransferProvider implements com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider {
+public class ViaProxyTransferProvider implements TransferProvider {
 
     @Override
-    public void connectToServer(UserConnection user, InetSocketAddress newAddress) {
+    public void connectToServer(UserConnection user, String host, int port) {
+        final InetSocketAddress newAddress = new InetSocketAddress(host, port);
         final Channel channel = ProxyConnection.fromChannel(user.getChannel()).getC2P();
         TransferDataHolder.addTempRedirect(channel, newAddress);
         if (user.has(CookieStorage.class)) {
@@ -40,11 +41,6 @@ public class ViaProxyTransferProvider extends TransferProvider implements com.vi
             ProxyConnection.fromUserConnection(user).kickClient("§aThe server transferred you to another server §7(§e" + newAddress.getHostName() + ":" + newAddress.getPort() + "§7)§a. Please reconnect to ViaProxy.");
         } catch (CloseAndReturn ignored) {
         }
-    }
-
-    @Override
-    public void connectToServer(UserConnection user, String host, int port) {
-        this.connectToServer(user, new InetSocketAddress(host, port));
     }
 
 }

@@ -17,12 +17,12 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
+import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.HandItemProvider;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
-import net.raphimc.viabedrock.protocol.providers.TransferProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicCustomCommandProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicMPPassProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicWorldHeightProvider;
@@ -46,7 +46,7 @@ public class ViaProxyVLLoader extends VLLoader {
         Via.getManager().getProviders().use(VersionProvider.class, new ViaProxyVersionProvider());
 
         // ViaBackwards
-        Via.getManager().getProviders().use(com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider.class, new ViaProxyTransferProvider());
+        Via.getManager().getProviders().use(TransferProvider.class, new ViaProxyTransferProvider());
 
         // ViaLegacy
         Via.getManager().getProviders().use(GameProfileFetcher.class, new ViaProxyGameProfileFetcher());
@@ -58,7 +58,6 @@ public class ViaProxyVLLoader extends VLLoader {
 
         // ViaBedrock
         Via.getManager().getProviders().use(NettyPipelineProvider.class, new ViaProxyNettyPipelineProvider());
-        Via.getManager().getProviders().use(TransferProvider.class, new ViaProxyTransferProvider());
 
         // ViaProxy plugins
         ViaProxy.EVENT_MANAGER.call(new ViaLoadingEvent());
