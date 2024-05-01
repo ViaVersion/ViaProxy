@@ -22,7 +22,6 @@ import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
 import com.viaversion.viaversion.api.minecraft.signature.model.MessageMetadata;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import com.viaversion.viaversion.api.type.Type;
-import com.viaversion.viaversion.api.type.types.BitSetType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -76,7 +75,7 @@ public class ChatSignaturePacketHandler extends PacketHandler {
                 newChatMessage.writeLong(salt); // salt
                 Type.OPTIONAL_SIGNATURE_BYTES.write(newChatMessage, signature); // signature
                 PacketTypes.writeVarInt(newChatMessage, 0); // offset
-                new BitSetType(20).write(newChatMessage, new BitSet(20)); // acknowledged
+                Type.ACKNOWLEDGED_BIT_SET.write(newChatMessage, new BitSet(20)); // acknowledged
                 this.proxyConnection.getChannel().writeAndFlush(newChatMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
                 return false;
