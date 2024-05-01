@@ -58,6 +58,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<Boolean> optionBetacraftAuth;
     private final OptionSpec<String> optionBackendProxyUrl;
     private final OptionSpec<Boolean> optionBackendHaProxy;
+    private final OptionSpec<Boolean> optionFrontendHaProxy;
     private final OptionSpec<Boolean> optionChatSigning;
     private final OptionSpec<Integer> optionCompressionThreshold;
     private final OptionSpec<Boolean> optionAllowBetaPinging;
@@ -75,6 +76,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private boolean betacraftAuth = false;
     private URI backendProxyUrl = null;
     private boolean backendHaProxy = false;
+    private boolean frontendHaProxy = false;
     private boolean chatSigning = true;
     private int compressionThreshold = 256;
     private boolean allowBetaPinging = false;
@@ -97,6 +99,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionBetacraftAuth = this.optionParser.accepts("betacraft-auth").withRequiredArg().ofType(Boolean.class).defaultsTo(this.betacraftAuth);
         this.optionBackendProxyUrl = this.optionParser.accepts("backend-proxy-url").withRequiredArg().ofType(String.class).defaultsTo("");
         this.optionBackendHaProxy = this.optionParser.accepts("backend-haproxy").withRequiredArg().ofType(Boolean.class).defaultsTo(this.backendHaProxy);
+        this.optionFrontendHaProxy = this.optionParser.accepts("frontend-haproxy").withRequiredArg().ofType(Boolean.class).defaultsTo(this.frontendHaProxy);
         this.optionChatSigning = this.optionParser.accepts("chat-signing").withRequiredArg().ofType(Boolean.class).defaultsTo(this.chatSigning);
         this.optionCompressionThreshold = this.optionParser.accepts("compression-threshold").withRequiredArg().ofType(Integer.class).defaultsTo(this.compressionThreshold);
         this.optionAllowBetaPinging = this.optionParser.accepts("allow-beta-pinging").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowBetaPinging);
@@ -126,6 +129,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.betacraftAuth = this.getBoolean("betacraft-auth", this.betacraftAuth);
         this.backendProxyUrl = this.parseProxyUrl(this.getString("backend-proxy-url", ""));
         this.backendHaProxy = this.getBoolean("backend-haproxy", this.backendHaProxy);
+        this.frontendHaProxy = this.getBoolean("frontend-haproxy", this.frontendHaProxy);
         this.chatSigning = this.getBoolean("chat-signing", this.chatSigning);
         this.compressionThreshold = this.getInt("compression-threshold", this.compressionThreshold);
         this.allowBetaPinging = this.getBoolean("allow-beta-pinging", this.allowBetaPinging);
@@ -159,6 +163,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.betacraftAuth = options.valueOf(this.optionBetacraftAuth);
             this.backendProxyUrl = this.parseProxyUrl(options.valueOf(this.optionBackendProxyUrl));
             this.backendHaProxy = options.valueOf(this.optionBackendHaProxy);
+            this.frontendHaProxy = options.valueOf(this.optionFrontendHaProxy);
             this.chatSigning = options.valueOf(this.optionChatSigning);
             this.compressionThreshold = options.valueOf(this.optionCompressionThreshold);
             this.allowBetaPinging = options.valueOf(this.optionAllowBetaPinging);
@@ -281,6 +286,15 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setBackendHaProxy(final boolean backendHaProxy) {
         this.backendHaProxy = backendHaProxy;
         this.set("backend-haproxy", backendHaProxy);
+    }
+
+    public boolean useFrontendHaProxy() {
+        return this.frontendHaProxy;
+    }
+
+    public void setFrontendHaProxy(final boolean frontendHaProxy) {
+        this.frontendHaProxy = frontendHaProxy;
+        this.set("frontend-haproxy", frontendHaProxy);
     }
 
     public boolean shouldSignChat() {

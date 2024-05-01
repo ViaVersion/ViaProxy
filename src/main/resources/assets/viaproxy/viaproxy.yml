@@ -36,6 +36,9 @@ backend-proxy-url: ""
 # Send HAProxy protocol messages to the target server.
 backend-haproxy: false
 #
+# Read HAProxy protocol messages from client connections.
+frontend-haproxy: false
+#
 # Enables sending signed chat messages on >= 1.19 servers.
 chat-signing: true
 #

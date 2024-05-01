@@ -19,6 +19,7 @@ package net.raphimc.viaproxy.proxy.client2proxy;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
@@ -31,6 +32,8 @@ import java.util.function.Supplier;
 
 public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer {
 
+    public static final String VIAPROXY_HAPROXY_DECODER_NAME = "viaproxy-haproxy-decoder";
+    public static final String VIAPROXY_HAPROXY_HANDLER_NAME = "viaproxy-haproxy-handler";
     public static final String LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME = "legacy-passthrough-initial-handler";
 
     public Client2ProxyChannelInitializer(final Supplier<ChannelHandler> handlerSupplier) {
@@ -44,6 +47,10 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
             return;
         }
 
+        if (ViaProxy.getConfig().useFrontendHaProxy()) {
+            channel.pipeline().addLast(VIAPROXY_HAPROXY_DECODER_NAME, new HAProxyMessageDecoder());
+            channel.pipeline().addLast(VIAPROXY_HAPROXY_HANDLER_NAME, new HAProxyHandler());
+        }
         if (ViaProxy.getConfig().shouldAllowLegacyClientPassthrough()) {
             channel.pipeline().addLast(LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME, new LegacyPassthroughInitialHandler());
         }
