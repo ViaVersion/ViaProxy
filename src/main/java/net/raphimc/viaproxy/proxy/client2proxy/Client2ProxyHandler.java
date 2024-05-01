@@ -134,19 +134,21 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                 if (handshakeParts[0].toLowerCase().contains(".viaproxy.")) {
                     handshakeParts[0] = handshakeParts[0].substring(0, handshakeParts[0].toLowerCase().lastIndexOf(".viaproxy."));
                 } else {
-                    throw CloseAndReturn.INSTANCE;
+                    throw new IllegalArgumentException();
                 }
                 final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split(Pattern.quote("_")));
                 if (arrayHelper.getLength() < 3) {
-                    throw CloseAndReturn.INSTANCE;
+                    throw new IllegalArgumentException();
                 }
                 final String versionString = arrayHelper.get(arrayHelper.getLength() - 1);
                 serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
-                if (serverVersion == null) throw CloseAndReturn.INSTANCE;
+                if (serverVersion == null) {
+                    this.proxyConnection.kickClient("§cWrong domain syntax!\n§cUnknown server version.");
+                }
                 final String connectIP = arrayHelper.getAsString(0, arrayHelper.getLength() - 3, "_");
                 final int connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
                 serverAddress = AddressUtil.parse(connectIP + ":" + connectPort, serverVersion);
-            } catch (CloseAndReturn e) {
+            } catch (IllegalArgumentException e) {
                 this.proxyConnection.kickClient("§cWrong domain syntax! §6Please use:\n§7address_port_version.viaproxy.hostname");
             }
         } else if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.INTERNAL) {
