@@ -17,9 +17,13 @@
  */
 package net.raphimc.viaproxy.proxy.packethandler;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusPongPacket;
+import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.util.List;
@@ -34,6 +38,13 @@ public class StatusPacketHandler extends PacketHandler {
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
         if (packet instanceof S2CStatusPongPacket) {
             listeners.add(ChannelFutureListener.CLOSE);
+        } else if (packet instanceof S2CStatusResponsePacket statusResponsePacket && !ViaProxy.getConfig().getCustomMotd().isBlank()) {
+            try {
+                final JsonObject obj = JsonParser.parseString(statusResponsePacket.statusJson).getAsJsonObject();
+                obj.addProperty("description", ViaProxy.getConfig().getCustomMotd());
+                statusResponsePacket.statusJson = obj.toString();
+            } catch (Throwable ignored) {
+            }
         }
 
         return true;

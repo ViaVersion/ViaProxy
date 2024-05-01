@@ -64,6 +64,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<Boolean> optionAllowBetaPinging;
     private final OptionSpec<Boolean> optionIgnoreProtocolTranslationErrors;
     private final OptionSpec<Boolean> optionAllowLegacyClientPassthrough;
+    private final OptionSpec<String> optionCustomMotd;
     private final OptionSpec<String> optionResourcePackUrl;
     private final OptionSpec<WildcardDomainHandling> optionWildcardDomainHandling;
 
@@ -82,6 +83,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private boolean allowBetaPinging = false;
     private boolean ignoreProtocolTranslationErrors = false;
     private boolean allowLegacyClientPassthrough = false;
+    private String customMotd = "";
     private String resourcePackUrl = "";
     private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
 
@@ -105,6 +107,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionAllowBetaPinging = this.optionParser.accepts("allow-beta-pinging").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowBetaPinging);
         this.optionIgnoreProtocolTranslationErrors = this.optionParser.accepts("ignore-protocol-translation-errors").withRequiredArg().ofType(Boolean.class).defaultsTo(this.ignoreProtocolTranslationErrors);
         this.optionAllowLegacyClientPassthrough = this.optionParser.accepts("allow-legacy-client-passthrough").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowLegacyClientPassthrough);
+        this.optionCustomMotd = this.optionParser.accepts("custom-motd").withRequiredArg().ofType(String.class).defaultsTo(this.customMotd);
         this.optionResourcePackUrl = this.optionParser.accepts("resource-pack-url").withRequiredArg().ofType(String.class).defaultsTo(this.resourcePackUrl);
         this.optionWildcardDomainHandling = this.optionParser.accepts("wildcard-domain-handling").withRequiredArg().ofType(WildcardDomainHandling.class).defaultsTo(this.wildcardDomainHandling);
     }
@@ -135,6 +138,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.allowBetaPinging = this.getBoolean("allow-beta-pinging", this.allowBetaPinging);
         this.ignoreProtocolTranslationErrors = this.getBoolean("ignore-protocol-translation-errors", this.ignoreProtocolTranslationErrors);
         this.allowLegacyClientPassthrough = this.getBoolean("allow-legacy-client-passthrough", this.allowLegacyClientPassthrough);
+        this.customMotd = this.getString("custom-motd", this.customMotd);
         this.resourcePackUrl = this.getString("resource-pack-url", this.resourcePackUrl);
         this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", this.wildcardDomainHandling.name()));
     }
@@ -169,6 +173,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.allowBetaPinging = options.valueOf(this.optionAllowBetaPinging);
             this.ignoreProtocolTranslationErrors = options.valueOf(this.optionIgnoreProtocolTranslationErrors);
             this.allowLegacyClientPassthrough = options.valueOf(this.optionAllowLegacyClientPassthrough);
+            this.customMotd = options.valueOf(this.optionCustomMotd);
             this.resourcePackUrl = options.valueOf(this.optionResourcePackUrl);
             this.wildcardDomainHandling = options.valueOf(this.optionWildcardDomainHandling);
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
@@ -340,6 +345,15 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setAllowLegacyClientPassthrough(final boolean allowLegacyClientPassthrough) {
         this.allowLegacyClientPassthrough = allowLegacyClientPassthrough;
         this.set("allow-legacy-client-passthrough", allowLegacyClientPassthrough);
+    }
+
+    public String getCustomMotd() {
+        return this.customMotd;
+    }
+
+    public void setCustomMotd(final String customMotd) {
+        this.customMotd = customMotd;
+        this.set("custom-motd", customMotd);
     }
 
     public String getResourcePackUrl() {

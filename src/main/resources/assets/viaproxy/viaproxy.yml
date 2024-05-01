@@ -55,6 +55,9 @@ ignore-protocol-translation-errors: false
 # Allow <= 1.6.4 clients to connect through ViaProxy to the target server. (No protocol translation or packet handling)
 allow-legacy-client-passthrough: false
 #
+# Custom MOTD to send when clients ping the proxy. Leave empty to use the target server's MOTD.
+custom-motd: ""
+#
 # URL of a resource pack which clients can optionally download when connecting to the server. Leave empty to disable.
 # Example: http://example.com/resourcepack.zip
 resource-pack-url: ""

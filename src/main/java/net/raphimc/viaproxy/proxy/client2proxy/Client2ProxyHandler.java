@@ -163,6 +163,9 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         }
 
         if (packet.intendedState.getConnectionState() == ConnectionState.STATUS && !ViaProxy.getConfig().shouldAllowBetaPinging() && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3)) {
+            if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
+                this.proxyConnection.kickClient(ViaProxy.getConfig().getCustomMotd());
+            }
             this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
         }
 
