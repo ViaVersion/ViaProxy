@@ -26,6 +26,7 @@ ViaProxy supports joining to any of the listed server version from any of the li
 - Support for joining on servers which have chat signing enabled from all listed client versions
 - Supports transfer and cookies for <=1.20.4 clients on 1.20.5+ servers
 - Allows joining Minecraft Realms with any supported client version
+- Supports Simple Voice Chat mod
 
 ## Releases
 ### Executable Jar File
