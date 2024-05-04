@@ -67,6 +67,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<String> optionCustomMotd;
     private final OptionSpec<String> optionResourcePackUrl;
     private final OptionSpec<WildcardDomainHandling> optionWildcardDomainHandling;
+    private final OptionSpec<Boolean> optionSimpleVoiceChatSupport;
 
     private SocketAddress bindAddress = AddressUtil.parse("0.0.0.0:25568", null);
     private SocketAddress targetAddress = AddressUtil.parse("127.0.0.1:25565", null);
@@ -86,6 +87,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private String customMotd = "";
     private String resourcePackUrl = "";
     private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
+    private boolean simpleVoiceChatSupport = false;
 
     public ViaProxyConfig(final File configFile) {
         super(configFile);
@@ -110,6 +112,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionCustomMotd = this.optionParser.accepts("custom-motd").withRequiredArg().ofType(String.class).defaultsTo(this.customMotd);
         this.optionResourcePackUrl = this.optionParser.accepts("resource-pack-url").withRequiredArg().ofType(String.class).defaultsTo(this.resourcePackUrl);
         this.optionWildcardDomainHandling = this.optionParser.accepts("wildcard-domain-handling").withRequiredArg().ofType(WildcardDomainHandling.class).defaultsTo(this.wildcardDomainHandling);
+        this.optionSimpleVoiceChatSupport = this.optionParser.accepts("simple-voice-chat-support").withRequiredArg().ofType(Boolean.class).defaultsTo(this.simpleVoiceChatSupport);
     }
 
     @Override
@@ -141,6 +144,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.customMotd = this.getString("custom-motd", this.customMotd);
         this.resourcePackUrl = this.getString("resource-pack-url", this.resourcePackUrl);
         this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", this.wildcardDomainHandling.name()));
+        this.simpleVoiceChatSupport = this.getBoolean("simple-voice-chat-support", this.simpleVoiceChatSupport);
     }
 
     public void loadFromArguments(final String[] args) throws IOException {
@@ -176,6 +180,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.customMotd = options.valueOf(this.optionCustomMotd);
             this.resourcePackUrl = options.valueOf(this.optionResourcePackUrl);
             this.wildcardDomainHandling = options.valueOf(this.optionWildcardDomainHandling);
+            this.simpleVoiceChatSupport = options.valueOf(this.optionSimpleVoiceChatSupport);
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
             return;
         } catch (OptionException e) {
@@ -372,6 +377,15 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setWildcardDomainHandling(final WildcardDomainHandling wildcardDomainHandling) {
         this.wildcardDomainHandling = wildcardDomainHandling;
         this.set("wildcard-domain-handling", wildcardDomainHandling.name().toLowerCase(Locale.ROOT));
+    }
+
+    public boolean shouldSupportSimpleVoiceChat() {
+        return this.simpleVoiceChatSupport;
+    }
+
+    public void setSimpleVoiceChatSupport(final boolean simpleVoiceChatSupport) {
+        this.simpleVoiceChatSupport = simpleVoiceChatSupport;
+        this.set("simple-voice-chat-support", simpleVoiceChatSupport);
     }
 
     private void checkTargetVersion() {

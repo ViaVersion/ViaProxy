@@ -68,5 +68,8 @@ resource-pack-url: ""
 # internal: Internal wildcard domain handling. Intended for local usage by custom clients. (Example: address:port\7version\7classic-mppass)
 wildcard-domain-handling: "none"
 #
+# Enables handling and rewriting of Simple Voice Chat mod packets.
+simple-voice-chat-support: false
+#
 # Configuration version. Do not change this.
 config-version: 1

@@ -20,62 +20,44 @@ package net.raphimc.viaproxy.proxy.packethandler;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.util.Key;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
-import net.raphimc.netminecraft.constants.ConnectionState;
-import net.raphimc.netminecraft.constants.MCPackets;
-import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.util.List;
 
-public class BrandCustomPayloadPacketHandler extends PacketHandler {
+public class BrandCustomPayloadPacketHandler extends CustomPayloadPacketHandler {
 
     private static final String BRAND_CHANNEL = "minecraft:brand";
     private static final String LEGACY_BRAND_CHANNEL = "MC|Brand";
 
-    private final int customPayloadId;
-    private final int configCustomPayloadId;
-
     public BrandCustomPayloadPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
-
-        this.customPayloadId = MCPackets.S2C_PLUGIN_MESSAGE.getId(proxyConnection.getClientVersion().getVersion());
-        this.configCustomPayloadId = MCPackets.S2C_CONFIG_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
     }
 
     @Override
-    public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket unknownPacket
-                && (unknownPacket.packetId == this.customPayloadId && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY
-                || unknownPacket.packetId == this.configCustomPayloadId && this.proxyConnection.getP2sConnectionState() == ConnectionState.CONFIGURATION)) {
-            final ByteBuf data = Unpooled.wrappedBuffer(unknownPacket.data);
-            final String channel = PacketTypes.readString(data, Short.MAX_VALUE); // channel
-            if (Key.namespaced(channel).equals(BRAND_CHANNEL) || channel.equals(LEGACY_BRAND_CHANNEL)) {
-
-                String brand;
-                try {
-                    brand = PacketTypes.readString(data, Short.MAX_VALUE);
-                } catch (Exception e) {
-                    if (this.proxyConnection.getServerVersion().newerThan(ProtocolVersion.v1_20)) {
-                        throw e;
-                    } else { // <=1.20 clients ignore errors
-                        brand = "Unknown";
-                    }
+    public ByteBuf handleP2S(UnknownPacket packet, String channel, ByteBuf data, List<ChannelFutureListener> listeners) throws Exception {
+        if (Key.namespaced(channel).equals(BRAND_CHANNEL) || channel.equals(LEGACY_BRAND_CHANNEL)) {
+            String brand;
+            try {
+                brand = PacketTypes.readString(data, Short.MAX_VALUE);
+            } catch (Exception e) {
+                if (this.proxyConnection.getServerVersion().newerThan(ProtocolVersion.v1_20)) {
+                    throw e;
+                } else { // <=1.20 clients ignore errors
+                    brand = "Unknown";
                 }
-                final String newBrand = "ViaProxy (" + this.proxyConnection.getClientVersion().getName() + ") -> " + brand + " §r(" + this.proxyConnection.getServerVersion().getName() + ")";
-
-                final ByteBuf newCustomPayloadData = Unpooled.buffer();
-                PacketTypes.writeString(newCustomPayloadData, channel); // channel
-                PacketTypes.writeString(newCustomPayloadData, newBrand); // data
-                unknownPacket.data = ByteBufUtil.getBytes(newCustomPayloadData);
             }
+            final String newBrand = "ViaProxy (" + this.proxyConnection.getClientVersion().getName() + ") -> " + brand + " §r(" + this.proxyConnection.getServerVersion().getName() + ")";
+
+            final ByteBuf newData = Unpooled.buffer();
+            PacketTypes.writeString(newData, newBrand);
+            return newData;
         }
 
-        return true;
+        return super.handleP2S(packet, channel, data, listeners);
     }
 
 }

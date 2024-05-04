@@ -128,6 +128,15 @@ public class ProxyConnection extends NetClient {
         return this.packetHandlers;
     }
 
+    public <T> T getPacketHandler(final Class<T> packetHandlerType) {
+        for (final PacketHandler packetHandler : this.packetHandlers) {
+            if (packetHandlerType.isInstance(packetHandler)) {
+                return packetHandlerType.cast(packetHandler);
+            }
+        }
+        return null;
+    }
+
     public SocketAddress getServerAddress() {
         return this.serverAddress;
     }
