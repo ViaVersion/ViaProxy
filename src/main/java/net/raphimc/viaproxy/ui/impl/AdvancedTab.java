@@ -69,6 +69,9 @@ public class AdvancedTab extends UITab {
         JPanel body = new JPanel();
         body.setLayout(new GridBagLayout());
 
+        JPanel checkboxes = new JPanel();
+        checkboxes.setLayout(new GridLayout(0, 2, BORDER_PADDING, BORDER_PADDING));
+
         int gridy = 0;
         {
             JLabel bindPortLabel = new JLabel(I18n.get("tab.advanced.bind_address.label"));
@@ -95,42 +98,42 @@ public class AdvancedTab extends UITab {
             this.proxyOnlineMode = new JCheckBox(I18n.get("tab.advanced.proxy_online_mode.label"));
             this.proxyOnlineMode.setToolTipText(I18n.get("tab.advanced.proxy_online_mode.tooltip"));
             this.proxyOnlineMode.setSelected(ViaProxy.getConfig().isProxyOnlineMode());
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.proxyOnlineMode);
+            checkboxes.add(this.proxyOnlineMode);
         }
         {
             this.legacySkinLoading = new JCheckBox(I18n.get("tab.advanced.legacy_skin_loading.label"));
             this.legacySkinLoading.setToolTipText(I18n.get("tab.advanced.legacy_skin_loading.tooltip"));
             ViaProxy.getSaveManager().uiSave.loadCheckBox("legacy_skin_loading", this.legacySkinLoading);
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.legacySkinLoading);
+            checkboxes.add(this.legacySkinLoading);
         }
         {
             this.chatSigning = new JCheckBox(I18n.get("tab.advanced.chat_signing.label"));
             this.chatSigning.setToolTipText(I18n.get("tab.advanced.chat_signing.tooltip"));
             this.chatSigning.setSelected(ViaProxy.getConfig().shouldSignChat());
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.chatSigning);
+            checkboxes.add(this.chatSigning);
         }
         {
             this.ignorePacketTranslationErrors = new JCheckBox(I18n.get("tab.advanced.ignore_packet_translation_errors.label"));
             this.ignorePacketTranslationErrors.setToolTipText(I18n.get("tab.advanced.ignore_packet_translation_errors.tooltip"));
             this.ignorePacketTranslationErrors.setSelected(false);
             this.ignorePacketTranslationErrors.setSelected(ViaProxy.getConfig().shouldIgnoreProtocolTranslationErrors());
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.ignorePacketTranslationErrors);
+            checkboxes.add(this.ignorePacketTranslationErrors);
         }
         {
             this.allowBetaPinging = new JCheckBox(I18n.get("tab.advanced.allow_beta_pinging.label"));
             this.allowBetaPinging.setToolTipText(I18n.get("tab.advanced.allow_beta_pinging.tooltip"));
             this.allowBetaPinging.setSelected(false);
             this.allowBetaPinging.setSelected(ViaProxy.getConfig().shouldAllowBetaPinging());
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.allowBetaPinging);
+            checkboxes.add(this.allowBetaPinging);
         }
-        gridy = 4;
         {
             this.simpleVoiceChatSupport = new JCheckBox(I18n.get("tab.advanced.simple_voice_chat_support.label"));
             this.simpleVoiceChatSupport.setToolTipText(I18n.get("tab.advanced.simple_voice_chat_support.tooltip"));
             this.simpleVoiceChatSupport.setSelected(false);
             this.simpleVoiceChatSupport.setSelected(ViaProxy.getConfig().shouldSupportSimpleVoiceChat());
-            GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, 0, 0, BORDER_PADDING).anchor(GBC.SOUTHEAST).add(this.simpleVoiceChatSupport);
+            checkboxes.add(this.simpleVoiceChatSupport);
         }
+        GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BODY_BLOCK_PADDING).fill(GBC.BOTH).weight(1, 1).add(checkboxes);
 
         parent.add(body, BorderLayout.NORTH);
     }
