@@ -24,7 +24,6 @@ import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.libs.gson.JsonPrimitive;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.util.AttributeKey;
@@ -39,13 +38,11 @@ import net.raphimc.netminecraft.netty.connection.NetClient;
 import net.raphimc.netminecraft.netty.crypto.AESEncryption;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
-import net.raphimc.netminecraft.packet.impl.login.S2CLoginCustomPayloadPacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket1_20_3;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
 import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
-import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -54,12 +51,7 @@ import java.net.SocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -69,9 +61,6 @@ public class ProxyConnection extends NetClient {
 
     private final Channel c2p;
     private final List<PacketHandler> packetHandlers = new ArrayList<>();
-
-    private final AtomicInteger customPayloadId = new AtomicInteger(0);
-    private final Map<Integer, CompletableFuture<ByteBuf>> customPayloadListener = new ConcurrentHashMap<>();
 
     private SocketAddress serverAddress;
 
@@ -246,47 +235,6 @@ public class ProxyConnection extends NetClient {
                     this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getPlayRegistry(true, this.clientVersion.getVersion()));
                 break;
         }
-    }
-
-    public CompletableFuture<ByteBuf> sendCustomPayload(final String channel, final ByteBuf data) {
-        if (channel.length() > 20) throw new IllegalStateException("Channel name can't be longer than 20 characters");
-        final CompletableFuture<ByteBuf> future = new CompletableFuture<>();
-        final int id = this.customPayloadId.getAndIncrement();
-
-        switch (this.c2pConnectionState) {
-            case LOGIN:
-                if (this.clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_13)) {
-                    this.c2p.writeAndFlush(new S2CLoginCustomPayloadPacket(id, channel, PacketTypes.readReadableBytes(data))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                } else {
-                    final ByteBuf disconnectPacketData = Unpooled.buffer();
-                    PacketTypes.writeString(disconnectPacketData, channel);
-                    PacketTypes.writeVarInt(disconnectPacketData, id);
-                    disconnectPacketData.writeBytes(data);
-                    this.c2p.writeAndFlush(new S2CLoginDisconnectPacket1_20_3(new StringComponent("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + OpenAuthModConstants.LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                }
-                break;
-            case PLAY:
-                final ByteBuf customPayloadPacket = Unpooled.buffer();
-                PacketTypes.writeVarInt(customPayloadPacket, MCPackets.S2C_PLUGIN_MESSAGE.getId(this.clientVersion.getVersion()));
-                PacketTypes.writeString(customPayloadPacket, channel); // channel
-                PacketTypes.writeVarInt(customPayloadPacket, id);
-                customPayloadPacket.writeBytes(data);
-                this.c2p.writeAndFlush(customPayloadPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                break;
-            default:
-                throw new IllegalStateException("Can't send a custom payload packet during " + this.c2pConnectionState);
-        }
-
-        this.customPayloadListener.put(id, future);
-        return future;
-    }
-
-    public boolean handleCustomPayload(final int id, final ByteBuf data) {
-        if (this.customPayloadListener.containsKey(id)) {
-            this.customPayloadListener.remove(id).complete(data);
-            return true;
-        }
-        return false;
     }
 
     public void kickClient(final String message) throws CloseAndReturn {

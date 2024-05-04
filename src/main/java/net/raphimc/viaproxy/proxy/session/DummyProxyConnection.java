@@ -21,7 +21,6 @@ import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import net.raphimc.netminecraft.constants.ConnectionState;
@@ -30,7 +29,6 @@ import net.raphimc.netminecraft.util.ChannelType;
 
 import java.net.SocketAddress;
 import java.security.Key;
-import java.util.concurrent.CompletableFuture;
 
 public class DummyProxyConnection extends ProxyConnection {
 
@@ -115,16 +113,6 @@ public class DummyProxyConnection extends ProxyConnection {
 
     @Override
     public ConnectionState getP2sConnectionState() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CompletableFuture<ByteBuf> sendCustomPayload(String channel, ByteBuf data) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean handleCustomPayload(int id, ByteBuf data) {
         throw new UnsupportedOperationException();
     }
 

@@ -216,7 +216,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         this.proxyConnection.setUserOptions(userOptions);
         this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new OpenAuthModPacketHandler(this.proxyConnection));
-        if (ViaProxy.getConfig().shouldSupportSimpleVoiceChat() && serverVersion.newerThan(ProtocolVersion.v1_12_2) && clientVersion.newerThan(ProtocolVersion.v1_12_2)) {
+        if (ViaProxy.getConfig().shouldSupportSimpleVoiceChat() && serverVersion.newerThan(ProtocolVersion.v1_14) && clientVersion.newerThan(ProtocolVersion.v1_14)) {
             this.proxyConnection.getPacketHandlers().add(new SimpleVoiceChatPacketHandler(this.proxyConnection));
         }
         if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)) {
