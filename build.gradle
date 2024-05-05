@@ -57,13 +57,13 @@ dependencies {
     include "com.viaversion:viaversion-common:4.10.1"
     include "com.viaversion:viabackwards-common:4.10.1"
     include "com.viaversion:viarewind-common:3.1.1"
-    include "net.raphimc:ViaLegacy:2.2.22"
-    include "net.raphimc:ViaAprilFools:2.0.12"
+    include "net.raphimc:ViaLegacy:2.2.23-SNAPSHOT"
+    include "net.raphimc:ViaAprilFools:2.0.13-SNAPSHOT"
     include("net.raphimc:ViaBedrock:0.0.7-SNAPSHOT") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
-    include("net.raphimc:ViaLoader:2.2.13") {
+    include("net.raphimc:ViaLoader:2.2.14-SNAPSHOT") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
