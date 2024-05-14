@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM gradle:jdk17 as base
+FROM --platform=$BUILDPLATFORM gradle:jdk17 as builder
 WORKDIR /build
 COPY --chown=gradle:gradle build.gradle settings.gradle gradle.properties ./
 COPY --chown=gradle:gradle src src
