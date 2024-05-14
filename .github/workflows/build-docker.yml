@@ -23,7 +23,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          tags: latest
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=sha
           images: ${{ env.REGISTRY }}/${{ github.repository }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
