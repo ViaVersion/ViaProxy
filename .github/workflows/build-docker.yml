@@ -1,5 +1,9 @@
 name: build-docker
-on: [push, pull_request, workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   REGISTRY: ghcr.io
@@ -7,7 +11,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -24,7 +27,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=raw,value=latest
             type=sha
           images: ${{ env.REGISTRY }}/${{ github.repository }}
       - name: Build and push Docker image
