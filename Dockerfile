@@ -1,5 +1,6 @@
 FROM --platform=$BUILDPLATFORM gradle:jdk21 as builder
 WORKDIR /build
+RUN apt-get upgrade && apt-get install -y git
 COPY --chown=gradle:gradle build.gradle settings.gradle gradle.properties ./
 COPY --chown=gradle:gradle src src
 RUN gradle --no-daemon build
