@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM gradle:jdk21 as builder
+FROM --platform=$BUILDPLATFORM gradle:jdk17 as builder
 WORKDIR /build
 COPY build.gradle settings.gradle gradle.properties ./
 COPY .git .git
