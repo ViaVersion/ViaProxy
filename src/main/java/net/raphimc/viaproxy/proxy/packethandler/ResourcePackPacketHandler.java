@@ -42,7 +42,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
     public ResourcePackPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
 
-        this.joinGameId = MCPackets.S2C_JOIN_GAME.getId(this.proxyConnection.getClientVersion().getVersion());
+        this.joinGameId = MCPackets.S2C_LOGIN.getId(this.proxyConnection.getClientVersion().getVersion());
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
                     final byte[] data = ViaProxy.getConfig().getResourcePackUrl().getBytes(StandardCharsets.UTF_8);
 
                     final ByteBuf customPayloadPacket = Unpooled.buffer();
-                    PacketTypes.writeVarInt(customPayloadPacket, MCPackets.S2C_PLUGIN_MESSAGE.getId(this.proxyConnection.getClientVersion().getVersion()));
+                    PacketTypes.writeVarInt(customPayloadPacket, MCPackets.S2C_CUSTOM_PAYLOAD.getId(this.proxyConnection.getClientVersion().getVersion()));
                     PacketTypes.writeString(customPayloadPacket, "MC|RPack"); // channel
                     customPayloadPacket.writeShort(data.length); // length
                     customPayloadPacket.writeBytes(data); // data

@@ -40,9 +40,9 @@ public abstract class CustomPayloadPacketHandler extends PacketHandler {
     public CustomPayloadPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
 
-        this.s2cCustomPayloadId = MCPackets.S2C_PLUGIN_MESSAGE.getId(proxyConnection.getClientVersion().getVersion());
+        this.s2cCustomPayloadId = MCPackets.S2C_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
         this.s2cConfigCustomPayloadId = MCPackets.S2C_CONFIG_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
-        this.c2sCustomPayloadId = MCPackets.C2S_PLUGIN_MESSAGE.getId(proxyConnection.getClientVersion().getVersion());
+        this.c2sCustomPayloadId = MCPackets.C2S_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
         this.c2sConfigCustomPayloadId = MCPackets.C2S_CONFIG_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
     }
 

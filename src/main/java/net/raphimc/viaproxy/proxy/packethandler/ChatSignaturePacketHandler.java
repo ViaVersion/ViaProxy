@@ -45,9 +45,9 @@ public class ChatSignaturePacketHandler extends PacketHandler {
     public ChatSignaturePacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
 
-        this.joinGameId = MCPackets.S2C_JOIN_GAME.getId(proxyConnection.getClientVersion().getVersion());
+        this.joinGameId = MCPackets.S2C_LOGIN.getId(proxyConnection.getClientVersion().getVersion());
         this.chatSessionUpdateId = MCPackets.C2S_CHAT_SESSION_UPDATE.getId(proxyConnection.getClientVersion().getVersion());
-        this.chatMessageId = MCPackets.C2S_CHAT_MESSAGE.getId(proxyConnection.getClientVersion().getVersion());
+        this.chatMessageId = MCPackets.C2S_CHAT.getId(proxyConnection.getClientVersion().getVersion());
     }
 
     @Override

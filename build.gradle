@@ -54,12 +54,12 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:5.0.0-20240517.190711-8"
-    include "com.viaversion:viabackwards-common:5.0.0-20240515.152913-2"
-    include "com.viaversion:viarewind-common:4.0.0-20240515.083613-2"
-    include "net.raphimc:ViaLegacy:3.0.0-20240517.210413-2"
-    include "net.raphimc:ViaAprilFools:3.0.0-20240517.172611-2"
-    include("net.raphimc:ViaBedrock:0.0.8-20240517.153009-1") {
+    include "com.viaversion:viaversion-common:5.0.0-SNAPSHOT"
+    include "com.viaversion:viabackwards-common:5.0.0-SNAPSHOT"
+    include "com.viaversion:viarewind-common:4.0.0-SNAPSHOT"
+    include "net.raphimc:ViaLegacy:3.0.0-SNAPSHOT"
+    include "net.raphimc:ViaAprilFools:3.0.0-SNAPSHOT"
+    include("net.raphimc:ViaBedrock:0.0.8-SNAPSHOT") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
@@ -88,7 +88,7 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include "net.lenni0451.commons:swing:1.5.1"
-    include("net.raphimc.netminecraft:all:2.4.0") {
+    include("net.raphimc.netminecraft:all:2.5.0-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include("net.raphimc:MinecraftAuth:4.0.1") {

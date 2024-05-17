@@ -53,8 +53,8 @@ public class OpenAuthModPacketHandler extends PacketHandler {
     public OpenAuthModPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
 
-        this.c2sCustomPayloadId = MCPackets.C2S_PLUGIN_MESSAGE.getId(proxyConnection.getClientVersion().getVersion());
-        this.s2cCustomPayloadId = MCPackets.S2C_PLUGIN_MESSAGE.getId(proxyConnection.getClientVersion().getVersion());
+        this.c2sCustomPayloadId = MCPackets.C2S_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
+        this.s2cCustomPayloadId = MCPackets.S2C_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
     }
 
     @Override

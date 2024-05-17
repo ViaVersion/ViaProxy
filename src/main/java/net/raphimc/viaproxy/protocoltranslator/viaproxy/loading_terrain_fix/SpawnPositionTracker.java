@@ -40,10 +40,10 @@ public class SpawnPositionTracker extends StoredObject {
     }
 
     public void sendSpawnPosition() {
-        final PacketWrapper spawnPosition = PacketWrapper.create(ClientboundPackets1_18.SET_DEFAULT_SPAWN_POSITION, this.getUser());
-        spawnPosition.write(Types.BLOCK_POSITION1_14, this.spawnPosition); // position
-        spawnPosition.write(Types.FLOAT, this.angle); // angle
-        spawnPosition.send(Protocol1_18To1_18_2.class);
+        final PacketWrapper setDefaultSpawnPosition = PacketWrapper.create(ClientboundPackets1_18.SET_DEFAULT_SPAWN_POSITION, this.getUser());
+        setDefaultSpawnPosition.write(Types.BLOCK_POSITION1_14, this.spawnPosition); // position
+        setDefaultSpawnPosition.write(Types.FLOAT, this.angle); // angle
+        setDefaultSpawnPosition.send(Protocol1_18To1_18_2.class);
     }
 
 }
