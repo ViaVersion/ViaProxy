@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
+import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
 import net.raphimc.netminecraft.constants.MCPipeline;
 
 public class ViaProxyCompressionProvider extends CompressionProvider {

@@ -17,7 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.util;
 
-import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.storage.CookieStorage;
+import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.storage.CookieStorage;
 import io.netty.channel.Channel;
 
 import java.net.InetAddress;

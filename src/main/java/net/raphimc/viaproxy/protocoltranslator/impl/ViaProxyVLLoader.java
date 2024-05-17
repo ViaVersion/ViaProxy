@@ -17,11 +17,11 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
-import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider;
+import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.HandItemProvider;
+import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
+import com.viaversion.viaversion.protocols.v1_8to1_9.provider.HandItemProvider;
 import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicCustomCommandProvider;
 import net.raphimc.vialegacy.protocols.classic.protocola1_0_15toc0_28_30.providers.ClassicMPPassProvider;

@@ -23,6 +23,7 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.raphimc.vialoader.util.JLoggerToSLF4J;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.BetterHelpFormatter;
 import net.raphimc.viaproxy.cli.HelpRequestedException;
@@ -33,6 +34,7 @@ import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +49,9 @@ import java.util.Map;
 
 public class ViaProxyConfig extends Config implements com.viaversion.viaversion.api.configuration.Config {
 
-    private OptionParser optionParser;
+    private static final java.util.logging.Logger LOGGER = new JLoggerToSLF4J(LoggerFactory.getLogger("ViaProxy"));
+
+    private final OptionParser optionParser;
     private final OptionSpec<Void> optionHelp;
     private final OptionSpec<String> optionBindAddress;
     private final OptionSpec<String> optionTargetAddress;
@@ -90,7 +94,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private boolean simpleVoiceChatSupport = false;
 
     public ViaProxyConfig(final File configFile) {
-        super(configFile);
+        super(configFile, LOGGER);
 
         this.optionParser = new OptionParser();
         this.optionHelp = this.optionParser.accepts("help").forHelp();
@@ -184,13 +188,13 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
             return;
         } catch (OptionException e) {
-            Logger.LOGGER.error("Error parsing CLI options: " + e.getMessage());
+            this.logger.severe("Error parsing CLI options: " + e.getMessage());
         } catch (HelpRequestedException ignored) {
         }
 
         this.optionParser.formatHelpWith(new BetterHelpFormatter());
         this.optionParser.printHelpOn(Logger.SYSOUT);
-        Logger.LOGGER.info("For a more detailed description of the options, please refer to the viaproxy.yml file.");
+        this.logger.info("For a more detailed description of the options, please refer to the viaproxy.yml file.");
         System.exit(1);
     }
 
@@ -391,12 +395,12 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private void checkTargetVersion() {
         if (this.targetVersion == null) {
             this.targetVersion = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
-            Logger.LOGGER.info("Invalid target version: " + this.getString("target-version", "") + ". Defaulting to auto detect.");
-            Logger.LOGGER.info("=== Supported Protocol Versions ===");
+            this.logger.info("Invalid target version: " + this.getString("target-version", "") + ". Defaulting to auto detect.");
+            this.logger.info("=== Supported Protocol Versions ===");
             for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
-                Logger.LOGGER.info(version.getName());
+                this.logger.info(version.getName());
             }
-            Logger.LOGGER.info("===================================");
+            this.logger.info("===================================");
         }
     }
 

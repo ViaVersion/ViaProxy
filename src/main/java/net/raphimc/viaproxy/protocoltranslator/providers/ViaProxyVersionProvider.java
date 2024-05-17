@@ -19,7 +19,7 @@ package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.protocols.base.BaseVersionProvider;
+import com.viaversion.viaversion.protocol.version.BaseVersionProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 public class ViaProxyVersionProvider extends BaseVersionProvider {

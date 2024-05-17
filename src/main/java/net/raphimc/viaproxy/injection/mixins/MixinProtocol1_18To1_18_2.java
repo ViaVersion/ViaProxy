@@ -20,38 +20,32 @@ package net.raphimc.viaproxy.injection.mixins;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.AbstractProtocol;
 import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
-import com.viaversion.viaversion.api.type.Type;
-import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ServerboundPackets1_17;
-import com.viaversion.viaversion.protocols.protocol1_18_2to1_18.Protocol1_18_2To1_18;
-import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPackets1_18;
+import com.viaversion.viaversion.api.type.Types;
+import com.viaversion.viaversion.protocols.v1_16_4to1_17.packet.ServerboundPackets1_17;
+import com.viaversion.viaversion.protocols.v1_17_1to1_18.packet.ClientboundPackets1_18;
+import com.viaversion.viaversion.protocols.v1_18to1_18_2.Protocol1_18To1_18_2;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.loading_terrain_fix.SpawnPositionTracker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 
-@Mixin(Protocol1_18_2To1_18.class)
-public abstract class MixinProtocol1_18_2To1_18 extends AbstractProtocol<ClientboundPackets1_18, ClientboundPackets1_18, ServerboundPackets1_17, ServerboundPackets1_17> {
+@Mixin(Protocol1_18To1_18_2.class)
+public abstract class MixinProtocol1_18To1_18_2 extends AbstractProtocol<ClientboundPackets1_18, ClientboundPackets1_18, ServerboundPackets1_17, ServerboundPackets1_17> {
 
     @Inject(method = "registerPackets", at = @At("RETURN"))
     private void fixDownloadingTerrainScreenNotClosing() {
         this.registerClientbound(ClientboundPackets1_18.PLAYER_POSITION, new PacketHandlers() {
             @Override
             public void register() {
-                handler(wrapper -> {
-                    final SpawnPositionTracker tracker = wrapper.user().get(SpawnPositionTracker.class);
-                    tracker.sendSpawnPosition();
-                });
+                handler(wrapper -> wrapper.user().get(SpawnPositionTracker.class).sendSpawnPosition());
             }
         });
-        this.registerClientbound(ClientboundPackets1_18.SPAWN_POSITION, new PacketHandlers() {
+        this.registerClientbound(ClientboundPackets1_18.SET_DEFAULT_SPAWN_POSITION, new PacketHandlers() {
             @Override
             public void register() {
-                map(Type.POSITION1_14); // position
-                map(Type.FLOAT); // angle
-                handler(wrapper -> {
-                    final SpawnPositionTracker tracker = wrapper.user().get(SpawnPositionTracker.class);
-                    tracker.setSpawnPosition(wrapper.get(Type.POSITION1_14, 0), wrapper.get(Type.FLOAT, 0));
-                });
+                map(Types.BLOCK_POSITION1_14); // position
+                map(Types.FLOAT); // angle
+                handler(wrapper -> wrapper.user().get(SpawnPositionTracker.class).setSpawnPosition(wrapper.get(Types.BLOCK_POSITION1_14, 0), wrapper.get(Types.FLOAT, 0)));
             }
         });
     }

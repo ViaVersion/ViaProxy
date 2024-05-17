@@ -17,8 +17,8 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.providers;
 
-import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider;
-import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.storage.CookieStorage;
+import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
+import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.storage.CookieStorage;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.Channel;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;

@@ -17,15 +17,15 @@
  */
 package net.raphimc.viaproxy.injection.mixins;
 
-import com.viaversion.viaversion.protocols.protocol1_16_2to1_16_1.packets.WorldPackets;
+import com.viaversion.viaversion.protocols.v1_16_1to1_16_2.rewriter.WorldPacketRewriter1_16_2;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(value = WorldPackets.class, remap = false)
-public abstract class MixinWorldPackets1_16_2 {
+@Mixin(value = WorldPacketRewriter1_16_2.class, remap = false)
+public abstract class MixinWorldPacketRewriter1_16_2 {
 
-    @ModifyConstant(method = "lambda$register$1", constant = @Constant(intValue = 16))
+    @ModifyConstant(method = "lambda$register$0", constant = @Constant(intValue = 16))
     private static int modifySectionCountToSupportClassicWorldHeight(int constant) {
         return 64;
     }

@@ -21,9 +21,9 @@ import com.viaversion.viaversion.api.connection.StoredObject;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.Position;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
-import com.viaversion.viaversion.api.type.Type;
-import com.viaversion.viaversion.protocols.protocol1_18_2to1_18.Protocol1_18_2To1_18;
-import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPackets1_18;
+import com.viaversion.viaversion.api.type.Types;
+import com.viaversion.viaversion.protocols.v1_17_1to1_18.packet.ClientboundPackets1_18;
+import com.viaversion.viaversion.protocols.v1_18to1_18_2.Protocol1_18To1_18_2;
 
 public class SpawnPositionTracker extends StoredObject {
 
@@ -39,11 +39,11 @@ public class SpawnPositionTracker extends StoredObject {
         this.angle = angle;
     }
 
-    public void sendSpawnPosition() throws Exception {
-        final PacketWrapper spawnPosition = PacketWrapper.create(ClientboundPackets1_18.SPAWN_POSITION, this.getUser());
-        spawnPosition.write(Type.POSITION1_14, this.spawnPosition); // position
-        spawnPosition.write(Type.FLOAT, this.angle); // angle
-        spawnPosition.send(Protocol1_18_2To1_18.class);
+    public void sendSpawnPosition() {
+        final PacketWrapper spawnPosition = PacketWrapper.create(ClientboundPackets1_18.SET_DEFAULT_SPAWN_POSITION, this.getUser());
+        spawnPosition.write(Types.BLOCK_POSITION1_14, this.spawnPosition); // position
+        spawnPosition.write(Types.FLOAT, this.angle); // angle
+        spawnPosition.send(Protocol1_18To1_18_2.class);
     }
 
 }

@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.proxy.client2proxy;
 
 import com.google.common.collect.Lists;
-import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.storage.CookieStorage;
+import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.storage.CookieStorage;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.ChannelFutureListener;

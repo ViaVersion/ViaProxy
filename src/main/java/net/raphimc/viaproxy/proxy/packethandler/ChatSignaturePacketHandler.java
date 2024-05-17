@@ -21,7 +21,7 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
 import com.viaversion.viaversion.api.minecraft.signature.model.MessageMetadata;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
-import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -73,9 +73,9 @@ public class ChatSignaturePacketHandler extends PacketHandler {
                 PacketTypes.writeString(newChatMessage, message); // message
                 newChatMessage.writeLong(timestamp); // timestamp
                 newChatMessage.writeLong(salt); // salt
-                Type.OPTIONAL_SIGNATURE_BYTES.write(newChatMessage, signature); // signature
+                Types.OPTIONAL_SIGNATURE_BYTES.write(newChatMessage, signature); // signature
                 PacketTypes.writeVarInt(newChatMessage, 0); // offset
-                Type.ACKNOWLEDGED_BIT_SET.write(newChatMessage, new BitSet(20)); // acknowledged
+                Types.ACKNOWLEDGED_BIT_SET.write(newChatMessage, new BitSet(20)); // acknowledged
                 this.proxyConnection.getChannel().writeAndFlush(newChatMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
                 return false;
@@ -97,7 +97,7 @@ public class ChatSignaturePacketHandler extends PacketHandler {
                         final ByteBuf chatSessionUpdate = Unpooled.buffer();
                         PacketTypes.writeVarInt(chatSessionUpdate, this.chatSessionUpdateId);
                         PacketTypes.writeUuid(chatSessionUpdate, chatSession.getSessionId()); // session id
-                        Type.PROFILE_KEY.write(chatSessionUpdate, chatSession.getProfileKey()); // profile key
+                        Types.PROFILE_KEY.write(chatSessionUpdate, chatSession.getProfileKey()); // profile key
                         this.proxyConnection.getChannel().writeAndFlush(chatSessionUpdate).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                     }
                 });
