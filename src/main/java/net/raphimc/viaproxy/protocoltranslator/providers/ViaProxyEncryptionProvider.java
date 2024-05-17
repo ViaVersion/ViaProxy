@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
+import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 public class ViaProxyEncryptionProvider extends EncryptionProvider {

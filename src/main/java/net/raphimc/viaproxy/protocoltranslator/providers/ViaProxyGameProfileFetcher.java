@@ -21,8 +21,8 @@ import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
-import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.model.GameProfile;
-import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
+import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.model.GameProfile;
+import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
 import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
 
 import java.util.Map;

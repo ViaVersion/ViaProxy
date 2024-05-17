@@ -27,7 +27,7 @@ import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.impl.login.*;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
-import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.storage.ProtocolMetadataStorage;
+import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.ProtocolMetadataStorage;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.plugins.events.ClientLoggedInEvent;
