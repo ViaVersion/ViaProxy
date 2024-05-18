@@ -56,7 +56,7 @@ repositories {
 dependencies {
     include "com.viaversion:viaversion-common:5.0.0-20240517.190711-8"
     include "com.viaversion:viabackwards-common:5.0.0-20240515.152913-2"
-    include "com.viaversion:viarewind-common:4.0.0-20240515.083613-2"
+    include "com.viaversion:viarewind-common:4.0.0-20240518.193415-3"
     include "net.raphimc:ViaLegacy:3.0.0-20240517.210413-2"
     include "net.raphimc:ViaAprilFools:3.0.0-20240517.172611-2"
     include("net.raphimc:ViaBedrock:0.0.8-SNAPSHOT") {
