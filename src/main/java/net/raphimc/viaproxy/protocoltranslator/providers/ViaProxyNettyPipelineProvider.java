@@ -23,7 +23,7 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
-import net.raphimc.viabedrock.protocol.providers.NettyPipelineProvider;
+import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
