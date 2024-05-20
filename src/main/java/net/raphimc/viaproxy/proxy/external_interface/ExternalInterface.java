@@ -57,7 +57,7 @@ import java.util.concurrent.TimeoutException;
 public class ExternalInterface {
 
     public static void fillPlayerData(final ProxyConnection proxyConnection) {
-        Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Filling player data");
+        Logger.u_info("auth", proxyConnection, "Filling player data");
         try {
             if (proxyConnection.getUserOptions().account() != null) {
                 final Account account = proxyConnection.getUserOptions().account();
@@ -107,7 +107,7 @@ public class ExternalInterface {
     }
 
     public static void joinServer(final String serverIdHash, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException {
-        Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Trying to join online mode server");
+        Logger.u_info("auth", proxyConnection, "Trying to join online mode server");
         if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {
             try {
                 final ByteBuf response = proxyConnection.getPacketHandler(OpenAuthModPacketHandler.class).sendCustomPayload(OpenAuthModConstants.JOIN_CHANNEL, PacketTypes.writeString(Unpooled.buffer(), serverIdHash)).get(6, TimeUnit.SECONDS);
@@ -128,7 +128,7 @@ public class ExternalInterface {
     }
 
     public static void signNonce(final byte[] nonce, final C2SLoginKeyPacket1_19 packet, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException, SignatureException {
-        Logger.u_info("auth", proxyConnection.getC2P().remoteAddress(), proxyConnection.getGameProfile(), "Requesting nonce signature");
+        Logger.u_info("auth", proxyConnection, "Requesting nonce signature");
         final UserConnection user = proxyConnection.getUserConnection();
 
         if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {

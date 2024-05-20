@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.session;
 
+import com.google.common.net.HostAndPort;
 import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -67,6 +68,7 @@ public class ProxyConnection extends NetClient {
     private ProtocolVersion serverVersion;
     private ProtocolVersion clientVersion;
 
+    private HostAndPort clientHandshakeAddress;
     private GameProfile gameProfile;
     private C2SLoginHelloPacket1_7 loginHelloPacket;
     private Key storedSecretKey;
@@ -140,6 +142,14 @@ public class ProxyConnection extends NetClient {
 
     public void setClientVersion(final ProtocolVersion clientVersion) {
         this.clientVersion = clientVersion;
+    }
+
+    public HostAndPort getClientHandshakeAddress() {
+        return this.clientHandshakeAddress;
+    }
+
+    public void setClientHandshakeAddress(final HostAndPort clientHandshakeAddress) {
+        this.clientHandshakeAddress = clientHandshakeAddress;
     }
 
     public GameProfile getGameProfile() {
@@ -238,7 +248,7 @@ public class ProxyConnection extends NetClient {
     }
 
     public void kickClient(final String message) throws CloseAndReturn {
-        Logger.u_err("proxy kick", this.c2p.remoteAddress(), this.getGameProfile(), ConsoleFormatter.convert(message));
+        Logger.u_err("proxy kick", this, ConsoleFormatter.convert(message));
 
         final ChannelFuture future;
         if (this.c2pConnectionState == ConnectionState.STATUS) {

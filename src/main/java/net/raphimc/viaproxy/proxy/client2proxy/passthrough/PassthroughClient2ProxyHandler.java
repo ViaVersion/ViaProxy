@@ -31,6 +31,7 @@ import net.raphimc.viaproxy.proxy.util.HAProxyUtil;
 import net.raphimc.viaproxy.proxy.util.ThrowingChannelFutureListener;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
+import org.apache.logging.log4j.Level;
 
 import java.net.SocketAddress;
 import java.util.function.Supplier;
@@ -80,7 +81,7 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         final SocketAddress serverAddress = this.getServerAddress();
 
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
-        Logger.u_info("connect", this.proxyConnection.getC2P().remoteAddress(), null, "[Legacy <-> Legacy] Connecting to " + AddressUtil.toString(serverAddress));
+        Logger.u_log(Level.INFO, "connect", this.proxyConnection.getC2P().remoteAddress(), null, "[Legacy <-> Legacy] Connecting to " + AddressUtil.toString(serverAddress));
 
         this.proxyConnection.connect(serverAddress).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {

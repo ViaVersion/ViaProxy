@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.util.logging;
 
 import com.mojang.authlib.GameProfile;
-import com.viaversion.viaversion.api.connection.UserConnection;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.AddressUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -43,20 +43,22 @@ public class Logger {
         System.setOut(new LoggerPrintStream("STDOUT", SYSOUT));
     }
 
-    public static void u_info(final String title, final SocketAddress address, final GameProfile gameProfile, final String msg) {
-        u_log(Level.INFO, title, address, gameProfile, msg);
+    public static void u_info(final String title, final ProxyConnection proxyConnection, final String msg) {
+        u_log(Level.INFO, title, proxyConnection, msg);
     }
 
-    public static void u_err(final String title, final SocketAddress address, final GameProfile gameProfile, final String msg) {
-        u_log(Level.ERROR, title, address, gameProfile, msg);
+    public static void u_warn(final String title, final ProxyConnection proxyConnection, final String msg) {
+        u_log(Level.WARN, title, proxyConnection, msg);
     }
 
-    public static void u_err(final String title, final UserConnection user, final String msg) {
-        GameProfile gameProfile = null;
-        if (user.getProtocolInfo().getUsername() != null) {
-            gameProfile = new GameProfile(user.getProtocolInfo().getUuid(), user.getProtocolInfo().getUsername());
-        }
-        u_log(Level.ERROR, title, user.getChannel().remoteAddress(), gameProfile, msg);
+    public static void u_err(final String title, final ProxyConnection proxyConnection, final String msg) {
+        u_log(Level.INFO, title, proxyConnection, msg);
+    }
+
+    public static void u_log(final Level level, final String title, final ProxyConnection proxyConnection, final String msg) {
+        final SocketAddress address = proxyConnection.getC2P().remoteAddress();
+        final GameProfile gameProfile = proxyConnection.getGameProfile();
+        u_log(level, title, address, gameProfile, msg);
     }
 
     public static void u_log(final Level level, final String title, final SocketAddress address, final GameProfile gameProfile, final String msg) {

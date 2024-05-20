@@ -50,7 +50,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
                 this.proxyConnection.setC2pConnectionState(ConnectionState.CONFIGURATION);
                 listeners.add(f -> {
                     if (f.isSuccess()) {
-                        Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Switching to CONFIGURATION state");
+                        Logger.u_info("session", this.proxyConnection, "Switching to CONFIGURATION state");
                         this.proxyConnection.setP2sConnectionState(ConnectionState.CONFIGURATION);
                         ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
                     }
@@ -68,7 +68,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
             this.proxyConnection.setC2pConnectionState(ConnectionState.PLAY);
             listeners.add(f -> {
                 if (f.isSuccess()) {
-                    Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Configuration finished! Switching to PLAY state");
+                    Logger.u_info("session", this.proxyConnection, "Configuration finished! Switching to PLAY state");
                     this.proxyConnection.setP2sConnectionState(ConnectionState.PLAY);
                     ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
                 }

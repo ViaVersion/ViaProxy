@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.session;
 
+import com.google.common.net.HostAndPort;
 import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
@@ -53,6 +54,16 @@ public class DummyProxyConnection extends ProxyConnection {
 
     @Override
     public ProtocolVersion getServerVersion() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public HostAndPort getClientHandshakeAddress() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setClientHandshakeAddress(HostAndPort clientHandshakeAddress) {
         throw new UnsupportedOperationException();
     }
 

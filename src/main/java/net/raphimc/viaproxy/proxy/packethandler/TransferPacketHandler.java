@@ -29,6 +29,7 @@ import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigTransfer1_20_
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.TransferDataHolder;
+import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -72,14 +73,18 @@ public class TransferPacketHandler extends PacketHandler {
     }
 
     private S2CConfigTransfer1_20_5 createTransferPacket() {
-        if (!(ViaProxy.getCurrentProxyServer().getChannel().localAddress() instanceof InetSocketAddress bindAddress)) {
-            throw new IllegalArgumentException("ViaProxy bind address must be an InetSocketAddress");
+        if (this.proxyConnection.getClientHandshakeAddress() != null) {
+            return new S2CConfigTransfer1_20_5(this.proxyConnection.getClientHandshakeAddress().getHost(), this.proxyConnection.getClientHandshakeAddress().getPort());
+        } else {
+            Logger.u_warn("transfer", this.proxyConnection, "Client handshake address is invalid, using ViaProxy bind address instead");
+            if (!(ViaProxy.getCurrentProxyServer().getChannel().localAddress() instanceof InetSocketAddress bindAddress)) {
+                throw new IllegalArgumentException("ViaProxy bind address must be an InetSocketAddress");
+            }
+            if (!(this.proxyConnection.getC2P().localAddress() instanceof InetSocketAddress clientAddress)) {
+                throw new IllegalArgumentException("Client address must be an InetSocketAddress");
+            }
+            return new S2CConfigTransfer1_20_5(clientAddress.getHostString(), bindAddress.getPort());
         }
-        if (!(this.proxyConnection.getC2P().localAddress() instanceof InetSocketAddress clientAddress)) {
-            throw new IllegalArgumentException("Client address must be an InetSocketAddress");
-        }
-
-        return new S2CConfigTransfer1_20_5(clientAddress.getHostString(), bindAddress.getPort());
     }
 
 }

@@ -99,14 +99,14 @@ public class LoginPacketHandler extends PacketHandler {
 
             if (loginKeyPacket.encryptedNonce != null) {
                 if (!Arrays.equals(this.verifyToken, CryptUtil.decryptData(KEY_PAIR.getPrivate(), loginKeyPacket.encryptedNonce))) {
-                    Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid verify token");
+                    Logger.u_err("auth", this.proxyConnection, "Invalid verify token");
                     this.proxyConnection.kickClient("§cInvalid verify token!");
                 }
             } else {
                 final C2SLoginKeyPacket1_19 keyPacket = (C2SLoginKeyPacket1_19) packet;
                 final C2SLoginHelloPacket1_19 helloPacket = (C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket();
                 if (helloPacket.key == null || !CryptUtil.verifySignedNonce(helloPacket.key, this.verifyToken, keyPacket.salt, keyPacket.signature)) {
-                    Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid verify token");
+                    Logger.u_err("auth", this.proxyConnection, "Invalid verify token");
                     this.proxyConnection.kickClient("§cInvalid verify token!");
                 }
             }
@@ -119,12 +119,12 @@ public class LoginPacketHandler extends PacketHandler {
                 final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
                 final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
                 if (mojangProfile == null) {
-                    Logger.u_err("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Invalid session");
+                    Logger.u_err("auth", this.proxyConnection, "Invalid session");
                     this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
                 } else {
                     this.proxyConnection.setGameProfile(mojangProfile);
                 }
-                Logger.u_info("auth", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
+                Logger.u_info("auth", this.proxyConnection, "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
             } catch (Throwable e) {
                 throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
             }
@@ -142,7 +142,7 @@ public class LoginPacketHandler extends PacketHandler {
     @Override
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException, ExecutionException, InterruptedException {
         if (packet instanceof S2CLoginDisconnectPacket1_7 loginDisconnectPacket) {
-            Logger.u_info("server kick", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), ConsoleFormatter.convert(loginDisconnectPacket.reason.asLegacyFormatString()));
+            Logger.u_info("server kick", this.proxyConnection, ConsoleFormatter.convert(loginDisconnectPacket.reason.asLegacyFormatString()));
         } else if (packet instanceof S2CLoginKeyPacket1_7 loginKeyPacket) {
             final PublicKey publicKey = CryptUtil.decodeRsaPublicKey(loginKeyPacket.publicKey);
             final SecretKey secretKey = CryptUtil.generateSecretKey();
@@ -176,7 +176,7 @@ public class LoginPacketHandler extends PacketHandler {
             final ConnectionState nextState = this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_2) ? ConnectionState.CONFIGURATION : ConnectionState.PLAY;
 
             this.proxyConnection.setGameProfile(new GameProfile(loginSuccessPacket.uuid, loginSuccessPacket.name));
-            Logger.u_info("session", this.proxyConnection.getC2P().remoteAddress(), this.proxyConnection.getGameProfile(), "Connected successfully! Switching to " + nextState + " state");
+            Logger.u_info("session", this.proxyConnection, "Connected successfully! Switching to " + nextState + " state");
 
             ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
             listeners.add(f -> {
