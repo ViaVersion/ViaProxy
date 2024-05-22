@@ -25,7 +25,7 @@ import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
-import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigTransfer1_20_5;
+import net.raphimc.netminecraft.packet.impl.common.S2CTransferPacket;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.TransferDataHolder;
@@ -48,7 +48,7 @@ public class TransferPacketHandler extends PacketHandler {
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
         if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY) {
             if (unknownPacket.packetId == this.transferId) {
-                final S2CConfigTransfer1_20_5 transfer = new S2CConfigTransfer1_20_5();
+                final S2CTransferPacket transfer = new S2CTransferPacket();
                 transfer.read(Unpooled.wrappedBuffer(unknownPacket.data));
                 this.handleTransfer(transfer);
 
@@ -58,7 +58,7 @@ public class TransferPacketHandler extends PacketHandler {
                 this.proxyConnection.getC2P().writeAndFlush(transferToViaProxy).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 return false;
             }
-        } else if (packet instanceof S2CConfigTransfer1_20_5 transfer) {
+        } else if (packet instanceof S2CTransferPacket transfer) {
             this.handleTransfer(transfer);
             this.proxyConnection.getC2P().writeAndFlush(this.createTransferPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             return false;
@@ -67,14 +67,14 @@ public class TransferPacketHandler extends PacketHandler {
         return true;
     }
 
-    private void handleTransfer(final S2CConfigTransfer1_20_5 transfer) {
+    private void handleTransfer(final S2CTransferPacket transfer) {
         final InetSocketAddress newAddress = new InetSocketAddress(transfer.host, transfer.port);
         TransferDataHolder.addTempRedirect(this.proxyConnection.getC2P(), newAddress);
     }
 
-    private S2CConfigTransfer1_20_5 createTransferPacket() {
+    private S2CTransferPacket createTransferPacket() {
         if (this.proxyConnection.getClientHandshakeAddress() != null) {
-            return new S2CConfigTransfer1_20_5(this.proxyConnection.getClientHandshakeAddress().getHost(), this.proxyConnection.getClientHandshakeAddress().getPort());
+            return new S2CTransferPacket(this.proxyConnection.getClientHandshakeAddress().getHost(), this.proxyConnection.getClientHandshakeAddress().getPort());
         } else {
             Logger.u_warn("transfer", this.proxyConnection, "Client handshake address is invalid, using ViaProxy bind address instead");
             if (!(ViaProxy.getCurrentProxyServer().getChannel().localAddress() instanceof InetSocketAddress bindAddress)) {
@@ -83,7 +83,7 @@ public class TransferPacketHandler extends PacketHandler {
             if (!(this.proxyConnection.getC2P().localAddress() instanceof InetSocketAddress clientAddress)) {
                 throw new IllegalArgumentException("Client address must be an InetSocketAddress");
             }
-            return new S2CConfigTransfer1_20_5(clientAddress.getHostString(), bindAddress.getPort());
+            return new S2CTransferPacket(clientAddress.getHostString(), bindAddress.getPort());
         }
     }
 

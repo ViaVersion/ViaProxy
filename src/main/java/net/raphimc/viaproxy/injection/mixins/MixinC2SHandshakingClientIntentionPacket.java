@@ -17,13 +17,13 @@
  */
 package net.raphimc.viaproxy.injection.mixins;
 
-import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
+import net.raphimc.netminecraft.packet.impl.handshaking.C2SHandshakingClientIntentionPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(C2SHandshakePacket.class)
-public abstract class MixinC2SHandshakePacket {
+@Mixin(C2SHandshakingClientIntentionPacket.class)
+public abstract class MixinC2SHandshakingClientIntentionPacket {
 
     @ModifyConstant(method = "read", constant = @Constant(intValue = 255))
     private int allowLargerHostnames(int constant) {

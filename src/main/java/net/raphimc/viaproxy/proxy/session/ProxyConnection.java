@@ -204,7 +204,7 @@ public class ProxyConnection extends NetClient {
         this.c2pConnectionState = connectionState;
         switch (connectionState) {
             case HANDSHAKING:
-                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
+                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakingRegistry(false));
                 break;
             case STATUS:
                 this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getStatusRegistry(false));
@@ -226,7 +226,7 @@ public class ProxyConnection extends NetClient {
         switch (connectionState) {
             case HANDSHAKING:
                 if (this.getChannel() != null)
-                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(true));
+                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakingRegistry(true));
                 break;
             case STATUS:
                 if (this.getChannel() != null)

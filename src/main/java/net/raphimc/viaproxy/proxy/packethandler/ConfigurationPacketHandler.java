@@ -22,9 +22,9 @@ import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.UnknownPacket;
-import net.raphimc.netminecraft.packet.impl.configuration.C2SConfigFinishConfiguration1_20_2;
-import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigFinishConfiguration1_20_2;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginStartConfiguration1_20_2;
+import net.raphimc.netminecraft.packet.impl.configuration.C2SConfigFinishConfigurationPacket;
+import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigFinishConfigurationPacket;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginAcknowledgedPacket;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ChannelUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -56,7 +56,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
                     }
                 });
             }
-        } else if (packet instanceof C2SLoginStartConfiguration1_20_2) {
+        } else if (packet instanceof C2SLoginAcknowledgedPacket) {
             this.proxyConnection.setC2pConnectionState(ConnectionState.CONFIGURATION);
             listeners.add(f -> {
                 if (f.isSuccess()) {
@@ -64,7 +64,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
                     ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
                 }
             });
-        } else if (packet instanceof C2SConfigFinishConfiguration1_20_2) {
+        } else if (packet instanceof C2SConfigFinishConfigurationPacket) {
             this.proxyConnection.setC2pConnectionState(ConnectionState.PLAY);
             listeners.add(f -> {
                 if (f.isSuccess()) {
@@ -84,7 +84,7 @@ public class ConfigurationPacketHandler extends PacketHandler {
             if (unknownPacket.packetId == this.startConfigurationId) {
                 ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
             }
-        } else if (packet instanceof S2CConfigFinishConfiguration1_20_2) {
+        } else if (packet instanceof S2CConfigFinishConfigurationPacket) {
             ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
         }
 

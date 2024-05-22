@@ -85,7 +85,7 @@ public class LoginPacketHandler extends PacketHandler {
             }
 
             if (ViaProxy.getConfig().isProxyOnlineMode() && !ViaProxy.EVENT_MANAGER.call(new ShouldVerifyOnlineModeEvent(this.proxyConnection)).isCancelled()) {
-                this.proxyConnection.getC2P().writeAndFlush(new S2CLoginKeyPacket1_8("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                this.proxyConnection.getC2P().writeAndFlush(new S2CLoginHelloPacket1_20_5("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken, true)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             } else {
                 ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
                 ExternalInterface.fillPlayerData(this.proxyConnection);
@@ -143,10 +143,10 @@ public class LoginPacketHandler extends PacketHandler {
     public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException, ExecutionException, InterruptedException {
         if (packet instanceof S2CLoginDisconnectPacket1_7 loginDisconnectPacket) {
             Logger.u_info("server kick", this.proxyConnection, ConsoleFormatter.convert(loginDisconnectPacket.reason.asLegacyFormatString()));
-        } else if (packet instanceof S2CLoginKeyPacket1_7 loginKeyPacket) {
-            final PublicKey publicKey = CryptUtil.decodeRsaPublicKey(loginKeyPacket.publicKey);
+        } else if (packet instanceof S2CLoginHelloPacket1_7 loginHelloPacket) {
+            final PublicKey publicKey = CryptUtil.decodeRsaPublicKey(loginHelloPacket.publicKey);
             final SecretKey secretKey = CryptUtil.generateSecretKey();
-            final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginKeyPacket.serverId, publicKey, secretKey)).toString(16);
+            final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginHelloPacket.serverId, publicKey, secretKey)).toString(16);
 
             boolean auth = true;
             if (this.proxyConnection.getServerVersion().olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)) {
@@ -157,11 +157,11 @@ public class LoginPacketHandler extends PacketHandler {
             }
 
             final byte[] encryptedSecretKey = CryptUtil.encryptData(publicKey, secretKey.getEncoded());
-            final byte[] encryptedNonce = CryptUtil.encryptData(publicKey, loginKeyPacket.nonce);
+            final byte[] encryptedNonce = CryptUtil.encryptData(publicKey, loginHelloPacket.nonce);
 
             final C2SLoginKeyPacket1_19_3 loginKey = new C2SLoginKeyPacket1_19_3(encryptedSecretKey, encryptedNonce);
             if (this.proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && this.proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19 && ((C2SLoginHelloPacket1_19) this.proxyConnection.getLoginHelloPacket()).key != null) {
-                ExternalInterface.signNonce(loginKeyPacket.nonce, loginKey, this.proxyConnection);
+                ExternalInterface.signNonce(loginHelloPacket.nonce, loginKey, this.proxyConnection);
             }
             this.proxyConnection.getChannel().writeAndFlush(loginKey).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 
@@ -172,10 +172,10 @@ public class LoginPacketHandler extends PacketHandler {
             }
 
             return false;
-        } else if (packet instanceof S2CLoginSuccessPacket1_7 loginSuccessPacket) {
+        } else if (packet instanceof S2CLoginGameProfilePacket1_7 loginGameProfilePacket) {
             final ConnectionState nextState = this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_2) ? ConnectionState.CONFIGURATION : ConnectionState.PLAY;
 
-            this.proxyConnection.setGameProfile(new GameProfile(loginSuccessPacket.uuid, loginSuccessPacket.name));
+            this.proxyConnection.setGameProfile(new GameProfile(loginGameProfilePacket.uuid, loginGameProfilePacket.name));
             Logger.u_info("session", this.proxyConnection, "Connected successfully! Switching to " + nextState + " state");
 
             ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());

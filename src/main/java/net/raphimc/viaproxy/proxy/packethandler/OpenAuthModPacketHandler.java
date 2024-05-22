@@ -28,9 +28,9 @@ import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.packet.IPacket;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginCustomPayloadPacket;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginCustomQueryAnswerPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_7;
-import net.raphimc.netminecraft.packet.impl.login.S2CLoginCustomPayloadPacket;
+import net.raphimc.netminecraft.packet.impl.login.S2CLoginCustomQueryPacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket1_20_3;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -67,8 +67,8 @@ public class OpenAuthModPacketHandler extends PacketHandler {
                     return false;
                 }
             }
-        } else if (packet instanceof C2SLoginCustomPayloadPacket loginCustomPayload) {
-            if (loginCustomPayload.response != null && this.handleCustomPayload(loginCustomPayload.queryId, Unpooled.wrappedBuffer(loginCustomPayload.response))) {
+        } else if (packet instanceof C2SLoginCustomQueryAnswerPacket loginCustomQueryAnswer) {
+            if (loginCustomQueryAnswer.response != null && this.handleCustomPayload(loginCustomQueryAnswer.queryId, Unpooled.wrappedBuffer(loginCustomQueryAnswer.response))) {
                 return false;
             }
         } else if (packet instanceof C2SLoginKeyPacket1_7 loginKeyPacket) {
@@ -90,7 +90,7 @@ public class OpenAuthModPacketHandler extends PacketHandler {
         switch (this.proxyConnection.getC2pConnectionState()) {
             case LOGIN:
                 if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_13)) {
-                    this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCustomPayloadPacket(id, channel, PacketTypes.readReadableBytes(data))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCustomQueryPacket(id, channel, PacketTypes.readReadableBytes(data))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 } else {
                     final ByteBuf disconnectPacketData = Unpooled.buffer();
                     PacketTypes.writeString(disconnectPacketData, channel);

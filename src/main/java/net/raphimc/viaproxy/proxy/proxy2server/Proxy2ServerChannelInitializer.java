@@ -74,7 +74,7 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         }
 
         super.initChannel(channel);
-        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(true));
+        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakingRegistry(true));
 
         channel.pipeline().addLast(new ViaProxyVLPipeline(user, proxyConnection.getServerVersion()));
         channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());

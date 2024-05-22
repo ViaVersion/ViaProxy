@@ -29,7 +29,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.IntendedState;
 import net.raphimc.netminecraft.packet.IPacket;
-import net.raphimc.netminecraft.packet.impl.handshake.C2SHandshakePacket;
+import net.raphimc.netminecraft.packet.impl.handshaking.C2SHandshakingClientIntentionPacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.viaproxy.ViaProxy;
@@ -91,7 +91,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         if (this.proxyConnection.isClosed()) return;
 
         if (this.proxyConnection.getC2pConnectionState() == ConnectionState.HANDSHAKING) {
-            if (packet instanceof C2SHandshakePacket) this.handleHandshake((C2SHandshakePacket) packet);
+            if (packet instanceof C2SHandshakingClientIntentionPacket) this.handleHandshake((C2SHandshakingClientIntentionPacket) packet);
             else throw new IllegalStateException("Unexpected packet in HANDSHAKING state");
             return;
         }
@@ -110,7 +110,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
         ExceptionUtil.handleNettyException(ctx, cause, this.proxyConnection);
     }
 
-    private void handleHandshake(final C2SHandshakePacket packet) {
+    private void handleHandshake(final C2SHandshakingClientIntentionPacket packet) {
         final ProtocolVersion clientVersion = ProtocolVersion.getProtocol(packet.protocolVersion);
 
         if (packet.intendedState == null) {
@@ -267,7 +267,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
                     }
 
                     handshakeParts[0] = address;
-                    final C2SHandshakePacket newHandshakePacket = new C2SHandshakePacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), port, intendedState);
+                    final C2SHandshakingClientIntentionPacket newHandshakePacket = new C2SHandshakingClientIntentionPacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), port, intendedState);
 
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {

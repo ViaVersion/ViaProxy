@@ -56,7 +56,7 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
         }
 
         super.initChannel(channel);
-        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakeRegistry(false));
+        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakingRegistry(false));
 
         if (ViaProxy.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();
