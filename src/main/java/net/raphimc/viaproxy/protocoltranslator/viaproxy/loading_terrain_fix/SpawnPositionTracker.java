@@ -19,7 +19,7 @@ package net.raphimc.viaproxy.protocoltranslator.viaproxy.loading_terrain_fix;
 
 import com.viaversion.viaversion.api.connection.StoredObject;
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.api.minecraft.Position;
+import com.viaversion.viaversion.api.minecraft.BlockPosition;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
 import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.protocols.v1_17_1to1_18.packet.ClientboundPackets1_18;
@@ -27,14 +27,14 @@ import com.viaversion.viaversion.protocols.v1_18to1_18_2.Protocol1_18To1_18_2;
 
 public class SpawnPositionTracker extends StoredObject {
 
-    private Position spawnPosition = new Position(8, 64, 8);
+    private BlockPosition spawnPosition = new BlockPosition(8, 64, 8);
     private float angle = 0F;
 
     public SpawnPositionTracker(final UserConnection user) {
         super(user);
     }
 
-    public void setSpawnPosition(final Position spawnPosition, final float angle) {
+    public void setSpawnPosition(final BlockPosition spawnPosition, final float angle) {
         this.spawnPosition = spawnPosition;
         this.angle = angle;
     }
