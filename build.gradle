@@ -5,7 +5,7 @@ plugins {
     id "application"
     id "maven-publish"
     id "idea"
-    id "net.raphimc.class-token-replacer" version "1.0.0"
+    id "net.raphimc.class-token-replacer" version "1.0.1"
     id "net.raphimc.java-downgrader" version "1.1.2"
 }
 
