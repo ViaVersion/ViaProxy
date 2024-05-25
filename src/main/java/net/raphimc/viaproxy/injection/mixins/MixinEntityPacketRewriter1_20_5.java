@@ -59,7 +59,7 @@ public abstract class MixinEntityPacketRewriter1_20_5 extends EntityRewriter<Cli
      * @reason Fix interaction range and step height differences
      */
     @Overwrite
-    private void sendRangeAttributes(final UserConnection connection, final boolean creativeMode) {
+    public void sendRangeAttributes(final UserConnection connection, final boolean creativeMode) {
         final PacketWrapper updateAttributes = PacketWrapper.create(ClientboundPackets1_20_5.UPDATE_ATTRIBUTES, connection);
         updateAttributes.write(Types.VAR_INT, this.tracker(connection).clientEntityId());
         if (connection.getProtocolInfo().serverProtocolVersion().olderThanOrEqualTo(ProtocolVersion.v1_7_6)) {
