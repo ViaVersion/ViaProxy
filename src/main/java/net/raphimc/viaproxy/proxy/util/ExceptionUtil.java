@@ -21,6 +21,7 @@ import com.viaversion.viaversion.exception.InformativeException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -41,7 +42,7 @@ public class ExceptionUtil {
         }
     }
 
-    public static void handleNettyException(ChannelHandlerContext ctx, Throwable cause, ProxyConnection proxyConnection) {
+    public static void handleNettyException(ChannelHandlerContext ctx, Throwable cause, ProxyConnection proxyConnection, boolean client2Proxy) {
         if (!ctx.channel().isOpen()) return;
         if (cause instanceof ClosedChannelException) return;
         if (cause instanceof IOException) return;
@@ -49,12 +50,14 @@ public class ExceptionUtil {
             ctx.channel().close();
             return;
         }
-        Logger.LOGGER.error("Caught unhandled netty exception", cause);
-        try {
-            if (proxyConnection != null) {
-                proxyConnection.kickClient("§cAn unhandled error occurred in your connection and it has been closed.\n§aError details for report:§f" + ExceptionUtil.prettyPrint(cause));
+        if (!client2Proxy || !ViaProxy.getConfig().shouldSuppressClientProtocolErrors()) {
+            Logger.LOGGER.error("Caught unhandled netty exception", cause);
+            try {
+                if (proxyConnection != null) {
+                    proxyConnection.kickClient("§cAn unhandled error occurred in your connection and it has been closed.\n§aError details for report:§f" + ExceptionUtil.prettyPrint(cause));
+                }
+            } catch (Throwable ignored) {
             }
-        } catch (Throwable ignored) {
         }
         ctx.channel().close();
     }

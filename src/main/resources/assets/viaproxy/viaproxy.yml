@@ -52,6 +52,10 @@ allow-beta-pinging: false
 # This may cause issues depending on the type of packet which failed to translate.
 ignore-protocol-translation-errors: false
 #
+# Enabling this will suppress client protocol errors to prevent lag when ViaProxy is getting spammed with invalid packets.
+# This may cause issues with debugging client connection issues because no error messages will be printed.
+suppress-client-protocol-errors: false
+#
 # Allow <= 1.6.4 clients to connect through ViaProxy to the target server. (No protocol translation or packet handling)
 allow-legacy-client-passthrough: false
 #

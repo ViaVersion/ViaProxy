@@ -107,7 +107,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ExceptionUtil.handleNettyException(ctx, cause, this.proxyConnection);
+        ExceptionUtil.handleNettyException(ctx, cause, this.proxyConnection, true);
     }
 
     private void handleHandshake(final C2SHandshakingClientIntentionPacket packet) {

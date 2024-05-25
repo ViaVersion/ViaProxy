@@ -69,7 +69,7 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ExceptionUtil.handleNettyException(ctx, cause, null);
+        ExceptionUtil.handleNettyException(ctx, cause, null, true);
     }
 
     protected void connectToServer(final Channel c2pChannel) {

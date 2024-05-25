@@ -66,7 +66,7 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ExceptionUtil.handleNettyException(ctx, cause, this.proxyConnection);
+        ExceptionUtil.handleNettyException(ctx, cause, this.proxyConnection, false);
     }
 
 }

@@ -53,7 +53,7 @@ public class LegacyPassthroughInitialHandler extends SimpleChannelInboundHandler
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ExceptionUtil.handleNettyException(ctx, cause, null);
+        ExceptionUtil.handleNettyException(ctx, cause, null, true);
     }
 
 }

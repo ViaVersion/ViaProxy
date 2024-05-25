@@ -67,6 +67,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<Integer> optionCompressionThreshold;
     private final OptionSpec<Boolean> optionAllowBetaPinging;
     private final OptionSpec<Boolean> optionIgnoreProtocolTranslationErrors;
+    private final OptionSpec<Boolean> optionSuppressClientProtocolErrors;
     private final OptionSpec<Boolean> optionAllowLegacyClientPassthrough;
     private final OptionSpec<String> optionCustomMotd;
     private final OptionSpec<String> optionResourcePackUrl;
@@ -87,6 +88,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private int compressionThreshold = 256;
     private boolean allowBetaPinging = false;
     private boolean ignoreProtocolTranslationErrors = false;
+    private boolean suppressClientProtocolErrors = false;
     private boolean allowLegacyClientPassthrough = false;
     private String customMotd = "";
     private String resourcePackUrl = "";
@@ -112,6 +114,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionCompressionThreshold = this.optionParser.accepts("compression-threshold").withRequiredArg().ofType(Integer.class).defaultsTo(this.compressionThreshold);
         this.optionAllowBetaPinging = this.optionParser.accepts("allow-beta-pinging").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowBetaPinging);
         this.optionIgnoreProtocolTranslationErrors = this.optionParser.accepts("ignore-protocol-translation-errors").withRequiredArg().ofType(Boolean.class).defaultsTo(this.ignoreProtocolTranslationErrors);
+        this.optionSuppressClientProtocolErrors = this.optionParser.accepts("suppress-client-protocol-errors").withRequiredArg().ofType(Boolean.class).defaultsTo(this.suppressClientProtocolErrors);
         this.optionAllowLegacyClientPassthrough = this.optionParser.accepts("allow-legacy-client-passthrough").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowLegacyClientPassthrough);
         this.optionCustomMotd = this.optionParser.accepts("custom-motd").withRequiredArg().ofType(String.class).defaultsTo(this.customMotd);
         this.optionResourcePackUrl = this.optionParser.accepts("resource-pack-url").withRequiredArg().ofType(String.class).defaultsTo(this.resourcePackUrl);
@@ -144,6 +147,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.compressionThreshold = this.getInt("compression-threshold", this.compressionThreshold);
         this.allowBetaPinging = this.getBoolean("allow-beta-pinging", this.allowBetaPinging);
         this.ignoreProtocolTranslationErrors = this.getBoolean("ignore-protocol-translation-errors", this.ignoreProtocolTranslationErrors);
+        this.suppressClientProtocolErrors = this.getBoolean("suppress-client-protocol-errors", this.suppressClientProtocolErrors);
         this.allowLegacyClientPassthrough = this.getBoolean("allow-legacy-client-passthrough", this.allowLegacyClientPassthrough);
         this.customMotd = this.getString("custom-motd", this.customMotd);
         this.resourcePackUrl = this.getString("resource-pack-url", this.resourcePackUrl);
@@ -180,6 +184,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.compressionThreshold = options.valueOf(this.optionCompressionThreshold);
             this.allowBetaPinging = options.valueOf(this.optionAllowBetaPinging);
             this.ignoreProtocolTranslationErrors = options.valueOf(this.optionIgnoreProtocolTranslationErrors);
+            this.suppressClientProtocolErrors = options.valueOf(this.optionSuppressClientProtocolErrors);
             this.allowLegacyClientPassthrough = options.valueOf(this.optionAllowLegacyClientPassthrough);
             this.customMotd = options.valueOf(this.optionCustomMotd);
             this.resourcePackUrl = options.valueOf(this.optionResourcePackUrl);
@@ -345,6 +350,15 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setIgnoreProtocolTranslationErrors(final boolean ignoreProtocolTranslationErrors) {
         this.ignoreProtocolTranslationErrors = ignoreProtocolTranslationErrors;
         this.set("ignore-protocol-translation-errors", ignoreProtocolTranslationErrors);
+    }
+
+    public boolean shouldSuppressClientProtocolErrors() {
+        return this.suppressClientProtocolErrors;
+    }
+
+    public void setSuppressClientProtocolErrors(final boolean suppressClientProtocolErrors) {
+        this.suppressClientProtocolErrors = suppressClientProtocolErrors;
+        this.set("suppress-client-protocol-errors", suppressClientProtocolErrors);
     }
 
     public boolean shouldAllowLegacyClientPassthrough() {
