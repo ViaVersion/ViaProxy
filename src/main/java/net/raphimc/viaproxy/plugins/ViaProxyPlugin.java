@@ -17,19 +17,18 @@
  */
 package net.raphimc.viaproxy.plugins;
 
-import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
-
+import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public abstract class ViaProxyPlugin {
 
-    private InjectionClassLoader classLoader;
+    private URLClassLoader classLoader;
     private Map<String, Object> viaProxyYaml;
     private boolean enabled;
 
-    final void init(final InjectionClassLoader classLoader, final Map<String, Object> viaProxyYaml) {
+    final void init(final URLClassLoader classLoader, final Map<String, Object> viaProxyYaml) {
         this.classLoader = classLoader;
         this.viaProxyYaml = viaProxyYaml;
     }
@@ -68,7 +67,7 @@ public abstract class ViaProxyPlugin {
         return Collections.unmodifiableList((List<String>) this.viaProxyYaml.getOrDefault("depends", Collections.emptyList()));
     }
 
-    public final InjectionClassLoader getClassLoader() {
+    public final URLClassLoader getClassLoader() {
         return this.classLoader;
     }
 

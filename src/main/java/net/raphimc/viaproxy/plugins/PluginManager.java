@@ -24,10 +24,12 @@ import net.lenni0451.classtransform.additionalclassprovider.LazyFileClassProvide
 import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.reflect.stream.RStream;
-import net.raphimc.javadowngrader.impl.classtransform.JavaDowngraderTransformer;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.util.logging.Logger;
+import org.objectweb.asm.Opcodes;
 import org.yaml.snakeyaml.Yaml;
+import xyz.wagyourtail.jvmdg.Constants;
+import xyz.wagyourtail.jvmdg.runtime.ClassDowngradingAgent;
 
 import java.io.File;
 import java.io.InputStream;
@@ -93,9 +95,20 @@ public class PluginManager {
     private void loadAndScanJar(final File file) throws Throwable {
         final URL url = file.toURI().toURL();
         final TransformerManager transformerManager = new TransformerManager(new LazyFileClassProvider(Collections.singletonList(file), this.rootClassProvider));
-        transformerManager.addBytecodeTransformer(new JavaDowngraderTransformer(transformerManager));
-        final InjectionClassLoader loader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
-        final InputStream viaproxyYml = loader.getResourceAsStream("viaproxy.yml");
+        final InjectionClassLoader classLoader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
+
+        try {
+            final String[] versions = System.getProperty("java.class.version").split("\\.");
+            final int nativeClassVersion = Integer.parseInt(versions[0]);
+            if (nativeClassVersion < Opcodes.V17) {
+                System.setProperty(Constants.ALLOW_MAVEN_LOOKUP, "false");
+                transformerManager.addClassFileTransformer(classLoader, new ClassDowngradingAgent());
+            }
+        } catch (Throwable e) {
+            Logger.LOGGER.error("Failed to setup class downgrading", e);
+        }
+
+        final InputStream viaproxyYml = classLoader.getResourceAsStream("viaproxy.yml");
         if (viaproxyYml == null) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a viaproxy.yml");
         final Map<String, Object> yaml = this.yaml.load(viaproxyYml);
         if (!yaml.containsKey("name")) throw new IllegalStateException("Plugin '" + file.getName() + "' does not have a name attribute in the viaproxy.yml");
@@ -109,14 +122,14 @@ public class PluginManager {
 
         final String main = (String) yaml.get("main");
 
-        final Class<?> mainClass = loader.loadClass(main);
+        final Class<?> mainClass = classLoader.loadClass(main);
         if (!ViaProxyPlugin.class.isAssignableFrom(mainClass)) {
             throw new IllegalStateException("Class '" + mainClass.getName() + "' from '" + file.getName() + "' does not extend ViaProxyPlugin");
         }
         final Object instance = mainClass.getDeclaredConstructor().newInstance();
         final ViaProxyPlugin plugin = (ViaProxyPlugin) instance;
 
-        plugin.init(loader, yaml);
+        plugin.init(classLoader, yaml);
 
         if (plugin.getDepends().size() > 1) {
             throw new IllegalStateException("Plugin '" + file.getName() + "' has more than one dependency. This is not supported yet.");
@@ -137,7 +150,7 @@ public class PluginManager {
                 this.enablePlugin(dependPlugin);
             }
 
-            RStream.of(plugin.getClassLoader()).fields().by("parent").set(dependPlugin.getClassLoader());
+            RStream.of(plugin.getClassLoader()).withSuper().fields().by("parent").set(dependPlugin.getClassLoader());
         }
 
         try {

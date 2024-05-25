@@ -3,8 +3,8 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven {
-            name = "Lenni0451"
-            url "https://maven.lenni0451.net/everything"
+            name = "WagYourTail"
+            url = "https://maven.wagyourtail.xyz/releases"
         }
     }
 }

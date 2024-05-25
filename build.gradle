@@ -1,12 +1,10 @@
-import net.raphimc.javadowngrader.gradle.task.DowngradeJarTask
-
 plugins {
     id "java"
     id "application"
     id "maven-publish"
     id "idea"
     id "net.raphimc.class-token-replacer" version "1.0.1"
-    id "net.raphimc.java-downgrader" version "1.1.2"
+    id "xyz.wagyourtail.jvmdowngrader" version "0.5.1"
 }
 
 base {
@@ -20,6 +18,7 @@ base {
 
 configurations {
     include
+    includeJ8
 
     implementation.extendsFrom include
     api.extendsFrom include
@@ -79,9 +78,9 @@ dependencies {
     include("com.mojang:authlib:3.16.29") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    include "net.lenni0451.classtransform:mixinstranslator:1.13.1"
-    include "net.lenni0451.classtransform:mixinsdummy:1.13.1"
-    include "net.lenni0451.classtransform:additionalclassprovider:1.13.1"
+    include "net.lenni0451.classtransform:mixinstranslator:1.14.0-SNAPSHOT"
+    include "net.lenni0451.classtransform:mixinsdummy:1.14.0-SNAPSHOT"
+    include "net.lenni0451.classtransform:additionalclassprovider:1.14.0-SNAPSHOT"
     include "net.lenni0451:Reflect:1.3.4"
     include "net.lenni0451:LambdaEvents:2.4.2"
     include("net.lenni0451:MCPing:1.4.1") {
@@ -95,14 +94,13 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    include("net.raphimc.javadowngrader:impl-classtransform:1.1.2") {
-        exclude group: "org.ow2.asm", module: "asm-commons"
-        exclude group: "net.lenni0451.classtransform", module: "additionalclassprovider"
-    }
     include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT") {
         exclude group: "io.netty"
     }
     include "gs.mclo:api:3.0.1"
+
+    includeJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:0.5.1"))
+    includeJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:0.5.1:downgraded-8"
 }
 
 sourceSets {
@@ -199,13 +197,22 @@ idea {
     }
 }
 
-tasks.register("java8Jar", DowngradeJarTask) {
-    input = tasks.jar.archiveFile.get().asFile
-    outputSuffix = "+java8"
-    compileClassPath = sourceSets.main.compileClasspath
-    copyRuntimeClasses = false
-}.get().dependsOn("build")
-build.finalizedBy("java8Jar")
+downgradeJar {
+    dependsOn configurations.includeJ8
+    from {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations.includeJ8.collect {
+            zipTree(it)
+        }
+    } {
+        exclude "META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA"
+    }
+
+    downgradeTo = JavaVersion.VERSION_1_8
+    archiveClassifier = null
+    archiveVersion = project.version + "+java8"
+}
+build.finalizedBy("downgradeJar")
 
 String latestCommitHash() {
     def stdout = new ByteArrayOutputStream()
