@@ -36,7 +36,7 @@ public class ClassLoaderPriorityUtil {
                 try {
                     if (file.getName().endsWith(".jar")) {
                         ClassLoaders.loadToFront(file.toURI().toURL());
-                        Logger.LOGGER.info("Loaded overriding jar " + file.getName());
+                        Logger.LOGGER.warn("Loaded overriding jar " + file.getName());
                     }
                 } catch (Throwable e) {
                     Logger.LOGGER.error("Failed to load overriding jar " + file.getName(), e);
