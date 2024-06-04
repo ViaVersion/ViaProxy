@@ -77,7 +77,6 @@ public class ProtocolTranslator {
             Files.writeString(viaVersionConfig.toPath(), """
                     1_13-tab-complete-delay: 5
                     no-delay-shield-blocking: true
-                    chunk-border-fix: true
                     handle-invalid-item-count: true
                     """, StandardOpenOption.CREATE_NEW);
         } catch (FileAlreadyExistsException ignored) {
