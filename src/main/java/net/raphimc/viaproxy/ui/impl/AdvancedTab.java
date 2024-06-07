@@ -50,6 +50,7 @@ public class AdvancedTab extends UITab {
     JCheckBox ignorePacketTranslationErrors;
     JCheckBox allowBetaPinging;
     JCheckBox simpleVoiceChatSupport;
+    JCheckBox fakeAcceptResourcePacks;
     JButton viaVersionDumpButton;
     JButton uploadLogsButton;
 
@@ -133,6 +134,13 @@ public class AdvancedTab extends UITab {
             this.simpleVoiceChatSupport.setSelected(ViaProxy.getConfig().shouldSupportSimpleVoiceChat());
             checkboxes.add(this.simpleVoiceChatSupport);
         }
+        {
+            this.fakeAcceptResourcePacks = new JCheckBox(I18n.get("tab.advanced.fake_accept_resource_packs.label"));
+            this.fakeAcceptResourcePacks.setToolTipText(I18n.get("tab.advanced.fake_accept_resource_packs.tooltip"));
+            this.fakeAcceptResourcePacks.setSelected(false);
+            this.fakeAcceptResourcePacks.setSelected(ViaProxy.getConfig().shouldFakeAcceptResourcePacks());
+            checkboxes.add(this.fakeAcceptResourcePacks);
+        }
         GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BODY_BLOCK_PADDING).fill(GBC.BOTH).weight(1, 1).add(checkboxes);
 
         parent.add(body, BorderLayout.NORTH);
@@ -210,6 +218,7 @@ public class AdvancedTab extends UITab {
         ViaProxy.getConfig().setIgnoreProtocolTranslationErrors(this.ignorePacketTranslationErrors.isSelected());
         ViaProxy.getConfig().setAllowBetaPinging(this.allowBetaPinging.isSelected());
         ViaProxy.getConfig().setSimpleVoiceChatSupport(this.simpleVoiceChatSupport.isSelected());
+        ViaProxy.getConfig().setFakeAcceptResourcePacks(this.fakeAcceptResourcePacks.isSelected());
     }
 
 }

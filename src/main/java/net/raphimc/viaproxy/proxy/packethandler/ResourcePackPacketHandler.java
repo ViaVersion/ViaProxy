@@ -33,6 +33,7 @@ import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class ResourcePackPacketHandler extends PacketHandler {
@@ -63,7 +64,22 @@ public class ResourcePackPacketHandler extends PacketHandler {
     private void sendResourcePack() {
         if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getChannel().eventLoop().schedule(() -> {
-                if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
+                if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
+                    final ByteBuf resourcePackPushPacket = Unpooled.buffer();
+                    PacketTypes.writeVarInt(resourcePackPushPacket, MCPackets.S2C_RESOURCE_PACK_PUSH.getId(this.proxyConnection.getClientVersion().getVersion()));
+                    PacketTypes.writeUuid(resourcePackPushPacket, UUID.randomUUID()); // pack id
+                    PacketTypes.writeString(resourcePackPushPacket, ViaProxy.getConfig().getResourcePackUrl()); // url
+                    PacketTypes.writeString(resourcePackPushPacket, ""); // hash
+                    resourcePackPushPacket.writeBoolean(Via.getConfig().isForcedUse1_17ResourcePack()); // required
+                    final JsonElement promptMessage = Via.getConfig().get1_17ResourcePackPrompt();
+                    if (promptMessage != null) {
+                        resourcePackPushPacket.writeBoolean(true); // has message
+                        PacketTypes.writeString(resourcePackPushPacket, promptMessage.toString()); // message
+                    } else {
+                        resourcePackPushPacket.writeBoolean(false); // has message
+                    }
+                    this.proxyConnection.getC2P().writeAndFlush(resourcePackPushPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
                     final ByteBuf resourcePackPacket = Unpooled.buffer();
                     PacketTypes.writeVarInt(resourcePackPacket, MCPackets.S2C_RESOURCE_PACK.getId(this.proxyConnection.getClientVersion().getVersion()));
                     PacketTypes.writeString(resourcePackPacket, ViaProxy.getConfig().getResourcePackUrl()); // url

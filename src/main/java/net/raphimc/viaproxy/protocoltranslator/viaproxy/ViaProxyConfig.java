@@ -73,6 +73,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<String> optionResourcePackUrl;
     private final OptionSpec<WildcardDomainHandling> optionWildcardDomainHandling;
     private final OptionSpec<Boolean> optionSimpleVoiceChatSupport;
+    private final OptionSpec<Boolean> optionFakeAcceptResourcePacks;
 
     private SocketAddress bindAddress = AddressUtil.parse("0.0.0.0:25568", null);
     private SocketAddress targetAddress = AddressUtil.parse("127.0.0.1:25565", null);
@@ -94,6 +95,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private String resourcePackUrl = "";
     private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
     private boolean simpleVoiceChatSupport = false;
+    private boolean fakeAcceptResourcePacks = false;
 
     public ViaProxyConfig(final File configFile) {
         super(configFile, LOGGER);
@@ -120,6 +122,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionResourcePackUrl = this.optionParser.accepts("resource-pack-url").withRequiredArg().ofType(String.class).defaultsTo(this.resourcePackUrl);
         this.optionWildcardDomainHandling = this.optionParser.accepts("wildcard-domain-handling").withRequiredArg().ofType(WildcardDomainHandling.class).defaultsTo(this.wildcardDomainHandling);
         this.optionSimpleVoiceChatSupport = this.optionParser.accepts("simple-voice-chat-support").withRequiredArg().ofType(Boolean.class).defaultsTo(this.simpleVoiceChatSupport);
+        this.optionFakeAcceptResourcePacks = this.optionParser.accepts("fake-accept-resource-packs").withRequiredArg().ofType(Boolean.class).defaultsTo(this.fakeAcceptResourcePacks);
     }
 
     @Override
@@ -153,6 +156,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.resourcePackUrl = this.getString("resource-pack-url", this.resourcePackUrl);
         this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", this.wildcardDomainHandling.name()));
         this.simpleVoiceChatSupport = this.getBoolean("simple-voice-chat-support", this.simpleVoiceChatSupport);
+        this.fakeAcceptResourcePacks = this.getBoolean("fake-accept-resource-packs", this.fakeAcceptResourcePacks);
     }
 
     public void loadFromArguments(final String[] args) throws IOException {
@@ -190,6 +194,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.resourcePackUrl = options.valueOf(this.optionResourcePackUrl);
             this.wildcardDomainHandling = options.valueOf(this.optionWildcardDomainHandling);
             this.simpleVoiceChatSupport = options.valueOf(this.optionSimpleVoiceChatSupport);
+            this.fakeAcceptResourcePacks = options.valueOf(this.optionFakeAcceptResourcePacks);
             ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
             return;
         } catch (OptionException e) {
@@ -404,6 +409,15 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setSimpleVoiceChatSupport(final boolean simpleVoiceChatSupport) {
         this.simpleVoiceChatSupport = simpleVoiceChatSupport;
         this.set("simple-voice-chat-support", simpleVoiceChatSupport);
+    }
+
+    public boolean shouldFakeAcceptResourcePacks() {
+        return this.fakeAcceptResourcePacks;
+    }
+
+    public void setFakeAcceptResourcePacks(final boolean fakeAcceptResourcePacks) {
+        this.fakeAcceptResourcePacks = fakeAcceptResourcePacks;
+        this.set("fake-accept-resource-packs", fakeAcceptResourcePacks);
     }
 
     private void checkTargetVersion() {

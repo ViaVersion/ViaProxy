@@ -212,6 +212,8 @@ public class GeneralTab extends UITab {
         this.viaProxyWindow.advancedTab.chatSigning.setEnabled(state);
         this.viaProxyWindow.advancedTab.ignorePacketTranslationErrors.setEnabled(state);
         this.viaProxyWindow.advancedTab.allowBetaPinging.setEnabled(state);
+        this.viaProxyWindow.advancedTab.simpleVoiceChatSupport.setEnabled(state);
+        this.viaProxyWindow.advancedTab.fakeAcceptResourcePacks.setEnabled(state);
         if (state) this.serverVersion.getActionListeners()[0].actionPerformed(null);
     }
 

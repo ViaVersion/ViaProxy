@@ -75,5 +75,9 @@ wildcard-domain-handling: "none"
 # Enables handling and rewriting of Simple Voice Chat mod packets.
 simple-voice-chat-support: false
 #
+# Accepts resource packs from the server without showing a prompt to the client.
+# This is required for servers that require a resource pack, but the client can't load it due to version differences.
+fake-accept-resource-packs: false
+#
 # Configuration version. Do not change this.
 config-version: 1
