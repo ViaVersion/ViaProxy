@@ -17,6 +17,9 @@
  */
 package net.raphimc.viaproxy.ui;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Ordering;
 import net.raphimc.viabedrock.api.util.FileSystemUtil;
 import net.raphimc.viaproxy.ViaProxy;
 
@@ -29,7 +32,7 @@ import java.util.*;
 public class I18n {
 
     private static final String DEFAULT_LOCALE = "en_US";
-    private static final Map<String, Properties> LOCALES = new HashMap<>();
+    private static Map<String, Properties> LOCALES = new LinkedHashMap<>();
     private static String currentLocale;
 
     static {
@@ -46,6 +49,7 @@ public class I18n {
         } catch (Throwable e) {
             throw new RuntimeException("Failed to load translations", e);
         }
+        LOCALES = ImmutableSortedMap.copyOf(LOCALES, Ordering.from(Comparator.comparing((Properties p) -> p.getProperty("language.name"))).onResultOf(Functions.forMap(LOCALES)));
 
         currentLocale = ViaProxy.getSaveManager().uiSave.get("locale");
         if (currentLocale == null || !LOCALES.containsKey(currentLocale)) {
