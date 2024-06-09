@@ -21,7 +21,6 @@ import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferPro
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
-import com.viaversion.viaversion.protocols.v1_8to1_9.provider.HandItemProvider;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocol.classic.c0_28_30toa1_0_15.provider.ClassicCustomCommandProvider;
 import net.raphimc.vialegacy.protocol.classic.c0_28_30toa1_0_15.provider.ClassicMPPassProvider;
@@ -42,7 +41,6 @@ public class ViaProxyVLLoader extends VLLoader {
 
         // ViaVersion
         Via.getManager().getProviders().use(CompressionProvider.class, new ViaProxyCompressionProvider());
-        Via.getManager().getProviders().use(HandItemProvider.class, new ViaProxyHandItemProvider());
         Via.getManager().getProviders().use(VersionProvider.class, new ViaProxyVersionProvider());
 
         // ViaBackwards
