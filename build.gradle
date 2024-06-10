@@ -4,7 +4,7 @@ plugins {
     id "maven-publish"
     id "idea"
     id "net.raphimc.class-token-replacer" version "1.0.1"
-    id "xyz.wagyourtail.jvmdowngrader" version "0.6.1"
+    id "xyz.wagyourtail.jvmdowngrader" version "0.7.1"
 }
 
 base {
