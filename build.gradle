@@ -53,8 +53,8 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:5.0.0"
-    include "com.viaversion:viabackwards-common:5.0.0"
+    include "com.viaversion:viaversion-common:5.0.1-SNAPSHOT"
+    include "com.viaversion:viabackwards-common:5.0.1-SNAPSHOT"
     include "com.viaversion:viarewind-common:4.0.0"
     include "net.raphimc:ViaLegacy:3.0.0"
     include "net.raphimc:ViaAprilFools:3.0.0"
