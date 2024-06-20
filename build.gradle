@@ -3,7 +3,7 @@ plugins {
     id "application"
     id "maven-publish"
     id "idea"
-    id "net.raphimc.class-token-replacer" version "1.1.0"
+    id "net.raphimc.class-token-replacer" version "1.1.1"
     id "xyz.wagyourtail.jvmdowngrader" version "0.7.2"
 }
 
