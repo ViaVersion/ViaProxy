@@ -69,6 +69,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<Boolean> optionIgnoreProtocolTranslationErrors;
     private final OptionSpec<Boolean> optionSuppressClientProtocolErrors;
     private final OptionSpec<Boolean> optionAllowLegacyClientPassthrough;
+    private final OptionSpec<Boolean> optionBungeecordPlayerInfoPassthrough;
     private final OptionSpec<String> optionCustomMotd;
     private final OptionSpec<String> optionResourcePackUrl;
     private final OptionSpec<WildcardDomainHandling> optionWildcardDomainHandling;
@@ -91,6 +92,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private boolean ignoreProtocolTranslationErrors = false;
     private boolean suppressClientProtocolErrors = false;
     private boolean allowLegacyClientPassthrough = false;
+    private boolean bungeecordPlayerInfoPassthrough = false;
     private String customMotd = "";
     private String resourcePackUrl = "";
     private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
@@ -118,6 +120,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionIgnoreProtocolTranslationErrors = this.optionParser.accepts("ignore-protocol-translation-errors").withRequiredArg().ofType(Boolean.class).defaultsTo(this.ignoreProtocolTranslationErrors);
         this.optionSuppressClientProtocolErrors = this.optionParser.accepts("suppress-client-protocol-errors").withRequiredArg().ofType(Boolean.class).defaultsTo(this.suppressClientProtocolErrors);
         this.optionAllowLegacyClientPassthrough = this.optionParser.accepts("allow-legacy-client-passthrough").withRequiredArg().ofType(Boolean.class).defaultsTo(this.allowLegacyClientPassthrough);
+        this.optionBungeecordPlayerInfoPassthrough = this.optionParser.accepts("bungeecord-player-info-passthrough").withRequiredArg().ofType(Boolean.class).defaultsTo(this.bungeecordPlayerInfoPassthrough);
         this.optionCustomMotd = this.optionParser.accepts("custom-motd").withRequiredArg().ofType(String.class).defaultsTo(this.customMotd);
         this.optionResourcePackUrl = this.optionParser.accepts("resource-pack-url").withRequiredArg().ofType(String.class).defaultsTo(this.resourcePackUrl);
         this.optionWildcardDomainHandling = this.optionParser.accepts("wildcard-domain-handling").withRequiredArg().ofType(WildcardDomainHandling.class).defaultsTo(this.wildcardDomainHandling);
@@ -152,6 +155,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.ignoreProtocolTranslationErrors = this.getBoolean("ignore-protocol-translation-errors", this.ignoreProtocolTranslationErrors);
         this.suppressClientProtocolErrors = this.getBoolean("suppress-client-protocol-errors", this.suppressClientProtocolErrors);
         this.allowLegacyClientPassthrough = this.getBoolean("allow-legacy-client-passthrough", this.allowLegacyClientPassthrough);
+        this.bungeecordPlayerInfoPassthrough = this.getBoolean("bungeecord-player-info-passthrough", this.bungeecordPlayerInfoPassthrough);
         this.customMotd = this.getString("custom-motd", this.customMotd);
         this.resourcePackUrl = this.getString("resource-pack-url", this.resourcePackUrl);
         this.wildcardDomainHandling = WildcardDomainHandling.byName(this.getString("wildcard-domain-handling", this.wildcardDomainHandling.name()));
@@ -190,6 +194,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.ignoreProtocolTranslationErrors = options.valueOf(this.optionIgnoreProtocolTranslationErrors);
             this.suppressClientProtocolErrors = options.valueOf(this.optionSuppressClientProtocolErrors);
             this.allowLegacyClientPassthrough = options.valueOf(this.optionAllowLegacyClientPassthrough);
+            this.bungeecordPlayerInfoPassthrough = options.valueOf(this.optionBungeecordPlayerInfoPassthrough);
             this.customMotd = options.valueOf(this.optionCustomMotd);
             this.resourcePackUrl = options.valueOf(this.optionResourcePackUrl);
             this.wildcardDomainHandling = options.valueOf(this.optionWildcardDomainHandling);
@@ -373,6 +378,15 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setAllowLegacyClientPassthrough(final boolean allowLegacyClientPassthrough) {
         this.allowLegacyClientPassthrough = allowLegacyClientPassthrough;
         this.set("allow-legacy-client-passthrough", allowLegacyClientPassthrough);
+    }
+
+    public boolean shouldPassthroughBungeecordPlayerInfo() {
+        return this.bungeecordPlayerInfoPassthrough;
+    }
+
+    public void setPassthroughBungeecordPlayerInfo(final boolean bungeecordPlayerInfoPassthrough) {
+        this.bungeecordPlayerInfoPassthrough = bungeecordPlayerInfoPassthrough;
+        this.set("bungeecord-player-info-passthrough", bungeecordPlayerInfoPassthrough);
     }
 
     public String getCustomMotd() {

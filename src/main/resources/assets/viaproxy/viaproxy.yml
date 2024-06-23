@@ -59,6 +59,10 @@ suppress-client-protocol-errors: false
 # Allow <= 1.6.4 clients to connect through ViaProxy to the target server. (No protocol translation or packet handling)
 allow-legacy-client-passthrough: false
 #
+# Allow additional information like player ip, player uuid to be passed through to the backend server.
+# This is typically used by proxies like BungeeCord and requires support from the backend server as well.
+bungeecord-player-info-passthrough: false
+#
 # Custom MOTD to send when clients ping the proxy. Leave empty to use the target server's MOTD.
 custom-motd: ""
 #

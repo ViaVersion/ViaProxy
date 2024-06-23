@@ -124,7 +124,12 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
             this.proxyConnection.kickClient("§cYour client version is not supported by ViaProxy!");
         }
 
-        final String[] handshakeParts = packet.address.split("\0");
+        final String[] handshakeParts;
+        if (ViaProxy.getConfig().shouldPassthroughBungeecordPlayerInfo()) {
+            handshakeParts = packet.address.split("\0");
+        } else {
+            handshakeParts = new String[]{packet.address};
+        }
 
         SocketAddress serverAddress = ViaProxy.getConfig().getTargetAddress();
         ProtocolVersion serverVersion = ViaProxy.getConfig().getTargetVersion();
