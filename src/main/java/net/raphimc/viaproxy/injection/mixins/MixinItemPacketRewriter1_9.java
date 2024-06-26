@@ -22,6 +22,7 @@ import com.viaversion.nbt.tag.CompoundTag;
 import com.viaversion.nbt.tag.ListTag;
 import com.viaversion.viaversion.api.minecraft.item.Item;
 import com.viaversion.viaversion.api.minecraft.item.data.AttributeModifiers1_20_5;
+import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.libs.fastutil.ints.Int2ObjectMap;
 import com.viaversion.viaversion.libs.fastutil.ints.Int2ObjectOpenHashMap;
 import com.viaversion.viaversion.libs.gson.JsonElement;
@@ -53,13 +54,8 @@ public abstract class MixinItemPacketRewriter1_9 extends ItemRewriter<Clientboun
     @Unique
     private final Map<String, Map<String, Pair<String, AttributeModifiers1_20_5.ModifierData>>> itemAttributes = new HashMap<>();
 
-    // TODO: ClassTransform bug: Constructor merging is broken
-    /*public MixinItemPacketRewriter1_9(Protocol1_8To1_9 protocol, Type<Item> itemType, Type<Item[]> itemArrayType, Type<Item> mappedItemType, Type<Item[]> mappedItemArrayType) {
+    public MixinItemPacketRewriter1_9(Protocol1_8To1_9 protocol, Type<Item> itemType, Type<Item[]> itemArrayType, Type<Item> mappedItemType, Type<Item[]> mappedItemArrayType) {
         super(protocol, itemType, itemArrayType, mappedItemType, mappedItemArrayType);
-    }*/
-
-    public MixinItemPacketRewriter1_9(Protocol1_8To1_9 protocol) {
-        super(null, null, null, null, null);
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
