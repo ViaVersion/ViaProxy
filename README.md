@@ -32,6 +32,15 @@ ViaProxy supports joining to any of the listed server version from any of the li
 ### Executable Jar File
 If you want the executable jar file you can download a stable release from [GitHub Releases](https://github.com/ViaVersion/ViaProxy/releases/latest) or the latest dev version from [GitHub Actions](https://github.com/RaphiMC/ViaProxy/actions/workflows/build.yml) or the [ViaVersion Jenkins](https://ci.viaversion.com/view/All/job/ViaProxy/).
 
+### Docker Image
+ViaProxy docker images can be found on [GitHub Packages](https://github.com/ViaVersion/ViaProxy/pkgs/container/viaproxy).
+
+To run the latest version of ViaProxy you can use the following command:
+```bash
+docker run -it -v /path/to/run:/app/run -p 25568:25568 ghcr.io/viaversion/viaproxy:latest
+```
+where ``/path/to/run`` is the path where the ViaProxy data should be stored and ``25568`` is the port ViaProxy should listen on.
+
 ### Gradle/Maven
 To use ViaProxy with Gradle/Maven you can use the ViaVersion maven server:
 ```groovy
