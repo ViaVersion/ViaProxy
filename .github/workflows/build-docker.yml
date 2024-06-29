@@ -38,15 +38,16 @@ jobs:
         with:
           tags: |
             type=raw,value=latest
-            type=sha
+            type=raw,value=${{ github.ref_name }}
+            type=semver,pattern={{version}}
           images: ${{ env.REGISTRY }}/${{ github.repository }}
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
