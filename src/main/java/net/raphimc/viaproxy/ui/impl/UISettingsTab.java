@@ -18,17 +18,14 @@
 package net.raphimc.viaproxy.ui.impl;
 
 import net.lenni0451.commons.swing.GBC;
-import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.UITab;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
+import net.raphimc.viaproxy.util.JarUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 
@@ -65,10 +62,9 @@ public class UISettingsTab extends UITab {
                 I18n.setLocale(locale);
                 ViaProxyWindow.showInfo(I18n.get("tab.ui_settings.language.success", I18n.get("language.name"), locale));
                 try {
-                    final File f = new File(ViaProxy.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-                    Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
+                    JarUtil.launch(JarUtil.getJarFile().orElseThrow());
                     System.exit(0);
-                } catch (URISyntaxException | IOException e) {
+                } catch (Throwable e) {
                     Logger.LOGGER.error("Could not start the ViaProxy jar", e);
                     ViaProxyWindow.showException(e);
                     System.exit(1);

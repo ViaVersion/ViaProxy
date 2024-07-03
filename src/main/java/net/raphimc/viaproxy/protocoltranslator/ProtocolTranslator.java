@@ -69,7 +69,7 @@ public class ProtocolTranslator {
     }
 
     private static void patchConfigs() {
-        final File configFolder = new File("ViaLoader");
+        final File configFolder = new File(ViaProxy.getCwd(), "ViaLoader");
         configFolder.mkdirs();
 
         try {

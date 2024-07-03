@@ -17,33 +17,24 @@
  */
 package net.raphimc.viaproxy.util;
 
-import net.lenni0451.reflect.ClassLoaders;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
 
-public class ClassLoaderPriorityUtil {
+public class JarUtil {
 
-    public static void loadOverridingJars() {
-        final File jarsFolder = new File(ViaProxy.getCwd(), "jars");
-        if (!jarsFolder.exists()) {
-            jarsFolder.mkdir();
-            return;
+    public static Optional<File> getJarFile() {
+        try {
+            return Optional.of(new File(ViaProxy.class.getProtectionDomain().getCodeSource().getLocation().toURI()));
+        } catch (Throwable ignored) {
+            return Optional.empty();
         }
+    }
 
-        if (jarsFolder.isDirectory()) {
-            for (File file : jarsFolder.listFiles()) {
-                try {
-                    if (file.getName().endsWith(".jar")) {
-                        ClassLoaders.loadToFront(file.toURI().toURL());
-                        Logger.LOGGER.warn("Loaded overriding jar " + file.getName());
-                    }
-                } catch (Throwable e) {
-                    Logger.LOGGER.error("Failed to load overriding jar " + file.getName(), e);
-                }
-            }
-        }
+    public static void launch(final File jarFile) throws IOException {
+        new ProcessBuilder(System.getProperty("java.home") + "/bin/java", "-jar", jarFile.getAbsolutePath()).directory(ViaProxy.getCwd()).start();
     }
 
 }

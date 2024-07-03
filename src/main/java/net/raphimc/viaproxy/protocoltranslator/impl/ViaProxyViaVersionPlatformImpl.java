@@ -29,7 +29,7 @@ import java.util.UUID;
 public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
 
     public ViaProxyViaVersionPlatformImpl() {
-        super(null);
+        super(ViaProxy.getCwd());
     }
 
     @Override

@@ -41,7 +41,7 @@ import java.util.Map;
 
 public class PluginManager {
 
-    public static final File PLUGINS_DIR = new File("plugins");
+    public static final File PLUGINS_DIR = new File(ViaProxy.getCwd(), "plugins");
 
     private final Yaml yaml = new Yaml();
     private final IClassProvider rootClassProvider = new GuavaClassPathProvider();

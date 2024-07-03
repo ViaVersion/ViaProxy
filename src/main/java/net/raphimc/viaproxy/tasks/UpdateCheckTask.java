@@ -26,11 +26,11 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.ui.popups.DownloadPopup;
+import net.raphimc.viaproxy.util.JarUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -77,7 +77,7 @@ public class UpdateCheckTask implements Runnable {
             }
             if (updateAvailable) {
                 Logger.LOGGER.warn("You are running an outdated version of ViaProxy! Latest version: " + latestVersion);
-                if (this.hasUI) {
+                if (this.hasUI && JarUtil.getJarFile().isPresent()) {
                     final boolean runsJava8 = System.getProperty("java.version").startsWith("1.8");
                     JsonArray assets = object.getAsJsonArray("assets");
                     boolean found = false;
@@ -103,13 +103,13 @@ public class UpdateCheckTask implements Runnable {
     private void showUpdateQuestion(final String name, final String downloadUrl, final String latestVersion) {
         int chosen = JOptionPane.showConfirmDialog(ViaProxy.getForegroundWindow(), I18n.get("popup.update.info", VERSION, latestVersion) + "\n\n" + I18n.get("popup.update.question"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (chosen == JOptionPane.YES_OPTION) {
-            File f = new File(name);
+            final File f = new File(JarUtil.getJarFile().map(File::getParentFile).orElseThrow(), name);
             new DownloadPopup(ViaProxy.getForegroundWindow(), downloadUrl, f, () -> SwingUtilities.invokeLater(() -> {
                 JOptionPane.showMessageDialog(ViaProxy.getForegroundWindow(), I18n.get("popup.update.success"), "ViaProxy", JOptionPane.INFORMATION_MESSAGE);
                 try {
-                    Runtime.getRuntime().exec(new String[]{System.getProperty("java.home") + "/bin/java", "-jar", f.getAbsolutePath()});
+                    JarUtil.launch(f);
                     System.exit(0);
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     Logger.LOGGER.error("Could not start the new ViaProxy jar", e);
                     ViaProxyWindow.showException(e);
                 }

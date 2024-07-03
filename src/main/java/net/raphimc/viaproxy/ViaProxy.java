@@ -53,6 +53,7 @@ import net.raphimc.viaproxy.ui.SplashScreen;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.ClassLoaderPriorityUtil;
+import net.raphimc.viaproxy.util.JarUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -61,6 +62,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -70,6 +74,7 @@ public class ViaProxy {
     public static final String IMPL_VERSION = "${impl_version}";
 
     public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
+    private static /*final*/ File CWD;
     private static /*final*/ PluginManager PLUGIN_MANAGER;
     private static /*final*/ SaveManager SAVE_MANAGER;
     private static /*final*/ ViaProxyConfig CONFIG;
@@ -107,17 +112,37 @@ public class ViaProxy {
     }
 
     public static void injectedMain(final String injectionMethod, final String[] args) throws InterruptedException, IOException, InvocationTargetException {
-        Logger.setup();
-
         final boolean useUI = args.length == 0 && !GraphicsEnvironment.isHeadless();
         final boolean useConfig = args.length == 2 && args[0].equals("config");
         final boolean useCLI = args.length > 0 && args[0].equals("cli");
-        if (!useUI && !useConfig && !useCLI) {
-            String fileName = "ViaProxy.jar";
-            try {
-                fileName = new File(ViaProxy.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getName();
-            } catch (Throwable ignored) {
+
+        final List<File> potentialCwds = new ArrayList<>();
+        potentialCwds.add(new File(System.getProperty("user.dir")));
+        potentialCwds.add(new File("."));
+        JarUtil.getJarFile().map(File::getParentFile).ifPresent(potentialCwds::add);
+
+        final List<File> failedCwds = new ArrayList<>();
+        for (File potentialCwd : potentialCwds) {
+            if (potentialCwd.isDirectory()) {
+                if (Files.isWritable(potentialCwd.toPath())) {
+                    CWD = potentialCwd;
+                    break;
+                }
             }
+            failedCwds.add(potentialCwd);
+        }
+        if (CWD != null) {
+            System.setProperty("user.dir", CWD.getAbsolutePath());
+        } else if (useUI) {
+            JOptionPane.showMessageDialog(null, "Could not find a suitable directory to use as working directory. Make sure that the current folder is writeable.", "ViaProxy", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        } else {
+            throw new IllegalStateException("Could not find a suitable directory to use as working directory. Make sure that the current folder is writeable.");
+        }
+
+        Logger.setup();
+        if (!useUI && !useConfig && !useCLI) {
+            final String fileName = JarUtil.getJarFile().map(File::getName).orElse("ViaProxy.jar");
             Logger.LOGGER.info("Usage: java -jar " + fileName + " | Starts ViaProxy in graphical mode if available");
             Logger.LOGGER.info("Usage: java -jar " + fileName + " config <config file> | Starts ViaProxy with the specified config file");
             Logger.LOGGER.info("Usage: java -jar " + fileName + " cli --help | Starts ViaProxy in CLI mode");
@@ -127,7 +152,13 @@ public class ViaProxy {
         Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", useUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
         Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
         Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
-        Logger.LOGGER.info("Working directory: " + System.getProperty("user.dir"));
+        Logger.LOGGER.info("Working directory: " + CWD.getAbsolutePath());
+        if (!failedCwds.isEmpty()) {
+            Logger.LOGGER.warn("Failed to use the following directories as working directory:");
+            for (File failedCwd : failedCwds) {
+                Logger.LOGGER.warn("\t- " + failedCwd.getAbsolutePath());
+            }
+        }
         if (System.getProperty("ignoreSystemRequirements") == null) {
             if ("32".equals(System.getProperty("sun.arch.data.model")) && Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
                 Logger.LOGGER.fatal("ViaProxy is not able to run on 32bit Java.");
@@ -179,7 +210,7 @@ public class ViaProxy {
         if (useConfig) {
             viaProxyConfigFile = new File(args[1]);
         } else {
-            viaProxyConfigFile = new File("viaproxy.yml");
+            viaProxyConfigFile = new File(ViaProxy.getCwd(), "viaproxy.yml");
         }
         final boolean firstStart = !viaProxyConfigFile.exists();
 
@@ -273,6 +304,10 @@ public class ViaProxy {
         }
         MCPipeline.useOptimizedPipeline();
         CLIENT_CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    }
+
+    public static File getCwd() {
+        return CWD;
     }
 
     public static PluginManager getPluginManager() {
