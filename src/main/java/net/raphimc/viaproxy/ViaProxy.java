@@ -137,7 +137,12 @@ public class ViaProxy {
             JOptionPane.showMessageDialog(null, "Could not find a suitable directory to use as working directory. Make sure that the current folder is writeable.", "ViaProxy", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         } else {
-            throw new IllegalStateException("Could not find a suitable directory to use as working directory. Make sure that the current folder is writeable.");
+            System.err.println("Could not find a suitable directory to use as working directory. Make sure that the current folder is writeable.");
+            System.err.println("Attempted to use the following directories:");
+            for (File failedCwd : failedCwds) {
+                System.err.println("\t- " + failedCwd.getAbsolutePath());
+            }
+            System.exit(1);
         }
 
         Logger.setup();
