@@ -117,6 +117,9 @@ public class ViaProxy {
         final boolean useCLI = args.length > 0 && args[0].equals("cli");
 
         final List<File> potentialCwds = new ArrayList<>();
+        if (System.getenv("VP_RUN_DIR") != null) {
+            potentialCwds.add(new File(System.getenv("VP_RUN_DIR")));
+        }
         potentialCwds.add(new File(System.getProperty("user.dir")));
         potentialCwds.add(new File("."));
         JarUtil.getJarFile().map(File::getParentFile).ifPresent(potentialCwds::add);
