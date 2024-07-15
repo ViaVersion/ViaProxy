@@ -97,7 +97,7 @@ dependencies {
     include("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT") {
         exclude group: "io.netty"
     }
-    include "gs.mclo:api:3.0.1"
+    include "gs.mclo:api:4.0.3"
 
     includeJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:0.8.3"))
     includeJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:0.8.3:downgraded-8"
