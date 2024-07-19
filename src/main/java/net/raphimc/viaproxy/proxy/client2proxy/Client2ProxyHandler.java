@@ -279,15 +279,14 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
 
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {
-                            this.proxyConnection.setP2sConnectionState(intendedState.getConnectionState());
                             final UserConnection userConnection = this.proxyConnection.getUserConnection();
                             if (userConnection.has(CookieStorage.class) && TransferDataHolder.hasCookieStorage(this.proxyConnection.getC2P())) {
                                 userConnection.get(CookieStorage.class).cookies().putAll(TransferDataHolder.removeCookieStorage(this.proxyConnection.getC2P()).cookies());
                             }
+                            this.proxyConnection.setP2sConnectionState(intendedState.getConnectionState());
+                            ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
                         }
                     });
-
-                    ChannelUtil.restoreAutoRead(this.proxyConnection.getC2P());
                 });
             }
         }, (ThrowingChannelFutureListener) f -> {

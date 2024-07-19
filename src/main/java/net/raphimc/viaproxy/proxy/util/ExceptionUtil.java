@@ -25,7 +25,6 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.logging.Logger;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.channels.ClosedChannelException;
 
@@ -45,7 +44,6 @@ public class ExceptionUtil {
     public static void handleNettyException(ChannelHandlerContext ctx, Throwable cause, ProxyConnection proxyConnection, boolean client2Proxy) {
         if (!ctx.channel().isOpen()) return;
         if (cause instanceof ClosedChannelException) return;
-        if (cause instanceof IOException) return;
         if (cause instanceof CloseAndReturn) {
             ctx.channel().close();
             return;
