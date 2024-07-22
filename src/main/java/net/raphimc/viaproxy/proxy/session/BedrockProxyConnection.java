@@ -54,7 +54,6 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .group(channelType.clientEventLoopGroup().get())
                 .channelFactory(RakChannelFactory.client(channelClass))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000)
-                .option(ChannelOption.IP_TOS, 0x18)
                 .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
                 .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
                 .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
