@@ -209,6 +209,7 @@ downgradeJar {
     }
 
     downgradeTo = JavaVersion.VERSION_1_8
+    ignoreWarningsIn.add("net/lenni0451/commons/httpclient/executor/HttpClientExecutor")
     archiveClassifier = null
     archiveVersion = project.version + "+java8"
 }
