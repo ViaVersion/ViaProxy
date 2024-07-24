@@ -57,6 +57,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private final OptionSpec<String> optionTargetAddress;
     private final OptionSpec<ProtocolVersion> optionTargetVersion;
     private final OptionSpec<Boolean> optionProxyOnlineMode;
+    private final OptionSpec<Integer> optionConnectTimeout;
     private final OptionSpec<AuthMethod> optionAuthMethod;
     private final OptionSpec<Integer> optionMinecraftAccountIndex;
     private final OptionSpec<Boolean> optionBetacraftAuth;
@@ -79,6 +80,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     private SocketAddress bindAddress = AddressUtil.parse("0.0.0.0:25568", null);
     private SocketAddress targetAddress = AddressUtil.parse("127.0.0.1:25565", null);
     private ProtocolVersion targetVersion = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
+    private int connectTimeout = 8000;
     private boolean proxyOnlineMode = false;
     private AuthMethod authMethod = AuthMethod.NONE;
     private Account account = null;
@@ -108,6 +110,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.optionTargetAddress = this.optionParser.accepts("target-address").withRequiredArg().ofType(String.class).defaultsTo(AddressUtil.toString(this.targetAddress));
         this.optionTargetVersion = this.optionParser.accepts("target-version").withRequiredArg().withValuesConvertedBy(new ProtocolVersionConverter()).defaultsTo(this.targetVersion);
         this.optionProxyOnlineMode = this.optionParser.accepts("proxy-online-mode").withRequiredArg().ofType(Boolean.class).defaultsTo(this.proxyOnlineMode);
+        this.optionConnectTimeout = this.optionParser.accepts("connect-timeout").withRequiredArg().ofType(Integer.class).defaultsTo(this.connectTimeout);
         this.optionAuthMethod = this.optionParser.accepts("auth-method").withRequiredArg().ofType(AuthMethod.class).defaultsTo(this.authMethod);
         this.optionMinecraftAccountIndex = this.optionParser.accepts("minecraft-account-index").withRequiredArg().ofType(Integer.class).defaultsTo(0);
         this.optionBetacraftAuth = this.optionParser.accepts("betacraft-auth").withRequiredArg().ofType(Boolean.class).defaultsTo(this.betacraftAuth);
@@ -136,6 +139,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
         this.targetVersion = ProtocolVersion.getClosest(this.getString("target-version", this.targetVersion.getName()));
         this.checkTargetVersion();
         this.targetAddress = AddressUtil.parse(this.getString("target-address", AddressUtil.toString(this.targetAddress)), this.targetVersion);
+        this.connectTimeout = this.getInt("connect-timeout", this.connectTimeout);
         this.proxyOnlineMode = this.getBoolean("proxy-online-mode", this.proxyOnlineMode);
         this.authMethod = AuthMethod.byName(this.getString("auth-method", this.authMethod.name()));
         final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
@@ -174,6 +178,7 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
             this.targetVersion = options.valueOf(this.optionTargetVersion);
             this.checkTargetVersion();
             this.targetAddress = AddressUtil.parse(options.valueOf(this.optionTargetAddress), this.targetVersion);
+            this.connectTimeout = options.valueOf(this.optionConnectTimeout);
             this.proxyOnlineMode = options.valueOf(this.optionProxyOnlineMode);
             this.authMethod = options.valueOf(this.optionAuthMethod);
             final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
@@ -257,6 +262,15 @@ public class ViaProxyConfig extends Config implements com.viaversion.viaversion.
     public void setTargetVersion(final ProtocolVersion targetVersion) {
         this.targetVersion = targetVersion;
         this.set("target-version", targetVersion.getName());
+    }
+
+    public int getConnectTimeout() {
+        return this.connectTimeout;
+    }
+
+    public void setConnectTimeout(final int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+        this.set("connect-timeout", connectTimeout);
     }
 
     public boolean isProxyOnlineMode() {

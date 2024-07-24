@@ -22,6 +22,7 @@ import io.netty.channel.*;
 import io.netty.util.AttributeKey;
 import net.raphimc.netminecraft.netty.connection.NetClient;
 import net.raphimc.netminecraft.util.ChannelType;
+import net.raphimc.viaproxy.ViaProxy;
 
 import java.net.SocketAddress;
 import java.util.function.Function;
@@ -45,7 +46,7 @@ public class LegacyProxyConnection extends NetClient {
 
     @Override
     public void initialize(final ChannelType channelType, final Bootstrap bootstrap) {
-        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000);
+        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getConnectTimeout());
         bootstrap.attr(LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY, this);
         super.initialize(channelType, bootstrap);
     }

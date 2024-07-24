@@ -10,6 +10,9 @@ target-address: "127.0.0.1:25565"
 # The version ViaProxy should translate to. (See ViaProxy GUI for a list of versions)
 target-version: "Auto Detect (1.7+ servers)"
 #
+# The connect timeout for backend server connections in milliseconds.
+connect-timeout: 8000
+#
 # Proxy Online Mode allows you to see skins on online mode servers and use the signed chat features.
 # Enabling Proxy Online Mode requires your client to have a valid minecraft account.
 proxy-online-mode: false
