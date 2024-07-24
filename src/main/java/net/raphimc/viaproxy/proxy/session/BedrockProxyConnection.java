@@ -55,6 +55,8 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .channelFactory(RakChannelFactory.client(channelClass))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4_000)
                 .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
+                .option(RakChannelOption.RAK_COMPATIBILITY_MODE, true)
+                .option(RakChannelOption.RAK_CLIENT_INTERNAL_ADDRESSES, 20)
                 .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 4_000L)
                 .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
                 .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong())
@@ -62,6 +64,10 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .handler(this.channelInitializerSupplier.apply(this.handlerSupplier));
 
         this.channelFuture = bootstrap.register().syncUninterruptibly();
+
+        /*if (this.getChannel().config().setOption(RakChannelOption.RAK_IP_DONT_FRAGMENT, true)) {
+            this.getChannel().config().setOption(RakChannelOption.RAK_MTU_SIZES, new Integer[]{1492, 1200, 576});
+        }*/
     }
 
     @Override
