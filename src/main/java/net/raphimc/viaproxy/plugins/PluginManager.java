@@ -96,6 +96,7 @@ public class PluginManager {
         final URL url = file.toURI().toURL();
         final TransformerManager transformerManager = new TransformerManager(new LazyFileClassProvider(Collections.singletonList(file), this.rootClassProvider));
         final InjectionClassLoader classLoader = new InjectionClassLoader(transformerManager, PluginManager.class.getClassLoader(), url);
+        classLoader.addProtectedPackage("io.netty.");
 
         try {
             final String[] versions = System.getProperty("java.class.version").split("\\.");
