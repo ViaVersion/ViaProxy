@@ -44,7 +44,7 @@ public class LegacyPassthroughInitialHandler extends SimpleChannelInboundHandler
 
             final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new PassthroughClient2ProxyHandler(), true)).getHandler();
             final PassthroughClient2ProxyChannelInitializer channelInitializer = new PassthroughClient2ProxyChannelInitializer(handlerSupplier);
-            channelInitializer.initChannel(ctx.channel());
+            ctx.channel().pipeline().addLast(channelInitializer);
             ctx.channel().pipeline().fireChannelActive();
         }
 
