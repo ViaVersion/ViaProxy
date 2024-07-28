@@ -87,7 +87,7 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include "net.lenni0451.commons:swing:1.5.1"
-    include("net.raphimc.netminecraft:all:2.5.1-20240724.182357-3") {
+    include("net.raphimc.netminecraft:all:2.5.1-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include("net.raphimc:MinecraftAuth:4.1.0") {
