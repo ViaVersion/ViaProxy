@@ -98,6 +98,7 @@ dependencies {
         exclude group: "io.netty"
     }
     include "gs.mclo:api:3.0.1"
+    include "net.lenni0451:optconfig:1.0.0-SNAPSHOT"
 
     includeJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:0.9.1"))
     includeJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:0.9.1:downgraded-8"

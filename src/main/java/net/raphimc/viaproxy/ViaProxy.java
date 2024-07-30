@@ -30,6 +30,8 @@ import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
+import net.lenni0451.optconfig.ConfigLoader;
+import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.ClassLoaders;
 import net.lenni0451.reflect.JavaBypass;
@@ -229,8 +231,13 @@ public class ViaProxy {
         progressConsumer.accept("Loading Saves");
         SAVE_MANAGER = new SaveManager();
         progressConsumer.accept("Loading Config");
-        CONFIG = new ViaProxyConfig(viaProxyConfigFile);
-        CONFIG.reload();
+        final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
+        configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
+        try {
+            CONFIG = configLoader.load(ConfigProvider.file(viaProxyConfigFile)).getConfigInstance();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to load config", e);
+        }
 
         if (useUI) {
             progressConsumer.accept("Loading GUI");
@@ -253,7 +260,11 @@ public class ViaProxy {
             if (useCLI) {
                 final String[] cliArgs = new String[args.length - 1];
                 System.arraycopy(args, 1, cliArgs, 0, cliArgs.length);
-                CONFIG.loadFromArguments(cliArgs);
+                try {
+                    CONFIG.loadFromArguments(cliArgs);
+                } catch (Throwable e) {
+                    throw new RuntimeException("Failed to load CLI arguments", e);
+                }
             } else if (firstStart) {
                 Logger.LOGGER.info("This is the first start of ViaProxy. Please configure the settings in the " + viaProxyConfigFile.getName() + " file and restart ViaProxy.");
                 System.exit(0);
