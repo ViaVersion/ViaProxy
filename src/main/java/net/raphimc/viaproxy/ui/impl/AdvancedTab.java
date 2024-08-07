@@ -180,7 +180,7 @@ public class AdvancedTab extends UITab {
                 try {
                     this.uploadLogsButton.setEnabled(false);
                     final MclogsClient mclogsClient = new MclogsClient("ViaProxy", ViaProxy.VERSION);
-                    final UploadLogResponse apiResponse = mclogsClient.uploadLog(logFile.toPath());
+                    final UploadLogResponse apiResponse = mclogsClient.uploadLog(logFile.toPath()).get();
                     if (apiResponse.isSuccess()) {
                         ViaProxyWindow.openURL(apiResponse.getUrl());
                         final StringSelection selection = new StringSelection(apiResponse.getUrl());
