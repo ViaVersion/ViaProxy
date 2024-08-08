@@ -53,16 +53,16 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:5.0.3-SNAPSHOT"
-    include "com.viaversion:viabackwards-common:5.0.3-SNAPSHOT"
-    include "com.viaversion:viarewind-common:4.0.2"
-    include "net.raphimc:ViaLegacy:3.0.3-SNAPSHOT"
-    include "net.raphimc:viaaprilfools-common:3.0.2-SNAPSHOT"
-    include("net.raphimc:ViaBedrock:0.0.10-SNAPSHOT") {
+    include "com.viaversion:viaversion-common:5.0.4-20240808.153015-1"
+    include "com.viaversion:viabackwards-common:5.0.3"
+    include "com.viaversion:viarewind-common:4.0.3-20240806.221208-3"
+    include "net.raphimc:ViaLegacy:3.0.3-20240806.214914-6"
+    include "net.raphimc:viaaprilfools-common:3.0.2-20240806.214715-4"
+    include("net.raphimc:ViaBedrock:0.0.10-20240807.200847-18") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
-    include("net.raphimc:ViaLoader:3.0.3-SNAPSHOT") {
+    include("net.raphimc:ViaLoader:3.0.3-20240808.151621-9") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
@@ -87,7 +87,7 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include "net.lenni0451.commons:swing:1.5.1"
-    include("net.raphimc.netminecraft:all:2.5.1-SNAPSHOT") {
+    include("net.raphimc.netminecraft:all:2.5.1-20240724.182357-3") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include("net.raphimc:MinecraftAuth:4.1.0") {
@@ -98,7 +98,7 @@ dependencies {
         exclude group: "io.netty"
     }
     include "gs.mclo:api:4.0.3"
-    include "net.lenni0451:optconfig:1.0.0-SNAPSHOT"
+    include "net.lenni0451:optconfig:1.0.0-20240730.204142-1"
 
     includeJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:1.0.1"))
     includeJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.0.1:downgraded-8"
