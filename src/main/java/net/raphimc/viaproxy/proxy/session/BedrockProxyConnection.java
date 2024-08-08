@@ -45,10 +45,11 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public void initialize(final ChannelType channelType, final Bootstrap bootstrap) {
+    public void initialize(ChannelType channelType, final Bootstrap bootstrap) {
         if (!DatagramChannel.class.isAssignableFrom(channelType.udpClientChannelClass())) {
             throw new IllegalArgumentException("Channel type must be a DatagramChannel");
         }
+        if (channelType == ChannelType.KQUEUE) channelType = ChannelType.NIO; // KQueue doesn't work for Bedrock for some reason
         final Class<? extends DatagramChannel> channelClass = (Class<? extends DatagramChannel>) channelType.udpClientChannelClass();
 
         bootstrap
