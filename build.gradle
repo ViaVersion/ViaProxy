@@ -73,7 +73,7 @@ dependencies {
     include "com.google.code.gson:gson:2.11.0"
     include "com.formdev:flatlaf:3.5.1"
     include "com.formdev:flatlaf-extras:3.5.1"
-    include "org.apache.commons:commons-lang3:3.16.0"
+    include "org.apache.commons:commons-lang3:3.17.0"
     include "commons-io:commons-io:2.16.1"
     include "net.sf.jopt-simple:jopt-simple:5.0.4"
     include "org.apache.logging.log4j:log4j-core:2.23.1"
