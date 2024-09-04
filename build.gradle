@@ -27,10 +27,6 @@ configurations {
 repositories {
     mavenCentral()
     maven {
-        name = "Jitpack"
-        url = "https://jitpack.io"
-    }
-    maven {
         name = "Lenni0451"
         url "https://maven.lenni0451.net/everything"
     }
@@ -49,6 +45,14 @@ repositories {
     maven {
         name = "Minecraft Libraries"
         url "https://libraries.minecraft.net"
+    }
+    maven {
+        name = "Jitpack"
+        url = "https://jitpack.io"
+
+        content {
+            includeGroup "com.github.Oryxel"
+        }
     }
 }
 
