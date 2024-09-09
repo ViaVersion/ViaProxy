@@ -23,7 +23,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.lenni0451.optconfig.ConfigContext;
-import net.lenni0451.optconfig.access.impl.reflection.ReflectionClassAccess;
+import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.annotations.*;
 import net.lenni0451.optconfig.index.ClassIndexer;
 import net.lenni0451.optconfig.index.ConfigType;
@@ -189,7 +189,8 @@ public class ViaProxyConfig {
 
         final Map<OptionSpec<Object>, ConfigOption> optionMap = new HashMap<>();
         final Stack<SectionIndex> stack = new Stack<>();
-        stack.push(ClassIndexer.indexClass(ConfigType.INSTANCED, ViaProxyConfig.class, ReflectionClassAccess::new));
+        final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
+        stack.push(ClassIndexer.indexClass(ConfigType.INSTANCED, ViaProxyConfig.class, configLoader.getConfigOptions().getClassAccessFactory()));
         while (!stack.isEmpty()) {
             final SectionIndex index = stack.pop();
             stack.addAll(index.getSubSections().values());
@@ -199,7 +200,7 @@ public class ViaProxyConfig {
 
                 Object defaultValue = option.getFieldAccess().getValue(this);
                 if (option.getTypeSerializer() != null) {
-                    defaultValue = option.createTypeSerializer(null, ViaProxyConfig.class, this).serialize(defaultValue);
+                    defaultValue = option.createTypeSerializer(configLoader, ViaProxyConfig.class, this).serialize(defaultValue);
                 }
                 final OptionSpec<Object> cliOption = optionParser.accepts(option.getName()).withRequiredArg().ofType((Class<Object>) defaultValue.getClass()).defaultsTo(defaultValue);
                 optionMap.put(cliOption, option);
@@ -221,7 +222,7 @@ public class ViaProxyConfig {
                 if (options.has(entry.getKey())) {
                     Object value = options.valueOf(entry.getKey());
                     if (option.getTypeSerializer() != null) {
-                        value = option.createTypeSerializer(null, ViaProxyConfig.class, this).deserialize((Class<Object>) option.getFieldAccess().getType(), value);
+                        value = option.createTypeSerializer(configLoader, ViaProxyConfig.class, this).deserialize((Class<Object>) option.getFieldAccess().getType(), value);
                     }
                     if (option.getValidator() != null) {
                         value = option.getValidator().invoke(this, value);
