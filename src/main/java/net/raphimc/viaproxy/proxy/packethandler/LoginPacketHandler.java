@@ -148,8 +148,8 @@ public class LoginPacketHandler extends PacketHandler {
             final SecretKey secretKey = CryptUtil.generateSecretKey();
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginHelloPacket.serverId, publicKey, secretKey)).toString(16);
 
-            boolean auth = true;
-            if (this.proxyConnection.getServerVersion().olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)) {
+            boolean auth = !(packet instanceof S2CLoginHelloPacket1_20_5 packet1_20_5) || packet1_20_5.authenticate;
+            if (auth && this.proxyConnection.getServerVersion().olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)) {
                 auth = this.proxyConnection.getUserConnection().get(ProtocolMetadataStorage.class).authenticate;
             }
             if (auth) {
