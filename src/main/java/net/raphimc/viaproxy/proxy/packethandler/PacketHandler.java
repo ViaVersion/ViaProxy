@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.proxy.packethandler;
 
 import io.netty.channel.ChannelFutureListener;
-import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.util.List;
@@ -31,11 +31,11 @@ public abstract class PacketHandler {
         this.proxyConnection = proxyConnection;
     }
 
-    public boolean handleC2P(final IPacket packet, final List<ChannelFutureListener> listeners) throws Exception {
+    public boolean handleC2P(final Packet packet, final List<ChannelFutureListener> listeners) throws Exception {
         return true;
     }
 
-    public boolean handleP2S(final IPacket packet, final List<ChannelFutureListener> listeners) throws Exception {
+    public boolean handleP2S(final Packet packet, final List<ChannelFutureListener> listeners) throws Exception {
         return true;
     }
 

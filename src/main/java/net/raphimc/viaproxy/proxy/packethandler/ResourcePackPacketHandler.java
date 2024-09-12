@@ -19,15 +19,16 @@ package net.raphimc.viaproxy.proxy.packethandler;
 
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.libs.gson.JsonElement;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import net.lenni0451.mcstructs.text.ATextComponent;
+import net.lenni0451.mcstructs.text.serializer.TextComponentSerializer;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
-import net.raphimc.netminecraft.packet.IPacket;
-import net.raphimc.netminecraft.packet.PacketTypes;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.UnknownPacket;
+import net.raphimc.netminecraft.packet.impl.play.S2CPlayCustomPayloadPacket;
+import net.raphimc.netminecraft.packet.impl.play.S2CPlayResourcePackPacket;
+import net.raphimc.netminecraft.packet.impl.play.S2CPlayResourcePackPushPacket;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
@@ -47,7 +48,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
     }
 
     @Override
-    public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
+    public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) {
         if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY) {
             if (unknownPacket.packetId == this.joinGameId) {
                 listeners.add(f -> {
@@ -64,46 +65,17 @@ public class ResourcePackPacketHandler extends PacketHandler {
     private void sendResourcePack() {
         if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getChannel().eventLoop().schedule(() -> {
-                if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
-                    final ByteBuf resourcePackPushPacket = Unpooled.buffer();
-                    PacketTypes.writeVarInt(resourcePackPushPacket, MCPackets.S2C_RESOURCE_PACK_PUSH.getId(this.proxyConnection.getClientVersion().getVersion()));
-                    PacketTypes.writeUuid(resourcePackPushPacket, UUID.randomUUID()); // pack id
-                    PacketTypes.writeString(resourcePackPushPacket, ViaProxy.getConfig().getResourcePackUrl()); // url
-                    PacketTypes.writeString(resourcePackPushPacket, ""); // hash
-                    resourcePackPushPacket.writeBoolean(Via.getConfig().isForcedUse1_17ResourcePack()); // required
-                    final JsonElement promptMessage = Via.getConfig().get1_17ResourcePackPrompt();
-                    if (promptMessage != null) {
-                        resourcePackPushPacket.writeBoolean(true); // has message
-                        PacketTypes.writeString(resourcePackPushPacket, promptMessage.toString()); // message
-                    } else {
-                        resourcePackPushPacket.writeBoolean(false); // has message
-                    }
-                    this.proxyConnection.getC2P().writeAndFlush(resourcePackPushPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
-                    final ByteBuf resourcePackPacket = Unpooled.buffer();
-                    PacketTypes.writeVarInt(resourcePackPacket, MCPackets.S2C_RESOURCE_PACK.getId(this.proxyConnection.getClientVersion().getVersion()));
-                    PacketTypes.writeString(resourcePackPacket, ViaProxy.getConfig().getResourcePackUrl()); // url
-                    PacketTypes.writeString(resourcePackPacket, ""); // hash
-                    if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_17)) {
-                        resourcePackPacket.writeBoolean(Via.getConfig().isForcedUse1_17ResourcePack()); // required
-                        final JsonElement promptMessage = Via.getConfig().get1_17ResourcePackPrompt();
-                        if (promptMessage != null) {
-                            resourcePackPacket.writeBoolean(true); // has message
-                            PacketTypes.writeString(resourcePackPacket, promptMessage.toString()); // message
-                        } else {
-                            resourcePackPacket.writeBoolean(false); // has message
-                        }
-                    }
-                    this.proxyConnection.getC2P().writeAndFlush(resourcePackPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
-                    final byte[] data = ViaProxy.getConfig().getResourcePackUrl().getBytes(StandardCharsets.UTF_8);
+                final String url = ViaProxy.getConfig().getResourcePackUrl();
+                final boolean required = Via.getConfig().isForcedUse1_17ResourcePack();
+                final ATextComponent message = TextComponentSerializer.LATEST.deserialize(Via.getConfig().get1_17ResourcePackPrompt().toString());
 
-                    final ByteBuf customPayloadPacket = Unpooled.buffer();
-                    PacketTypes.writeVarInt(customPayloadPacket, MCPackets.S2C_CUSTOM_PAYLOAD.getId(this.proxyConnection.getClientVersion().getVersion()));
-                    PacketTypes.writeString(customPayloadPacket, "MC|RPack"); // channel
-                    customPayloadPacket.writeShort(data.length); // length
-                    customPayloadPacket.writeBytes(data); // data
-                    this.proxyConnection.getC2P().writeAndFlush(customPayloadPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPushPacket(UUID.randomUUID(), url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPacket(url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
+                    final byte[] data = url.getBytes(StandardCharsets.UTF_8);
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayCustomPayloadPacket("MC|RPack", data)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 }
             }, 250, TimeUnit.MILLISECONDS);
         }

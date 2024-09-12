@@ -20,15 +20,17 @@ package net.raphimc.viaproxy.proxy.packethandler;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.util.Key;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.PacketTypes;
-import net.raphimc.netminecraft.packet.UnknownPacket;
+import net.raphimc.netminecraft.packet.impl.common.S2CCustomPayloadPacket;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.util.List;
 
-public class BrandCustomPayloadPacketHandler extends CustomPayloadPacketHandler {
+public class BrandCustomPayloadPacketHandler extends PacketHandler {
 
     private static final String BRAND_CHANNEL = "minecraft:brand";
     private static final String LEGACY_BRAND_CHANNEL = "MC|Brand";
@@ -38,26 +40,29 @@ public class BrandCustomPayloadPacketHandler extends CustomPayloadPacketHandler 
     }
 
     @Override
-    public ByteBuf handleP2S(UnknownPacket packet, String channel, ByteBuf data, List<ChannelFutureListener> listeners) throws Exception {
-        if (Key.namespaced(channel).equals(BRAND_CHANNEL) || channel.equals(LEGACY_BRAND_CHANNEL)) {
-            String brand;
-            try {
-                brand = PacketTypes.readString(data, Short.MAX_VALUE);
-            } catch (Exception e) {
-                if (this.proxyConnection.getServerVersion().newerThan(ProtocolVersion.v1_20)) {
-                    throw e;
-                } else { // <=1.20 clients ignore errors
-                    brand = "Unknown";
+    public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) throws Exception {
+        if (packet instanceof S2CCustomPayloadPacket customPayloadPacket) {
+            if (Key.namespaced(customPayloadPacket.channel).equals(BRAND_CHANNEL) || customPayloadPacket.channel.equals(LEGACY_BRAND_CHANNEL)) {
+                final ByteBuf data = Unpooled.wrappedBuffer(customPayloadPacket.data);
+                String brand;
+                try {
+                    brand = PacketTypes.readString(data, Short.MAX_VALUE);
+                } catch (Exception e) {
+                    if (this.proxyConnection.getServerVersion().newerThan(ProtocolVersion.v1_20)) {
+                        throw e;
+                    } else { // <=1.20 clients ignore errors
+                        brand = "Unknown";
+                    }
                 }
-            }
-            final String newBrand = "ViaProxy (" + this.proxyConnection.getClientVersion().getName() + ") -> " + brand + " §r(" + this.proxyConnection.getServerVersion().getName() + ")";
+                final String newBrand = "ViaProxy (" + this.proxyConnection.getClientVersion().getName() + ") -> " + brand + " §r(" + this.proxyConnection.getServerVersion().getName() + ")";
 
-            final ByteBuf newData = Unpooled.buffer();
-            PacketTypes.writeString(newData, newBrand);
-            return newData;
+                final ByteBuf newData = Unpooled.buffer();
+                PacketTypes.writeString(newData, newBrand);
+                customPayloadPacket.data = ByteBufUtil.getBytes(newData);
+            }
         }
 
-        return super.handleP2S(packet, channel, data, listeners);
+        return super.handleP2S(packet, listeners);
     }
 
 }

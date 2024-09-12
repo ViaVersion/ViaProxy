@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.proxy.packethandler;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.netty.channel.ChannelFutureListener;
-import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusPongResponsePacket;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.viaproxy.ViaProxy;
@@ -35,7 +35,7 @@ public class StatusPacketHandler extends PacketHandler {
     }
 
     @Override
-    public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
+    public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) {
         if (packet instanceof S2CStatusPongResponsePacket) {
             listeners.add(ChannelFutureListener.CLOSE);
         } else if (packet instanceof S2CStatusResponsePacket statusResponsePacket && !ViaProxy.getConfig().getCustomMotd().isBlank()) {

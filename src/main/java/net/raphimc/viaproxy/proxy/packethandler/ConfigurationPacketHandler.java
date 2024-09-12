@@ -19,12 +19,12 @@ package net.raphimc.viaproxy.proxy.packethandler;
 
 import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.constants.ConnectionState;
-import net.raphimc.netminecraft.constants.MCPackets;
-import net.raphimc.netminecraft.packet.IPacket;
-import net.raphimc.netminecraft.packet.UnknownPacket;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.impl.configuration.C2SConfigFinishConfigurationPacket;
 import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigFinishConfigurationPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginAcknowledgedPacket;
+import net.raphimc.netminecraft.packet.impl.play.C2SPlayConfigurationAcknowledgedPacket;
+import net.raphimc.netminecraft.packet.impl.play.S2CPlayStartConfigurationPacket;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ChannelUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -33,30 +33,13 @@ import java.util.List;
 
 public class ConfigurationPacketHandler extends PacketHandler {
 
-    private final int configurationAcknowledgedId;
-    private final int startConfigurationId;
-
     public ConfigurationPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
-
-        this.configurationAcknowledgedId = MCPackets.C2S_CONFIGURATION_ACKNOWLEDGED.getId(proxyConnection.getClientVersion().getVersion());
-        this.startConfigurationId = MCPackets.S2C_START_CONFIGURATION.getId(proxyConnection.getClientVersion().getVersion());
     }
 
     @Override
-    public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
-            if (unknownPacket.packetId == this.configurationAcknowledgedId) {
-                this.proxyConnection.setC2pConnectionState(ConnectionState.CONFIGURATION);
-                listeners.add(f -> {
-                    if (f.isSuccess()) {
-                        Logger.u_info("session", this.proxyConnection, "Switching to CONFIGURATION state");
-                        this.proxyConnection.setP2sConnectionState(ConnectionState.CONFIGURATION);
-                        ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
-                    }
-                });
-            }
-        } else if (packet instanceof C2SLoginAcknowledgedPacket) {
+    public boolean handleC2P(Packet packet, List<ChannelFutureListener> listeners) {
+        if (packet instanceof C2SLoginAcknowledgedPacket) {
             this.proxyConnection.setC2pConnectionState(ConnectionState.CONFIGURATION);
             listeners.add(f -> {
                 if (f.isSuccess()) {
@@ -73,18 +56,25 @@ public class ConfigurationPacketHandler extends PacketHandler {
                     ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
                 }
             });
+        } else if (packet instanceof C2SPlayConfigurationAcknowledgedPacket) {
+            this.proxyConnection.setC2pConnectionState(ConnectionState.CONFIGURATION);
+            listeners.add(f -> {
+                if (f.isSuccess()) {
+                    Logger.u_info("session", this.proxyConnection, "Switching to CONFIGURATION state");
+                    this.proxyConnection.setP2sConnectionState(ConnectionState.CONFIGURATION);
+                    ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
+                }
+            });
         }
 
         return true;
     }
 
     @Override
-    public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getP2sConnectionState() == ConnectionState.PLAY) {
-            if (unknownPacket.packetId == this.startConfigurationId) {
-                ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
-            }
-        } else if (packet instanceof S2CConfigFinishConfigurationPacket) {
+    public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) {
+        if (packet instanceof S2CConfigFinishConfigurationPacket) {
+            ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
+        } else if (packet instanceof S2CPlayStartConfigurationPacket) {
             ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
         }
 

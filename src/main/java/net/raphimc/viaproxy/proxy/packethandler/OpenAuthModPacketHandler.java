@@ -23,15 +23,14 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import net.lenni0451.mcstructs.text.components.StringComponent;
-import net.raphimc.netminecraft.constants.ConnectionState;
-import net.raphimc.netminecraft.constants.MCPackets;
-import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.PacketTypes;
-import net.raphimc.netminecraft.packet.UnknownPacket;
+import net.raphimc.netminecraft.packet.impl.common.C2SCustomPayloadPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginCustomQueryAnswerPacket;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_7;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginCustomQueryPacket;
-import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket1_20_3;
+import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket;
+import net.raphimc.netminecraft.packet.impl.play.S2CPlayCustomPayloadPacket;
 import net.raphimc.viaproxy.proxy.external_interface.OpenAuthModConstants;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
@@ -45,33 +44,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class OpenAuthModPacketHandler extends PacketHandler {
 
-    private final int c2sCustomPayloadId;
-    private final int s2cCustomPayloadId;
     private final AtomicInteger id = new AtomicInteger(0);
     private final Map<Integer, CompletableFuture<ByteBuf>> customPayloadListener = new ConcurrentHashMap<>();
 
     public OpenAuthModPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
-
-        this.c2sCustomPayloadId = MCPackets.C2S_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
-        this.s2cCustomPayloadId = MCPackets.S2C_CUSTOM_PAYLOAD.getId(proxyConnection.getClientVersion().getVersion());
     }
 
     @Override
-    public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) {
-        if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
-            if (unknownPacket.packetId == this.c2sCustomPayloadId) {
-                final ByteBuf data = Unpooled.wrappedBuffer(unknownPacket.data);
-                final String channel = PacketTypes.readString(data, Short.MAX_VALUE); // channel
-                if (channel.equals(OpenAuthModConstants.DATA_CHANNEL) && this.handleCustomPayload(PacketTypes.readVarInt(data), data)) {
-                    return false;
-                }
+    public boolean handleC2P(Packet packet, List<ChannelFutureListener> listeners) {
+        if (packet instanceof C2SCustomPayloadPacket customPayloadPacket) {
+            final ByteBuf data = Unpooled.wrappedBuffer(customPayloadPacket.data);
+            if (customPayloadPacket.channel.equals(OpenAuthModConstants.DATA_CHANNEL) && this.handleCustomPayload(PacketTypes.readVarInt(data), data)) {
+                return false;
             }
         } else if (packet instanceof C2SLoginCustomQueryAnswerPacket loginCustomQueryAnswer) {
             if (loginCustomQueryAnswer.response != null && this.handleCustomPayload(loginCustomQueryAnswer.queryId, Unpooled.wrappedBuffer(loginCustomQueryAnswer.response))) {
                 return false;
             }
-        } else if (packet instanceof C2SLoginKeyPacket1_7 loginKeyPacket) {
+        } else if (packet instanceof C2SLoginKeyPacket loginKeyPacket) {
             if (this.proxyConnection.getClientVersion().olderThanOrEqualTo(ProtocolVersion.v1_12_2) && new String(loginKeyPacket.encryptedNonce, StandardCharsets.UTF_8).equals(OpenAuthModConstants.DATA_CHANNEL)) { // 1.8-1.12.2 OpenAuthMod response handling
                 final ByteBuf byteBuf = Unpooled.wrappedBuffer(loginKeyPacket.encryptedSecretKey);
                 this.handleCustomPayload(PacketTypes.readVarInt(byteBuf), byteBuf);
@@ -96,16 +87,14 @@ public class OpenAuthModPacketHandler extends PacketHandler {
                     PacketTypes.writeString(disconnectPacketData, channel);
                     PacketTypes.writeVarInt(disconnectPacketData, id);
                     disconnectPacketData.writeBytes(data);
-                    this.proxyConnection.getC2P().writeAndFlush(new S2CLoginDisconnectPacket1_20_3(new StringComponent("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + OpenAuthModConstants.LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CLoginDisconnectPacket(new StringComponent("§cYou need to install OpenAuthMod in order to join this server.§k\n" + Base64.getEncoder().encodeToString(ByteBufUtil.getBytes(disconnectPacketData)) + "\n" + OpenAuthModConstants.LEGACY_MAGIC_STRING))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 }
                 break;
             case PLAY:
-                final ByteBuf customPayloadPacket = Unpooled.buffer();
-                PacketTypes.writeVarInt(customPayloadPacket, this.s2cCustomPayloadId);
-                PacketTypes.writeString(customPayloadPacket, channel); // channel
-                PacketTypes.writeVarInt(customPayloadPacket, id);
-                customPayloadPacket.writeBytes(data);
-                this.proxyConnection.getC2P().writeAndFlush(customPayloadPacket).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                final ByteBuf responseData = Unpooled.buffer();
+                PacketTypes.writeVarInt(responseData, id);
+                responseData.writeBytes(data);
+                this.proxyConnection.getC2P().writeAndFlush(new S2CPlayCustomPayloadPacket(channel, ByteBufUtil.getBytes(responseData))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 break;
             default:
                 throw new IllegalStateException("Can't send a custom payload packet during " + this.proxyConnection.getC2pConnectionState());

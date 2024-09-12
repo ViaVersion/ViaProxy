@@ -25,7 +25,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import net.raphimc.netminecraft.constants.ConnectionState;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
 import net.raphimc.netminecraft.util.ChannelType;
 
 import java.net.SocketAddress;
@@ -78,12 +78,12 @@ public class DummyProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public C2SLoginHelloPacket1_7 getLoginHelloPacket() {
+    public C2SLoginHelloPacket getLoginHelloPacket() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setLoginHelloPacket(C2SLoginHelloPacket1_7 loginHelloPacket) {
+    public void setLoginHelloPacket(C2SLoginHelloPacket loginHelloPacket) {
         throw new UnsupportedOperationException();
     }
 

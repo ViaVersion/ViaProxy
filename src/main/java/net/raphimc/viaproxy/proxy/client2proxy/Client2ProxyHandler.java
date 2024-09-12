@@ -28,7 +28,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.IntendedState;
-import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.impl.handshaking.C2SHandshakingClientIntentionPacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
@@ -63,7 +63,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
+public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
 
     private ProxyConnection proxyConnection;
 
@@ -87,7 +87,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<IPacket> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, IPacket packet) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
         if (this.proxyConnection.isClosed()) return;
 
         if (this.proxyConnection.getC2pConnectionState() == ConnectionState.HANDSHAKING) {

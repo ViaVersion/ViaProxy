@@ -22,7 +22,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
-import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
+import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
@@ -56,7 +56,7 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
         }
 
         super.initChannel(channel);
-        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakingRegistry(false));
+        channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(new DefaultPacketRegistry(false, -1));
 
         if (ViaProxy.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();

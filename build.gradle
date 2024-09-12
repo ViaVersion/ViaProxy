@@ -95,10 +95,10 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include "net.lenni0451.commons:swing:1.6.0"
-    include("net.raphimc.netminecraft:all:2.5.1-SNAPSHOT") {
+    include("net.raphimc.netminecraft:all:3.0.0-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    include("net.raphimc:MinecraftAuth:4.1.0") {
+    include("net.raphimc:MinecraftAuth:4.1.1-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
         exclude group: "org.slf4j", module: "slf4j-api"
     }

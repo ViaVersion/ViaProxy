@@ -29,9 +29,8 @@ import io.netty.buffer.Unpooled;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
 import net.raphimc.netminecraft.packet.PacketTypes;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_19_3;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_20_2;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket1_19;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.viaproxy.ViaProxy;
@@ -80,7 +79,7 @@ public class ExternalInterface {
                     if (proxyConnection.getClientVersion().equals(ProtocolVersion.v1_19)) {
                         loginHelloKeySignature = playerCertificates.getLegacyPublicKeySignature();
                     }
-                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket1_20_2(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
+                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
 
                     user.put(new ChatSession1_19_0(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.getLegacyPublicKeySignature())));
                     user.put(new ChatSession1_19_1(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
@@ -101,9 +100,7 @@ public class ExternalInterface {
         }
 
         proxyConnection.getLoginHelloPacket().name = proxyConnection.getGameProfile().getName();
-        if (proxyConnection.getLoginHelloPacket() instanceof C2SLoginHelloPacket1_19_3) {
-            ((C2SLoginHelloPacket1_19_3) proxyConnection.getLoginHelloPacket()).uuid = proxyConnection.getGameProfile().getId();
-        }
+        proxyConnection.getLoginHelloPacket().uuid = proxyConnection.getGameProfile().getId();
     }
 
     public static void joinServer(final String serverIdHash, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException {
@@ -127,7 +124,7 @@ public class ExternalInterface {
         }
     }
 
-    public static void signNonce(final byte[] nonce, final C2SLoginKeyPacket1_19 packet, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException, SignatureException {
+    public static void signNonce(final byte[] nonce, final C2SLoginKeyPacket packet, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException, SignatureException {
         Logger.u_info("auth", proxyConnection, "Requesting nonce signature");
         final UserConnection user = proxyConnection.getUserConnection();
 

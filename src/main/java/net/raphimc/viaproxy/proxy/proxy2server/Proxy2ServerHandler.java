@@ -21,7 +21,7 @@ import com.google.common.collect.Lists;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
@@ -29,7 +29,7 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.util.List;
 
-public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
+public class Proxy2ServerHandler extends SimpleChannelInboundHandler<Packet> {
 
     private ProxyConnection proxyConnection;
 
@@ -52,7 +52,7 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<IPacket> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, IPacket packet) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
         if (this.proxyConnection.isClosed()) return;
 
         final List<ChannelFutureListener> listeners = Lists.newArrayList(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);

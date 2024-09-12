@@ -28,7 +28,7 @@ import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.netminecraft.packet.IPacket;
+import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.UnknownPacket;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -51,7 +51,7 @@ public class ChatSignaturePacketHandler extends PacketHandler {
     }
 
     @Override
-    public boolean handleC2P(IPacket packet, List<ChannelFutureListener> listeners) throws Exception {
+    public boolean handleC2P(Packet packet, List<ChannelFutureListener> listeners) throws Exception {
         if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
             final UserConnection user = this.proxyConnection.getUserConnection();
 
@@ -86,7 +86,7 @@ public class ChatSignaturePacketHandler extends PacketHandler {
     }
 
     @Override
-    public boolean handleP2S(IPacket packet, List<ChannelFutureListener> listeners) {
+    public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) {
         if (packet instanceof UnknownPacket unknownPacket && this.proxyConnection.getC2pConnectionState() == ConnectionState.PLAY) {
             final UserConnection user = this.proxyConnection.getUserConnection();
 

@@ -21,27 +21,21 @@ import com.google.common.net.HostAndPort;
 import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.libs.gson.JsonPrimitive;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.util.AttributeKey;
-import net.lenni0451.mcstructs.nbt.INbtTag;
-import net.lenni0451.mcstructs.nbt.tags.CompoundTag;
-import net.lenni0451.mcstructs.nbt.tags.StringTag;
 import net.lenni0451.mcstructs.text.components.StringComponent;
 import net.raphimc.netminecraft.constants.ConnectionState;
-import net.raphimc.netminecraft.constants.MCPackets;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.connection.NetClient;
 import net.raphimc.netminecraft.netty.crypto.AESEncryption;
-import net.raphimc.netminecraft.packet.PacketTypes;
-import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket1_7;
-import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket1_20_3;
+import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigDisconnectPacket;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
+import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket;
+import net.raphimc.netminecraft.packet.impl.play.S2CPlayDisconnectPacket;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
-import net.raphimc.netminecraft.packet.registry.PacketRegistryUtil;
+import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
 import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
@@ -71,7 +65,7 @@ public class ProxyConnection extends NetClient {
 
     private HostAndPort clientHandshakeAddress;
     private GameProfile gameProfile;
-    private C2SLoginHelloPacket1_7 loginHelloPacket;
+    private C2SLoginHelloPacket loginHelloPacket;
     private Key storedSecretKey;
 
     private UserConnection userConnection;
@@ -143,6 +137,7 @@ public class ProxyConnection extends NetClient {
 
     public void setClientVersion(final ProtocolVersion clientVersion) {
         this.clientVersion = clientVersion;
+        this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(new DefaultPacketRegistry(false, clientVersion.getVersion()));
     }
 
     public HostAndPort getClientHandshakeAddress() {
@@ -161,11 +156,11 @@ public class ProxyConnection extends NetClient {
         this.gameProfile = gameProfile;
     }
 
-    public C2SLoginHelloPacket1_7 getLoginHelloPacket() {
+    public C2SLoginHelloPacket getLoginHelloPacket() {
         return this.loginHelloPacket;
     }
 
-    public void setLoginHelloPacket(final C2SLoginHelloPacket1_7 loginHelloPacket) {
+    public void setLoginHelloPacket(final C2SLoginHelloPacket loginHelloPacket) {
         this.loginHelloPacket = loginHelloPacket;
     }
 
@@ -203,48 +198,13 @@ public class ProxyConnection extends NetClient {
 
     public void setC2pConnectionState(final ConnectionState connectionState) {
         this.c2pConnectionState = connectionState;
-        switch (connectionState) {
-            case HANDSHAKING:
-                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakingRegistry(false));
-                break;
-            case STATUS:
-                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getStatusRegistry(false));
-                break;
-            case LOGIN:
-                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getLoginRegistry(false, this.clientVersion.getVersion()));
-                break;
-            case CONFIGURATION:
-                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getConfigurationRegistry(false, this.clientVersion.getVersion()));
-                break;
-            case PLAY:
-                this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getPlayRegistry(false, this.clientVersion.getVersion()));
-                break;
-        }
+        this.c2p.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).get().setConnectionState(connectionState);
     }
 
     public void setP2sConnectionState(final ConnectionState connectionState) {
         this.p2sConnectionState = connectionState;
-        switch (connectionState) {
-            case HANDSHAKING:
-                if (this.getChannel() != null)
-                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getHandshakingRegistry(true));
-                break;
-            case STATUS:
-                if (this.getChannel() != null)
-                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getStatusRegistry(true));
-                break;
-            case LOGIN:
-                if (this.getChannel() != null)
-                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getLoginRegistry(true, this.clientVersion.getVersion()));
-                break;
-            case CONFIGURATION:
-                if (this.getChannel() != null)
-                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getConfigurationRegistry(true, this.clientVersion.getVersion()));
-                break;
-            case PLAY:
-                if (this.getChannel() != null)
-                    this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(PacketRegistryUtil.getPlayRegistry(true, this.clientVersion.getVersion()));
-                break;
+        if (this.getChannel() != null) {
+            this.getChannel().attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).get().setConnectionState(connectionState);
         }
     }
 
@@ -255,25 +215,11 @@ public class ProxyConnection extends NetClient {
         if (this.c2pConnectionState == ConnectionState.STATUS) {
             future = this.c2p.writeAndFlush(new S2CStatusResponsePacket("{\"players\":{\"max\":0,\"online\":0},\"description\":" + new JsonPrimitive(message) + ",\"version\":{\"protocol\":-1,\"name\":\"ViaProxy\"}}"));
         } else if (this.c2pConnectionState == ConnectionState.LOGIN) {
-            future = this.c2p.writeAndFlush(new S2CLoginDisconnectPacket1_20_3(new StringComponent(message)));
+            future = this.c2p.writeAndFlush(new S2CLoginDisconnectPacket(new StringComponent(message)));
         } else if (this.c2pConnectionState == ConnectionState.CONFIGURATION) {
-            final ByteBuf disconnectPacket = Unpooled.buffer();
-            PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_CONFIG_DISCONNECT.getId(this.clientVersion.getVersion()));
-            if (this.clientVersion.olderThanOrEqualTo(ProtocolVersion.v1_20_2)) {
-                PacketTypes.writeString(disconnectPacket, messageToJson(message));
-            } else {
-                PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));
-            }
-            future = this.c2p.writeAndFlush(disconnectPacket);
+            future = this.c2p.writeAndFlush(new S2CConfigDisconnectPacket(new StringComponent(message)));
         } else if (this.c2pConnectionState == ConnectionState.PLAY) {
-            final ByteBuf disconnectPacket = Unpooled.buffer();
-            PacketTypes.writeVarInt(disconnectPacket, MCPackets.S2C_DISCONNECT.getId(this.clientVersion.getVersion()));
-            if (this.clientVersion.olderThanOrEqualTo(ProtocolVersion.v1_20_2)) {
-                PacketTypes.writeString(disconnectPacket, messageToJson(message));
-            } else {
-                PacketTypes.writeUnnamedTag(disconnectPacket, messageToNbt(message));
-            }
-            future = this.c2p.writeAndFlush(disconnectPacket);
+            future = this.c2p.writeAndFlush(new S2CPlayDisconnectPacket(new StringComponent(message)));
         } else {
             future = this.c2p.newSucceededFuture();
         }
@@ -284,18 +230,6 @@ public class ProxyConnection extends NetClient {
 
     public boolean isClosed() {
         return !this.c2p.isOpen() || (this.getChannel() != null && !this.getChannel().isOpen());
-    }
-
-    private static String messageToJson(final String message) {
-        final JsonObject obj = new JsonObject();
-        obj.addProperty("text", message);
-        return obj.toString();
-    }
-
-    private static INbtTag messageToNbt(final String message) {
-        final CompoundTag tag = new CompoundTag();
-        tag.add("text", new StringTag(message));
-        return tag;
     }
 
 }
