@@ -186,6 +186,7 @@ public class ViaProxyConfig {
     public void loadFromArguments(final String[] args) throws Exception {
         final OptionParser optionParser = new OptionParser();
         final OptionSpec<Void> optionHelp = optionParser.accepts("help").forHelp();
+        final OptionSpec<Void> optionListVersions = optionParser.accepts("list-versions", "Lists all supported server/target versions").forHelp();
 
         final Map<OptionSpec<Object>, ConfigOption> optionMap = new HashMap<>();
         final Stack<SectionIndex> stack = new Stack<>();
@@ -212,6 +213,13 @@ public class ViaProxyConfig {
             final OptionSet options = optionParser.parse(args);
             if (options.has(optionHelp)) {
                 throw new HelpRequestedException();
+            } else if (options.has(optionListVersions)) {
+                Logger.LOGGER.info("=== Supported Server Versions ===");
+                for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
+                    Logger.LOGGER.info(version.getName());
+                }
+                Logger.LOGGER.info("===================================");
+                System.exit(0);
             }
 
             if (options.has("minecraft-account-index")) {
