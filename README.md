@@ -16,7 +16,8 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 
 ## Supported Client versions
 - Release (1.7.2 - 1.21.1)
-- Bedrock Edition (Needs the [Geyser plugin](https://geysermc.org/download))
+- Bedrock Edition (Requires the [Geyser plugin](https://geysermc.org/download))
+- Beta 1.7.3 (Requires the [Beta2Release plugin](https://github.com/ViaVersionAddons/ViaProxyBeta2Release))
 - Classic, Alpha, Beta, Release 1.0 - 1.6.4 (Only passthrough)
 
 ViaProxy supports joining to any of the listed server version from any of the listed client versions.
