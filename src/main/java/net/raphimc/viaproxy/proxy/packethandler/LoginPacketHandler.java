@@ -25,11 +25,13 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.crypto.AESEncryption;
 import net.raphimc.netminecraft.netty.crypto.CryptUtil;
 import net.raphimc.netminecraft.packet.Packet;
-import net.raphimc.netminecraft.packet.impl.login.*;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
+import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket;
+import net.raphimc.netminecraft.packet.impl.login.S2CLoginGameProfilePacket;
+import net.raphimc.netminecraft.packet.impl.login.S2CLoginHelloPacket;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.ProtocolMetadataStorage;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.plugins.events.ClientLoggedInEvent;
 import net.raphimc.viaproxy.plugins.events.ShouldVerifyOnlineModeEvent;
 import net.raphimc.viaproxy.proxy.LoginState;
@@ -138,9 +140,7 @@ public class LoginPacketHandler extends PacketHandler {
 
     @Override
     public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) throws GeneralSecurityException, ExecutionException, InterruptedException {
-        if (packet instanceof S2CLoginDisconnectPacket loginDisconnectPacket) {
-            Logger.u_info("server kick", this.proxyConnection, ConsoleFormatter.convert(loginDisconnectPacket.reason.asLegacyFormatString()));
-        } else if (packet instanceof S2CLoginHelloPacket loginHelloPacket) {
+        if (packet instanceof S2CLoginHelloPacket loginHelloPacket) {
             final PublicKey publicKey = CryptUtil.decodeRsaPublicKey(loginHelloPacket.publicKey);
             final SecretKey secretKey = CryptUtil.generateSecretKey();
             final String serverHash = new BigInteger(CryptUtil.computeServerIdHash(loginHelloPacket.serverId, publicKey, secretKey)).toString(16);
