@@ -59,6 +59,7 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
                 .option(RakChannelOption.RAK_COMPATIBILITY_MODE, true)
                 .option(RakChannelOption.RAK_CLIENT_INTERNAL_ADDRESSES, 20)
+                .option(RakChannelOption.RAK_TIME_BETWEEN_SEND_CONNECTION_ATTEMPTS_MS, 500)
                 .option(RakChannelOption.RAK_CONNECT_TIMEOUT, (long) ViaProxy.getConfig().getConnectTimeout())
                 .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
                 .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong())
