@@ -46,9 +46,10 @@ public class LegacyPassthroughInitialHandler extends SimpleChannelInboundHandler
             final PassthroughClient2ProxyChannelInitializer channelInitializer = new PassthroughClient2ProxyChannelInitializer(handlerSupplier);
             ctx.channel().pipeline().addLast(channelInitializer);
             ctx.channel().pipeline().fireChannelActive();
+            ctx.pipeline().fireChannelRead(msg.retain());
+        } else {
+            ctx.fireChannelRead(msg.retain());
         }
-
-        ctx.pipeline().fireChannelRead(msg.retain());
     }
 
     @Override
