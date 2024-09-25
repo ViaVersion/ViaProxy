@@ -73,9 +73,9 @@ public class LoginPacketHandler extends PacketHandler {
             if (this.loginState != LoginState.FIRST_PACKET) throw CloseAndReturn.INSTANCE;
             this.loginState = LoginState.SENT_HELLO;
 
-                if (loginHelloPacket.expiresAt != null && loginHelloPacket.expiresAt.isBefore(Instant.now())) {
-                    throw new IllegalStateException("Expired public key");
-                }
+            if (loginHelloPacket.expiresAt != null && loginHelloPacket.expiresAt.isBefore(Instant.now())) {
+                throw new IllegalStateException("Expired public key");
+            }
 
             proxyConnection.setLoginHelloPacket(loginHelloPacket);
             if (loginHelloPacket.uuid != null) {

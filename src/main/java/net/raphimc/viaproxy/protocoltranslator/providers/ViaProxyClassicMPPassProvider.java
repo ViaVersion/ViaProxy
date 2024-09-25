@@ -18,18 +18,18 @@
 package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.google.common.hash.Hashing;
-import com.google.common.io.Resources;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import net.lenni0451.commons.httpclient.HttpClient;
+import net.lenni0451.commons.httpclient.handler.ThrowingResponseHandler;
+import net.lenni0451.commons.httpclient.requests.impl.GetRequest;
 import net.raphimc.vialegacy.protocol.classic.c0_28_30toa1_0_15.provider.ClassicMPPassProvider;
 import net.raphimc.vialegacy.protocol.release.r1_2_4_5tor1_3_1_2.provider.OldAuthProvider;
-import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.HandshakeStorage;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
-import java.net.InetAddress;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 import java.util.logging.Level;
 
 public class ViaProxyClassicMPPassProvider extends ClassicMPPassProvider {
@@ -37,27 +37,25 @@ public class ViaProxyClassicMPPassProvider extends ClassicMPPassProvider {
     @Override
     public String getMpPass(UserConnection user) {
         final String mppass = ProxyConnection.fromUserConnection(user).getUserOptions().classicMpPass();
-        if (mppass != null && !mppass.isEmpty() && !mppass.equals("0")) {
+        if (mppass != null && !mppass.isBlank()) {
             return mppass;
         } else if (ViaProxy.getConfig().useBetacraftAuth()) {
-            final HandshakeStorage handshakeStorage = user.get(HandshakeStorage.class);
-            return getBetacraftMpPass(user, user.getProtocolInfo().getUsername(), handshakeStorage.getHostname(), handshakeStorage.getPort());
-        } else {
-            return super.getMpPass(user);
+            try {
+                final HttpClient httpClient = new HttpClient();
+                String externalIp;
+                try {
+                    externalIp = httpClient.execute(new GetRequest("https://checkip.amazonaws.com"), new ThrowingResponseHandler()).getContentAsString();
+                } catch (Throwable e) {
+                    throw new RuntimeException("Failed to get external IP address!", e);
+                }
+                final byte[] hash = Hashing.sha1().hashString(externalIp.strip(), StandardCharsets.UTF_8).asBytes();
+                Via.getManager().getProviders().get(OldAuthProvider.class).sendAuthRequest(user, HexFormat.of().formatHex(hash));
+            } catch (Throwable e) {
+                Via.getPlatform().getLogger().log(Level.WARNING, "An unknown error occurred while authenticating with BetaCraft", e);
+            }
         }
-    }
 
-    private static String getBetacraftMpPass(final UserConnection user, final String username, final String serverIp, final int port) {
-        try {
-            final String server = InetAddress.getByName(serverIp).getHostAddress() + ":" + port;
-            Via.getManager().getProviders().get(OldAuthProvider.class).sendAuthRequest(user, Hashing.sha1().hashBytes(server.getBytes()).toString());
-            final String mppass = Resources.toString(new URL("http://api.betacraft.uk/getmppass.jsp?user=" + username + "&server=" + server), StandardCharsets.UTF_8);
-            if (mppass.contains("FAILED") || mppass.contains("SERVER NOT FOUND")) return "0";
-            return mppass;
-        } catch (Throwable e) {
-            Via.getPlatform().getLogger().log(Level.WARNING, "An unknown error occurred while authenticating with BetaCraft", e);
-        }
-        return "0";
+        return super.getMpPass(user);
     }
 
 }
