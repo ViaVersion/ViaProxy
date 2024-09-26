@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.plugins;
 
+import java.io.File;
 import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.List;
@@ -49,6 +50,14 @@ public abstract class ViaProxyPlugin {
     }
 
     public void onDisable() {
+    }
+
+    public final File getDataFolder() {
+        final File dataFolder = new File(PluginManager.PLUGINS_DIR, (String) this.viaProxyYaml.get("name"));
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs();
+        }
+        return dataFolder;
     }
 
     public final String getName() {
