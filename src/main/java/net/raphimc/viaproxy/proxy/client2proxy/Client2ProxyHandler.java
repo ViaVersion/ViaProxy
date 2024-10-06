@@ -186,7 +186,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
             clientHandshakeAddress = null;
         }
 
-        final PreConnectEvent preConnectEvent = new PreConnectEvent(serverAddress, serverVersion, clientVersion, clientHandshakeAddress, this.proxyConnection.getC2P());
+        final PreConnectEvent preConnectEvent = new PreConnectEvent(serverAddress, serverVersion, clientVersion, clientHandshakeAddress, packet.intendedState, this.proxyConnection.getC2P());
         if (ViaProxy.EVENT_MANAGER.call(preConnectEvent).isCancelled()) {
             this.proxyConnection.kickClient(preConnectEvent.getCancelMessage());
         }
