@@ -78,6 +78,7 @@ public class ProtocolTranslator {
                     1_13-tab-complete-delay: 5
                     no-delay-shield-blocking: true
                     handle-invalid-item-count: true
+                    fix-1_21-placement-rotation: true
                     """, StandardOpenOption.CREATE_NEW);
         } catch (FileAlreadyExistsException ignored) {
         } catch (Throwable e) {
