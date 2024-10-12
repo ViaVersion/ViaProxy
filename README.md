@@ -42,35 +42,6 @@ docker run -it -v /path/to/run:/app/run -p 25568:25568 ghcr.io/viaversion/viapro
 ```
 where ``/path/to/run`` is the path where the ViaProxy data should be stored and ``25568`` is the port ViaProxy should listen on.
 
-### Gradle/Maven
-To use ViaProxy with Gradle/Maven you can use the ViaVersion maven server:
-```groovy
-repositories {
-    maven { url "https://repo.viaversion.com" }
-}
-
-dependencies {
-    implementation("net.raphimc:ViaProxy:x.x.x") // Get latest version from releases
-}
-```
-
-```xml
-<repositories>
-    <repository>
-        <id>viaversion</id>
-        <url>https://repo.viaversion.com</url>
-    </repository>
-</repositories>
-
-<dependencies>
-    <dependency>
-        <groupId>net.raphimc</groupId>
-        <artifactId>ViaProxy</artifactId>
-        <version>x.x.x</version> <!-- Get latest version from releases -->
-    </dependency>
-</dependencies>
-```
-
 ## Usage for Players (GUI)
 ![ViaProxy GUI](https://i.imgur.com/RaDWkbK.png)
 1. Download the latest version from the [Releases section](#executable-jar-file)
@@ -111,9 +82,9 @@ You will find 5 config files there:
 - viabedrock.yml (ViaBedrock)
 
 ### Developer Plugin API
-ViaProxy has a plugin API which allows you to create plugins for ViaProxy.  
-Documentation for the plugin API can be found [here](https://github.com/ViaVersionAddons/NoLocalConnections?tab=readme-ov-file#how-to-make-a-viaproxy-plugin).  
-A list of plugins can be found [here](docs/PLUGINS.md).
+ViaProxy has a plugin API which allows you to extend and modify the behavior of ViaProxy.  
+Documentation for the plugin API can be found [here](https://github.com/ViaVersion/ViaProxy/wiki/Creating-plugins).  
+A list of plugins can be found [here](https://github.com/ViaVersion/ViaProxy/wiki/Plugins).
 
 ## Contributing
 Contributions in the form of pull requests are always welcome.
