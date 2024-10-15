@@ -18,15 +18,14 @@
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.ChannelHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.vialoader.netty.VLPipeline;
 
 public class ViaProxyVLPipeline extends VLPipeline {
 
-    public ViaProxyVLPipeline(UserConnection user, ProtocolVersion version) {
-        super(user, version);
+    public ViaProxyVLPipeline(final UserConnection user) {
+        super(user);
     }
 
     @Override

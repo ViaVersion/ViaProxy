@@ -19,17 +19,34 @@ package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import com.viaversion.viaversion.api.protocol.version.VersionType;
+import com.viaversion.viaversion.protocol.RedirectProtocolVersion;
 import com.viaversion.viaversion.protocol.version.BaseVersionProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 public class ViaProxyVersionProvider extends BaseVersionProvider {
 
     @Override
-    public ProtocolVersion getClosestServerProtocol(UserConnection connection) throws Exception {
+    public ProtocolVersion getClientProtocol(UserConnection connection) {
+        final ProtocolVersion clientProtocol = connection.getProtocolInfo().protocolVersion();
+        if (clientProtocol.getVersionType() == VersionType.SPECIAL && ProtocolVersion.isRegistered(VersionType.SPECIAL, clientProtocol.getOriginalVersion())) {
+            return ProtocolVersion.getProtocol(VersionType.SPECIAL, clientProtocol.getOriginalVersion());
+        } else {
+            return super.getClientProtocol(connection);
+        }
+    }
+
+    @Override
+    public ProtocolVersion getClosestServerProtocol(UserConnection connection) {
+        final ProtocolVersion clientProtocol = connection.getProtocolInfo().protocolVersion();
         if (connection.isClientSide()) {
             return ProxyConnection.fromUserConnection(connection).getServerVersion();
+        } else if (clientProtocol.getVersionType() == VersionType.RELEASE) {
+            return clientProtocol;
+        } else if (clientProtocol instanceof RedirectProtocolVersion redirectProtocolVersion) {
+            return redirectProtocolVersion.getOrigin();
         } else {
-            return super.getClosestServerProtocol(connection);
+            return ProtocolVersion.v1_7_2;
         }
     }
 

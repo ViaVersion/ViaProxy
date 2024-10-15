@@ -62,10 +62,6 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
         final ProxyConnection proxyConnection = ProxyConnection.fromChannel(channel);
 
-        final UserConnection user = new UserConnectionImpl(channel, true);
-        new ProtocolPipelineImpl(user);
-        proxyConnection.setUserConnection(user);
-
         if (ViaProxy.getConfig().getBackendProxyUrl() != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
             channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, this.getProxyHandler());
         }
@@ -76,7 +72,10 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         super.initChannel(channel);
         channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(new DefaultPacketRegistry(true, proxyConnection.getClientVersion().getVersion()));
 
-        channel.pipeline().addLast(new ViaProxyVLPipeline(user, proxyConnection.getServerVersion()));
+        final UserConnection user = new UserConnectionImpl(channel, true);
+        new ProtocolPipelineImpl(user);
+        proxyConnection.setUserConnection(user);
+        channel.pipeline().addLast(new ViaProxyVLPipeline(user));
         channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
         if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
             channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
