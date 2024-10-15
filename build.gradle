@@ -70,7 +70,7 @@ dependencies {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
-    include("net.raphimc:ViaLoader:3.0.3-SNAPSHOT") {
+    include("net.raphimc:ViaLoader:3.0.4-SNAPSHOT") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
