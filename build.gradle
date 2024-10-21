@@ -75,7 +75,7 @@ dependencies {
     }
 
     include "com.google.code.gson:gson:2.11.0"
-    include "com.formdev:flatlaf:3.5.1"
+    include "com.formdev:flatlaf:3.5.2"
     include "com.formdev:flatlaf-extras:3.5.2"
     include "org.apache.commons:commons-lang3:3.17.0"
     include "commons-io:commons-io:2.17.0"
