@@ -29,7 +29,7 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
     @Override
     public ProtocolVersion getClientProtocol(UserConnection connection) {
         final ProtocolVersion clientProtocol = connection.getProtocolInfo().protocolVersion();
-        if (clientProtocol.getVersionType() == VersionType.SPECIAL && ProtocolVersion.isRegistered(VersionType.SPECIAL, clientProtocol.getOriginalVersion())) {
+        if (!clientProtocol.isKnown() && ProtocolVersion.isRegistered(VersionType.SPECIAL, clientProtocol.getOriginalVersion())) {
             return ProtocolVersion.getProtocol(VersionType.SPECIAL, clientProtocol.getOriginalVersion());
         } else {
             return super.getClientProtocol(connection);
