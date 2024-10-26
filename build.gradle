@@ -62,7 +62,7 @@ repositories {
 
 dependencies {
     include "com.viaversion:viaversion-common:5.1.1-SNAPSHOT"
-    include "com.viaversion:viabackwards-common:5.1.0"
+    include "com.viaversion:viabackwards-common:5.1.1-SNAPSHOT"
     include "com.viaversion:viarewind-common:4.0.3"
     include "net.raphimc:ViaLegacy:3.0.5-SNAPSHOT"
     include "net.raphimc:viaaprilfools-common:3.0.4-SNAPSHOT"
