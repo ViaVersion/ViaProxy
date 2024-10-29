@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.proxy.util;
 
-import com.viaversion.viaversion.exception.InformativeException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
@@ -25,21 +24,9 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.logging.Logger;
 
-import java.lang.reflect.Field;
 import java.nio.channels.ClosedChannelException;
 
 public class ExceptionUtil {
-
-    private static Field infoField;
-
-    static {
-        try {
-            infoField = InformativeException.class.getDeclaredField("info");
-            infoField.setAccessible(true);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void handleNettyException(ChannelHandlerContext ctx, Throwable cause, ProxyConnection proxyConnection, boolean client2Proxy) {
         if (!ctx.channel().isOpen()) return;
