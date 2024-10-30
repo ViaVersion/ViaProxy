@@ -22,6 +22,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
 import com.viaversion.viaversion.protocol.RedirectProtocolVersion;
 import com.viaversion.viaversion.protocol.version.BaseVersionProvider;
+import net.raphimc.netminecraft.constants.MCVersion;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 public class ViaProxyVersionProvider extends BaseVersionProvider {
@@ -42,7 +43,15 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
         if (connection.isClientSide()) {
             return ProxyConnection.fromUserConnection(connection).getServerVersion();
         } else if (clientProtocol.getVersionType() == VersionType.RELEASE) {
-            return clientProtocol;
+            if (MCVersion.ALL_VERSIONS.containsKey(clientProtocol.getVersion())) {
+                return clientProtocol;
+            } else { // Version not supported by NetMinecraft
+                return MCVersion.ALL_VERSIONS.keySet().stream().min((o1, o2) -> {
+                    final int diff1 = Math.abs(o1 - clientProtocol.getVersion());
+                    final int diff2 = Math.abs(o2 - clientProtocol.getVersion());
+                    return Integer.compare(diff1, diff2);
+                }).map(ProtocolVersion::getProtocol).orElse(ProtocolVersion.unknown);
+            }
         } else if (clientProtocol instanceof RedirectProtocolVersion redirectProtocolVersion) {
             return redirectProtocolVersion.getOrigin();
         } else {
