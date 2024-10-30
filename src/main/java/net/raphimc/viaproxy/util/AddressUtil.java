@@ -31,6 +31,10 @@ import java.net.SocketAddress;
 public class AddressUtil {
 
     public static SocketAddress parse(final String serverAddress, final ProtocolVersion version) {
+        if (serverAddress.isBlank()) {
+            throw new IllegalArgumentException("Server address cannot be blank");
+        }
+
         if (serverAddress.startsWith("file:///") || serverAddress.startsWith("unix:///")) { // Unix Socket
             final String filePath = serverAddress.substring(7);
 
