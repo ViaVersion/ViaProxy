@@ -195,6 +195,10 @@ public class GeneralTab extends UITab {
                 this.stateButton.setText(I18n.get("tab.general.state.start"));
                 this.stateButton.setEnabled(true);
                 timer.stop();
+
+                if (System.getProperty("viaproxy.gui.autoStart") != null) {
+                    this.stateButton.doClick();
+                }
             }
         });
         timer.start();
