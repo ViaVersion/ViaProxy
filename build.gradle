@@ -66,7 +66,7 @@ dependencies {
     include "com.viaversion:viarewind-common:4.0.3"
     include "net.raphimc:ViaLegacy:3.0.5"
     include "net.raphimc:viaaprilfools-common:3.0.4"
-    include("net.raphimc:ViaBedrock:0.0.13-20241029.202645-4") {
+    include("net.raphimc:ViaBedrock:0.0.13-SNAPSHOT") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
