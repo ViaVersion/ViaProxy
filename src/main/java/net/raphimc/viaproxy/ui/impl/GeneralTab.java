@@ -197,7 +197,7 @@ public class GeneralTab extends UITab {
                 timer.stop();
 
                 if (System.getProperty("viaproxy.gui.autoStart") != null) {
-                    this.stateButton.doClick();
+                    this.stateButton.doClick(0);
                 }
             }
         });

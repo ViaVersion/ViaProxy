@@ -237,7 +237,7 @@ public class RealmsTab extends UITab {
                             final int chosen = JOptionPane.showConfirmDialog(this.viaProxyWindow, I18n.get("tab.realms.accept_tos", "https://aka.ms/MinecraftRealmsTerms"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                             if (chosen == JOptionPane.YES_OPTION) {
                                 javaRealmsService.acceptTos();
-                                join.doClick();
+                                join.doClick(0);
                             }
                         } else {
                             Logger.LOGGER.error("Failed to join realm", cause);
@@ -256,12 +256,12 @@ public class RealmsTab extends UITab {
         final GeneralTab generalTab = this.viaProxyWindow.generalTab;
         if (generalTab.stateButton.isEnabled()) {
             if (!generalTab.stateButton.getText().equals(I18n.get("tab.general.state.start"))) {
-                generalTab.stateButton.doClick(); // Stop the running proxy
+                generalTab.stateButton.doClick(0); // Stop the running proxy
             }
             generalTab.serverAddress.setText(address);
             generalTab.serverVersion.setSelectedItem(version);
             generalTab.authMethod.setSelectedIndex(0);
-            generalTab.stateButton.doClick();
+            generalTab.stateButton.doClick(0);
             this.viaProxyWindow.contentPane.setSelectedIndex(0);
         }
     }
