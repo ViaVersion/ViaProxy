@@ -157,7 +157,6 @@ public class AccountsTab extends UITab {
         {
             final JPanel addButtons = new JPanel();
             addButtons.setLayout(new GridLayout(1, 3, BORDER_PADDING, 0));
-            contentPane.add(addButtons);
             {
                 JButton addOfflineAccountButton = new JButton(I18n.get("tab.accounts.add_offline.label"));
                 addOfflineAccountButton.addActionListener(event -> {
