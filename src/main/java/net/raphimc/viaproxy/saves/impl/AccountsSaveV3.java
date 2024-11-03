@@ -20,7 +20,9 @@ package net.raphimc.viaproxy.saves.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.lenni0451.reflect.Classes;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
@@ -43,7 +45,19 @@ public class AccountsSaveV3 extends AbstractSave {
         for (JsonElement element : jsonElement.getAsJsonArray()) {
             final JsonObject jsonObject = element.getAsJsonObject();
             final String type = jsonObject.get("accountType").getAsString();
-            final Class<?> clazz = Class.forName(type);
+            Class<?> clazz = Classes.byName(type);
+            if (clazz == null) {
+                for (ViaProxyPlugin plugin : ViaProxy.getPluginManager().getPlugins()) {
+                    clazz = Classes.byName(type, plugin.getClass().getClassLoader());
+                    if (clazz != null) {
+                        break;
+                    }
+                }
+            }
+            if (clazz == null) {
+                throw new ClassNotFoundException(type);
+            }
+
             final Account account = (Account) clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
             this.accounts.add(account);
         }
