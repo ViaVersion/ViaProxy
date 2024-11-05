@@ -41,22 +41,15 @@ public class AccountsSaveV3 extends AbstractSave {
 
     @Override
     public void load(JsonElement jsonElement) throws Exception {
+        final List<ClassLoader> classLoaders = new ArrayList<>();
+        classLoaders.add(ViaProxy.class.getClassLoader());
+        classLoaders.addAll(ViaProxy.getPluginManager().getPlugins().stream().map(ViaProxyPlugin::getClassLoader).toList());
+
         this.accounts = new ArrayList<>();
         for (JsonElement element : jsonElement.getAsJsonArray()) {
             final JsonObject jsonObject = element.getAsJsonObject();
             final String type = jsonObject.get("accountType").getAsString();
-            Class<?> clazz = Classes.byName(type);
-            if (clazz == null) {
-                for (ViaProxyPlugin plugin : ViaProxy.getPluginManager().getPlugins()) {
-                    clazz = Classes.byName(type, plugin.getClass().getClassLoader());
-                    if (clazz != null) {
-                        break;
-                    }
-                }
-            }
-            if (clazz == null) {
-                throw new ClassNotFoundException(type);
-            }
+            final Class<?> clazz = Classes.find(type, true, classLoaders);
 
             final Account account = (Account) clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
             this.accounts.add(account);
