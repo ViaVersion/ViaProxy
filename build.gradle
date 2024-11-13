@@ -116,7 +116,7 @@ sourceSets {
     main {
         classTokenReplacer {
             property("\${version}", project.version)
-            property("\${impl_version}", "git-${project.name}-${project.version}:${project.latestCommitHash()}")
+            property("\${impl_version}", "git-${project.name}-${project.version}:${project.latestCommitHash().get()}")
         }
     }
 }
@@ -224,11 +224,8 @@ downgradeJar {
 }
 build.finalizedBy("downgradeJar")
 
-String latestCommitHash() {
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine "git", "rev-parse", "--short", "HEAD"
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
+Provider<String> latestCommitHash() {
+    return providers.exec {
+        commandLine = ["git", "rev-parse", "--short", "HEAD"]
+    }.standardOutput.getAsText().map(String::trim)
 }
