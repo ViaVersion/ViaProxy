@@ -93,9 +93,7 @@ Please make sure to keep your code style consistent with the rest of the project
 If you plan to make a large scale changes, please open an issue first or join my discord to discuss it.
 
 ### Translations
-If you want to help translating ViaProxy you can do so by creating a pull request with your language file.
-The language files are located in the [language folder](/src/main/resources/assets/viaproxy/language).
-You can find the guidelines for creating a language file in the [en_US](/src/main/resources/assets/viaproxy/language/en_US.properties) language file.
+If you want to help translating ViaProxy you can do so on [Crowdin](https://crowdin.com/project/viaproxy).
 
 ## Contact
 If you encounter any issues, please report them on the
