@@ -30,6 +30,7 @@ import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.UITab;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
+import net.raphimc.viaproxy.ui.elements.LinkLabel;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -38,8 +39,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -77,14 +76,7 @@ public class GeneralTab extends UITab {
         JPanel header = new JPanel();
         header.setLayout(new GridBagLayout());
 
-        JLabel discord = new JLabel("<html><a href=\"\">Discord</a></html>");
-        discord.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                ViaProxyWindow.openURL("https://discord.gg/viaversion");
-            }
-        });
-        discord.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        LinkLabel discord = new LinkLabel("Discord", "https://discord.gg/viaversion");
         GBC.create(header).grid(0, 0).width(0).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(discord);
 
         JLabel title = new JLabel("ViaProxy");

@@ -21,12 +21,14 @@ import net.lenni0451.commons.swing.GBC;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.UITab;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
+import net.raphimc.viaproxy.ui.elements.LinkLabel;
 import net.raphimc.viaproxy.util.JarUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 
+import static net.raphimc.viaproxy.ui.ViaProxyWindow.BODY_BLOCK_PADDING;
 import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 
 public class UISettingsTab extends UITab {
@@ -72,6 +74,8 @@ public class UISettingsTab extends UITab {
             });
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(language);
         }
+        GBC.create(body).grid(0, gridy++).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(new JLabel("<html>" + I18n.get("tab.ui_settings.crowdin.info") + "</html>"));
+        GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(new LinkLabel(I18n.get("tab.ui_settings.crowdin.link"), "https://crowdin.com/project/viaproxy"));
 
         contentPane.setLayout(new BorderLayout());
         contentPane.add(body, BorderLayout.NORTH);
