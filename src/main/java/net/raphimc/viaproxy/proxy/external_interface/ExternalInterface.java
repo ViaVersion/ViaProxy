@@ -35,9 +35,11 @@ import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
+import net.raphimc.viaproxy.plugins.events.JoinServerRequestEvent;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.packethandler.OpenAuthModPacketHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
@@ -94,6 +96,8 @@ public class ExternalInterface {
             }
 
             ViaProxy.EVENT_MANAGER.call(new FillPlayerDataEvent(proxyConnection));
+        } catch (CloseAndReturn e) {
+            throw e;
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to fill player data", e);
             proxyConnection.kickClient("§cFailed to fill player data. This might be caused by outdated account tokens or rate limits. Wait a couple of seconds and try again. If the problem persists, remove and re-add your account.");
@@ -103,24 +107,31 @@ public class ExternalInterface {
         proxyConnection.getLoginHelloPacket().uuid = proxyConnection.getGameProfile().getId();
     }
 
-    public static void joinServer(final String serverIdHash, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException {
+    public static void joinServer(final String serverIdHash, final ProxyConnection proxyConnection) {
         Logger.u_info("auth", proxyConnection, "Trying to join online mode server");
-        if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {
-            try {
-                final ByteBuf response = proxyConnection.getPacketHandler(OpenAuthModPacketHandler.class).sendCustomPayload(OpenAuthModConstants.JOIN_CHANNEL, PacketTypes.writeString(Unpooled.buffer(), serverIdHash)).get(6, TimeUnit.SECONDS);
-                if (response == null) throw new TimeoutException();
-                if (response.isReadable() && !response.readBoolean()) throw new TimeoutException();
-            } catch (TimeoutException e) {
-                proxyConnection.kickClient("§cAuthentication cancelled! You need to install OpenAuthMod in order to join this server.");
+        try {
+            if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {
+                try {
+                    final ByteBuf response = proxyConnection.getPacketHandler(OpenAuthModPacketHandler.class).sendCustomPayload(OpenAuthModConstants.JOIN_CHANNEL, PacketTypes.writeString(Unpooled.buffer(), serverIdHash)).get(6, TimeUnit.SECONDS);
+                    if (response == null) throw new TimeoutException();
+                    if (response.isReadable() && !response.readBoolean()) throw new TimeoutException();
+                } catch (TimeoutException e) {
+                    proxyConnection.kickClient("§cAuthentication cancelled! You need to install OpenAuthMod in order to join this server.");
+                }
+            } else if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
+                try {
+                    AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                } catch (Throwable e) {
+                    proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
+                }
+            } else if (!ViaProxy.EVENT_MANAGER.call(new JoinServerRequestEvent(proxyConnection, serverIdHash)).isCancelled()) {
+                proxyConnection.kickClient("§cThis server is in online mode and requires a valid authentication mode.");
             }
-        } else if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
-            try {
-                AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
-            } catch (Throwable e) {
-                proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
-            }
-        } else {
-            proxyConnection.kickClient("§cThis server is in online mode and requires a valid authentication mode.");
+        } catch (CloseAndReturn e) {
+            throw e;
+        } catch (Throwable e) {
+            Logger.LOGGER.error("Failed to join online mode server", e);
+            proxyConnection.kickClient("§cFailed to join online mode server. See console for more information.");
         }
     }
 
