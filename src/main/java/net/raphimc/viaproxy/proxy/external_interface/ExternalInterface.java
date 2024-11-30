@@ -24,11 +24,8 @@ import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_1;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
-import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
@@ -36,8 +33,6 @@ import net.raphimc.viabedrock.protocol.storage.AuthChainData;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
 import net.raphimc.viaproxy.plugins.events.JoinServerRequestEvent;
-import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
-import net.raphimc.viaproxy.proxy.packethandler.OpenAuthModPacketHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
@@ -50,10 +45,7 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class ExternalInterface {
 
@@ -110,15 +102,7 @@ public class ExternalInterface {
     public static void joinServer(final String serverIdHash, final ProxyConnection proxyConnection) {
         Logger.u_info("auth", proxyConnection, "Trying to join online mode server");
         try {
-            if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {
-                try {
-                    final ByteBuf response = proxyConnection.getPacketHandler(OpenAuthModPacketHandler.class).sendCustomPayload(OpenAuthModConstants.JOIN_CHANNEL, PacketTypes.writeString(Unpooled.buffer(), serverIdHash)).get(6, TimeUnit.SECONDS);
-                    if (response == null) throw new TimeoutException();
-                    if (response.isReadable() && !response.readBoolean()) throw new TimeoutException();
-                } catch (TimeoutException e) {
-                    proxyConnection.kickClient("§cAuthentication cancelled! You need to install OpenAuthMod in order to join this server.");
-                }
-            } else if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
+            if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
                 try {
                     AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
                 } catch (Throwable e) {
@@ -135,21 +119,11 @@ public class ExternalInterface {
         }
     }
 
-    public static void signNonce(final byte[] nonce, final C2SLoginKeyPacket packet, final ProxyConnection proxyConnection) throws InterruptedException, ExecutionException, SignatureException {
+    public static void signNonce(final byte[] nonce, final C2SLoginKeyPacket packet, final ProxyConnection proxyConnection) throws SignatureException {
         Logger.u_info("auth", proxyConnection, "Requesting nonce signature");
         final UserConnection user = proxyConnection.getUserConnection();
 
-        if (ViaProxy.getConfig().getAuthMethod() == ViaProxyConfig.AuthMethod.OPENAUTHMOD) {
-            try {
-                final ByteBuf response = proxyConnection.getPacketHandler(OpenAuthModPacketHandler.class).sendCustomPayload(OpenAuthModConstants.SIGN_NONCE_CHANNEL, PacketTypes.writeByteArray(Unpooled.buffer(), nonce)).get(5, TimeUnit.SECONDS);
-                if (response == null) throw new TimeoutException();
-                if (!response.readBoolean()) throw new TimeoutException();
-                packet.salt = response.readLong();
-                packet.signature = PacketTypes.readByteArray(response);
-            } catch (TimeoutException e) {
-                proxyConnection.kickClient("§cAuthentication cancelled! You need to install OpenAuthMod in order to join this server.");
-            }
-        } else if (user.has(ChatSession1_19_0.class)) {
+        if (user.has(ChatSession1_19_0.class)) {
             final long salt = ThreadLocalRandom.current().nextLong();
             packet.signature = user.get(ChatSession1_19_0.class).sign(updater -> {
                 updater.accept(nonce);

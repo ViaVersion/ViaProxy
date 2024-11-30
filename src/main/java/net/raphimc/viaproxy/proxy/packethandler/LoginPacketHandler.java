@@ -157,7 +157,7 @@ public class LoginPacketHandler extends PacketHandler {
             final byte[] encryptedNonce = CryptUtil.encryptData(publicKey, loginHelloPacket.nonce);
 
             final C2SLoginKeyPacket loginKey = new C2SLoginKeyPacket(encryptedSecretKey, encryptedNonce);
-            if (this.proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && this.proxyConnection.getLoginHelloPacket().key != null) {
+            if (this.proxyConnection.getServerVersion().betweenInclusive(ProtocolVersion.v1_19, ProtocolVersion.v1_19_1) && this.proxyConnection.getLoginHelloPacket().key != null) {
                 ExternalInterface.signNonce(loginHelloPacket.nonce, loginKey, this.proxyConnection);
             }
             this.proxyConnection.getChannel().writeAndFlush(loginKey).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);

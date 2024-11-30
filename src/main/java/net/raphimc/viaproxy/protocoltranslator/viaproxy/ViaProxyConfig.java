@@ -490,11 +490,7 @@ public class ViaProxyConfig {
         /**
          * No authentication (Offline mode)
          */
-        NONE("tab.general.minecraft_account.option_no_account"),
-        /**
-         * Requires the OpenAuthMod client mod (https://modrinth.com/mod/openauthmod)
-         */
-        OPENAUTHMOD("tab.general.minecraft_account.option_openauthmod");
+        NONE("tab.general.minecraft_account.option_no_account");
 
         private final String guiTranslationKey;
 
