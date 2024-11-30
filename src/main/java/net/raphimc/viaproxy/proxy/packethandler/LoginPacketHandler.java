@@ -52,11 +52,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LoginPacketHandler extends PacketHandler {
 
     private static final KeyPair KEY_PAIR = CryptUtil.generateKeyPair();
     private static final Random RANDOM = new Random();
+    private static final ExecutorService HTTP_EXECUTOR = Executors.newWorkStealingPool(4);
 
     private final byte[] verifyToken = new byte[4];
     private LoginState loginState = LoginState.FIRST_PACKET;
@@ -113,25 +116,33 @@ public class LoginPacketHandler extends PacketHandler {
             final SecretKey secretKey = CryptUtil.decryptSecretKey(KEY_PAIR.getPrivate(), loginKeyPacket.encryptedSecretKey);
             this.proxyConnection.getC2P().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(secretKey));
 
-            final String userName = this.proxyConnection.getGameProfile().getName();
-            try {
-                final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
-                final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
-                if (mojangProfile == null) {
-                    Logger.u_err("auth", this.proxyConnection, "Invalid session");
-                    this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
-                } else {
-                    this.proxyConnection.setGameProfile(mojangProfile);
+            HTTP_EXECUTOR.submit(() -> {
+                final String userName = this.proxyConnection.getGameProfile().getName();
+                try {
+                    final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
+                    final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
+                    if (mojangProfile == null) {
+                        Logger.u_err("auth", this.proxyConnection, "Invalid session");
+                        this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
+                    } else {
+                        this.proxyConnection.setGameProfile(mojangProfile);
+                    }
+                    Logger.u_info("auth", this.proxyConnection, "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
+                } catch (CloseAndReturn ignored) {
+                } catch (Throwable e) {
+                    Logger.LOGGER.error("Failed to make session request for user '" + userName + "'!", e);
+                    try {
+                        this.proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again later.");
+                    } catch (Throwable ignored) {
+                    }
                 }
-                Logger.u_info("auth", this.proxyConnection, "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
-            } catch (Throwable e) {
-                throw new RuntimeException("Failed to make session request for user '" + userName + "'!", e);
-            }
 
-            ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
-            ExternalInterface.fillPlayerData(this.proxyConnection);
-            this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-
+                this.proxyConnection.getC2P().eventLoop().execute(() -> {
+                    ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(proxyConnection));
+                    ExternalInterface.fillPlayerData(this.proxyConnection);
+                    this.proxyConnection.getChannel().writeAndFlush(this.proxyConnection.getLoginHelloPacket()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                });
+            });
             return false;
         }
 
