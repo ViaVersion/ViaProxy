@@ -30,6 +30,7 @@ import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginGameProfilePacket;
 import net.raphimc.netminecraft.packet.impl.login.S2CLoginHelloPacket;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
+import net.raphimc.vialegacy.api.util.UuidUtil;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.storage.ProtocolMetadataStorage;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ClientLoggedInEvent;
@@ -84,7 +85,7 @@ public class LoginPacketHandler extends PacketHandler {
             if (loginHelloPacket.uuid != null) {
                 proxyConnection.setGameProfile(new GameProfile(loginHelloPacket.uuid, loginHelloPacket.name));
             } else {
-                proxyConnection.setGameProfile(new GameProfile(null, loginHelloPacket.name));
+                proxyConnection.setGameProfile(new GameProfile(UuidUtil.createOfflinePlayerUuid(loginHelloPacket.name), loginHelloPacket.name));
             }
 
             if (ViaProxy.getConfig().isProxyOnlineMode() && !ViaProxy.EVENT_MANAGER.call(new ShouldVerifyOnlineModeEvent(this.proxyConnection)).isCancelled()) {

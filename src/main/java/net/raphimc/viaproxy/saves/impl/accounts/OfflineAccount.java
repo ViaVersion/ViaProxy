@@ -18,8 +18,8 @@
 package net.raphimc.viaproxy.saves.impl.accounts;
 
 import com.google.gson.JsonObject;
+import net.raphimc.vialegacy.api.util.UuidUtil;
 
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public class OfflineAccount extends Account {
@@ -34,7 +34,7 @@ public class OfflineAccount extends Account {
 
     public OfflineAccount(final String name) {
         this.name = name;
-        this.uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8));
+        this.uuid = UuidUtil.createOfflinePlayerUuid(name);
     }
 
     @Override
