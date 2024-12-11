@@ -23,6 +23,7 @@ import com.viaversion.viaversion.api.minecraft.signature.model.MessageMetadata;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.constants.ConnectionState;
@@ -68,17 +69,14 @@ public class ChatSignaturePacketHandler extends PacketHandler {
                 final MessageMetadata metadata = new MessageMetadata(null, timestamp, salt);
                 final byte[] signature = chatSession.signChatMessage(metadata, message, new PlayerMessageSignature[0]);
 
-                final ByteBuf newChatMessage = Unpooled.buffer();
-                PacketTypes.writeVarInt(newChatMessage, this.chatMessageId);
-                PacketTypes.writeString(newChatMessage, message); // message
-                newChatMessage.writeLong(timestamp); // timestamp
-                newChatMessage.writeLong(salt); // salt
-                Types.OPTIONAL_SIGNATURE_BYTES.write(newChatMessage, signature); // signature
-                PacketTypes.writeVarInt(newChatMessage, 0); // offset
-                Types.ACKNOWLEDGED_BIT_SET.write(newChatMessage, new BitSet(20)); // acknowledged
-                this.proxyConnection.getChannel().writeAndFlush(newChatMessage).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-
-                return false;
+                final ByteBuf newChatMessageData = Unpooled.buffer();
+                PacketTypes.writeString(newChatMessageData, message); // message
+                newChatMessageData.writeLong(timestamp); // timestamp
+                newChatMessageData.writeLong(salt); // salt
+                Types.OPTIONAL_SIGNATURE_BYTES.write(newChatMessageData, signature); // signature
+                PacketTypes.writeVarInt(newChatMessageData, 0); // offset
+                Types.ACKNOWLEDGED_BIT_SET.write(newChatMessageData, new BitSet(20)); // acknowledged
+                unknownPacket.data = ByteBufUtil.getBytes(newChatMessageData);
             }
         }
 
