@@ -29,6 +29,7 @@ import net.lenni0451.optconfig.index.ClassIndexer;
 import net.lenni0451.optconfig.index.ConfigType;
 import net.lenni0451.optconfig.index.types.ConfigOption;
 import net.lenni0451.optconfig.index.types.SectionIndex;
+import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.BetterHelpFormatter;
 import net.raphimc.viaproxy.cli.HelpRequestedException;
@@ -40,6 +41,7 @@ import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.config.*;
 import net.raphimc.viaproxy.util.logging.Logger;
 
+import java.io.File;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.util.HashMap;
@@ -181,6 +183,16 @@ public class ViaProxyConfig {
             "This is required for servers that require a resource pack, but the client can't load it due to version differences."
     })
     private boolean fakeAcceptResourcePacks = false;
+
+    public static ViaProxyConfig create(final File configFile) {
+        final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
+        configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
+        try {
+            return configLoader.load(ConfigProvider.file(configFile)).getConfigInstance();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to load config", e);
+        }
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     public void loadFromArguments(final String[] args) throws Exception {

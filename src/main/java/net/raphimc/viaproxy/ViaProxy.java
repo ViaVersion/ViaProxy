@@ -30,8 +30,6 @@ import net.lenni0451.classtransform.utils.loader.InjectionClassLoader;
 import net.lenni0451.classtransform.utils.tree.IClassProvider;
 import net.lenni0451.lambdaevents.LambdaManager;
 import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
-import net.lenni0451.optconfig.ConfigLoader;
-import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.lenni0451.reflect.Agents;
 import net.lenni0451.reflect.ClassLoaders;
 import net.lenni0451.reflect.JavaBypass;
@@ -50,6 +48,7 @@ import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.saves.SaveManager;
+import net.raphimc.viaproxy.tasks.SystemRequirementsCheck;
 import net.raphimc.viaproxy.tasks.UpdateCheckTask;
 import net.raphimc.viaproxy.ui.SplashScreen;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
@@ -170,26 +169,7 @@ public class ViaProxy {
             }
         }
         if (System.getProperty("ignoreSystemRequirements") == null) {
-            if ("32".equals(System.getProperty("sun.arch.data.model")) && Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
-                Logger.LOGGER.fatal("ViaProxy is not able to run on 32bit Java.");
-                if (useUI) {
-                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run on 32bit Java. Please install 64bit Java", "ViaProxy", JOptionPane.ERROR_MESSAGE);
-                }
-                System.exit(1);
-            }
-
-            if (Runtime.getRuntime().maxMemory() < 256 * 1024 * 1024) {
-                Logger.LOGGER.fatal("ViaProxy is not able to run with less than 256MB of RAM.");
-                if (useUI) {
-                    JOptionPane.showMessageDialog(null, "ViaProxy is not able to run with less than 256MB of RAM.", "ViaProxy", JOptionPane.ERROR_MESSAGE);
-                }
-                System.exit(1);
-            } else if (Runtime.getRuntime().maxMemory() < 512 * 1024 * 1024) {
-                Logger.LOGGER.warn("ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.");
-                if (useUI) {
-                    JOptionPane.showMessageDialog(null, "ViaProxy has less than 512MB of RAM. This may cause issues with multiple clients connected.", "ViaProxy", JOptionPane.WARNING_MESSAGE);
-                }
-            }
+            SystemRequirementsCheck.run(useUI);
         }
 
         final SplashScreen splashScreen;
@@ -216,14 +196,6 @@ public class ViaProxy {
         ViaProxy.loadNetty();
         ClassLoaderPriorityUtil.loadOverridingJars();
 
-        final File viaProxyConfigFile;
-        if (useConfig) {
-            viaProxyConfigFile = new File(args[1]);
-        } else {
-            viaProxyConfigFile = new File(ViaProxy.getCwd(), "viaproxy.yml");
-        }
-        final boolean firstStart = !viaProxyConfigFile.exists();
-
         progressConsumer.accept("Loading Plugins");
         PLUGIN_MANAGER = new PluginManager();
         progressConsumer.accept("Loading Protocol Translators");
@@ -231,13 +203,14 @@ public class ViaProxy {
         progressConsumer.accept("Loading Saves");
         SAVE_MANAGER = new SaveManager();
         progressConsumer.accept("Loading Config");
-        final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
-        configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
-        try {
-            CONFIG = configLoader.load(ConfigProvider.file(viaProxyConfigFile)).getConfigInstance();
-        } catch (Throwable e) {
-            throw new RuntimeException("Failed to load config", e);
+        final File viaProxyConfigFile;
+        if (useConfig) {
+            viaProxyConfigFile = new File(args[1]);
+        } else {
+            viaProxyConfigFile = new File(ViaProxy.getCwd(), "viaproxy.yml");
         }
+        final boolean firstStart = !viaProxyConfigFile.exists();
+        CONFIG = ViaProxyConfig.create(viaProxyConfigFile);
 
         if (useUI) {
             progressConsumer.accept("Loading GUI");
@@ -275,11 +248,9 @@ public class ViaProxy {
             }
             EVENT_MANAGER.call(new ViaProxyLoadedEvent());
             Logger.LOGGER.info("ViaProxy started successfully!");
-            startProxy();
+            ViaProxy.startProxy();
 
-            while (true) {
-                Thread.sleep(Integer.MAX_VALUE);
-            }
+            Thread.sleep(Integer.MAX_VALUE);
         }
     }
 
