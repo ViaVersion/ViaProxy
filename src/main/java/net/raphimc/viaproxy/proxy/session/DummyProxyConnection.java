@@ -34,7 +34,7 @@ import java.security.Key;
 public class DummyProxyConnection extends ProxyConnection {
 
     public DummyProxyConnection(final Channel c2p) {
-        super(null, null, c2p);
+        super(null, c2p);
     }
 
     @Override

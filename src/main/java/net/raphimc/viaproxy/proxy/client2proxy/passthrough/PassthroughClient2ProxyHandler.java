@@ -74,7 +74,7 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
 
     protected void connectToServer(final Channel c2pChannel) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new PassthroughProxy2ServerHandler(), true)).getHandler();
-        final LegacyProxyConnection proxyConnection = new LegacyProxyConnection(handlerSupplier, PassthroughProxy2ServerChannelInitializer::new, c2pChannel);
+        final LegacyProxyConnection proxyConnection = new LegacyProxyConnection(new PassthroughProxy2ServerChannelInitializer(handlerSupplier), c2pChannel);
         this.proxyConnection = ViaProxy.EVENT_MANAGER.call(new ProxySessionCreationEvent<>(proxyConnection, true)).getProxySession();
         this.proxyConnection.getC2P().attr(LegacyProxyConnection.LEGACY_PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);
 

@@ -48,8 +48,6 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ProxyConnection extends NetClient {
 
@@ -74,8 +72,8 @@ public class ProxyConnection extends NetClient {
     private ConnectionState c2pConnectionState = ConnectionState.HANDSHAKING;
     private ConnectionState p2sConnectionState = ConnectionState.HANDSHAKING;
 
-    public ProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, final Channel c2p) {
-        super(handlerSupplier, channelInitializerSupplier);
+    public ProxyConnection(final ChannelInitializer<Channel> channelInitializer, final Channel c2p) {
+        super(channelInitializer);
         this.c2p = c2p;
     }
 

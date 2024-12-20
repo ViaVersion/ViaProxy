@@ -219,9 +219,9 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         final ProxyConnection proxyConnection;
         if (serverVersion.equals(BedrockProtocolVersion.bedrockLatest)) {
-            proxyConnection = new BedrockProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
+            proxyConnection = new BedrockProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
         } else {
-            proxyConnection = new ProxyConnection(handlerSupplier, Proxy2ServerChannelInitializer::new, this.proxyConnection.getC2P());
+            proxyConnection = new ProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
         }
         this.proxyConnection = ViaProxy.EVENT_MANAGER.call(new ProxySessionCreationEvent<>(proxyConnection, false)).getProxySession();
         this.proxyConnection.getC2P().attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY).set(this.proxyConnection);

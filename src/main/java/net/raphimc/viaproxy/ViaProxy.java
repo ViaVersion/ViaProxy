@@ -260,7 +260,7 @@ public class ViaProxy {
         }
         try {
             Logger.LOGGER.info("Starting proxy server");
-            currentProxyServer = new NetServer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler(), Client2ProxyChannelInitializer::new);
+            currentProxyServer = new NetServer(new Client2ProxyChannelInitializer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler()));
             EVENT_MANAGER.call(new ProxyStartEvent());
             Logger.LOGGER.info("Binding proxy server to " + AddressUtil.toString(CONFIG.getBindAddress()));
             currentProxyServer.bind(CONFIG.getBindAddress(), false);

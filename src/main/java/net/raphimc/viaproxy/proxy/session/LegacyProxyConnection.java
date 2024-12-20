@@ -18,15 +18,16 @@
 package net.raphimc.viaproxy.proxy.session;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.util.AttributeKey;
 import net.raphimc.netminecraft.netty.connection.NetClient;
 import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.viaproxy.ViaProxy;
 
 import java.net.SocketAddress;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class LegacyProxyConnection extends NetClient {
 
@@ -35,8 +36,8 @@ public class LegacyProxyConnection extends NetClient {
     private final Channel c2p;
     private SocketAddress serverAddress;
 
-    public LegacyProxyConnection(final Supplier<ChannelHandler> handlerSupplier, final Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, final Channel c2p) {
-        super(handlerSupplier, channelInitializerSupplier);
+    public LegacyProxyConnection(final ChannelInitializer<Channel> channelInitializer, final Channel c2p) {
+        super(channelInitializer);
         this.c2p = c2p;
     }
 

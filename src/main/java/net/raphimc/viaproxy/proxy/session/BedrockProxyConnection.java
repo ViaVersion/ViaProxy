@@ -19,7 +19,10 @@ package net.raphimc.viaproxy.proxy.session;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.DatagramChannel;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.constants.ConnectionState;
@@ -35,13 +38,11 @@ import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class BedrockProxyConnection extends ProxyConnection {
 
-    public BedrockProxyConnection(Supplier<ChannelHandler> handlerSupplier, Function<Supplier<ChannelHandler>, ChannelInitializer<Channel>> channelInitializerSupplier, Channel c2p) {
-        super(handlerSupplier, channelInitializerSupplier, c2p);
+    public BedrockProxyConnection(final ChannelInitializer<Channel> channelInitializer, Channel c2p) {
+        super(channelInitializer, c2p);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
                 .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong())
                 .attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY, this)
-                .handler(this.channelInitializerSupplier.apply(this.handlerSupplier));
+                .handler(this.channelInitializer);
 
         this.channelFuture = bootstrap.register().syncUninterruptibly();
 
