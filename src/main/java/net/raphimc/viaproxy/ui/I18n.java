@@ -42,6 +42,7 @@ public class I18n {
             for (Map.Entry<Path, byte[]> entry : FileSystemUtil.getFilesInDirectory("assets/viaproxy/language").entrySet()) {
                 final Properties properties = new Properties();
                 properties.load(new InputStreamReader(new ByteArrayInputStream(entry.getValue()), StandardCharsets.UTF_8));
+                if (properties.isEmpty()) continue;
                 LOCALES.put(entry.getKey().getFileName().toString().replace(".properties", ""), properties);
             }
         } catch (Throwable e) {
