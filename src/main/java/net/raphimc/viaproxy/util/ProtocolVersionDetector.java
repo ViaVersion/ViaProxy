@@ -17,11 +17,11 @@
  */
 package net.raphimc.viaproxy.util;
 
+import com.viaversion.vialoader.util.ProtocolVersionList;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.mcping.MCPing;
 import net.lenni0451.mcping.pings.sockets.impl.factories.SocketChannelSocketFactory;
 import net.lenni0451.mcping.responses.MCPingResponse;
-import net.raphimc.vialoader.util.ProtocolVersionList;
 
 import java.net.SocketAddress;
 

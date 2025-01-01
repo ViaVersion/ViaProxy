@@ -17,9 +17,9 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
+import com.viaversion.vialoader.impl.platform.ViaVersionPlatformImpl;
 import com.viaversion.viaversion.libs.gson.JsonArray;
 import com.viaversion.viaversion.libs.gson.JsonObject;
-import net.raphimc.vialoader.impl.platform.ViaVersionPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.plugins.ViaProxyPlugin;

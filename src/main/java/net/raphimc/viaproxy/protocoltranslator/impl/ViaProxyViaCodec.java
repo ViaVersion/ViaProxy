@@ -17,9 +17,9 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
+import com.viaversion.vialoader.netty.ViaCodec;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.ChannelHandlerContext;
-import net.raphimc.vialoader.netty.ViaCodec;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.util.logging.Logger;
 

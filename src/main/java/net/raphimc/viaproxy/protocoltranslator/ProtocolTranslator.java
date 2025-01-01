@@ -17,14 +17,14 @@
  */
 package net.raphimc.viaproxy.protocoltranslator;
 
+import com.viaversion.vialoader.ViaLoader;
+import com.viaversion.vialoader.impl.platform.ViaAprilFoolsPlatformImpl;
+import com.viaversion.vialoader.impl.platform.ViaBackwardsPlatformImpl;
+import com.viaversion.vialoader.impl.platform.ViaBedrockPlatformImpl;
+import com.viaversion.vialoader.impl.platform.ViaRewindPlatformImpl;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
 import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.Protocol1_20_3To1_20_5;
-import net.raphimc.vialoader.ViaLoader;
-import net.raphimc.vialoader.impl.platform.ViaAprilFoolsPlatformImpl;
-import net.raphimc.vialoader.impl.platform.ViaBackwardsPlatformImpl;
-import net.raphimc.vialoader.impl.platform.ViaBedrockPlatformImpl;
-import net.raphimc.vialoader.impl.platform.ViaRewindPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ProtocolTranslatorInitEvent;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLLoader;

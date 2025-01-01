@@ -17,13 +17,13 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
+import com.viaversion.vialoader.util.ProtocolVersionList;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.lambdaevents.EventHandler;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
-import net.raphimc.vialoader.util.ProtocolVersionList;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;

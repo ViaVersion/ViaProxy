@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
+import com.viaversion.vialoader.impl.viaversion.VLLoader;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
@@ -28,7 +29,6 @@ import net.raphimc.vialegacy.protocol.classic.c0_28_30toa1_0_15.provider.Classic
 import net.raphimc.vialegacy.protocol.release.r1_2_4_5tor1_3_1_2.provider.OldAuthProvider;
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
 import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
-import net.raphimc.vialoader.impl.viaversion.VLLoader;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
 import net.raphimc.viaproxy.protocoltranslator.providers.*;

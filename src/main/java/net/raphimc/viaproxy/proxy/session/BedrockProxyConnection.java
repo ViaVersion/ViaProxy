@@ -17,6 +17,8 @@
  */
 package net.raphimc.viaproxy.proxy.session;
 
+import com.viaversion.vialoader.netty.VLPipeline;
+import com.viaversion.vialoader.netty.viabedrock.PingEncapsulationCodec;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -29,8 +31,6 @@ import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.util.ChannelType;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
-import net.raphimc.vialoader.netty.VLPipeline;
-import net.raphimc.vialoader.netty.viabedrock.PingEncapsulationCodec;
 import net.raphimc.viaproxy.ViaProxy;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;

@@ -61,16 +61,16 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:5.2.1-SNAPSHOT"
-    include "com.viaversion:viabackwards-common:5.2.1-SNAPSHOT"
-    include "com.viaversion:viarewind-common:4.0.5-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:3.0.7-SNAPSHOT"
-    include "net.raphimc:viaaprilfools-common:3.0.5-SNAPSHOT"
+    include "com.viaversion:viaversion-common:5.2.1"
+    include "com.viaversion:viabackwards-common:5.2.1"
+    include "com.viaversion:viarewind-common:4.0.5"
+    include "net.raphimc:ViaLegacy:3.0.7"
+    include "com.viaversion:viaaprilfools-common:4.0.0"
     include("net.raphimc:ViaBedrock:0.0.14-SNAPSHOT") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
-    include("net.raphimc:ViaLoader:3.0.5-SNAPSHOT") {
+    include("com.viaversion:vialoader:4.0.0") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 

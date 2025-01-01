@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.providers;
 
+import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.Channel;
 import net.raphimc.netminecraft.constants.MCPipeline;
@@ -24,7 +25,6 @@ import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
-import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import javax.crypto.SecretKey;

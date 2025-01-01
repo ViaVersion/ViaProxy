@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.proxy.client2proxy;
 
+import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.connection.UserConnectionImpl;
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
@@ -27,7 +28,6 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.codec.NoReadFlowControlHandler;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
-import net.raphimc.vialoader.netty.VLPipeline;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;

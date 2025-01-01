@@ -17,10 +17,10 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
+import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.ChannelHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.vialoader.netty.VLPipeline;
 
 public class ViaProxyVLPipeline extends VLPipeline {
 
