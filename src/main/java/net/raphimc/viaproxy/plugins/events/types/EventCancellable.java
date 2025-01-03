@@ -17,10 +17,13 @@
  */
 package net.raphimc.viaproxy.plugins.events.types;
 
-public abstract class EventCancellable {
+import net.lenni0451.lambdaevents.types.ICancellableEvent;
+
+public abstract class EventCancellable implements ICancellableEvent {
 
     private boolean cancelled = false;
 
+    @Override
     public boolean isCancelled() {
         return this.cancelled;
     }

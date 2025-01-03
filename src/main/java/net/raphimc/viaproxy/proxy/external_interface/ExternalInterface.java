@@ -109,7 +109,7 @@ public class ExternalInterface {
                     proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
                 }
             } else if (!ViaProxy.EVENT_MANAGER.call(new JoinServerRequestEvent(proxyConnection, serverIdHash)).isCancelled()) {
-                proxyConnection.kickClient("§cThis server is in online mode and requires a valid authentication mode.");
+                proxyConnection.kickClient("§cThe configured target server is in online mode and requires a valid authentication mode.");
             }
         } catch (CloseAndReturn e) {
             throw e;
@@ -131,7 +131,7 @@ public class ExternalInterface {
             });
             packet.salt = salt;
         } else {
-            proxyConnection.kickClient("§cThis server requires a signed nonce. Please enable chat signing in the config and select a valid authentication mode.");
+            proxyConnection.kickClient("§cThe configured target server requires a signed nonce. Please enable chat signing in the config and select a valid authentication mode.");
         }
     }
 
