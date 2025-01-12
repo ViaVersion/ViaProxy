@@ -168,7 +168,7 @@ public class ViaProxyConfig {
     @Description({
             "Allows clients to specify a target server and version using wildcard domains.",
             "none: No wildcard domain handling.",
-            "public: Public wildcard domain handling. Intended for usage by external clients. (Example: address_port_version.viaproxy.127.0.0.1.nip.io)",
+            "public: Public wildcard domain handling. Intended for usage by external clients. (Example: address.<address>.port.<port>.version.<version>.viaproxy.127.0.0.1.nip.io)",
             "internal: Internal wildcard domain handling. Intended for local usage by custom clients. (Example: original-handshake-address\\7address:port\\7version\\7classic-mppass)"
     })
     private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
