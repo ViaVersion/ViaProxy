@@ -67,7 +67,7 @@ import java.util.regex.Pattern;
 public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
 
     private static final Pattern ADDRESS_SYNTAX_PATTERN = Pattern.compile(
-            "^address\\.(.+?)\\.port\\.(\\d+?)\\.version\\.(.+?)$"
+            "^address\\.(.+?)\\.port\\.(\\d+?)(?:\\.version\\.(.+?))?$"
     );
 
     private ProxyConnection proxyConnection;
@@ -161,9 +161,14 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
                     final int connectPort = Integer.parseInt(matcher.group(2));
                     final String versionString = matcher.group(3);
 
-                    serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
-                    if (serverVersion == null) {
-                        this.proxyConnection.kickClient("§cWrong domain syntax!\n§cUnknown server version.");
+                    if (versionString != null) {
+                        serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
+                        if (serverVersion == null) {
+                            this.proxyConnection.kickClient("§cWrong domain syntax!\n§cUnknown server version.");
+                        }
+                    } else {
+                        // When no version is specified, use the auto-detect protocol
+                        serverVersion = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
                     }
 
                     serverAddress = AddressUtil.parse(connectAddress + ":" + connectPort, serverVersion);
