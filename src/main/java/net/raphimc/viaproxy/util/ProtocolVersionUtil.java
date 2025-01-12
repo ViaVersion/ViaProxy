@@ -18,10 +18,15 @@
 package net.raphimc.viaproxy.util;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 
 public class ProtocolVersionUtil {
 
     public static ProtocolVersion fromNameLenient(final String name) {
+        if (name.equalsIgnoreCase("auto")) { // Short form for auto-detect
+            return ProtocolTranslator.AUTO_DETECT_PROTOCOL;
+        }
+
         final ProtocolVersion version = ProtocolVersion.getClosest(name);
         if (version == null) {
             return ProtocolVersion.getClosest(name.replace("-", " "));
