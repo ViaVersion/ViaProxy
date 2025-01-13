@@ -61,9 +61,12 @@ import java.nio.channels.UnresolvedAddressException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
+
+    private static final Pattern PUBLIC_WILDCARD_FORMAT2_PATTERN = Pattern.compile("^address\\.(.+?)\\.port\\.(\\d+?)(?:\\.version\\.(.+?))?$");
 
     private ProxyConnection proxyConnection;
 
@@ -136,24 +139,47 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         String classicMpPass = ViaProxy.getConfig().getAccount() instanceof ClassicAccount classicAccount ? classicAccount.getMppass() : null;
 
         if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.PUBLIC) {
-            try {
-                if (!handshakeParts[0].toLowerCase().contains(".viaproxy.")) {
-                    throw new IllegalArgumentException();
+            if (handshakeParts[0].toLowerCase().contains("f2.viaproxy.")) { // Format 2: address.<address>.port.<port>.version.<version>.f2.viaproxy.hostname
+                try {
+                    final String addressData = handshakeParts[0].substring(0, handshakeParts[0].toLowerCase().lastIndexOf(".f2.viaproxy."));
+                    final Matcher matcher = PUBLIC_WILDCARD_FORMAT2_PATTERN.matcher(addressData);
+                    if (!matcher.matches()) {
+                        throw new IllegalArgumentException();
+                    }
+                    final String connectAddress = matcher.group(1);
+                    final int connectPort = Integer.parseInt(matcher.group(2));
+                    final String versionString = matcher.group(3);
+                    if (versionString != null) { // Version part is optional
+                        serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
+                        if (serverVersion == null) {
+                            this.proxyConnection.kickClient("§cWrong domain syntax!\n§cUnknown server version.");
+                        }
+                    } else { // Default to auto-detect
+                        serverVersion = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
+                    }
+                    serverAddress = AddressUtil.parse(connectAddress + ":" + connectPort, serverVersion);
+                } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+                    this.proxyConnection.kickClient("§cWrong domain syntax! §6Please use:\n§7address.<address>.port.<port>.version.<version>.f2.viaproxy.hostname");
                 }
-                final String addressData = handshakeParts[0].substring(0, handshakeParts[0].toLowerCase().lastIndexOf(".viaproxy."));
-                final ArrayHelper arrayHelper = ArrayHelper.instanceOf(addressData.split(Pattern.quote("_")));
-                if (arrayHelper.getLength() < 3) {
-                    throw new IllegalArgumentException();
+            } else if (handshakeParts[0].toLowerCase().contains("viaproxy.")) { // Format 1: address_port_version.viaproxy.hostname
+                try {
+                    final String addressData = handshakeParts[0].substring(0, handshakeParts[0].toLowerCase().lastIndexOf(".viaproxy."));
+                    final ArrayHelper arrayHelper = ArrayHelper.instanceOf(addressData.split(Pattern.quote("_")));
+                    if (arrayHelper.getLength() < 3) {
+                        throw new IllegalArgumentException();
+                    }
+                    final String versionString = arrayHelper.get(arrayHelper.getLength() - 1);
+                    serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
+                    if (serverVersion == null) {
+                        this.proxyConnection.kickClient("§cWrong domain syntax!\n§cUnknown server version.");
+                    }
+                    final String connectAddress = arrayHelper.getAsString(0, arrayHelper.getLength() - 3, "_");
+                    final int connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
+                    serverAddress = AddressUtil.parse(connectAddress + ":" + connectPort, serverVersion);
+                } catch (IllegalArgumentException | StringIndexOutOfBoundsException e) {
+                    this.proxyConnection.kickClient("§cWrong domain syntax! §6Please use:\n§7address_port_version.viaproxy.hostname");
                 }
-                final String versionString = arrayHelper.get(arrayHelper.getLength() - 1);
-                serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
-                if (serverVersion == null) {
-                    this.proxyConnection.kickClient("§cWrong domain syntax!\n§cUnknown server version.");
-                }
-                final String connectAddress = arrayHelper.getAsString(0, arrayHelper.getLength() - 3, "_");
-                final int connectPort = arrayHelper.getInteger(arrayHelper.getLength() - 2);
-                serverAddress = AddressUtil.parse(connectAddress + ":" + connectPort, serverVersion);
-            } catch (IllegalArgumentException e) {
+            } else {
                 this.proxyConnection.kickClient("§cWrong domain syntax! §6Please use:\n§7address_port_version.viaproxy.hostname");
             }
         } else if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.INTERNAL) {
