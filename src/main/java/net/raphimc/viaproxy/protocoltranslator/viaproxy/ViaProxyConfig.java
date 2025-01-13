@@ -84,7 +84,6 @@ public class ViaProxyConfig {
     @Description({
             "The authentication method to use for joining the target server.",
             "none: No authentication (Offline mode)",
-            "openauthmod: Requires the OpenAuthMod client mod (https://modrinth.com/mod/openauthmod)",
             "account: Use an account for joining the target server. (Has to be configured in ViaProxy GUI)"
     })
     private AuthMethod authMethod = AuthMethod.NONE;
