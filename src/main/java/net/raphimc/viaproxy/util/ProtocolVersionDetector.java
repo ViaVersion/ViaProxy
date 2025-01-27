@@ -30,7 +30,7 @@ public class ProtocolVersionDetector {
     private static final int TIMEOUT = 3000;
 
     public static ProtocolVersion get(final SocketAddress serverAddress, final ProtocolVersion clientVersion) {
-        MCPingResponse response = MCPing
+        final MCPingResponse response = MCPing
                 .pingModern(clientVersion.getOriginalVersion())
                 .tcpSocketFactory(new SocketChannelSocketFactory())
                 .address(AddressUtil.toJ16UnixSocketAddress(serverAddress))
@@ -40,27 +40,19 @@ public class ProtocolVersionDetector {
 
         if (response.version.protocol == clientVersion.getOriginalVersion()) { // If the server is on the same version as the client, we can just connect
             return clientVersion;
-        } else { // Else ping again with protocol id -1 to get the protocol id of the server
-            response = MCPing
-                    .pingModern(-1)
-                    .tcpSocketFactory(new SocketChannelSocketFactory())
-                    .address(AddressUtil.toJ16UnixSocketAddress(serverAddress))
-                    .noResolve()
-                    .timeout(TIMEOUT, TIMEOUT)
-                    .getSync();
+        }
 
-            if (ProtocolVersion.isRegistered(response.version.protocol)) { // If the protocol is registered, we can use it
-                return ProtocolVersion.getProtocol(response.version.protocol);
-            } else {
-                for (ProtocolVersion protocolVersion : ProtocolVersionList.getProtocolsNewToOld()) {
-                    for (String version : protocolVersion.getIncludedVersions()) {
-                        if (response.version.name.contains(version)) {
-                            return protocolVersion;
-                        }
+        if (ProtocolVersion.isRegistered(response.version.protocol)) { // If the protocol is registered, we can use it
+            return ProtocolVersion.getProtocol(response.version.protocol);
+        } else {
+            for (ProtocolVersion protocolVersion : ProtocolVersionList.getProtocolsNewToOld()) {
+                for (String version : protocolVersion.getIncludedVersions()) {
+                    if (response.version.name.contains(version)) {
+                        return protocolVersion;
                     }
                 }
-                throw new RuntimeException("Unable to detect the server version\nServer sent an invalid protocol id: " + response.version.protocol + " (" + response.version.name + "§r)");
             }
+            throw new RuntimeException("Unable to detect the server version\nServer sent an invalid protocol id: " + response.version.protocol + " (" + response.version.name + "§r)");
         }
     }
 
