@@ -94,7 +94,7 @@ dependencies {
     include("net.lenni0451:MCPing:1.4.2") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    include "net.lenni0451.commons:swing:1.6.1"
+    include "net.lenni0451.commons:swing:1.7.0"
     include("net.raphimc.netminecraft:all:3.1.0-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
