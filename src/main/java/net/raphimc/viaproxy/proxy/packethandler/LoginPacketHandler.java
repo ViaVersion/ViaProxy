@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.proxy.packethandler;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.constants.ConnectionState;
@@ -121,12 +122,12 @@ public class LoginPacketHandler extends PacketHandler {
                 final String userName = this.proxyConnection.getGameProfile().getName();
                 try {
                     final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
-                    final GameProfile mojangProfile = AuthLibServices.SESSION_SERVICE.hasJoinedServer(this.proxyConnection.getGameProfile(), serverHash, null);
-                    if (mojangProfile == null) {
+                    final ProfileResult profileResult = AuthLibServices.SESSION_SERVICE.hasJoinedServer(userName, serverHash, null);
+                    if (profileResult == null) {
                         Logger.u_err("auth", this.proxyConnection, "Invalid session");
                         this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
                     } else {
-                        this.proxyConnection.setGameProfile(mojangProfile);
+                        this.proxyConnection.setGameProfile(profileResult.profile());
                     }
                     Logger.u_info("auth", this.proxyConnection, "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
                 } catch (CloseAndReturn ignored) {

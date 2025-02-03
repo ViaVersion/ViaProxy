@@ -104,7 +104,7 @@ public class ExternalInterface {
         try {
             if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
                 try {
-                    AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                    AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
                 } catch (Throwable e) {
                     proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
                 }
