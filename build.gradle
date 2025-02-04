@@ -108,8 +108,8 @@ dependencies {
     include "gs.mclo:api:4.1.0"
     include "net.lenni0451:optconfig:1.1.0"
 
-    includeJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:1.2.1"))
-    includeJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.2.1:downgraded-8"
+    includeJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:1.2.2"))
+    includeJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.2.2:downgraded-8"
 }
 
 sourceSets {
