@@ -183,6 +183,13 @@ public class ViaProxyConfig {
     })
     private boolean fakeAcceptResourcePacks = false;
 
+    @Option("workaround-config-state-packet-queue")
+    @Description({
+            "Fixes https://github.com/ViaVersion/ViaVersion/issues/4308 where the config state packet queue causes a disconnect sometimes.",
+            "It's recommended to only enable this if you are experiencing issues with the config state packet queue (See above issue)."
+    })
+    private boolean workAroundConfigStatePacketQueue = false;
+
     public static ViaProxyConfig create(final File configFile) {
         final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
         configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
@@ -475,6 +482,15 @@ public class ViaProxyConfig {
 
     public void setFakeAcceptResourcePacks(final boolean fakeAcceptResourcePacks) {
         this.fakeAcceptResourcePacks = fakeAcceptResourcePacks;
+        this.save();
+    }
+
+    public boolean shouldWorkAroundConfigStatePacketQueue() {
+        return this.workAroundConfigStatePacketQueue;
+    }
+
+    public void setWorkAroundConfigStatePacketQueue(final boolean workAroundConfigStatePacketQueue) {
+        this.workAroundConfigStatePacketQueue = workAroundConfigStatePacketQueue;
         this.save();
     }
 
