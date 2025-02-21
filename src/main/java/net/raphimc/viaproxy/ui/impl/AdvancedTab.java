@@ -36,6 +36,7 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.concurrent.ExecutionException;
 
 import static net.raphimc.viaproxy.ui.ViaProxyWindow.BODY_BLOCK_PADDING;
 import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
@@ -189,8 +190,13 @@ public class AdvancedTab extends UITab {
                     } else {
                         ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", apiResponse.getError()));
                     }
-                } catch (FileNotFoundException e) {
-                    ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_not_found"));
+                } catch (ExecutionException e) {
+                    if (e.getCause() instanceof FileNotFoundException) {
+                        ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_not_found"));
+                    } else {
+                        Logger.LOGGER.error("Failed to upload log file", e.getCause());
+                        ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", e.getCause().getMessage()));
+                    }
                 } catch (Throwable e) {
                     Logger.LOGGER.error("Failed to upload log file", e);
                     ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", e.getMessage()));
