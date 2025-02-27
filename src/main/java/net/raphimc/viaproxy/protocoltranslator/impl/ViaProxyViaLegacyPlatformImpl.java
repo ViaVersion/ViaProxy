@@ -18,13 +18,13 @@
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.vialoader.impl.platform.ViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.ViaProxy;
+import com.viaversion.viaversion.api.Via;
 
 public class ViaProxyViaLegacyPlatformImpl extends ViaLegacyPlatformImpl {
 
     @Override
     public String getCpeAppName() {
-        return "ViaProxy " + ViaProxy.VERSION;
+        return Via.getPlatform().getPlatformName() + " " + Via.getPlatform().getPlatformVersion();
     }
 
 }

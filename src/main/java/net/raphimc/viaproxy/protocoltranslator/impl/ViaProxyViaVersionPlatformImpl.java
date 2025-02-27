@@ -33,6 +33,16 @@ public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
     }
 
     @Override
+    public String getPlatformName() {
+        return "ViaProxy";
+    }
+
+    @Override
+    public String getPlatformVersion() {
+        return ViaProxy.VERSION;
+    }
+
+    @Override
     public void sendMessage(UUID uuid, String msg) {
         super.sendMessage(uuid, ConsoleFormatter.convert(msg));
     }
@@ -41,7 +51,6 @@ public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
     public JsonObject getDump() {
         final JsonObject root = new JsonObject();
 
-        root.addProperty("version", ViaProxy.VERSION);
         root.addProperty("impl_version", ViaProxy.IMPL_VERSION);
 
         final JsonArray plugins = new JsonArray();
