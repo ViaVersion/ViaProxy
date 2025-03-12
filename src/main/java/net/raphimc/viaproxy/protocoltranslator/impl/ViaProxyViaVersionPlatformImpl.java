@@ -18,15 +18,13 @@
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.vialoader.impl.platform.ViaVersionPlatformImpl;
-import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.libs.gson.JsonArray;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
-
-import java.util.UUID;
+import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 
 public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
 
@@ -45,14 +43,12 @@ public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
     }
 
     @Override
-    public boolean kickPlayer(UUID uuid, String message) {
-        final UserConnection userConnection = Via.getManager().getConnectionManager().getConnectedClient(uuid);
-        if (userConnection != null) {
-            ProxyConnection.fromUserConnection(userConnection).kickClient(message);
-            return true;
-        } else {
-            return false;
+    public boolean kickPlayer(UserConnection connection, String message) {
+        try {
+            ProxyConnection.fromUserConnection(connection).kickClient(message);
+        } catch (CloseAndReturn ignored) {
         }
+        return true;
     }
 
     @Override

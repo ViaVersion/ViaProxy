@@ -30,7 +30,7 @@ public class ViaProxyVLPipeline extends VLPipeline {
 
     @Override
     public ChannelHandler createViaCodec() {
-        return new ViaProxyViaCodec(this.user);
+        return new ViaProxyViaCodec(this.connection);
     }
 
     @Override
