@@ -31,6 +31,7 @@ import net.raphimc.netminecraft.packet.impl.play.S2CPlayResourcePackPacket;
 import net.raphimc.netminecraft.packet.impl.play.S2CPlayResourcePackPushPacket;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -65,17 +66,26 @@ public class ResourcePackPacketHandler extends PacketHandler {
     private void sendResourcePack() {
         if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getChannel().eventLoop().schedule(() -> {
-                final String url = ViaProxy.getConfig().getResourcePackUrl();
-                final boolean required = Via.getConfig().isForcedUse1_17ResourcePack();
-                final ATextComponent message = TextComponentSerializer.LATEST.deserialize(Via.getConfig().get1_17ResourcePackPrompt().toString());
+                try {
+                    final String url = ViaProxy.getConfig().getResourcePackUrl();
+                    final boolean required = Via.getConfig().isForcedUse1_17ResourcePack();
+                    final ATextComponent message;
+                    if (Via.getConfig().get1_17ResourcePackPrompt() != null) {
+                        message = TextComponentSerializer.LATEST.deserialize(Via.getConfig().get1_17ResourcePackPrompt().toString());
+                    } else {
+                        message = null;
+                    }
 
-                if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
-                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPushPacket(UUID.randomUUID(), url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
-                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPacket(url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
-                    final byte[] data = url.getBytes(StandardCharsets.UTF_8);
-                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayCustomPayloadPacket("MC|RPack", data)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
+                        this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPushPacket(UUID.randomUUID(), url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
+                        this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPacket(url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
+                        final byte[] data = url.getBytes(StandardCharsets.UTF_8);
+                        this.proxyConnection.getC2P().writeAndFlush(new S2CPlayCustomPayloadPacket("MC|RPack", data)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    }
+                } catch (Throwable e) {
+                    Logger.LOGGER.warn("Failed to send resource pack", e);
                 }
             }, 250, TimeUnit.MILLISECONDS);
         }
