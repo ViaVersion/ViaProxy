@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.proxy.packethandler;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.channel.ChannelFutureListener;
-import net.lenni0451.mcstructs.text.ATextComponent;
+import net.lenni0451.mcstructs.text.TextComponent;
 import net.lenni0451.mcstructs.text.serializer.TextComponentSerializer;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPackets;
@@ -69,7 +69,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
                 try {
                     final String url = ViaProxy.getConfig().getResourcePackUrl();
                     final boolean required = Via.getConfig().isForcedUse1_17ResourcePack();
-                    final ATextComponent message;
+                    final TextComponent message;
                     if (Via.getConfig().get1_17ResourcePackPrompt() != null) {
                         message = TextComponentSerializer.LATEST.deserialize(Via.getConfig().get1_17ResourcePackPrompt().toString());
                     } else {

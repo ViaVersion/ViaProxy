@@ -21,6 +21,7 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
 import com.viaversion.viaversion.api.minecraft.signature.model.MessageMetadata;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -76,6 +77,9 @@ public class ChatSignaturePacketHandler extends PacketHandler {
                 Types.OPTIONAL_SIGNATURE_BYTES.write(newChatMessageData, signature); // signature
                 PacketTypes.writeVarInt(newChatMessageData, 0); // offset
                 Types.ACKNOWLEDGED_BIT_SET.write(newChatMessageData, new BitSet(20)); // acknowledged
+                if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_21_5)) {
+                    newChatMessageData.writeByte(0); // checksum
+                }
                 unknownPacket.data = ByteBufUtil.getBytes(newChatMessageData);
             }
         }

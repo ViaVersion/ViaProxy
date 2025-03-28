@@ -61,16 +61,16 @@ repositories {
 }
 
 dependencies {
-    include "com.viaversion:viaversion-common:5.2.2-SNAPSHOT"
-    include "com.viaversion:viabackwards-common:5.2.2-SNAPSHOT"
-    include "com.viaversion:viarewind-common:4.0.6-SNAPSHOT"
-    include "net.raphimc:ViaLegacy:3.0.8-SNAPSHOT"
-    include "com.viaversion:viaaprilfools-common:4.0.1-SNAPSHOT"
-    include("net.raphimc:ViaBedrock:0.0.15-SNAPSHOT") {
+    include "com.viaversion:viaversion-common:5.3.0"
+    include "com.viaversion:viabackwards-common:5.3.0"
+    include "com.viaversion:viarewind-common:4.0.6"
+    include "net.raphimc:ViaLegacy:3.0.8"
+    include "com.viaversion:viaaprilfools-common:4.0.1"
+    include("net.raphimc:ViaBedrock:0.0.16-20250328.181745-1") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
-    include("com.viaversion:vialoader:4.0.1-SNAPSHOT") {
+    include("com.viaversion:vialoader:4.0.1") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
@@ -95,7 +95,7 @@ dependencies {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include "net.lenni0451.commons:swing:1.7.0"
-    include("net.raphimc.netminecraft:all:3.1.0-SNAPSHOT") {
+    include("net.raphimc.netminecraft:all:3.1.0") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     include("net.raphimc:MinecraftAuth:4.1.1") {
