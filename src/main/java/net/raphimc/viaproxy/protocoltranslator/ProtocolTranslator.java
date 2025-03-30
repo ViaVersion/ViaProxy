@@ -78,6 +78,8 @@ public class ProtocolTranslator {
                     1_13-tab-complete-delay: 5
                     no-delay-shield-blocking: true
                     handle-invalid-item-count: true
+                    max-pps: 1400
+                    tracking-warning-pps: 400
                     """, StandardOpenOption.CREATE_NEW);
         } catch (FileAlreadyExistsException ignored) {
         } catch (Throwable e) {
