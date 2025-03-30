@@ -64,31 +64,29 @@ public class ResourcePackPacketHandler extends PacketHandler {
     }
 
     private void sendResourcePack() {
-        if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
-            this.proxyConnection.getChannel().eventLoop().schedule(() -> {
-                try {
-                    final String url = ViaProxy.getConfig().getResourcePackUrl();
-                    final boolean required = Via.getConfig().isForcedUse1_17ResourcePack();
-                    final TextComponent message;
-                    if (Via.getConfig().get1_17ResourcePackPrompt() != null) {
-                        message = TextComponentSerializer.LATEST.deserialize(Via.getConfig().get1_17ResourcePackPrompt().toString());
-                    } else {
-                        message = null;
-                    }
-
-                    if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
-                        this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPushPacket(UUID.randomUUID(), url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                    } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
-                        this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPacket(url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                    } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
-                        final byte[] data = url.getBytes(StandardCharsets.UTF_8);
-                        this.proxyConnection.getC2P().writeAndFlush(new S2CPlayCustomPayloadPacket("MC|RPack", data)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                    }
-                } catch (Throwable e) {
-                    Logger.LOGGER.warn("Failed to send resource pack", e);
+        this.proxyConnection.getChannel().eventLoop().schedule(() -> {
+            try {
+                final String url = ViaProxy.getConfig().getResourcePackUrl();
+                final boolean required = Via.getConfig().isForcedUse1_17ResourcePack();
+                final TextComponent message;
+                if (Via.getConfig().get1_17ResourcePackPrompt() != null) {
+                    message = TextComponentSerializer.LATEST.deserialize(Via.getConfig().get1_17ResourcePackPrompt().toString());
+                } else {
+                    message = null;
                 }
-            }, 250, TimeUnit.MILLISECONDS);
-        }
+
+                if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPushPacket(UUID.randomUUID(), url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayResourcePackPacket(url, "", required, message)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                } else if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_7_2)) {
+                    final byte[] data = url.getBytes(StandardCharsets.UTF_8);
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CPlayCustomPayloadPacket("MC|RPack", data)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                }
+            } catch (Throwable e) {
+                Logger.LOGGER.warn("Failed to send resource pack", e);
+            }
+        }, 250, TimeUnit.MILLISECONDS);
     }
 
 }

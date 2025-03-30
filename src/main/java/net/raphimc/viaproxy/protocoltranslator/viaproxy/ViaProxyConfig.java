@@ -190,6 +190,13 @@ public class ViaProxyConfig {
     })
     private boolean workAroundConfigStatePacketQueue = false;
 
+    @Option("send-connection-details")
+    @Description({
+            "If enabled, ViaProxy will send a connection details custom payload packet to the server.",
+            "This includes the actual client version as well as the ViaProxy version."
+    })
+    private boolean sendConnectionDetails = false;
+
     public static ViaProxyConfig create(final File configFile) {
         final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
         configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
@@ -491,6 +498,15 @@ public class ViaProxyConfig {
 
     public void setWorkAroundConfigStatePacketQueue(final boolean workAroundConfigStatePacketQueue) {
         this.workAroundConfigStatePacketQueue = workAroundConfigStatePacketQueue;
+        this.save();
+    }
+
+    public boolean shouldSendConnectionDetails() {
+        return this.sendConnectionDetails;
+    }
+
+    public void setSendConnectionDetails(final boolean sendConnectionDetails) {
+        this.sendConnectionDetails = sendConnectionDetails;
         this.save();
     }
 
