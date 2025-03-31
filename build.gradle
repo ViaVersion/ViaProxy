@@ -65,8 +65,8 @@ dependencies {
     include "com.viaversion:viabackwards-common:5.3.1"
     include "com.viaversion:viarewind-common:4.0.7"
     include "net.raphimc:ViaLegacy:3.0.9"
-    include "com.viaversion:viaaprilfools-common:4.0.2-SNAPSHOT"
-    include("net.raphimc:ViaBedrock:0.0.16-SNAPSHOT") {
+    include "com.viaversion:viaaprilfools-common:4.0.1"
+    include("net.raphimc:ViaBedrock:0.0.16-20250331.164510-3") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
@@ -86,9 +86,9 @@ dependencies {
     include("com.mojang:authlib:6.0.57") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    include "net.lenni0451.classtransform:mixinstranslator:1.14.0"
-    include "net.lenni0451.classtransform:mixinsdummy:1.14.0"
-    include "net.lenni0451.classtransform:additionalclassprovider:1.14.0"
+    include "net.lenni0451.classtransform:mixinstranslator:1.14.1"
+    include "net.lenni0451.classtransform:mixinsdummy:1.14.1"
+    include "net.lenni0451.classtransform:additionalclassprovider:1.14.1"
     include "net.lenni0451:Reflect:1.4.0"
     include "net.lenni0451:LambdaEvents:2.4.2"
     include("net.lenni0451:MCPing:1.4.3") {
