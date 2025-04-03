@@ -190,6 +190,13 @@ public class ViaProxyConfig {
     })
     private boolean workAroundConfigStatePacketQueue = false;
 
+    @Option("skip-config-state-packet-queue")
+    @Description({
+            "Fixes potential join issues on <= 1.20.1 quilt/fabric servers.",
+            "It's recommended to only enable this if you are experiencing issues with the config state packet queue (See above issue)."
+    })
+    private boolean skipConfigStatePacketQueue = false;
+
     @Option("send-connection-details")
     @Description({
             "If enabled, ViaProxy will send a connection details custom payload packet to the server.",
@@ -498,6 +505,15 @@ public class ViaProxyConfig {
 
     public void setWorkAroundConfigStatePacketQueue(final boolean workAroundConfigStatePacketQueue) {
         this.workAroundConfigStatePacketQueue = workAroundConfigStatePacketQueue;
+        this.save();
+    }
+
+    public boolean shouldSkipConfigStatePacketQueue() {
+        return this.skipConfigStatePacketQueue;
+    }
+
+    public void setSkipConfigStatePacketQueue(final boolean skipConfigStatePacketQueue) {
+        this.skipConfigStatePacketQueue = skipConfigStatePacketQueue;
         this.save();
     }
 
