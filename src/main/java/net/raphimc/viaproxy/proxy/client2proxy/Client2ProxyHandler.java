@@ -269,7 +269,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         this.proxyConnection.getPacketHandlers().add(new CompressionPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new LoginPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new DisconnectPacketHandler(this.proxyConnection));
-        if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+        if (ViaProxy.getConfig().shouldRewriteTransferPackets() && clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
             this.proxyConnection.getPacketHandlers().add(new TransferPacketHandler(this.proxyConnection));
         }
         if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2) || serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2)) {
