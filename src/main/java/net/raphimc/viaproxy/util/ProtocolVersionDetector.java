@@ -31,7 +31,7 @@ public class ProtocolVersionDetector {
 
     public static ProtocolVersion get(final SocketAddress serverAddress, final ProtocolVersion clientVersion) {
         final MCPingResponse response = MCPing
-                .pingModern(clientVersion.getOriginalVersion())
+                .pingModern(clientVersion.getOriginalVersion(), true)
                 .tcpSocketFactory(new SocketChannelSocketFactory())
                 .address(AddressUtil.toJ16UnixSocketAddress(serverAddress))
                 .noResolve()
