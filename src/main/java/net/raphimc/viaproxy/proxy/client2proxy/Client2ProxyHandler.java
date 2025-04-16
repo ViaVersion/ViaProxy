@@ -204,6 +204,9 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
 
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && TransferDataHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
             serverAddress = TransferDataHolder.removeTempRedirect(this.proxyConnection.getC2P());
+            if (clientVersion.olderThan(ProtocolVersion.v1_20_5)) {
+                packet.intendedState = IntendedState.TRANSFER;
+            }
         }
 
         HostAndPort clientHandshakeAddress;
