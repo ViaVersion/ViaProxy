@@ -74,7 +74,7 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
-    include "com.google.code.gson:gson:2.13.0"
+    include "com.google.code.gson:gson:2.13.1"
     include "com.formdev:flatlaf:3.6"
     include "com.formdev:flatlaf-extras:3.6"
     include "org.apache.commons:commons-lang3:3.17.0"
