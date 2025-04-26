@@ -19,8 +19,11 @@ package net.raphimc.viaproxy.protocoltranslator.viaproxy.item_component_hasher;
 
 import com.viaversion.nbt.tag.*;
 import net.lenni0451.mcstructs.nbt.NbtTag;
+import net.lenni0451.mcstructs.nbt.utils.NbtCodecUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class NbtConverter {
@@ -74,6 +77,12 @@ public class NbtConverter {
             return new net.lenni0451.mcstructs.nbt.tags.ByteArrayTag(byteArrayTag.getValue());
         } else if (tag instanceof StringTag stringTag) {
             return new net.lenni0451.mcstructs.nbt.tags.StringTag(stringTag.getValue());
+        } else if (tag instanceof MixedListTag mixedListTag) { // VV moment
+            final List<NbtTag> tags = new ArrayList<>();
+            for (Tag subTag : mixedListTag) {
+                tags.add(viaToMcStructs(subTag));
+            }
+            return NbtCodecUtils.wrapMarkers(tags);
         } else if (tag instanceof ListTag<?> listTag) {
             final net.lenni0451.mcstructs.nbt.tags.ListTag<NbtTag> mcListTag = new net.lenni0451.mcstructs.nbt.tags.ListTag<>();
             for (Tag subTag : listTag) {
