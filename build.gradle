@@ -82,7 +82,7 @@ dependencies {
     include "net.sf.jopt-simple:jopt-simple:5.0.4"
     include "org.apache.logging.log4j:log4j-core:2.24.3"
     include "org.apache.logging.log4j:log4j-slf4j-impl:2.24.3"
-    include "org.fusesource.jansi:jansi:2.4.1"
+    include "org.jline:jansi:3.29.0"
     include("com.mojang:authlib:6.0.57") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }

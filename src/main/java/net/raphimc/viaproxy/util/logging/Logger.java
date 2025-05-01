@@ -22,7 +22,7 @@ import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.AddressUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.fusesource.jansi.AnsiConsole;
+import org.jline.jansi.AnsiConsole;
 
 import java.io.PrintStream;
 import java.net.SocketAddress;
