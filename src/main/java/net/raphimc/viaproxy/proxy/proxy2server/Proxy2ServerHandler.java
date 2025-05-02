@@ -21,7 +21,9 @@ import com.google.common.collect.Lists;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.packet.Packet;
+import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.ExceptionUtil;
@@ -44,7 +46,9 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<Packet> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
 
-        Logger.u_info("disconnect", this.proxyConnection, "Connection closed");
+        if (ViaProxy.getConfig().shouldLogClientStatusRequests() || this.proxyConnection.getP2sConnectionState() != ConnectionState.STATUS) {
+            Logger.u_info("disconnect", this.proxyConnection, "Connection closed");
+        }
         try {
             this.proxyConnection.getC2P().close();
         } catch (Throwable ignored) {

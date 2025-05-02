@@ -289,7 +289,9 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         }
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
 
-        Logger.u_info("connect", this.proxyConnection, "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + AddressUtil.toString(serverAddress));
+        if (ViaProxy.getConfig().shouldLogClientStatusRequests() || intendedState != IntendedState.STATUS) {
+            Logger.u_info("connect", this.proxyConnection, "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + AddressUtil.toString(serverAddress));
+        }
         ViaProxy.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
 
         this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {

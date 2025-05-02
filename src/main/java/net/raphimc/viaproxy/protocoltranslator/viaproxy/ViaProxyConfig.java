@@ -211,6 +211,12 @@ public class ViaProxyConfig {
     })
     private boolean sendConnectionDetails = false;
 
+    @Option("log-client-status-requests")
+    @Description({
+            "Enable this if you want to see client status requests in the console and log files.",
+    })
+    private boolean logClientStatusRequests = false;
+
     public static ViaProxyConfig create(final File configFile) {
         final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
         configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
@@ -539,6 +545,15 @@ public class ViaProxyConfig {
 
     public void setSendConnectionDetails(final boolean sendConnectionDetails) {
         this.sendConnectionDetails = sendConnectionDetails;
+        this.save();
+    }
+
+    public boolean shouldLogClientStatusRequests() {
+        return this.logClientStatusRequests;
+    }
+
+    public void setLogClientStatusRequests(final boolean logClientStatusRequests) {
+        this.logClientStatusRequests = logClientStatusRequests;
         this.save();
     }
 
