@@ -1,0 +1,11 @@
+plugins {
+    id "idea"
+}
+
+idea {
+    module {
+        ["run"].each {
+            excludeDirs << file("$it")
+        }
+    }
+}

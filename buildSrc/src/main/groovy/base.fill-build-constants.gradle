@@ -1,0 +1,16 @@
+plugins {
+    id "net.raphimc.class-token-replacer"
+}
+
+sourceSets.configureEach {
+    it.classTokenReplacer {
+        property("\${version}", project.version)
+        property("\${commit_hash}", latestCommitHash().get())
+    }
+}
+
+Provider<String> latestCommitHash() {
+    return providers.exec {
+        commandLine = ["git", "rev-parse", "--short", "HEAD"]
+    }.standardOutput.getAsText().map(String::trim)
+}

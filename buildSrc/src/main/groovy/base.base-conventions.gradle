@@ -1,0 +1,26 @@
+base {
+    java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
+
+    group = project.maven_group
+    archivesName = project.maven_name
+    version = project.maven_version
+}
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    var projectName = project.name
+    from("LICENSE") {
+        rename { "${it}_${projectName}" }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+}
+
+tasks.withType(Javadoc).configureEach {
+    it.options.encoding = "UTF-8"
+}

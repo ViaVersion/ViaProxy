@@ -1,31 +1,18 @@
 plugins {
     id "java"
-    id "application"
-    id "maven-publish"
-    id "idea"
+    id "base.base-conventions"
+    id "base.application-conventions"
+    id "base.fill-build-constants"
+    id "viaproxy.publishing-conventions"
     id "net.raphimc.class-token-replacer" version "1.1.4"
     id "xyz.wagyourtail.jvmdowngrader" version "1.2.2"
 }
 
-base {
-    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-    compileJava.options.encoding = compileTestJava.options.encoding = javadoc.options.encoding = "UTF-8"
-
-    group = project.maven_group ?: rootProject.maven_group
-    archivesName = project.maven_name ?: rootProject.maven_name
-    version = project.maven_version ?: rootProject.maven_version
-}
-
 configurations {
-    include
     includeJ8
-
-    implementation.extendsFrom include
-    api.extendsFrom include
 }
 
 repositories {
-    mavenCentral()
     maven {
         name = "ViaVersion"
         url = "https://repo.viaversion.com"
@@ -113,102 +100,20 @@ dependencies {
     includeJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.2.2:downgraded-8"
 }
 
-sourceSets {
-    main {
-        classTokenReplacer {
-            property("\${version}", project.version)
-            property("\${impl_version}", "git-${project.name}-${project.version}:${project.latestCommitHash().get()}")
-        }
-    }
-}
-
-java {
-    withSourcesJar()
-}
-
 application {
     mainClass = "net.raphimc.viaproxy.ViaProxy"
 }
 
 jar {
-    dependsOn configurations.include
-    from {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        configurations.include.collect {
-            zipTree(it)
-        }
-    } {
-        exclude "META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA"
-    }
-
     manifest {
         attributes(
-                "Main-Class": application.mainClass,
-                "Multi-Release": "true",
                 "Launcher-Agent-Class": application.mainClass
         )
-    }
-
-    from("LICENSE") {
-        rename { "${it}_${project.name ?: rootProject.name}" }
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "Via"
-            url = "https://repo.viaversion.com/"
-
-            credentials(PasswordCredentials)
-            authentication {
-                basic(BasicAuthentication)
-            }
-        }
-    }
-    publications {
-        maven(MavenPublication) {
-            groupId = project.maven_group
-            artifactId = project.maven_name
-            version = project.maven_version
-
-            from components.java
-
-            pom {
-                name = "ViaProxy"
-                description = "Standalone proxy which allows players to join EVERY Minecraft server version (Classic, Alpha, Beta, Release, Bedrock)"
-                url = "https://github.com/ViaVersion/ViaProxy"
-                licenses {
-                    license {
-                        name = "GPL-3.0 License"
-                        url = "https://github.com/ViaVersion/ViaProxy/blob/main/LICENSE"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "RK_01"
-                    }
-                }
-                scm {
-                    connection = "scm:git:git://github.com/ViaVersion/ViaProxy.git"
-                    developerConnection = "scm:git:ssh://github.com/ViaVersion/ViaProxy.git"
-                    url = "https://github.com/ViaVersion/ViaProxy.git"
-                }
-            }
-        }
-    }
-}
-
-idea {
-    module {
-        ["run"].each {
-            excludeDirs << file("$it")
-        }
     }
 }
 
 downgradeJar {
-    dependsOn configurations.includeJ8
+    dependsOn(configurations.includeJ8)
     from {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         configurations.includeJ8.collect {
@@ -225,8 +130,4 @@ downgradeJar {
 }
 build.finalizedBy("downgradeJar")
 
-Provider<String> latestCommitHash() {
-    return providers.exec {
-        commandLine = ["git", "rev-parse", "--short", "HEAD"]
-    }.standardOutput.getAsText().map(String::trim)
-}
+tasks.javadoc.enabled = false

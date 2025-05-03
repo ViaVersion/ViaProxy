@@ -72,7 +72,7 @@ import java.util.function.Consumer;
 public class ViaProxy {
 
     public static final String VERSION = "${version}";
-    public static final String IMPL_VERSION = "${impl_version}";
+    public static final String IMPL_VERSION = "git-ViaProxy-${version}:${commit_hash}";
 
     public static final LambdaManager EVENT_MANAGER = LambdaManager.threadSafe(new LambdaMetaFactoryGenerator(JavaBypass.TRUSTED_LOOKUP));
     private static /*final*/ File CWD;

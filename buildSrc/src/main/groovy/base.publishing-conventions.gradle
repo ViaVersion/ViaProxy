@@ -1,0 +1,30 @@
+plugins {
+    id "maven-publish"
+    id "signing"
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from(components.java)
+
+            groupId = project.maven_group
+            artifactId = project.maven_name
+            version = project.maven_version
+        }
+    }
+}
+
+signing {
+    setRequired(false)
+    sign(publishing.publications.mavenJava)
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    it.dependsOn(tasks.withType(Sign))
+}

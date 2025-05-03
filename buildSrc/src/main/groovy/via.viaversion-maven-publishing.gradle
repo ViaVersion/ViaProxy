@@ -1,0 +1,13 @@
+publishing {
+    repositories {
+        maven {
+            name = "Via"
+            url = "https://repo.viaversion.com/"
+
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}
