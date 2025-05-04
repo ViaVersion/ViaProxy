@@ -23,4 +23,5 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(Javadoc).configureEach {
     it.options.encoding = "UTF-8"
+    it.options.addStringOption("Xdoclint:none", "-quiet")
 }
