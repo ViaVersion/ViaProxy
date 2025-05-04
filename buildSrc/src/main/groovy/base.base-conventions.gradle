@@ -11,9 +11,16 @@ repositories {
 }
 
 jar {
-    var projectName = project.name
-    from("LICENSE") {
-        rename { "${it}_${projectName}" }
+    if (layout.projectDirectory.file("LICENSE").asFile.exists()) {
+        def projectName = project.name
+        from(layout.projectDirectory.file("LICENSE")) {
+            rename { "${it}_${projectName}" }
+        }
+    } else if (rootProject.layout.projectDirectory.file("LICENSE").asFile.exists()) {
+        def projectName = rootProject.name
+        from(rootProject.layout.projectDirectory.file("LICENSE")) {
+            rename { "${it}_${projectName}" }
+        }
     }
 }
 

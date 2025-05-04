@@ -1,15 +1,15 @@
 configurations {
-    include
+    includeInJar
 
-    implementation.extendsFrom(include)
-    api.extendsFrom(include)
+    implementation.extendsFrom(includeInJar)
+    api.extendsFrom(includeInJar)
 }
 
 jar {
-    dependsOn(configurations.include)
+    dependsOn(configurations.includeInJar)
     from {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        configurations.include.collect {
+        configurations.includeInJar.collect {
             zipTree(it)
         }
     } {

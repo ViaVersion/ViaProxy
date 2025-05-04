@@ -1,6 +1,6 @@
 plugins {
     id "application"
-    id "base.include-configuration"
+    id "base.include-in-jar-configuration"
     id "base.exclude-run-folder"
 }
 
