@@ -2,7 +2,7 @@ base {
     java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
 
     group = project.maven_group
-    archivesName = project.maven_name
+    archivesName = project.name
     version = project.maven_version
 }
 
