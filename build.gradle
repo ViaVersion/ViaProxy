@@ -92,7 +92,7 @@ dependencies {
     includeInJar("org.cloudburstmc.netty:netty-transport-raknet:1.0.0.CR3-SNAPSHOT") {
         exclude group: "io.netty"
     }
-    includeInJar "gs.mclo:api:5.0.0"
+    includeInJar "gs.mclo:api:5.0.2"
     includeInJar "net.lenni0451:optconfig:1.1.1"
 
     includeInJarJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:1.2.2"))
