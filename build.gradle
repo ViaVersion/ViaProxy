@@ -48,8 +48,8 @@ repositories {
 }
 
 dependencies {
-    includeInJar "com.viaversion:viaversion-common:5.3.3-SNAPSHOT"
-    includeInJar "com.viaversion:viabackwards-common:5.3.3-SNAPSHOT"
+    includeInJar "com.viaversion:viaversion-common:5.4.0-SNAPSHOT"
+    includeInJar "com.viaversion:viabackwards-common:5.4.0-SNAPSHOT"
     includeInJar "com.viaversion:viarewind-common:4.0.8-SNAPSHOT"
     includeInJar "net.raphimc:ViaLegacy:3.0.10-SNAPSHOT"
     includeInJar "com.viaversion:viaaprilfools-common:4.0.2-SNAPSHOT"
