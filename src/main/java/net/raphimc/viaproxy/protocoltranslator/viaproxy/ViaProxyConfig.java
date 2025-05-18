@@ -211,6 +211,12 @@ public class ViaProxyConfig {
     })
     private boolean sendConnectionDetails = false;
 
+    @Option("log-ips")
+    @Description({
+            "Disable this if you want to hide IP addresses in the console and log files.",
+    })
+    private boolean logIps = true;
+
     @Option("log-client-status-requests")
     @Description({
             "Enable this if you want to see client status requests in the console and log files.",
@@ -545,6 +551,15 @@ public class ViaProxyConfig {
 
     public void setSendConnectionDetails(final boolean sendConnectionDetails) {
         this.sendConnectionDetails = sendConnectionDetails;
+        this.save();
+    }
+
+    public boolean shouldLogIps() {
+        return this.logIps;
+    }
+
+    public void setLogIps(final boolean logIps) {
+        this.logIps = logIps;
         this.save();
     }
 
