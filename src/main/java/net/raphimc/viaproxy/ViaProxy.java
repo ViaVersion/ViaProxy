@@ -64,6 +64,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -134,6 +135,21 @@ public class ViaProxy {
                 }
             }
             failedCwds.add(potentialCwd);
+        }
+        if (CWD == null) { // Backup strategy for weird permission setups: Attempt to write a dummy file to check if the directory is writable
+            for (File potentialCwd : potentialCwds) {
+                if (potentialCwd.isDirectory()) {
+                    try {
+                        final Path testFile = new File(potentialCwd, "viaproxy_writable_test.txt").toPath();
+                        Files.deleteIfExists(testFile);
+                        Files.writeString(testFile, "This is just a test. This file can be deleted.");
+                        Files.deleteIfExists(testFile);
+                        CWD = potentialCwd;
+                        break;
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
         }
         if (CWD != null) {
             System.setProperty("user.dir", CWD.getAbsolutePath());
