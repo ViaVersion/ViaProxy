@@ -18,12 +18,15 @@
 package net.raphimc.viaproxy.proxy.external_interface;
 
 import com.google.common.primitives.Longs;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_0;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_1;
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.lenni0451.commons.httpclient.proxy.SingleProxyAuthenticator;
 import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
 import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
@@ -38,8 +41,10 @@ import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
+import net.raphimc.viaproxy.util.Proxy;
 import net.raphimc.viaproxy.util.logging.Logger;
 
+import java.net.Authenticator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -104,7 +109,21 @@ public class ExternalInterface {
         try {
             if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
                 try {
-                    AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                    if (ViaProxy.getConfig().getBackendProxy() == null) {
+                        AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                    } else {
+                        final Proxy proxy = ViaProxy.getConfig().getBackendProxy();
+                        final MinecraftSessionService sessionService = new YggdrasilAuthenticationService(proxy.toJavaProxy()).createMinecraftSessionService();
+                        Authenticator prevAuthenticator = Authenticator.getDefault();
+                        try {
+                            if (proxy.getUsername() != null && proxy.getPassword() != null) {
+                                Authenticator.setDefault(new SingleProxyAuthenticator(proxy.getUsername(), proxy.getPassword()));
+                            }
+                            sessionService.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                        } finally {
+                            Authenticator.setDefault(prevAuthenticator);
+                        }
+                    }
                 } catch (Throwable e) {
                     proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
                 }

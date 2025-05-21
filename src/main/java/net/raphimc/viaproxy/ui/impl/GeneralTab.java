@@ -33,6 +33,7 @@ import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.ui.elements.LinkLabel;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.util.AddressUtil;
+import net.raphimc.viaproxy.util.Proxy;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -287,12 +288,12 @@ public class GeneralTab extends UITab {
                     }
                     if (!proxyUrl.isBlank()) {
                         try {
-                            ViaProxy.getConfig().setBackendProxyUrl(new URI(proxyUrl));
+                            ViaProxy.getConfig().setBackendProxy(new Proxy(new URI(proxyUrl)));
                         } catch (URISyntaxException e) {
                             throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_proxy_url"));
                         }
                     } else {
-                        ViaProxy.getConfig().setBackendProxyUrl(null);
+                        ViaProxy.getConfig().setBackendProxy(null);
                     }
                     this.applyGuiState();
                     this.viaProxyWindow.advancedTab.applyGuiState();

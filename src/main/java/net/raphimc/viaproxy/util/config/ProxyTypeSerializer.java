@@ -19,22 +19,23 @@ package net.raphimc.viaproxy.util.config;
 
 import net.lenni0451.optconfig.serializer.ConfigTypeSerializer;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
+import net.raphimc.viaproxy.util.Proxy;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class ProxyUriTypeSerializer extends ConfigTypeSerializer<ViaProxyConfig, URI> {
+public class ProxyTypeSerializer extends ConfigTypeSerializer<ViaProxyConfig, Proxy> {
 
-    public ProxyUriTypeSerializer(final ViaProxyConfig config) {
+    public ProxyTypeSerializer(final ViaProxyConfig config) {
         super(config);
     }
 
     @Override
-    public URI deserialize(final Class<URI> typeClass, final Object serializedObject) {
+    public Proxy deserialize(final Class<Proxy> typeClass, final Object serializedObject) {
         final String proxyUrl = (String) serializedObject;
         if (!proxyUrl.isBlank()) {
             try {
-                return new URI(proxyUrl);
+                return new Proxy(new URI(proxyUrl));
             } catch (URISyntaxException e) {
                 throw new IllegalArgumentException("Invalid proxy url: " + proxyUrl + ". Proxy url format: type://address:port or type://username:password@address:port");
             }
@@ -43,9 +44,9 @@ public class ProxyUriTypeSerializer extends ConfigTypeSerializer<ViaProxyConfig,
     }
 
     @Override
-    public Object serialize(final URI object) {
+    public Object serialize(final Proxy object) {
         if (object != null) {
-            return object.toString();
+            return object.toURI().toString();
         } else {
             return "";
         }

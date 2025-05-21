@@ -24,10 +24,6 @@ import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
-import io.netty.handler.proxy.HttpProxyHandler;
-import io.netty.handler.proxy.ProxyHandler;
-import io.netty.handler.proxy.Socks4ProxyHandler;
-import io.netty.handler.proxy.Socks5ProxyHandler;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.codec.NoReadFlowControlHandler;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
@@ -39,9 +35,6 @@ import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.Locale;
 import java.util.function.Supplier;
 
 public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer {
@@ -62,8 +55,8 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
         final ProxyConnection proxyConnection = ProxyConnection.fromChannel(channel);
 
-        if (ViaProxy.getConfig().getBackendProxyUrl() != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
-            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, this.getProxyHandler());
+        if (ViaProxy.getConfig().getBackendProxy() != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
+            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, ViaProxy.getConfig().getBackendProxy().createNettyProxyHandler());
         }
         if (ViaProxy.getConfig().useBackendHaProxy()) {
             channel.pipeline().addLast(VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
@@ -85,30 +78,6 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();
         }
-    }
-
-    protected ProxyHandler getProxyHandler() {
-        final URI proxyUrl = ViaProxy.getConfig().getBackendProxyUrl();
-        final InetSocketAddress proxyAddress = new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort());
-        final String username = proxyUrl.getUserInfo() != null ? proxyUrl.getUserInfo().split(":")[0] : null;
-        final String password = proxyUrl.getUserInfo() != null && proxyUrl.getUserInfo().contains(":") ? proxyUrl.getUserInfo().split(":")[1] : null;
-
-        switch (proxyUrl.getScheme().toUpperCase(Locale.ROOT)) {
-            case "HTTP", "HTTPS" -> {
-                if (username != null && password != null) return new HttpProxyHandler(proxyAddress, username, password);
-                else return new HttpProxyHandler(proxyAddress);
-            }
-            case "SOCKS4" -> {
-                if (username != null) return new Socks4ProxyHandler(proxyAddress, username);
-                else return new Socks4ProxyHandler(proxyAddress);
-            }
-            case "SOCKS5" -> {
-                if (username != null && password != null) return new Socks5ProxyHandler(proxyAddress, username, password);
-                else return new Socks5ProxyHandler(proxyAddress);
-            }
-        }
-
-        throw new IllegalArgumentException("Unknown proxy type: " + proxyUrl.getScheme());
     }
 
 }

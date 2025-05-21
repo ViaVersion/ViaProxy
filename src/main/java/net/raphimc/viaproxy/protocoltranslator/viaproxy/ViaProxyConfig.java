@@ -38,12 +38,12 @@ import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.AddressUtil;
+import net.raphimc.viaproxy.util.Proxy;
 import net.raphimc.viaproxy.util.config.*;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.File;
 import java.net.SocketAddress;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -107,8 +107,8 @@ public class ViaProxyConfig {
             "- type://address:port",
             "- type://username:password@address:port"
     })
-    @TypeSerializer(ProxyUriTypeSerializer.class)
-    private URI backendProxyUrl = null;
+    @TypeSerializer(ProxyTypeSerializer.class)
+    private Proxy backendProxy = null;
 
     @Option("backend-haproxy")
     @Description("Send HAProxy protocol messages to the target server.")
@@ -383,12 +383,12 @@ public class ViaProxyConfig {
         this.save();
     }
 
-    public URI getBackendProxyUrl() {
-        return this.backendProxyUrl;
+    public Proxy getBackendProxy() {
+        return this.backendProxy;
     }
 
-    public void setBackendProxyUrl(final URI backendProxyUrl) {
-        this.backendProxyUrl = backendProxyUrl;
+    public void setBackendProxy(final Proxy backendProxy) {
+        this.backendProxy = backendProxy;
         this.save();
     }
 
