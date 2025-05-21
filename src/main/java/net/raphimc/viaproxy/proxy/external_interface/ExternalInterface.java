@@ -40,10 +40,15 @@ import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.util.logging.Logger;
 
+import java.net.Authenticator;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URI;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -104,7 +109,9 @@ public class ExternalInterface {
         try {
             if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
                 try {
-                    AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                    Proxy proxy = getProxy();
+                    AuthLibServices.getSessionService(proxy)
+                            .joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
                 } catch (Throwable e) {
                     proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again in a couple of seconds.");
                 }
@@ -133,6 +140,41 @@ public class ExternalInterface {
         } else {
             proxyConnection.kickClient("§cThe configured target server requires a signed nonce. Please enable chat signing in the config and select a valid authentication mode.");
         }
+    }
+
+    private static Proxy getProxy() {
+        final URI proxyUrl = ViaProxy.getConfig().getBackendProxyUrl();
+        if (proxyUrl == null) {
+            return Proxy.NO_PROXY;
+        }
+
+        final var proxyAddress = new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort());
+        final var username = proxyUrl.getUserInfo() != null ? proxyUrl.getUserInfo().split(":")[0] : null;
+        final var password = proxyUrl.getUserInfo() != null && proxyUrl.getUserInfo().contains(":") ? proxyUrl.getUserInfo().split(":")[1] : null;
+
+        // Set credentials if provided
+        if (username != null && password != null) {
+            Authenticator.setDefault(new java.net.Authenticator() {
+                @Override
+                protected java.net.PasswordAuthentication getPasswordAuthentication() {
+                    return new java.net.PasswordAuthentication(
+                            username,
+                            password.toCharArray()
+                    );
+                }
+            });
+        }
+
+        switch (proxyUrl.getScheme().toUpperCase(Locale.ROOT)) {
+            case "HTTP", "HTTPS" -> {
+                return new Proxy(Proxy.Type.HTTP, proxyAddress);
+            }
+            case "SOCKS4", "SOCKS5" -> {
+                return new Proxy(Proxy.Type.SOCKS, proxyAddress);
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown proxy type: " + proxyUrl.getScheme());
     }
 
 }

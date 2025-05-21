@@ -29,4 +29,12 @@ public class AuthLibServices {
     public static final MinecraftSessionService SESSION_SERVICE = AUTHENTICATION_SERVICE.createMinecraftSessionService();
     public static final GameProfileRepository PROFILE_REPOSITORY = AUTHENTICATION_SERVICE.createProfileRepository();
 
+    public static MinecraftSessionService getSessionService(final Proxy proxy) {
+        if (proxy == null || proxy == Proxy.NO_PROXY) {
+            return SESSION_SERVICE;
+        }
+
+        return new YggdrasilAuthenticationService(proxy).createMinecraftSessionService();
+    }
+
 }
