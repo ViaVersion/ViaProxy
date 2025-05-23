@@ -69,7 +69,7 @@ dependencies {
     includeInJar "net.sf.jopt-simple:jopt-simple:5.0.4"
     includeInJar "org.apache.logging.log4j:log4j-core:2.24.3"
     includeInJar "org.apache.logging.log4j:log4j-slf4j-impl:2.24.3"
-    includeInJar "org.jline:jansi:3.30.2"
+    includeInJar "org.jline:jansi:3.30.3"
     includeInJar("com.mojang:authlib:6.0.57") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
