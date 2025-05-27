@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.saves.impl.accounts;
 
 import com.google.gson.JsonObject;
-import net.raphimc.vialegacy.api.util.UuidUtil;
+import net.raphimc.vialegacy.api.util.GameProfileUtil;
 
 import java.util.UUID;
 
@@ -34,7 +34,7 @@ public class OfflineAccount extends Account {
 
     public OfflineAccount(final String name) {
         this.name = name;
-        this.uuid = UuidUtil.createOfflinePlayerUuid(name);
+        this.uuid = GameProfileUtil.getOfflinePlayerUuid(name);
     }
 
     @Override
