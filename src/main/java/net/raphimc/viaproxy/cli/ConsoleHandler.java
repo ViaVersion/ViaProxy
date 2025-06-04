@@ -17,15 +17,10 @@
  */
 package net.raphimc.viaproxy.cli;
 
-import com.viaversion.viaversion.api.Via;
-import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.plugins.events.ConsoleCommandEvent;
-import net.raphimc.viaproxy.protocoltranslator.viaproxy.ConsoleCommandSender;
-import net.raphimc.viaproxy.util.ArrayHelper;
+import net.raphimc.viaproxy.cli.command.CommandManager;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class ConsoleHandler {
@@ -42,37 +37,13 @@ public class ConsoleHandler {
     }
 
     private static void listen() {
+        final CommandManager commandManager = new CommandManager();
         final Scanner scanner = new Scanner(System.in);
         try {
             while (scanner.hasNextLine()) {
                 final String line = scanner.nextLine();
                 try {
-                    final String[] parts = line.split(" ");
-                    if (parts.length == 0) continue;
-                    final String command = parts[0];
-                    final ArrayHelper args = new ArrayHelper(Arrays.copyOfRange(parts, 1, parts.length));
-
-                    if (command.equalsIgnoreCase("gc")) {
-                        System.gc();
-                        System.out.println("GC Done");
-                    } else if (command.equalsIgnoreCase("via") || command.equalsIgnoreCase("viaversion")) {
-                        Via.getManager().getCommandHandler().onCommand(new ConsoleCommandSender(), args.getAsArray());
-                    } else if (command.equalsIgnoreCase("exit")) {
-                        System.exit(0);
-                    } else if (command.equalsIgnoreCase("threaddump")) {
-                        System.out.println("Thread Dump:");
-                        for (Thread thread : Thread.getAllStackTraces().keySet()) {
-                            System.out.println("Thread: " + thread.getName() + " | State: " + thread.getState());
-                            for (StackTraceElement element : thread.getStackTrace()) System.out.println("    " + element.toString());
-                        }
-                    } else {
-                        if (ViaProxy.EVENT_MANAGER.call(new ConsoleCommandEvent(command, args.getAsArray())).isCancelled()) continue;
-                        System.out.println("Invalid Command!");
-                        System.out.println(" gc | Run the garbage collector");
-                        System.out.println(" exit | Shutdown ViaProxy");
-                        System.out.println(" via | Run a viaversion command");
-                        System.out.println(" threaddump | Print the stacktrace of all running threads");
-                    }
+                    commandManager.execute(line);
                 } catch (Throwable e) {
                     Logger.LOGGER.error("Error while handling console input", e);
                 }

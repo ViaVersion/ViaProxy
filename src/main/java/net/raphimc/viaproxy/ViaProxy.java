@@ -22,6 +22,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.internal.PlatformDependent;
 import net.lenni0451.classtransform.TransformerManager;
 import net.lenni0451.classtransform.additionalclassprovider.GuavaClassPathProvider;
 import net.lenni0451.classtransform.mixinstranslator.MixinsTranslator;
@@ -305,8 +306,8 @@ public class ViaProxy {
 
     private static void loadNetty() {
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
-        if (System.getProperty("io.netty.allocator.maxOrder") == null) {
-            System.setProperty("io.netty.allocator.maxOrder", "9");
+        if (System.getProperty("io.netty.allocator.type") == null) {
+            System.setProperty("io.netty.allocator.type", PlatformDependent.isAndroid() ? "unpooled" : "pooled");
         }
         MCPipeline.useOptimizedPipeline();
         CLIENT_CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);

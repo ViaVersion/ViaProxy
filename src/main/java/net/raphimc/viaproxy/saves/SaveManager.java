@@ -39,10 +39,6 @@ public class SaveManager {
     public final UISave uiSave = new UISave();
 
     public SaveManager() {
-        this.load();
-    }
-
-    public void load() {
         try {
             if (!SAVE_FILE.exists()) {
                 SAVE_FILE.createNewFile();
@@ -70,7 +66,7 @@ public class SaveManager {
                         }
                     });
         } catch (Throwable e) {
-            Logger.LOGGER.error("Failed to load saves from file", e);
+            throw new RuntimeException("Failed to initialize SaveManager", e);
         }
     }
 
