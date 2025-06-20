@@ -48,16 +48,16 @@ repositories {
 }
 
 dependencies {
-    includeInJar "com.viaversion:viaversion-common:5.4.0-SNAPSHOT"
-    includeInJar "com.viaversion:viabackwards-common:5.4.0-SNAPSHOT"
-    includeInJar "com.viaversion:viarewind-common:4.0.8-SNAPSHOT"
-    includeInJar "net.raphimc:ViaLegacy:3.0.10-SNAPSHOT"
-    includeInJar "com.viaversion:viaaprilfools-common:4.0.2-SNAPSHOT"
-    includeInJar("net.raphimc:ViaBedrock:0.0.17-SNAPSHOT") {
+    includeInJar "com.viaversion:viaversion-common:5.4.0"
+    includeInJar "com.viaversion:viabackwards-common:5.4.0"
+    includeInJar "com.viaversion:viarewind-common:4.0.8"
+    includeInJar "net.raphimc:ViaLegacy:3.0.10"
+    includeInJar "com.viaversion:viaaprilfools-common:4.0.2"
+    includeInJar("net.raphimc:ViaBedrock:0.0.18-SNAPSHOT") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
-    includeInJar("com.viaversion:vialoader:4.0.3-SNAPSHOT") {
+    includeInJar("com.viaversion:vialoader:4.0.3") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
@@ -83,7 +83,7 @@ dependencies {
     }
     includeInJar "net.lenni0451.commons:swing:1.7.1"
     includeInJar "net.lenni0451.commons:brigadier:1.7.1"
-    includeInJar("net.raphimc.netminecraft:all:3.1.0") {
+    includeInJar("net.raphimc.netminecraft:all:3.1.1") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     includeInJar("net.raphimc:MinecraftAuth:4.1.1") {

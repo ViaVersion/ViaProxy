@@ -36,7 +36,7 @@ import net.raphimc.netminecraft.packet.impl.login.S2CLoginDisconnectPacket;
 import net.raphimc.netminecraft.packet.impl.play.S2CPlayDisconnectPacket;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
-import net.raphimc.netminecraft.util.ChannelType;
+import net.raphimc.netminecraft.util.TransportType;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.ConsoleFormatter;
 import net.raphimc.viaproxy.proxy.packethandler.PacketHandler;
@@ -92,10 +92,10 @@ public class ProxyConnection extends NetClient {
     }
 
     @Override
-    public void initialize(final ChannelType channelType, final Bootstrap bootstrap) {
+    public void initialize(final TransportType transportType, final Bootstrap bootstrap) {
         bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getConnectTimeout());
         bootstrap.attr(PROXY_CONNECTION_ATTRIBUTE_KEY, this);
-        super.initialize(channelType, bootstrap);
+        super.initialize(transportType, bootstrap);
     }
 
     public ChannelFuture connectToServer(final SocketAddress serverAddress, final ProtocolVersion targetVersion) {

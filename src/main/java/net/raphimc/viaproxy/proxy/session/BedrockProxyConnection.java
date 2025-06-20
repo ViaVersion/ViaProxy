@@ -29,7 +29,8 @@ import io.netty.channel.socket.DatagramChannel;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
-import net.raphimc.netminecraft.util.ChannelType;
+import net.raphimc.netminecraft.util.EventLoops;
+import net.raphimc.netminecraft.util.TransportType;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
@@ -46,15 +47,15 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public void initialize(ChannelType channelType, final Bootstrap bootstrap) {
-        if (!DatagramChannel.class.isAssignableFrom(channelType.udpClientChannelClass())) {
+    public void initialize(TransportType transportType, final Bootstrap bootstrap) {
+        if (!DatagramChannel.class.isAssignableFrom(transportType.udpClientChannelClass())) {
             throw new IllegalArgumentException("Channel type must be a DatagramChannel");
         }
-        if (channelType == ChannelType.KQUEUE) channelType = ChannelType.NIO; // KQueue doesn't work for Bedrock for some reason
-        final Class<? extends DatagramChannel> channelClass = (Class<? extends DatagramChannel>) channelType.udpClientChannelClass();
+        if (transportType == TransportType.KQUEUE) transportType = TransportType.NIO; // KQueue doesn't work for Bedrock for some reason
+        final Class<? extends DatagramChannel> channelClass = (Class<? extends DatagramChannel>) transportType.udpClientChannelClass();
 
         bootstrap
-                .group(channelType.clientEventLoopGroup().get())
+                .group(EventLoops.getClientEventLoop(transportType))
                 .channelFactory(RakChannelFactory.client(channelClass))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getConnectTimeout())
                 .option(RakChannelOption.RAK_PROTOCOL_VERSION, ProtocolConstants.BEDROCK_RAKNET_PROTOCOL_VERSION)
@@ -90,7 +91,7 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     private ChannelFuture ping(final SocketAddress address) {
-        if (this.channelFuture == null) this.initialize(ChannelType.get(address), new Bootstrap());
+        if (this.channelFuture == null) this.initialize(TransportType.getBest(address), new Bootstrap());
 
         this.channelFuture.channel().eventLoop().submit(() -> {
             this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(((InetSocketAddress) address)));
