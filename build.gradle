@@ -53,7 +53,7 @@ dependencies {
     includeInJar "com.viaversion:viarewind-common:4.0.8"
     includeInJar "net.raphimc:ViaLegacy:3.0.10"
     includeInJar "com.viaversion:viaaprilfools-common:4.0.3"
-    includeInJar("net.raphimc:ViaBedrock:0.0.18-20250625.093814-3") {
+    includeInJar("net.raphimc:ViaBedrock:0.0.18-SNAPSHOT") {
         exclude group: "io.netty"
         exclude group: "io.jsonwebtoken"
     }
