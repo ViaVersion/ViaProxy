@@ -83,7 +83,7 @@ dependencies {
     }
     includeInJar "net.lenni0451.commons:swing:1.7.1"
     includeInJar "net.lenni0451.commons:brigadier:1.7.1"
-    includeInJar("net.raphimc.netminecraft:all:3.1.1") {
+    includeInJar("net.raphimc.netminecraft:all:3.1.2") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     includeInJar("net.raphimc:MinecraftAuth:4.1.1") {
