@@ -6,7 +6,7 @@ Using it is very simple, just run the jar file, and it will start a user interfa
 For a full user guide go to the [Usage for Players](#usage-for-players-gui) section or the [Usage for Server Owners](#usage-for-server-owners-config) section.
 
 ## Supported Server versions
-- Release (1.0.0 - 1.21.6)
+- Release (1.0.0 - 1.21.7)
 - Beta (b1.0 - b1.8.1)
 - Alpha (a1.0.15 - a1.2.6)
 - Classic (c0.0.15 - c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
@@ -15,7 +15,7 @@ For a full user guide go to the [Usage for Players](#usage-for-players-gui) sect
 - Bedrock Edition 1.21.90 ([Some features are missing](https://github.com/RaphiMC/ViaBedrock#features))
 
 ## Supported Client versions
-- Release (1.7.2 - 1.21.6)
+- Release (1.7.2 - 1.21.7)
 - April Fools (3D Shareware, 25w14craftmine)
 - Bedrock Edition (Requires the [Geyser plugin](https://geysermc.org/download))
 - Beta 1.7.3 (Requires the [Beta2Release plugin](https://github.com/ViaVersionAddons/ViaProxyBeta2Release))
