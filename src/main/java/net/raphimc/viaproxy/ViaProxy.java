@@ -222,7 +222,12 @@ public class ViaProxy {
         progressConsumer.accept("Loading Config");
         final File viaProxyConfigFile;
         if (useConfig) {
-            viaProxyConfigFile = new File(args[1]);
+            final File absoluteConfigFile = new File(args[1]);
+            if (absoluteConfigFile.isAbsolute()) {
+                viaProxyConfigFile = absoluteConfigFile;
+            } else {
+                viaProxyConfigFile = new File(ViaProxy.getCwd(), args[1]);
+            }
         } else {
             viaProxyConfigFile = new File(ViaProxy.getCwd(), "viaproxy.yml");
         }
