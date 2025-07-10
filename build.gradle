@@ -64,7 +64,7 @@ dependencies {
     includeInJar "com.google.code.gson:gson:2.13.1"
     includeInJar "com.formdev:flatlaf:3.6"
     includeInJar "com.formdev:flatlaf-extras:3.6"
-    includeInJar "org.apache.commons:commons-lang3:3.17.0"
+    includeInJar "org.apache.commons:commons-lang3:3.18.0"
     includeInJar "commons-io:commons-io:2.19.0"
     includeInJar "net.sf.jopt-simple:jopt-simple:5.0.4"
     includeInJar "org.apache.logging.log4j:log4j-core:2.25.0"
