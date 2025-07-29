@@ -48,7 +48,7 @@ repositories {
 }
 
 dependencies {
-    includeInJar "com.viaversion:viaversion-common:5.4.2"
+    includeInJar "com.viaversion:viaversion-common:5.5.0-SNAPSHOT"
     includeInJar "com.viaversion:viabackwards-common:5.4.2"
     includeInJar "com.viaversion:viarewind-common:4.0.9"
     includeInJar "net.raphimc:ViaLegacy:3.0.10"
@@ -56,7 +56,7 @@ dependencies {
     includeInJar("net.raphimc:ViaBedrock:0.0.20-SNAPSHOT") {
         exclude group: "io.jsonwebtoken"
     }
-    includeInJar("com.viaversion:vialoader:4.0.4") {
+    includeInJar("com.viaversion:vialoader:4.0.5-SNAPSHOT") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
 
