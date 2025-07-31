@@ -2,7 +2,6 @@ configurations {
     includeInJar
 
     implementation.extendsFrom(includeInJar)
-    api.extendsFrom(includeInJar)
 }
 
 jar {
