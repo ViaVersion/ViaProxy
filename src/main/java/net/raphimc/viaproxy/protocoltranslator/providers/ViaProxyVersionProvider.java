@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.protocoltranslator.providers;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
-import com.viaversion.viaversion.protocol.RedirectProtocolVersion;
+import com.viaversion.viaversion.protocol.SpecialProtocolVersion;
 import com.viaversion.viaversion.protocol.version.BaseVersionProvider;
 import net.raphimc.netminecraft.constants.MCVersion;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -52,8 +52,8 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
                     return Integer.compare(diff1, diff2);
                 }).map(ProtocolVersion::getProtocol).orElse(ProtocolVersion.unknown);
             }
-        } else if (clientProtocol instanceof RedirectProtocolVersion redirectProtocolVersion) {
-            return redirectProtocolVersion.getOrigin();
+        } else if (clientProtocol instanceof SpecialProtocolVersion specialProtocolVersion) {
+            return specialProtocolVersion.getDelegate();
         } else {
             return ProtocolVersion.v1_7_2;
         }
