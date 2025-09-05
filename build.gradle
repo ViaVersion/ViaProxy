@@ -16,18 +16,36 @@ repositories {
     maven {
         name = "ViaVersion"
         url = "https://repo.viaversion.com"
+
+        content {
+            includeGroupByRegex "com\\.viaversion(\\..+)?"
+            includeGroupByRegex "net\\.raphimc(\\..+)?"
+        }
     }
     maven {
         name = "Lenni0451"
         url = "https://maven.lenni0451.net/everything"
+
+        content {
+            includeGroupByRegex "net\\.lenni0451(\\..+)?"
+            includeGroupByRegex "net\\.raphimc(\\..+)?"
+        }
     }
     maven {
         name = "OpenCollab Releases"
         url = "https://repo.opencollab.dev/maven-releases"
+
+        content {
+            includeGroupByRegex "org\\.cloudburstmc(\\..+)?"
+        }
     }
     maven {
         name = "OpenCollab Snapshots"
         url = "https://repo.opencollab.dev/maven-snapshots"
+
+        content {
+            includeGroupByRegex "org\\.cloudburstmc(\\..+)?"
+        }
     }
     maven {
         name = "Minecraft Libraries"
@@ -42,7 +60,7 @@ repositories {
         url = "https://jitpack.io"
 
         content {
-            includeGroup "com.github.Oryxel"
+            includeGroupByRegex "com\\.github\\..+"
         }
     }
 }
