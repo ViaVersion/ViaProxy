@@ -32,7 +32,7 @@ ViaProxy supports joining to any of the listed server version from any of the li
 
 ## Releases
 ### Executable Jar File
-If you want the executable jar file you can download a stable release from [GitHub Releases](https://github.com/ViaVersion/ViaProxy/releases/latest) or the latest dev version from [GitHub Actions](https://github.com/RaphiMC/ViaProxy/actions/workflows/build.yml) or the [ViaVersion Jenkins](https://ci.viaversion.com/view/All/job/ViaProxy/).
+If you want the executable jar file you can download a stable release from [GitHub Releases](https://github.com/ViaVersion/ViaProxy/releases/latest) or the latest dev version from [GitHub Actions](https://github.com/RaphiMC/ViaProxy/actions/workflows/build.yml) or the [ViaVersion Jenkins](https://ci.viaversion.com/view/Platforms/job/ViaProxy/).
 
 ### Docker Image
 ViaProxy docker images can be found on [GitHub Packages](https://github.com/ViaVersion/ViaProxy/pkgs/container/viaproxy).
