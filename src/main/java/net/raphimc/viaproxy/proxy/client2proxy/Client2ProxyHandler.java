@@ -267,6 +267,19 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         }
         ViaProxy.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
 
+        final int handshakePort;
+        if (ViaProxy.getConfig().shouldRewriteHandshakePacket()) {
+            if (serverAddress instanceof InetSocketAddress inetSocketAddress) {
+                handshakeParts[0] = inetSocketAddress.getHostString();
+                handshakePort = inetSocketAddress.getPort();
+            } else {
+                handshakeParts[0] = AddressUtil.toString(serverAddress);
+                handshakePort = 25565;
+            }
+        } else {
+            handshakePort = clientHandshakeAddress.getPort();
+        }
+
         this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
                 f.channel().eventLoop().submit(() -> { // Reschedule so the packets get sent after the channel is fully initialized and active
@@ -274,19 +287,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
                         this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                     }
 
-                    final String address;
-                    final int port;
-                    if (serverAddress instanceof InetSocketAddress inetSocketAddress) {
-                        address = inetSocketAddress.getHostString();
-                        port = inetSocketAddress.getPort();
-                    } else {
-                        address = AddressUtil.toString(serverAddress);
-                        port = 25565;
-                    }
-
-                    handshakeParts[0] = address;
-                    final C2SHandshakingClientIntentionPacket newHandshakePacket = new C2SHandshakingClientIntentionPacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), port, intendedState);
-
+                    final C2SHandshakingClientIntentionPacket newHandshakePacket = new C2SHandshakingClientIntentionPacket(clientVersion.getOriginalVersion(), String.join("\0", handshakeParts), handshakePort, intendedState);
                     this.proxyConnection.getChannel().writeAndFlush(newHandshakePacket).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f2 -> {
                         if (f2.isSuccess()) {
                             final UserConnection userConnection = this.proxyConnection.getUserConnection();

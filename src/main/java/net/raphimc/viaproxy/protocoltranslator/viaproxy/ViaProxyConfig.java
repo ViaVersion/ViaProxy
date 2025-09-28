@@ -155,6 +155,13 @@ public class ViaProxyConfig {
     })
     private boolean bungeecordPlayerInfoPassthrough = false;
 
+    @Option("rewrite-handshake-packet")
+    @Description({
+            "Enabling this will rewrite the address in the handshake packet to a value the vanilla client would have sent when connecting directly to the target server.",
+            "This should be left enabled unless you are a server owner and you need the original address on the backend server."
+    })
+    private boolean rewriteHandshakePacket = true;
+
     @Option("rewrite-transfer-packets")
     @Description({
             "Enabling this will rewrite transfer packets to point back to ViaProxy. This allows ViaProxy to perform protocol translation when forwarding the player to the actual server from the transfer packet.",
@@ -470,6 +477,15 @@ public class ViaProxyConfig {
 
     public void setPassthroughBungeecordPlayerInfo(final boolean bungeecordPlayerInfoPassthrough) {
         this.bungeecordPlayerInfoPassthrough = bungeecordPlayerInfoPassthrough;
+        this.save();
+    }
+
+    public boolean shouldRewriteHandshakePacket() {
+        return this.rewriteHandshakePacket;
+    }
+
+    public void setRewriteHandshakePacket(final boolean rewriteHandshakePacket) {
+        this.rewriteHandshakePacket = rewriteHandshakePacket;
         this.save();
     }
 
