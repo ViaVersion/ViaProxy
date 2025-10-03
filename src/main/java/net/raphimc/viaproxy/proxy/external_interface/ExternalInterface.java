@@ -87,8 +87,7 @@ public class ExternalInterface {
                     final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
 
                     final UUID deviceId = mcChain.getXblXsts().getInitialXblSession().getXblDeviceToken().getId();
-                    final String playFabId = bedrockAccount.getPlayFabToken().getPlayFabId();
-                    user.put(new AuthChainData(mcChain.getMojangJwt(), mcChain.getIdentityJwt(), mcChain.getPublicKey(), mcChain.getPrivateKey(), deviceId, playFabId));
+                    user.put(new AuthChainData(mcChain.getMojangJwt(), mcChain.getIdentityJwt(), mcChain.getPublicKey(), mcChain.getPrivateKey(), deviceId));
                 }
             }
 
