@@ -66,12 +66,12 @@ repositories {
 }
 
 dependencies {
-    includeInJar "com.viaversion:viaversion-common:5.5.1-20251003.180311-1"
-    includeInJar "com.viaversion:viabackwards-common:5.5.1-20251003.194311-1"
+    includeInJar "com.viaversion:viaversion-common:5.5.1-SNAPSHOT"
+    includeInJar "com.viaversion:viabackwards-common:5.5.1-SNAPSHOT"
     includeInJar "com.viaversion:viarewind-common:4.0.10"
     includeInJar "net.raphimc:ViaLegacy:3.0.11"
     includeInJar "com.viaversion:viaaprilfools-common:4.0.4"
-    includeInJar("net.raphimc:ViaBedrock:0.0.22-20251003.200622-1") {
+    includeInJar("net.raphimc:ViaBedrock:0.0.22-SNAPSHOT") {
         exclude group: "io.jsonwebtoken"
     }
     includeInJar("com.viaversion:vialoader:4.0.5") {
