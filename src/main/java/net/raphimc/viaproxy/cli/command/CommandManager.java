@@ -43,6 +43,7 @@ public class CommandManager implements CommandBuilder<CommandExecutor> {
     private final StopCommand StopCommand = new StopCommand();
     private final ViaVersionCommand ViaVersionCommand = new ViaVersionCommand();
     private final UploadLogCommand UploadLogCommand = new UploadLogCommand();
+    private final AccountCommand AccountCommand = new AccountCommand();
 
     // Debugging commands
     private final GcCommand GcCommand = new GcCommand();
