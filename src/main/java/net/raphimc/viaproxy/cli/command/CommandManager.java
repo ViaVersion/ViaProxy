@@ -21,6 +21,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.lenni0451.commons.brigadier.CommandBuilder;
+import net.lenni0451.commons.brigadier.HelpAppender;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.command.executor.CommandExecutor;
@@ -35,7 +36,12 @@ import java.util.List;
 
 public class CommandManager implements CommandBuilder<CommandExecutor> {
 
-    private final CommandDispatcher<CommandExecutor> dispatcher = new CommandDispatcher<>();
+    private final CommandDispatcher<CommandExecutor> dispatcher = HelpAppender.newAutoHelpAppendingCommandDispatcher((sender, name, usages) -> {
+        sender.sendMessage("Incomplete command. Possible usages:");
+        for (String usage : usages) {
+            sender.sendMessage(" - " + usage);
+        }
+    });
     private final List<Command> commands = new ArrayList<>();
 
     // Core commands
