@@ -47,9 +47,13 @@ public class AccountCommand extends Command {
     public void register(LiteralArgumentBuilder<CommandExecutor> builder) {
         builder.then(literal("list").executes(ctx -> {
             List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
-            for (int i = 0; i < accounts.size(); i++) {
-                boolean isSelected = ViaProxy.getConfig().getAccount() == accounts.get(i);
-                ctx.getSource().sendMessage("[" + i + "] " + accounts.get(i).getDisplayString() + (isSelected ? " <--" : ""));
+            if (accounts.isEmpty()) {
+                ctx.getSource().sendMessage("No accounts added yet.");
+            } else {
+                for (int i = 0; i < accounts.size(); i++) {
+                    boolean isSelected = ViaProxy.getConfig().getAccount() == accounts.get(i);
+                    ctx.getSource().sendMessage("[" + i + "] " + accounts.get(i).getDisplayString() + (isSelected ? " <--" : ""));
+                }
             }
             return 1;
         }));
