@@ -79,8 +79,8 @@ dependencies {
     }
 
     includeInJar "com.google.code.gson:gson:2.13.2"
-    includeInJar "com.formdev:flatlaf:3.6.1"
-    includeInJar "com.formdev:flatlaf-extras:3.6.1"
+    includeInJar "com.formdev:flatlaf:3.6.2"
+    includeInJar "com.formdev:flatlaf-extras:3.6.2"
     includeInJar "org.apache.commons:commons-lang3:3.19.0"
     includeInJar "commons-io:commons-io:2.20.0"
     includeInJar "net.sf.jopt-simple:jopt-simple:5.0.4"
