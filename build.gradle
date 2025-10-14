@@ -66,11 +66,11 @@ repositories {
 }
 
 dependencies {
-    includeInJar "com.viaversion:viaversion-common:5.5.1"
-    includeInJar "com.viaversion:viabackwards-common:5.5.1"
+    includeInJar "com.viaversion:viaversion-common:5.5.2-SNAPSHOT"
+    includeInJar "com.viaversion:viabackwards-common:5.5.2-SNAPSHOT"
     includeInJar "com.viaversion:viarewind-common:4.0.11"
     includeInJar "net.raphimc:ViaLegacy:3.0.11"
-    includeInJar "com.viaversion:viaaprilfools-common:4.0.5"
+    includeInJar "com.viaversion:viaaprilfools-common:4.0.6-SNAPSHOT"
     includeInJar("net.raphimc:ViaBedrock:0.0.22-SNAPSHOT") {
         exclude group: "io.jsonwebtoken"
     }
