@@ -46,7 +46,11 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
             if (serverVersion != null) {
                 return serverVersion;
             }
-            return super.getClosestServerProtocol(connection);
+            try {
+                return super.getClosestServerProtocol(connection);
+            } catch (Exception e) {
+                return ProtocolVersion.unknown;
+            }
         } else if (clientProtocol.getVersionType() == VersionType.RELEASE) {
             if (MCVersion.ALL_VERSIONS.containsKey(clientProtocol.getVersion())) {
                 return clientProtocol;
