@@ -62,5 +62,5 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
         } else {
             return ProtocolVersion.v1_7_2;
         }
-
+    }
 }
