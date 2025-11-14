@@ -38,10 +38,15 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
     }
 
     @Override
-    public ProtocolVersion getClosestServerProtocol(UserConnection connection) {
+    public ProtocolVersion getClosestServerProtocol(final UserConnection connection) {
         final ProtocolVersion clientProtocol = connection.getProtocolInfo().protocolVersion();
+
         if (connection.isClientSide()) {
-            return ProxyConnection.fromUserConnection(connection).getServerVersion();
+            final ProtocolVersion serverVersion = ProxyConnection.fromUserConnection(connection).getServerVersion();
+            if (serverVersion != null) {
+                return serverVersion;
+            }
+            return super.getClosestServerProtocol(connection);
         } else if (clientProtocol.getVersionType() == VersionType.RELEASE) {
             if (MCVersion.ALL_VERSIONS.containsKey(clientProtocol.getVersion())) {
                 return clientProtocol;
@@ -57,6 +62,5 @@ public class ViaProxyVersionProvider extends BaseVersionProvider {
         } else {
             return ProtocolVersion.v1_7_2;
         }
-    }
 
 }
