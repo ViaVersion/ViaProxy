@@ -33,7 +33,7 @@ import net.raphimc.minecraftauth.java.model.MinecraftPlayerCertificates;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
-import net.raphimc.viabedrock.protocol.storage.AuthChainData;
+import net.raphimc.viabedrock.protocol.storage.AuthData;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.FillPlayerDataEvent;
 import net.raphimc.viaproxy.plugins.events.JoinServerRequestEvent;
@@ -49,8 +49,6 @@ import java.net.Authenticator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -88,7 +86,7 @@ public class ExternalInterface {
                 } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
                     final MinecraftMultiplayerToken multiplayerToken = bedrockAccount.getAuthManager().getMinecraftMultiplayerToken().refresh();
                     final MinecraftCertificateChain certificateChain = bedrockAccount.getAuthManager().getMinecraftCertificateChain().refresh();
-                    user.put(new AuthChainData(certificateChain.getMojangJwt(), certificateChain.getIdentityJwt(), (ECPublicKey) bedrockAccount.getAuthManager().getSessionKeyPair().getPublic(), (ECPrivateKey) bedrockAccount.getAuthManager().getSessionKeyPair().getPrivate(), bedrockAccount.getAuthManager().getDeviceId()));
+                    user.put(new AuthData(certificateChain.getMojangJwt(), certificateChain.getIdentityJwt(), multiplayerToken.getToken(), bedrockAccount.getAuthManager().getSessionKeyPair(), bedrockAccount.getAuthManager().getDeviceId()));
                 }
             }
 
