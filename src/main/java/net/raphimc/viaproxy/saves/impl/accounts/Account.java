@@ -24,8 +24,6 @@ import java.util.UUID;
 
 public abstract class Account {
 
-    private long lastRefresh = 0L;
-
     public Account() {
     }
 
@@ -40,13 +38,5 @@ public abstract class Account {
     }
 
     public abstract String getDisplayString();
-
-    public boolean refresh() throws Exception {
-        if (System.currentTimeMillis() - this.lastRefresh < 10_000L) {
-            return false;
-        }
-        this.lastRefresh = System.currentTimeMillis();
-        return true;
-    }
 
 }

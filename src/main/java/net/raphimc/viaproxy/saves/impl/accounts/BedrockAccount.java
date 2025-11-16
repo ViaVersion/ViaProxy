@@ -19,74 +19,54 @@ package net.raphimc.viaproxy.saves.impl.accounts;
 
 import com.google.gson.JsonObject;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.AbstractStep;
-import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
-import net.raphimc.minecraftauth.step.bedrock.StepPlayFabToken;
-import net.raphimc.minecraftauth.step.bedrock.session.StepFullBedrockSession;
-import net.raphimc.minecraftauth.step.xbl.StepXblXstsToken;
-import net.raphimc.minecraftauth.util.MicrosoftConstants;
+import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
+import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
+import net.raphimc.viaproxy.ViaProxy;
 
+import java.io.IOException;
 import java.util.UUID;
 
 public class BedrockAccount extends Account {
 
-    public static final AbstractStep<?, StepFullBedrockSession.FullBedrockSession> DEVICE_CODE_LOGIN = MinecraftAuth.builder()
-            .withClientId(MicrosoftConstants.BEDROCK_ANDROID_TITLE_ID).withScope(MicrosoftConstants.SCOPE_TITLE_AUTH)
-            .deviceCode()
-            .withDeviceToken("Android")
-            .sisuTitleAuthentication(MicrosoftConstants.BEDROCK_XSTS_RELYING_PARTY)
-            .buildMinecraftBedrockChainStep(true, true);
-
-    private StepFullBedrockSession.FullBedrockSession bedrockSession;
+    private final BedrockAuthManager bedrockAuthManager;
 
     public BedrockAccount(final JsonObject jsonObject) {
-        this.bedrockSession = DEVICE_CODE_LOGIN.fromJson(jsonObject.getAsJsonObject("bedrockSession"));
+        this.bedrockAuthManager = BedrockAuthManager.fromJson(MinecraftAuth.createHttpClient(), ProtocolConstants.BEDROCK_VERSION_NAME, jsonObject);
+        if (!this.bedrockAuthManager.getMinecraftMultiplayerToken().hasValue()) {
+            this.bedrockAuthManager.getMinecraftMultiplayerToken().refreshUnchecked();
+        }
+        this.bedrockAuthManager.getChangeListeners().add(() -> ViaProxy.getSaveManager().save());
     }
 
-    public BedrockAccount(final StepFullBedrockSession.FullBedrockSession bedrockSession) {
-        this.bedrockSession = bedrockSession;
+    public BedrockAccount(final BedrockAuthManager bedrockAuthManager) throws IOException {
+        this.bedrockAuthManager = bedrockAuthManager;
+        bedrockAuthManager.getMinecraftMultiplayerToken().refreshIfExpired();
+        bedrockAuthManager.getMinecraftCertificateChain().refreshIfExpired();
+        bedrockAuthManager.getChangeListeners().add(() -> ViaProxy.getSaveManager().save());
     }
 
     @Override
     public JsonObject toJson() {
-        final JsonObject jsonObject = new JsonObject();
-        jsonObject.add("bedrockSession", DEVICE_CODE_LOGIN.toJson(this.bedrockSession));
-        return jsonObject;
+        return BedrockAuthManager.toJson(this.bedrockAuthManager);
     }
 
     @Override
     public String getName() {
-        return this.bedrockSession.getMcChain().getDisplayName();
+        return this.bedrockAuthManager.getMinecraftMultiplayerToken().getCached().getDisplayName();
     }
 
     @Override
     public UUID getUUID() {
-        return this.bedrockSession.getMcChain().getId();
+        return this.bedrockAuthManager.getMinecraftMultiplayerToken().getCached().getUuid();
     }
 
-    public StepMCChain.MCChain getMcChain() {
-        return this.bedrockSession.getMcChain();
-    }
-
-    public StepPlayFabToken.PlayFabToken getPlayFabToken() {
-        return this.bedrockSession.getPlayFabToken();
-    }
-
-    public StepXblXstsToken.XblXsts<?> getRealmsXsts() {
-        return this.bedrockSession.getRealmsXsts();
+    public BedrockAuthManager getAuthManager() {
+        return this.bedrockAuthManager;
     }
 
     @Override
     public String getDisplayString() {
         return this.getName() + " (Bedrock)";
-    }
-
-    @Override
-    public boolean refresh() throws Exception {
-        if (!super.refresh()) return false;
-
-        this.bedrockSession = DEVICE_CODE_LOGIN.refresh(MinecraftAuth.createHttpClient(), this.bedrockSession);
-        return true;
     }
 
 }

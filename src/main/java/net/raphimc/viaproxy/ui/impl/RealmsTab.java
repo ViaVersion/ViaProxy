@@ -23,11 +23,11 @@ import com.viaversion.viaversion.api.protocol.version.VersionType;
 import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.commons.swing.layouts.VerticalLayout;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.responsehandler.exception.RealmsRequestException;
-import net.raphimc.minecraftauth.service.realms.AbstractRealmsService;
-import net.raphimc.minecraftauth.service.realms.BedrockRealmsService;
-import net.raphimc.minecraftauth.service.realms.JavaRealmsService;
-import net.raphimc.minecraftauth.service.realms.model.RealmsWorld;
+import net.raphimc.minecraftauth.extra.realms.exception.RealmsRequestException;
+import net.raphimc.minecraftauth.extra.realms.model.RealmsServer;
+import net.raphimc.minecraftauth.extra.realms.service.RealmsService;
+import net.raphimc.minecraftauth.extra.realms.service.impl.BedrockRealmsService;
+import net.raphimc.minecraftauth.extra.realms.service.impl.JavaRealmsService;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
@@ -37,7 +37,6 @@ import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.UITab;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
-import net.raphimc.viaproxy.util.StringUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import javax.swing.*;
@@ -107,13 +106,12 @@ public class RealmsTab extends UITab {
             statusLabel.setText(I18n.get("tab.realms.refreshing_account"));
             CompletableFuture.runAsync(() -> {
                 try {
-                    ViaProxy.getSaveManager().accountsSave.ensureRefreshed(this.currentAccount);
                     SwingUtilities.invokeLater(() -> {
                         if (this.currentAccount instanceof MicrosoftAccount account) {
-                            final JavaRealmsService realmsService = new JavaRealmsService(MinecraftAuth.createHttpClient(), Iterables.getLast(this.currentSelectedJavaVersion.getIncludedVersions()), account.getMcProfile());
+                            final JavaRealmsService realmsService = new JavaRealmsService(MinecraftAuth.createHttpClient(), Iterables.getLast(this.currentSelectedJavaVersion.getIncludedVersions()), account.getAuthManager().getMinecraftToken(), account.getAuthManager().getMinecraftProfile());
                             this.loadRealms(realmsService, body, statusLabel);
                         } else if (this.currentAccount instanceof BedrockAccount account) {
-                            final BedrockRealmsService realmsService = new BedrockRealmsService(MinecraftAuth.createHttpClient(), ProtocolConstants.BEDROCK_VERSION_NAME, account.getRealmsXsts());
+                            final BedrockRealmsService realmsService = new BedrockRealmsService(MinecraftAuth.createHttpClient(), ProtocolConstants.BEDROCK_VERSION_NAME, account.getAuthManager().getRealmsXstsToken());
                             this.loadRealms(realmsService, body, statusLabel);
                         } else {
                             statusLabel.setText(I18n.get("tab.realms.unsupported_account"));
@@ -131,24 +129,24 @@ public class RealmsTab extends UITab {
         contentPane.add(body, BorderLayout.NORTH);
     }
 
-    private void loadRealms(final AbstractRealmsService realmsService, final JPanel body, final JLabel statusLabel) {
+    private void loadRealms(final RealmsService realmsService, final JPanel body, final JLabel statusLabel) {
         statusLabel.setText(I18n.get("tab.realms.availability_check"));
 
-        realmsService.isAvailable().thenAccept(state -> {
+        realmsService.isCompatibleAsync().thenAccept(state -> {
             if (state) {
                 SwingUtilities.invokeLater(() -> statusLabel.setText(I18n.get("tab.realms.loading_worlds")));
-                realmsService.getWorlds().thenAccept(worlds -> SwingUtilities.invokeLater(() -> {
+                realmsService.getWorldsAsync().thenAccept(servers -> SwingUtilities.invokeLater(() -> {
                     body.remove(statusLabel);
                     this.addHeader(body, realmsService instanceof JavaRealmsService);
                     final JPanel realmsPanel = new JPanel();
                     realmsPanel.setLayout(new VerticalLayout(5, 5));
-                    if (worlds.isEmpty()) {
+                    if (servers.isEmpty()) {
                         JLabel label = new JLabel(I18n.get("tab.realms.no_worlds"));
                         label.setHorizontalAlignment(SwingConstants.CENTER);
                         label.setFont(label.getFont().deriveFont(20F));
                         realmsPanel.add(label);
                     } else {
-                        this.addRealms(realmsPanel, realmsService, worlds);
+                        this.addRealms(realmsPanel, realmsService, servers);
                     }
                     final JScrollPane realmsScrollPane = new JScrollPane(realmsPanel);
                     realmsScrollPane.getVerticalScrollBar().setUnitIncrement(10);
@@ -192,31 +190,31 @@ public class RealmsTab extends UITab {
         }
     }
 
-    private void addRealms(final JPanel parent, final AbstractRealmsService realmsService, final List<RealmsWorld> worlds) {
-        worlds.sort((o1, o2) -> {
+    private void addRealms(final JPanel parent, final RealmsService realmsService, final List<RealmsServer> servers) {
+        servers.sort((o1, o2) -> {
             boolean o1Compatible = o1.isCompatible() && !o1.isExpired();
             boolean o2Compatible = o2.isCompatible() && !o2.isExpired();
             if (o1Compatible && !o2Compatible) return -1;
             if (!o1Compatible && o2Compatible) return 1;
             return 0;
         });
-        for (RealmsWorld world : worlds) {
+        for (RealmsServer server : servers) {
             final JPanel panel = new JPanel();
             panel.setLayout(new GridBagLayout());
             panel.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Table.gridColor")));
 
             String nameString = "";
-            if (world.getOwnerName() != null) nameString += world.getOwnerName() + " - ";
+            if (server.getOwnerName() != null) nameString += server.getOwnerName() + " - ";
             String versionString = "";
-            if (!world.getActiveVersion().isEmpty()) versionString += " - " + world.getActiveVersion();
-            GBC.create(panel).grid(0, 0).weightx(1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(nameString + StringUtil.emptyIfNull(world.getName()) + " (" + world.getState() + ")"));
-            GBC.create(panel).grid(1, 0).insets(5, 5, 0, 5).anchor(GBC.LINE_END).add(new JLabel(world.getWorldType() + versionString));
-            GBC.create(panel).grid(0, 1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(StringUtil.emptyIfNull(world.getMotd())));
+            if (server.getActiveVersion() != null) versionString += " - " + server.getActiveVersion();
+            GBC.create(panel).grid(0, 0).weightx(1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(nameString + server.getNameOr("") + " (" + server.getState() + ")"));
+            GBC.create(panel).grid(1, 0).insets(5, 5, 0, 5).anchor(GBC.LINE_END).add(new JLabel(server.getWorldType() + versionString));
+            GBC.create(panel).grid(0, 1).insets(5, 5, 0, 5).fill(GBC.HORIZONTAL).add(new JLabel(server.getMotdOr("")));
             final JButton join = new JButton(I18n.get("tab.realms.join"));
-            if (world.isExpired()) {
+            if (server.isExpired()) {
                 join.setEnabled(false);
                 join.setToolTipText(I18n.get("tab.realms.expired"));
-            } else if (!world.isCompatible()) {
+            } else if (!server.isCompatible()) {
                 join.setEnabled(false);
                 join.setToolTipText(I18n.get("tab.realms.incompatible"));
             }
@@ -224,19 +222,19 @@ public class RealmsTab extends UITab {
             join.addActionListener(event -> {
                 join.setEnabled(false);
                 join.setText(I18n.get("tab.realms.joining"));
-                realmsService.joinWorld(world).thenAccept(address -> SwingUtilities.invokeLater(() -> {
+                realmsService.joinWorldAsync(server).thenAccept(joinInformation -> SwingUtilities.invokeLater(() -> {
                     join.setEnabled(true);
                     join.setText(I18n.get("tab.realms.join"));
-                    this.setServerAddressAndStartViaProxy(address, realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : BedrockProtocolVersion.bedrockLatest);
+                    this.setServerAddressAndStartViaProxy(joinInformation.getAddress(), realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : BedrockProtocolVersion.bedrockLatest);
                 })).exceptionally(e -> {
                     final Throwable cause = e.getCause();
                     SwingUtilities.invokeLater(() -> {
                         join.setEnabled(true);
                         join.setText(I18n.get("tab.realms.join"));
-                        if (realmsService instanceof JavaRealmsService javaRealmsService && cause instanceof RealmsRequestException realmsRequestException && realmsRequestException.getErrorCode() == RealmsRequestException.TOS_NOT_ACCEPTED) {
+                        if (realmsService instanceof JavaRealmsService javaRealmsService && cause instanceof RealmsRequestException realmsRequestException && realmsRequestException.getErrorCode() == RealmsRequestException.ERROR_TOS_NOT_ACCEPTED) {
                             final int chosen = JOptionPane.showConfirmDialog(this.viaProxyWindow, I18n.get("tab.realms.accept_tos", "https://aka.ms/MinecraftRealmsTerms"), "ViaProxy", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                             if (chosen == JOptionPane.YES_OPTION) {
-                                javaRealmsService.acceptTos();
+                                javaRealmsService.acceptTosUnchecked();
                                 join.doClick(0);
                             }
                         } else {

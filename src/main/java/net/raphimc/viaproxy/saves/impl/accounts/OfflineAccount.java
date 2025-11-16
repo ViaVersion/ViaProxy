@@ -60,9 +60,4 @@ public class OfflineAccount extends Account {
         return this.name + " (Offline)";
     }
 
-    @Override
-    public boolean refresh() {
-        return false;
-    }
-
 }

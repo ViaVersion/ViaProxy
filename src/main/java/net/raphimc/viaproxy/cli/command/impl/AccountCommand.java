@@ -19,7 +19,11 @@ package net.raphimc.viaproxy.cli.command.impl;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
+import net.raphimc.minecraftauth.msa.service.impl.DeviceCodeMsaAuthService;
+import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.cli.command.Command;
 import net.raphimc.viaproxy.cli.command.executor.CommandExecutor;
@@ -87,14 +91,10 @@ public class AccountCommand extends Command {
                     return 1;
                 })))
                 .then(literal("microsoft").executes(ctx -> {
-                    return this.handleLogin(ctx.getSource(), codeConsumer -> {
-                        return new MicrosoftAccount(MicrosoftAccount.DEVICE_CODE_LOGIN.getFromInput(MinecraftAuth.createHttpClient(), new StepMsaDeviceCode.MsaDeviceCodeCallback(codeConsumer)));
-                    });
+                    return this.handleLogin(ctx.getSource(), msaDeviceCodeConsumer -> new MicrosoftAccount(JavaAuthManager.create(MinecraftAuth.createHttpClient()).login(DeviceCodeMsaAuthService::new, msaDeviceCodeConsumer)));
                 }))
                 .then(literal("bedrock").executes(ctx -> {
-                    return this.handleLogin(ctx.getSource(), codeConsumer -> {
-                        return new BedrockAccount(BedrockAccount.DEVICE_CODE_LOGIN.getFromInput(MinecraftAuth.createHttpClient(), new StepMsaDeviceCode.MsaDeviceCodeCallback(codeConsumer)));
-                    });
+                    return this.handleLogin(ctx.getSource(), msaDeviceCodeConsumer -> new BedrockAccount(BedrockAuthManager.create(MinecraftAuth.createHttpClient(), ProtocolConstants.BEDROCK_VERSION_NAME).login(DeviceCodeMsaAuthService::new, msaDeviceCodeConsumer)));
                 }))
         );
         builder.then(literal("remove").then(argument("index", integer(0)).executes(ctx -> {
@@ -119,7 +119,7 @@ public class AccountCommand extends Command {
         })));
     }
 
-    private int handleLogin(final CommandExecutor source, final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, Account> requestHandler) {
+    private int handleLogin(final CommandExecutor source, final TFunction<Consumer<MsaDeviceCode>, Account> requestHandler) {
         try {
             Account account = requestHandler.apply(code -> {
                 source.sendMessage("Please open your browser and visit " + code.getDirectVerificationUri() + " and login with your Microsoft account.");

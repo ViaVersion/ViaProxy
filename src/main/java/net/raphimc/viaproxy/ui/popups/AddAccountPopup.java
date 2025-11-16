@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.ui.popups;
 
 import net.lenni0451.commons.swing.GBC;
-import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
 import net.raphimc.viaproxy.ui.I18n;
 import net.raphimc.viaproxy.ui.ViaProxyWindow;
 import net.raphimc.viaproxy.ui.elements.LinkLabel;
@@ -35,13 +35,13 @@ import static net.raphimc.viaproxy.ui.ViaProxyWindow.BORDER_PADDING;
 public class AddAccountPopup extends JDialog {
 
     private final ViaProxyWindow parent;
-    private final StepMsaDeviceCode.MsaDeviceCode deviceCode;
+    private final MsaDeviceCode msaDeviceCode;
     private boolean externalClose;
 
-    public AddAccountPopup(final ViaProxyWindow parent, final StepMsaDeviceCode.MsaDeviceCode deviceCode, final Consumer<AddAccountPopup> popupConsumer, final Runnable closeListener) {
+    public AddAccountPopup(final ViaProxyWindow parent, final MsaDeviceCode msaDeviceCode, final Consumer<AddAccountPopup> popupConsumer, final Runnable closeListener) {
         super(parent, true);
         this.parent = parent;
-        this.deviceCode = deviceCode;
+        this.msaDeviceCode = msaDeviceCode;
         popupConsumer.accept(this);
 
         this.initWindow(closeListener);
@@ -71,7 +71,7 @@ public class AddAccountPopup extends JDialog {
             JLabel browserLabel = new JLabel("<html><p>" + I18n.get("popup.login_account.instructions.browser") + "</p></html>");
             GBC.create(contentPane).grid(0, 0).weightx(1).insets(BORDER_PADDING, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(browserLabel);
 
-            GBC.create(contentPane).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(new LinkLabel(this.deviceCode.getDirectVerificationUri(), AddAccountPopup.this.deviceCode.getDirectVerificationUri()));
+            GBC.create(contentPane).grid(0, 1).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(new LinkLabel(this.msaDeviceCode.getDirectVerificationUri(), AddAccountPopup.this.msaDeviceCode.getDirectVerificationUri()));
 
             JLabel closeInfo = new JLabel("<html><p>" + I18n.get("popup.login_account.instructions.close") + "</p></html>");
             GBC.create(contentPane).grid(0, 2).weightx(1).insets(BODY_BLOCK_PADDING, BORDER_PADDING, BORDER_PADDING, BORDER_PADDING).fill(GBC.HORIZONTAL).add(closeInfo);

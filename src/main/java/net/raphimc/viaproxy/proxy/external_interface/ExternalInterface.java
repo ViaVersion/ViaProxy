@@ -27,8 +27,9 @@ import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.commons.httpclient.proxy.SingleProxyAuthenticator;
-import net.raphimc.minecraftauth.step.bedrock.StepMCChain;
-import net.raphimc.minecraftauth.step.java.StepPlayerCertificates;
+import net.raphimc.minecraftauth.bedrock.model.MinecraftCertificateChain;
+import net.raphimc.minecraftauth.bedrock.model.MinecraftMultiplayerToken;
+import net.raphimc.minecraftauth.java.model.MinecraftPlayerCertificates;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginKeyPacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
@@ -48,6 +49,8 @@ import java.net.Authenticator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -59,19 +62,18 @@ public class ExternalInterface {
         try {
             if (proxyConnection.getUserOptions().account() != null) {
                 final Account account = proxyConnection.getUserOptions().account();
-                ViaProxy.getSaveManager().accountsSave.ensureRefreshed(account);
 
                 proxyConnection.setGameProfile(account.getGameProfile());
                 final UserConnection user = proxyConnection.getUserConnection();
 
                 if (ViaProxy.getConfig().shouldSignChat() && proxyConnection.getServerVersion().newerThanOrEqualTo(ProtocolVersion.v1_19) && account instanceof MicrosoftAccount microsoftAccount) {
-                    final StepPlayerCertificates.PlayerCertificates playerCertificates = microsoftAccount.getPlayerCertificates();
+                    final MinecraftPlayerCertificates playerCertificates = microsoftAccount.getAuthManager().getMinecraftPlayerCertificates().getUpToDate();
                     final Instant expiresAt = Instant.ofEpochMilli(playerCertificates.getExpireTimeMs());
                     final long expiresAtMillis = playerCertificates.getExpireTimeMs();
-                    final PublicKey publicKey = playerCertificates.getPublicKey();
+                    final PublicKey publicKey = playerCertificates.getKeyPair().getPublic();
                     final byte[] publicKeyBytes = publicKey.getEncoded();
                     final byte[] keySignature = playerCertificates.getPublicKeySignature();
-                    final PrivateKey privateKey = playerCertificates.getPrivateKey();
+                    final PrivateKey privateKey = playerCertificates.getKeyPair().getPrivate();
                     final UUID uuid = proxyConnection.getGameProfile().getId();
 
                     byte[] loginHelloKeySignature = keySignature;
@@ -84,10 +86,9 @@ public class ExternalInterface {
                     user.put(new ChatSession1_19_1(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                     user.put(new ChatSession1_19_3(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                 } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
-                    final StepMCChain.MCChain mcChain = bedrockAccount.getMcChain();
-
-                    final UUID deviceId = mcChain.getXblXsts().getInitialXblSession().getXblDeviceToken().getId();
-                    user.put(new AuthChainData(mcChain.getMojangJwt(), mcChain.getIdentityJwt(), mcChain.getPublicKey(), mcChain.getPrivateKey(), deviceId));
+                    final MinecraftMultiplayerToken multiplayerToken = bedrockAccount.getAuthManager().getMinecraftMultiplayerToken().refresh();
+                    final MinecraftCertificateChain certificateChain = bedrockAccount.getAuthManager().getMinecraftCertificateChain().refresh();
+                    user.put(new AuthChainData(certificateChain.getMojangJwt(), certificateChain.getIdentityJwt(), (ECPublicKey) bedrockAccount.getAuthManager().getSessionKeyPair().getPublic(), (ECPrivateKey) bedrockAccount.getAuthManager().getSessionKeyPair().getPrivate(), bedrockAccount.getAuthManager().getDeviceId()));
                 }
             }
 
@@ -109,7 +110,7 @@ public class ExternalInterface {
             if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
                 try {
                     if (ViaProxy.getConfig().getBackendProxy() == null) {
-                        AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                        AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getAuthManager().getMinecraftToken().getUpToDate().getToken(), serverIdHash);
                     } else {
                         final Proxy proxy = ViaProxy.getConfig().getBackendProxy();
                         final MinecraftSessionService sessionService = new YggdrasilAuthenticationService(proxy.toJavaProxy()).createMinecraftSessionService();
@@ -118,7 +119,7 @@ public class ExternalInterface {
                             if (proxy.getUsername() != null && proxy.getPassword() != null) {
                                 Authenticator.setDefault(new SingleProxyAuthenticator(proxy.getUsername(), proxy.getPassword()));
                             }
-                            sessionService.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getMcProfile().getMcToken().getAccessToken(), serverIdHash);
+                            sessionService.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getAuthManager().getMinecraftToken().getUpToDate().getToken(), serverIdHash);
                         } finally {
                             Authenticator.setDefault(prevAuthenticator);
                         }

@@ -22,21 +22,25 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.saves.impl.AccountsSaveV3;
+import net.raphimc.viaproxy.saves.impl.AccountsSave;
 import net.raphimc.viaproxy.saves.impl.UISave;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SaveManager {
 
     private static final File SAVE_FILE = new File(ViaProxy.getCwd(), "saves.json");
     private static final Gson GSON = new Gson();
 
-    public final AccountsSaveV3 accountsSave = new AccountsSaveV3();
+    public final AccountsSave accountsSave = new AccountsSave();
     public final UISave uiSave = new UISave();
+
+    private final Map<String, JsonElement> unknownSaves = new HashMap<>();
 
     public SaveManager() {
         try {
@@ -59,20 +63,27 @@ public class SaveManager {
                         final AbstractSave save = field.get();
                         try {
                             if (saveObject.has(save.getName())) {
-                                save.load(saveObject.get(save.getName()));
+                                save.load(saveObject.remove(save.getName()));
                             }
                         } catch (Throwable e) {
                             Logger.LOGGER.error("Failed to load save " + save.getName(), e);
                         }
                     });
+
+            for (Map.Entry<String, JsonElement> entry : saveObject.entrySet()) {
+                this.unknownSaves.put(entry.getKey(), entry.getValue());
+            }
+
+            this.save();
         } catch (Throwable e) {
             throw new RuntimeException("Failed to initialize SaveManager", e);
         }
     }
 
-    public void save() {
+    public synchronized void save() {
         try {
             final JsonObject saveObject = new JsonObject();
+            this.unknownSaves.forEach(saveObject::add);
             RStream
                     .of(this)
                     .fields()

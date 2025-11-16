@@ -18,7 +18,9 @@
 package net.raphimc.viaproxy.saves;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.raphimc.minecraftauth.util.MinecraftAuth4To5Migrator;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.saves.impl.accounts.MicrosoftAccount;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -26,27 +28,27 @@ import net.raphimc.viaproxy.util.logging.Logger;
 public class SaveMigrator {
 
     public static void migrate(final JsonObject jsonObject) {
-        try {
-            if (jsonObject.has("new_accounts")) {
-                final JsonArray accountsArray = jsonObject.getAsJsonArray("new_accounts");
-                for (int i = 0; i < accountsArray.size(); i++) {
-                    final JsonObject object = accountsArray.get(i).getAsJsonObject();
-                    final String type = object.get("account_type").getAsString();
-                    if (BedrockAccount.class.getName().equals(type) && !object.has("mc_chain")) {
-                        final JsonObject newObject = new JsonObject();
-                        object.remove("account_type");
-                        newObject.add("mc_chain", object);
-                        newObject.addProperty("account_type", type);
-                        accountsArray.set(i, newObject);
+        try { // Accounts V3 -> V4 (MinecraftAuth 4 -> 5 migration)
+            if (jsonObject.has("accountsV3")) {
+                final JsonArray oldAccountsArray = jsonObject.getAsJsonArray("accountsV3");
+                final JsonArray newAccountsArray = new JsonArray(oldAccountsArray.size());
+                for (JsonElement oldAccountElement : oldAccountsArray) {
+                    final JsonObject oldAccountObject = oldAccountElement.getAsJsonObject();
+                    final String type = oldAccountObject.get("accountType").getAsString();
+                    final JsonObject newAccountObject;
+                    if (MicrosoftAccount.class.getName().equals(type)) {
+                        newAccountObject = MinecraftAuth4To5Migrator.migrateJavaSave(oldAccountObject);
+                        newAccountObject.addProperty("accountType", type);
+                    } else if (BedrockAccount.class.getName().equals(type)) {
+                        newAccountObject = MinecraftAuth4To5Migrator.migrateBedrockSave(oldAccountObject);
+                        newAccountObject.addProperty("accountType", type);
+                    } else {
+                        newAccountObject = oldAccountObject;
                     }
-                    if (MicrosoftAccount.class.getName().equals(type) && !object.has("mc_profile")) {
-                        final JsonObject newObject = new JsonObject();
-                        object.remove("account_type");
-                        newObject.add("mc_profile", object);
-                        newObject.addProperty("account_type", type);
-                        accountsArray.set(i, newObject);
-                    }
+                    newAccountsArray.add(newAccountObject);
                 }
+                jsonObject.remove("accountsV3");
+                jsonObject.add("accountsV4", newAccountsArray);
             }
         } catch (Throwable e) {
             Logger.LOGGER.error("Failed to migrate accounts save", e);

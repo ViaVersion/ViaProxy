@@ -26,17 +26,18 @@ import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 import net.raphimc.viaproxy.saves.AbstractSave;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.OfflineAccount;
+import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AccountsSaveV3 extends AbstractSave {
+public class AccountsSave extends AbstractSave {
 
-    private List<Account> accounts = new ArrayList<>();
+    private final List<Account> accounts = new ArrayList<>();
 
-    public AccountsSaveV3() {
-        super("accountsV3");
+    public AccountsSave() {
+        super("accountsV4");
     }
 
     @Override
@@ -45,14 +46,18 @@ public class AccountsSaveV3 extends AbstractSave {
         classLoaders.add(ViaProxy.class.getClassLoader());
         classLoaders.addAll(ViaProxy.getPluginManager().getPlugins().stream().map(ViaProxyPlugin::getClassLoader).toList());
 
-        this.accounts = new ArrayList<>();
+        this.accounts.clear();
         for (JsonElement element : jsonElement.getAsJsonArray()) {
-            final JsonObject jsonObject = element.getAsJsonObject();
-            final String type = jsonObject.get("accountType").getAsString();
-            final Class<?> clazz = Classes.find(type, true, classLoaders);
+            try {
+                final JsonObject jsonObject = element.getAsJsonObject();
+                final String type = jsonObject.get("accountType").getAsString();
+                final Class<?> clazz = Classes.find(type, true, classLoaders);
 
-            final Account account = (Account) clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
-            this.accounts.add(account);
+                final Account account = (Account) clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
+                this.accounts.add(account);
+            } catch (Throwable e) {
+                Logger.LOGGER.error("Failed to load an account", e);
+            }
         }
     }
 
@@ -85,14 +90,6 @@ public class AccountsSaveV3 extends AbstractSave {
 
     public void removeAccount(final Account account) {
         this.accounts.remove(account);
-    }
-
-    public void ensureRefreshed(final Account account) throws Throwable {
-        synchronized (this) {
-            if (account.refresh()) {
-                ViaProxy.getSaveManager().save();
-            }
-        }
     }
 
     public List<Account> getAccounts() {

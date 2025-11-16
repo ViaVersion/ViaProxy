@@ -19,7 +19,11 @@ package net.raphimc.viaproxy.ui.impl;
 
 import net.lenni0451.commons.swing.GBC;
 import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
+import net.raphimc.minecraftauth.java.JavaAuthManager;
+import net.raphimc.minecraftauth.msa.model.MsaDeviceCode;
+import net.raphimc.minecraftauth.msa.service.impl.DeviceCodeMsaAuthService;
+import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
@@ -173,9 +177,7 @@ public class AccountsTab extends UITab {
                 this.addMicrosoftAccountButton = new JButton(I18n.get("tab.accounts.add_microsoft.label"));
                 this.addMicrosoftAccountButton.addActionListener(event -> {
                     this.addMicrosoftAccountButton.setEnabled(false);
-                    this.handleLogin(msaDeviceCodeConsumer -> {
-                        return new MicrosoftAccount(MicrosoftAccount.DEVICE_CODE_LOGIN.getFromInput(MinecraftAuth.createHttpClient(), new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
-                    });
+                    this.handleLogin(msaDeviceCodeConsumer -> new MicrosoftAccount(JavaAuthManager.create(MinecraftAuth.createHttpClient()).login(DeviceCodeMsaAuthService::new, msaDeviceCodeConsumer)));
                 });
                 addButtons.add(this.addMicrosoftAccountButton);
             }
@@ -183,9 +185,7 @@ public class AccountsTab extends UITab {
                 this.addBedrockAccountButton = new JButton(I18n.get("tab.accounts.add_bedrock.label"));
                 this.addBedrockAccountButton.addActionListener(event -> {
                     this.addBedrockAccountButton.setEnabled(false);
-                    this.handleLogin(msaDeviceCodeConsumer -> {
-                        return new BedrockAccount(BedrockAccount.DEVICE_CODE_LOGIN.getFromInput(MinecraftAuth.createHttpClient(), new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCodeConsumer)));
-                    });
+                    this.handleLogin(msaDeviceCodeConsumer -> new BedrockAccount(BedrockAuthManager.create(MinecraftAuth.createHttpClient(), ProtocolConstants.BEDROCK_VERSION_NAME).login(DeviceCodeMsaAuthService::new, msaDeviceCodeConsumer)));
                 });
                 addButtons.add(this.addBedrockAccountButton);
             }
@@ -260,7 +260,7 @@ public class AccountsTab extends UITab {
         ViaProxy.getSaveManager().save();
     }
 
-    private void handleLogin(final TFunction<Consumer<StepMsaDeviceCode.MsaDeviceCode>, Account> requestHandler) {
+    private void handleLogin(final TFunction<Consumer<MsaDeviceCode>, Account> requestHandler) {
         this.addThread = new Thread(() -> {
             try {
                 final Account account = requestHandler.apply(msaDeviceCode -> SwingUtilities.invokeLater(() -> new AddAccountPopup(this.viaProxyWindow, msaDeviceCode, popup -> this.addAccountPopup = popup, () -> {
