@@ -71,7 +71,7 @@ dependencies {
     includeInJar "com.viaversion:viarewind-common:4.0.11"
     includeInJar "net.raphimc:ViaLegacy:3.0.11"
     includeInJar "com.viaversion:viaaprilfools-common:4.0.6-SNAPSHOT"
-    includeInJar "net.raphimc:ViaBedrock:0.0.23-SNAPSHOT"
+    includeInJar "net.raphimc:ViaBedrock:0.0.24-SNAPSHOT"
     includeInJar("com.viaversion:vialoader:4.0.5") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
