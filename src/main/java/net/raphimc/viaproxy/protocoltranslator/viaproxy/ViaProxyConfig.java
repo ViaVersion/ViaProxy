@@ -173,6 +173,10 @@ public class ViaProxyConfig {
     @Description("Custom MOTD to send when clients ping the proxy. Leave empty to use the target server's MOTD.")
     private String customMotd = "";
 
+    @Option("custom-favicon-path")
+    @Description("Relative file path to a custom favicon to send when clients ping the proxy. Leave empty to use the target server's favicon.")
+    private String customFaviconPath = "";
+
     @Option("resource-pack-url")
     @Description({"URL of a resource pack which clients can optionally download when connecting to the server. Leave empty to disable.", "Example: http://example.com/resourcepack.zip"})
     private String resourcePackUrl = "";
@@ -504,6 +508,15 @@ public class ViaProxyConfig {
 
     public void setCustomMotd(final String customMotd) {
         this.customMotd = customMotd;
+        this.save();
+    }
+
+    public String getCustomFaviconPath() {
+        return this.customFaviconPath;
+    }
+
+    public void setCustomFaviconPath(final String customFaviconPath) {
+        this.customFaviconPath = customFaviconPath;
         this.save();
     }
 
