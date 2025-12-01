@@ -18,7 +18,7 @@
 package net.raphimc.viaproxy.proxy.session;
 
 import com.viaversion.vialoader.netty.VLPipeline;
-import com.viaversion.vialoader.netty.viabedrock.PingEncapsulationCodec;
+import com.viaversion.vialoader.netty.viabedrock.RakNetPingEncapsulationCodec;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -94,7 +94,7 @@ public class BedrockProxyConnection extends ProxyConnection {
         if (this.channelFuture == null) this.initialize(TransportType.getBest(address), new Bootstrap());
 
         this.channelFuture.channel().eventLoop().submit(() -> {
-            this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new PingEncapsulationCodec(((InetSocketAddress) address)));
+            this.getChannel().pipeline().replace(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, "ping_encapsulation", new RakNetPingEncapsulationCodec(((InetSocketAddress) address)));
             this.getChannel().pipeline().remove(VLPipeline.VIABEDROCK_PACKET_ENCAPSULATION_HANDLER_NAME);
             this.getChannel().pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
         });
