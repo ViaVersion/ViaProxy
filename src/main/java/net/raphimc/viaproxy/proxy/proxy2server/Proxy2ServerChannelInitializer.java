@@ -24,11 +24,14 @@ import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
+import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.codec.NoReadFlowControlHandler;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.viabedrock.netty.util.DatagramCodec;
+import net.raphimc.viabedrock.protocol.RakNetStatusProtocol;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
@@ -73,6 +76,13 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
             channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
             channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
+
+            if (proxyConnection.getC2pConnectionState() == ConnectionState.STATUS) {
+                channel.pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
+                channel.pipeline().remove(VLPipeline.VIABEDROCK_PACKET_CODEC_NAME);
+                channel.pipeline().replace(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME, "viabedrock-datagram-codec", new DatagramCodec());
+                user.getProtocolInfo().getPipeline().add(RakNetStatusProtocol.INSTANCE);
+            }
         }
 
         if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {

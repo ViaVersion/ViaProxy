@@ -43,10 +43,7 @@ import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
-import net.raphimc.viaproxy.proxy.session.BedrockProxyConnection;
-import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
-import net.raphimc.viaproxy.proxy.session.ProxyConnection;
-import net.raphimc.viaproxy.proxy.session.UserOptions;
+import net.raphimc.viaproxy.proxy.session.*;
 import net.raphimc.viaproxy.proxy.util.*;
 import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.*;
@@ -54,6 +51,7 @@ import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
+import java.net.PortUnreachableException;
 import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.List;
@@ -206,7 +204,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
                 final ProtocolVersion detectedVersion = ProtocolVersionDetector.get(finalServerAddress, clientVersion);
                 this.connect(finalServerAddress, detectedVersion, clientVersion, packet.intendedState, finalClientHandshakeAddress, userOptions, handshakeParts);
             }).exceptionally(t -> {
-                if (t instanceof ConnectException || t instanceof UnresolvedAddressException) {
+                if (t instanceof ConnectException || t instanceof UnresolvedAddressException || t instanceof PortUnreachableException) {
                     this.proxyConnection.kickClient("§cCould not connect to the backend server!");
                 } else {
                     this.proxyConnection.kickClient("§cAutomatic protocol detection failed!\n§c" + t.getMessage());
@@ -222,7 +220,11 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         final ProxyConnection proxyConnection;
         if (serverVersion.equals(BedrockProtocolVersion.bedrockLatest)) {
-            proxyConnection = new BedrockProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
+            if (intendedState != IntendedState.STATUS) {
+                proxyConnection = new BedrockProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
+            } else {
+                proxyConnection = new BedrockStatusProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
+            }
         } else {
             proxyConnection = new ProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
         }
@@ -302,7 +304,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
             }
         }, (ThrowingChannelFutureListener) f -> {
             if (!f.isSuccess()) {
-                if (f.cause() instanceof ConnectException || f.cause() instanceof UnresolvedAddressException) {
+                if (f.cause() instanceof ConnectException || f.cause() instanceof UnresolvedAddressException || f.cause() instanceof PortUnreachableException) {
                     this.proxyConnection.kickClient("§cCould not connect to the backend server!");
                 } else {
                     Logger.LOGGER.error("Error while connecting to the backend server", f.cause());

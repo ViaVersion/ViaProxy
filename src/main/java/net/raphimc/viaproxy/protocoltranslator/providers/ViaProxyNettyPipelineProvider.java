@@ -22,8 +22,8 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.Channel;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
-import net.raphimc.viabedrock.netty.AesEncryptionCodec;
 import net.raphimc.viabedrock.netty.CompressionCodec;
+import net.raphimc.viabedrock.netty.raknet.AesEncryptionCodec;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
@@ -57,7 +57,7 @@ public class ViaProxyNettyPipelineProvider extends NettyPipelineProvider {
         }
 
         try {
-            channel.pipeline().addAfter(VLPipeline.VIABEDROCK_FRAME_ENCAPSULATION_HANDLER_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryptionCodec(key));
+            channel.pipeline().addAfter(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryptionCodec(key));
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
