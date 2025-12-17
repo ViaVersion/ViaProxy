@@ -20,7 +20,6 @@ package net.raphimc.viaproxy.util;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 
-import javax.annotation.Nullable;
 import java.net.SocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,7 +28,6 @@ public class WildcardDomainParser {
 
     private static final Pattern PUBLIC_WILDCARD_FORMAT2_PATTERN = Pattern.compile("^address\\.(.+?)\\.port\\.(\\d+?)(?:\\.version\\.(.+?))?$");
 
-    @Nullable
     public static ParsedDomain parseFormat1(final String address) {
         try {
             final String addressData = address.substring(0, address.toLowerCase().lastIndexOf(".viaproxy."));
@@ -47,7 +45,6 @@ public class WildcardDomainParser {
         }
     }
 
-    @Nullable
     public static ParsedDomain parseFormat2(final String address) {
         try {
             final String addressData = address.substring(0, address.toLowerCase().lastIndexOf(".f2.viaproxy."));
@@ -71,7 +68,7 @@ public class WildcardDomainParser {
     }
 
 
-    public record ParsedDomain(SocketAddress address, @Nullable ProtocolVersion version) {
+    public record ParsedDomain(SocketAddress address, ProtocolVersion version) {
     }
 
 }
