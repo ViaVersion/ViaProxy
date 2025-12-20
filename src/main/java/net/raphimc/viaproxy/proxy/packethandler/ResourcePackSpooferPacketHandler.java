@@ -25,7 +25,7 @@ import net.raphimc.netminecraft.packet.impl.common.S2CResourcePackPopPacket;
 import net.raphimc.netminecraft.packet.impl.common.S2CResourcePackPushPacket;
 import net.raphimc.netminecraft.packet.impl.configuration.C2SConfigResourcePackPacket;
 import net.raphimc.netminecraft.packet.impl.play.C2SPlayResourcePackPacket;
-import net.raphimc.viabedrock.protocol.data.enums.java.ResourcePackAction;
+import net.raphimc.viabedrock.protocol.data.enums.java.generated.ResourcePackAction;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 
 import java.util.HashSet;
