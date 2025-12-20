@@ -173,6 +173,14 @@ public class ViaProxyConfig {
     @Description("Custom MOTD to send when clients ping the proxy. Leave empty to use the target server's MOTD.")
     private String customMotd = "";
 
+    @Option("custom-players")
+    @Description({
+        "Custom Players to send when clients ping the proxy. Leave empty to use the target server's players.",
+        "For 1 player on a 8 player server with no sample players: 1/8",
+        "For 2 players on a 10 player server with 2 sample players: 2/10/player1/player2"
+    })
+    private String customPlayers = "";
+
     @Option("custom-favicon-path")
     @Description("Relative file path to a custom favicon to send when clients ping the proxy. Leave empty to use the target server's favicon.")
     private String customFaviconPath = "";
@@ -502,6 +510,10 @@ public class ViaProxyConfig {
     public void setCustomMotd(final String customMotd) {
         this.customMotd = customMotd;
         this.save();
+    }
+
+    public String getCustomPlayers() {
+        return this.customPlayers;
     }
 
     public String getCustomFaviconPath() {
