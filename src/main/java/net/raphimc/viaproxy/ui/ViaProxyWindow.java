@@ -124,7 +124,11 @@ public class ViaProxyWindow extends JFrame {
 
     public static void openURL(final String url) {
         try {
-            Desktop.getDesktop().browse(new URI(url));
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(url));
+            } else {
+                new ProcessBuilder("xdg-open", url).start();
+            }
         } catch (Throwable t) {
             showInfo(I18n.get("generic.could_not_open_url", url));
         }
