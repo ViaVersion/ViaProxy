@@ -97,7 +97,7 @@ dependencies {
     includeInJar("net.raphimc:MinecraftAuth:5.0.0") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    includeInJar("dev.kastle.netty:netty-transport-raknet:1.4.0") {
+    includeInJar("dev.kastle.netty:netty-transport-raknet:1.5.2") {
         exclude group: "io.netty"
     }
     includeInJar "gs.mclo:api:5.0.2"
