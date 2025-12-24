@@ -278,7 +278,7 @@ public class AccountsTab extends UITab {
             } catch (TimeoutException e) {
                 SwingUtilities.invokeLater(() -> {
                     this.closePopup();
-                    ViaProxyWindow.showError(I18n.get("tab.accounts.add.timeout", "60"));
+                    ViaProxyWindow.showError(I18n.get("tab.accounts.add.timeout", "300"));
                 });
             } catch (Throwable t) {
                 if (t.getCause() instanceof InterruptedException) {
