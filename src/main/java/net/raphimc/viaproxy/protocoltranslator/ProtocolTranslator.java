@@ -81,6 +81,9 @@ public class ProtocolTranslator {
                     packet-limiter:
                       max-per-second: 1400
                       sustained-max-per-second: 400
+                    logging:
+                      log-text-component-conversion-errors: true
+                      log-other-conversion-warnings: true
                     """, StandardOpenOption.CREATE_NEW);
         } catch (FileAlreadyExistsException ignored) {
         } catch (Throwable e) {
