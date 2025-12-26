@@ -30,7 +30,11 @@ public class BedrockStatusProxyConnection extends ProxyConnection {
     }
 
     @Override
-    public void initialize(final TransportType transportType, final Bootstrap bootstrap) {
+    public void initialize(TransportType transportType, final Bootstrap bootstrap) {
+        if (transportType == TransportType.KQUEUE) {
+            transportType = TransportType.NIO; // KQueue doesn't work for some reason
+        }
+
         bootstrap
                 .group(EventLoops.getClientEventLoop(transportType))
                 .channel(transportType.udpClientChannelClass())
