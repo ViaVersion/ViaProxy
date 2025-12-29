@@ -64,6 +64,24 @@ public class StatusPacketHandler extends PacketHandler {
                         obj.addProperty("favicon", FAVICON_BASE_64);
                     }
                 }
+                String customPlayers = ViaProxy.getConfig().getCustomPlayers();
+                if (!customPlayers.isBlank()) {
+                    String[] parts = customPlayers.split("/");
+                    JsonObject players = new JsonObject();
+                    players.addProperty("online", Integer.parseInt(parts[0]));
+                    players.addProperty("max", Integer.parseInt(parts[1]));
+                    if (parts.length > 2) {
+                        var sampleArray = new com.google.gson.JsonArray();
+                        for (int i = 2; i < parts.length; i++) {
+                            JsonObject samplePlayer = new JsonObject();
+                            samplePlayer.addProperty("name", parts[i]);
+                            samplePlayer.addProperty("id", "00000000-0000-0000-0000-000000000000");
+                            sampleArray.add(samplePlayer);
+                        }
+                        players.add("sample", sampleArray);
+                    }
+                    obj.add("players", players);
+                }                
                 statusResponsePacket.statusJson = obj.toString();
             } catch (Throwable ignored) {
             }
