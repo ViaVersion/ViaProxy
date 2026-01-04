@@ -51,8 +51,8 @@ repositories {
 
 dependencies {
     includeInJar "com.viaversion:viaversion-common:5.7.0"
-    includeInJar "com.viaversion:viabackwards-common:5.7.0"
-    includeInJar "com.viaversion:viarewind-common:4.0.13"
+    includeInJar "com.viaversion:viabackwards-common:5.7.1-SNAPSHOT"
+    includeInJar "com.viaversion:viarewind-common:4.0.14-SNAPSHOT"
     includeInJar "net.raphimc:ViaLegacy:3.0.13-SNAPSHOT"
     includeInJar "com.viaversion:viaaprilfools-common:4.0.8-SNAPSHOT"
     includeInJar "net.raphimc:ViaBedrock:0.0.25-SNAPSHOT"
