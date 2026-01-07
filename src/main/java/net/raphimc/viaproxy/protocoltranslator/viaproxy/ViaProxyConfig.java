@@ -194,6 +194,13 @@ public class ViaProxyConfig {
     @Description("Enables handling and rewriting of Simple Voice Chat mod packets.")
     private boolean simpleVoiceChatSupport = false;
 
+    @Option("fix-fabric-particle-api")
+    @Description({
+            "Fixes an issue where the Fabric Particle API causes disconnects when both the client and server have the mod installed and both are 1.21.5+.",
+            "See https://github.com/ViaVersion/ViaFabric/issues/428"
+    })
+    private boolean fixFabricParticleApi = true;
+
     @Option("fake-accept-resource-packs")
     @Description({
             "Accepts resource packs from the server without showing a prompt to the client.",
@@ -537,6 +544,15 @@ public class ViaProxyConfig {
 
     public void setSimpleVoiceChatSupport(final boolean simpleVoiceChatSupport) {
         this.simpleVoiceChatSupport = simpleVoiceChatSupport;
+        this.save();
+    }
+
+    public boolean shouldFixFabricParticleApi() {
+        return this.fixFabricParticleApi;
+    }
+
+    public void setFixFabricParticleApi(final boolean fixFabricParticleApi) {
+        this.fixFabricParticleApi = fixFabricParticleApi;
         this.save();
     }
 

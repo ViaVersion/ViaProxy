@@ -240,6 +240,9 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         if (ViaProxy.getConfig().shouldSupportSimpleVoiceChat() && serverVersion.newerThan(ProtocolVersion.v1_14) && clientVersion.newerThan(ProtocolVersion.v1_14)) {
             this.proxyConnection.getPacketHandlers().add(new SimpleVoiceChatPacketHandler(this.proxyConnection));
         }
+        if (ViaProxy.getConfig().shouldFixFabricParticleApi() && serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_21_5) && clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_21_5) && !serverVersion.equals(clientVersion)) {
+            this.proxyConnection.getPacketHandlers().add(new FabricParticleApiFixPacketHandler(this.proxyConnection));
+        }
         if (ViaProxy.getConfig().shouldFakeAcceptResourcePacks() && serverVersion.newerThanOrEqualTo(LegacyProtocolVersion.r1_3_1tor1_3_2)) {
             this.proxyConnection.getPacketHandlers().add(new ResourcePackSpooferPacketHandler(this.proxyConnection));
         }
