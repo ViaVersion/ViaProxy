@@ -31,13 +31,16 @@ import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.netty.util.DatagramCodec;
+import net.raphimc.viabedrock.protocol.NetherNetStatusProtocol;
 import net.raphimc.viabedrock.protocol.RakNetStatusProtocol;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLPipeline;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.util.NetherNetInetSocketAddress;
 
+import java.net.InetSocketAddress;
 import java.util.function.Supplier;
 
 public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer {
@@ -81,7 +84,13 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
                 channel.pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
                 channel.pipeline().remove(VLPipeline.VIABEDROCK_PACKET_CODEC_NAME);
                 channel.pipeline().replace(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME, "viabedrock-datagram-codec", new DatagramCodec());
-                user.getProtocolInfo().getPipeline().add(RakNetStatusProtocol.INSTANCE);
+                if (proxyConnection.getServerAddress() instanceof NetherNetInetSocketAddress) {
+                    user.getProtocolInfo().getPipeline().add(NetherNetStatusProtocol.INSTANCE);
+                } else if (proxyConnection.getServerAddress() instanceof InetSocketAddress) {
+                    user.getProtocolInfo().getPipeline().add(RakNetStatusProtocol.INSTANCE);
+                } else {
+                    throw new UnsupportedOperationException("Unsupported address type for Bedrock status: " + proxyConnection.getServerAddress().getClass().getName());
+                }
             }
         }
 

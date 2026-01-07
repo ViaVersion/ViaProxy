@@ -45,6 +45,7 @@ repositories {
 
         content {
             includeGroupByRegex "com\\.github\\..+"
+            includeGroupByRegex "dev\\.kastle\\..+"
         }
     }
 }
@@ -80,8 +81,9 @@ dependencies {
     includeInJar("net.lenni0451:MCPing:1.4.4") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    includeInJar "net.lenni0451.commons:swing:1.9.0"
-    includeInJar "net.lenni0451.commons:brigadier:1.9.0"
+    includeInJar "net.lenni0451.commons:swing:1.9.1"
+    includeInJar "net.lenni0451.commons:brigadier:1.9.1"
+    includeInJar "net.lenni0451.commons:unchecked:1.9.1"
     includeInJar("net.raphimc.netminecraft:all:3.1.5-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
@@ -99,6 +101,12 @@ dependencies {
     }
     includeInJar("dev.kastle.netty:netty-transport-raknet:1.5.2") {
         exclude group: "io.netty"
+    }
+    includeInJar("dev.kastle.NetworkCompatible:netty-transport-nethernet:6a8915db93") {
+        exclude group: "io.netty"
+    }
+    ["windows-x86_64", "windows-aarch64", "linux-x86_64", "linux-aarch64", "macos-aarch64"].each {
+        includeInJar "dev.kastle.webrtc:webrtc-java:1.0.3:$it"
     }
     includeInJar "gs.mclo:api:5.0.2"
     includeInJar "net.lenni0451:optconfig:1.1.1"

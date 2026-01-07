@@ -24,6 +24,7 @@ import net.lenni0451.commons.swing.GBC;
 import net.lenni0451.commons.swing.layouts.VerticalLayout;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.extra.realms.exception.RealmsRequestException;
+import net.raphimc.minecraftauth.extra.realms.model.RealmsJoinInformation;
 import net.raphimc.minecraftauth.extra.realms.model.RealmsServer;
 import net.raphimc.minecraftauth.extra.realms.service.RealmsService;
 import net.raphimc.minecraftauth.extra.realms.service.impl.BedrockRealmsService;
@@ -225,7 +226,7 @@ public class RealmsTab extends UITab {
                 realmsService.joinWorldAsync(server).thenAccept(joinInformation -> SwingUtilities.invokeLater(() -> {
                     join.setEnabled(true);
                     join.setText(I18n.get("tab.realms.join"));
-                    this.setServerAddressAndStartViaProxy(joinInformation.getAddress(), realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : BedrockProtocolVersion.bedrockLatest);
+                    this.setServerAddressAndStartViaProxy(joinInformation, realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : BedrockProtocolVersion.bedrockLatest);
                 })).exceptionally(e -> {
                     final Throwable cause = e.getCause();
                     SwingUtilities.invokeLater(() -> {
@@ -250,13 +251,19 @@ public class RealmsTab extends UITab {
         }
     }
 
-    private void setServerAddressAndStartViaProxy(final String address, final ProtocolVersion version) {
+    private void setServerAddressAndStartViaProxy(final RealmsJoinInformation joinInformation, final ProtocolVersion version) {
         final GeneralTab generalTab = this.viaProxyWindow.generalTab;
         if (generalTab.stateButton.isEnabled()) {
             if (!generalTab.stateButton.getText().equals(I18n.get("tab.general.state.start"))) {
                 generalTab.stateButton.doClick(0); // Stop the running proxy
             }
-            generalTab.serverAddress.setText(address);
+
+            switch (joinInformation.getNetworkProtocol()) {
+                case RealmsJoinInformation.PROTOCOL_DEFAULT -> generalTab.serverAddress.setText(joinInformation.getAddress());
+                case RealmsJoinInformation.PROTOCOL_NETHERNET -> generalTab.serverAddress.setText("nethernet://" + joinInformation.getAddress());
+                default -> throw new IllegalArgumentException("Unknown realms network protocol: " + joinInformation.getNetworkProtocol());
+            }
+
             generalTab.serverVersion.setSelectedItem(version);
             generalTab.authMethod.setSelectedIndex(0);
             generalTab.stateButton.doClick(0);

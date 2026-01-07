@@ -23,6 +23,7 @@ import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.storage.CookieStorag
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
+import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -43,7 +44,10 @@ import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.packethandler.*;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerChannelInitializer;
 import net.raphimc.viaproxy.proxy.proxy2server.Proxy2ServerHandler;
-import net.raphimc.viaproxy.proxy.session.*;
+import net.raphimc.viaproxy.proxy.session.BedrockProxyConnection;
+import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
+import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
 import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.*;
@@ -166,13 +170,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
             }
         }
 
-        if (packet.intendedState.getConnectionState() == ConnectionState.STATUS && !ViaProxy.getConfig().shouldAllowBetaPinging() && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3)) {
-            if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
-                this.proxyConnection.kickClient(ViaProxy.getConfig().getCustomMotd());
-            }
-            this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
-        }
-
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && TransferDataHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
             serverAddress = TransferDataHolder.removeTempRedirect(this.proxyConnection.getC2P());
             if (clientVersion.olderThan(ProtocolVersion.v1_20_5)) {
@@ -193,6 +190,15 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         }
         serverAddress = preConnectEvent.getServerAddress();
         serverVersion = preConnectEvent.getServerVersion();
+
+        final boolean isJavaBetaPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3) && !ViaProxy.getConfig().shouldAllowBetaPinging();
+        final boolean isBedrockNetherNetPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.bedrockLatest) && serverAddress instanceof NetherNetAddress;
+        if (isJavaBetaPing || isBedrockNetherNetPing) {
+            if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
+                this.proxyConnection.kickClient(ViaProxy.getConfig().getCustomMotd());
+            }
+            this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
+        }
 
         final UserOptions userOptions = new UserOptions(classicMpPass, ViaProxy.getConfig().getAccount());
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
@@ -220,11 +226,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         final ProxyConnection proxyConnection;
         if (serverVersion.equals(BedrockProtocolVersion.bedrockLatest)) {
-            if (intendedState != IntendedState.STATUS) {
-                proxyConnection = new BedrockProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
-            } else {
-                proxyConnection = new BedrockStatusProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
-            }
+            proxyConnection = new BedrockProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
         } else {
             proxyConnection = new ProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
         }

@@ -20,6 +20,7 @@ package net.raphimc.viaproxy.protocoltranslator.providers;
 import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.Channel;
+import net.lenni0451.commons.unchecked.Sneaky;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.viabedrock.api.io.compression.ProtocolCompression;
 import net.raphimc.viabedrock.netty.CompressionCodec;
@@ -40,11 +41,7 @@ public class ViaProxyNettyPipelineProvider extends NettyPipelineProvider {
             throw new IllegalStateException("Compression already enabled");
         }
 
-        try {
-            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.COMPRESSION_HANDLER_NAME, new CompressionCodec(protocolCompression));
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
+        channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.COMPRESSION_HANDLER_NAME, new CompressionCodec(protocolCompression));
     }
 
     @Override
@@ -56,10 +53,12 @@ public class ViaProxyNettyPipelineProvider extends NettyPipelineProvider {
             throw new IllegalStateException("Encryption already enabled");
         }
 
-        try {
-            channel.pipeline().addAfter(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryptionCodec(key));
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+        if (channel.pipeline().get(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME) != null) { // Only enable encryption for RakNet connections
+            try {
+                channel.pipeline().addAfter(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryptionCodec(key));
+            } catch (Throwable e) {
+                Sneaky.sneakyThrow(e);
+            }
         }
     }
 
