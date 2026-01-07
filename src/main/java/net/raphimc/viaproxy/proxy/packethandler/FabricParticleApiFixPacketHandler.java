@@ -31,6 +31,7 @@ import java.util.List;
 public class FabricParticleApiFixPacketHandler extends PacketHandler {
 
     private static final String REGISTER_CHANNEL = "minecraft:register";
+    private static final String UNREGISTER_CHANNEL = "minecraft:unregister";
 
     public FabricParticleApiFixPacketHandler(ProxyConnection proxyConnection) {
         super(proxyConnection);
@@ -39,13 +40,14 @@ public class FabricParticleApiFixPacketHandler extends PacketHandler {
     @Override
     public boolean handleC2P(Packet packet, List<ChannelFutureListener> listeners) throws Exception {
         if (packet instanceof C2SCustomPayloadPacket customPayloadPacket) {
-            if (Key.namespaced(customPayloadPacket.channel).equals(REGISTER_CHANNEL)) {
-                final List<String> channelsToRegister = Lists.newArrayList(new String(customPayloadPacket.data, StandardCharsets.UTF_8).split("\0"));
-                if (channelsToRegister.remove("fabric:extended_block_state_particle_effect_sync")) {
-                    if (channelsToRegister.isEmpty()) {
-                        return false; // Cancel packet
+            final String channel = Key.namespaced(customPayloadPacket.channel);
+            if (channel.equals(REGISTER_CHANNEL) || channel.equals(UNREGISTER_CHANNEL)) {
+                final List<String> channels = Lists.newArrayList(new String(customPayloadPacket.data, StandardCharsets.UTF_8).split("\0"));
+                if (channels.remove("fabric:extended_block_state_particle_effect_sync")) {
+                    if (!channels.isEmpty()) {
+                        customPayloadPacket.data = String.join("\0", channels).getBytes(StandardCharsets.UTF_8);
                     } else {
-                        customPayloadPacket.data = String.join("\0", channelsToRegister).getBytes(StandardCharsets.UTF_8);
+                        return false; // Cancel packet
                     }
                 }
             }
