@@ -26,6 +26,7 @@ import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.PacketTypes;
 import net.raphimc.netminecraft.packet.impl.common.S2CCustomPayloadPacket;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.util.AddressUtil;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.InetSocketAddress;
@@ -58,7 +59,9 @@ public class SimpleVoiceChatPacketHandler extends PacketHandler {
                     final String voiceHost = PacketTypes.readString(data, Short.MAX_VALUE); // voice host
                     if (voiceHost.isEmpty()) {
                         if (this.proxyConnection.getServerAddress() instanceof InetSocketAddress serverAddress) {
-                            PacketTypes.writeString(newData, new InetSocketAddress(serverAddress.getAddress(), port).toString());
+                            final String newVoiceHost = AddressUtil.toString(new InetSocketAddress(serverAddress.getAddress(), port));
+                            PacketTypes.writeString(newData, newVoiceHost);
+                            Logger.u_info("session", this.proxyConnection, "Redirecting Simple Voice Chat to " + newVoiceHost);
                         } else {
                             throw new IllegalArgumentException("Server address must be an InetSocketAddress");
                         }
@@ -68,7 +71,7 @@ public class SimpleVoiceChatPacketHandler extends PacketHandler {
                     newData.writeBytes(data);
                     customPayloadPacket.data = ByteBufUtil.getBytes(newData);
                 } catch (Throwable e) {
-                    Logger.LOGGER.error("Failed to handle simple voice chat packet", e);
+                    Logger.LOGGER.error("Failed to handle Simple Voice Chat packet", e);
                 }
             }
         }
