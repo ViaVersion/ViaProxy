@@ -45,7 +45,6 @@ repositories {
 
         content {
             includeGroupByRegex "com\\.github\\..+"
-            includeGroupByRegex "dev\\.kastle\\..+"
         }
     }
 }
@@ -102,7 +101,7 @@ dependencies {
     includeInJar("dev.kastle.netty:netty-transport-raknet:1.5.2") {
         exclude group: "io.netty"
     }
-    includeInJar("dev.kastle.NetworkCompatible:netty-transport-nethernet:6a8915db93") {
+    includeInJar("dev.kastle.netty:netty-transport-nethernet:1.6.0") {
         exclude group: "io.netty"
     }
     ["windows-x86_64", "windows-aarch64", "linux-x86_64", "linux-aarch64", "macos-aarch64"].each {

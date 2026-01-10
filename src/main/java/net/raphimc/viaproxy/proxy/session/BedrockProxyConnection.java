@@ -121,6 +121,7 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .group(EventLoops.getClientEventLoop(TransportType.NIO))
                 .channelFactory(NetherNetChannelFactory.client(new PeerConnectionFactory(), netherNetSignaling))
                 .option(NetherChannelOption.NETHER_CLIENT_HANDSHAKE_TIMEOUT_MS, ViaProxy.getConfig().getConnectTimeout())
+                .option(NetherChannelOption.NETHER_CLIENT_MAX_HANDSHAKE_ATTEMPTS, 1)
                 .handler(new ChannelInitializer<>() {
                     @Override
                     protected void initChannel(final Channel channel) {
