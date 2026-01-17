@@ -55,6 +55,11 @@ public class ViaProxyViaVersionPlatformImpl extends UserConnectionViaVersionPlat
     }
 
     @Override
+    public boolean isProxy() {
+        return true;
+    }
+
+    @Override
     public boolean kickPlayer(final UserConnection connection, final String message) {
         try {
             ProxyConnection.fromUserConnection(connection).kickClient(message);
