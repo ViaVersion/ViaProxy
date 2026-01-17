@@ -25,10 +25,15 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
 import com.viaversion.viaversion.commands.ViaCommandHandler;
 import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.Protocol1_20_3To1_20_5;
+import net.lenni0451.classtransform.utils.log.Logger;
 import net.raphimc.viabedrock.ViaBedrockPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ProtocolTranslatorInitEvent;
-import net.raphimc.viaproxy.protocoltranslator.impl.*;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyInjector;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyLoader;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatformImpl;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaVersionPlatformImpl;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
@@ -60,6 +65,7 @@ public class ProtocolTranslator {
     };
 
     public static void init() {
+        moveConfigs();
         patchConfigs();
         final Supplier<?>[] platformSuppliers = ViaProxy.EVENT_MANAGER.call(new ProtocolTranslatorInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaProxyViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
         ViaManagerImpl.initAndLoad(new ViaProxyViaVersionPlatformImpl(), new ViaProxyInjector(), new ViaCommandHandler(false), new ViaProxyLoader(), () -> {
@@ -71,12 +77,25 @@ public class ProtocolTranslator {
         ProtocolVersion.register(AUTO_DETECT_PROTOCOL);
     }
 
-    private static void patchConfigs() {
-        final File configFolder = new File(ViaProxy.getCwd(), "ViaLoader");
-        configFolder.mkdirs();
-
+    // Migrate from old config location (ViaLoader folder) to new one
+    private static void moveConfigs() {
         try {
-            final File viaVersionConfig = new File(configFolder, "viaversion.yml");
+            final File oldConfigDir = new File(ViaProxy.getCwd(), "ViaLoader");
+            if (!oldConfigDir.exists() || !oldConfigDir.isDirectory()) {
+                return;
+            }
+            for (File file : oldConfigDir.listFiles()) {
+                FileUtils.moveToDirectory(file, ViaProxy.getCwd(), true);
+            }
+            FileUtils.deleteDirectory(oldConfigDir);
+        } catch (Throwable e) {
+            Logger.error("Failed to migrate old ViaLoader configs", e);
+        }
+    }
+
+    private static void patchConfigs() {
+        try {
+            final File viaVersionConfig = new File(ViaProxy.getCwd(), "viaversion.yml");
             Files.writeString(viaVersionConfig.toPath(), """
                     1_13-tab-complete-delay: 5
                     no-delay-shield-blocking: true
@@ -94,7 +113,7 @@ public class ProtocolTranslator {
         }
 
         try {
-            final File viaBackwardsConfig = new File(configFolder, "viabackwards.yml");
+            final File viaBackwardsConfig = new File(ViaProxy.getCwd(), "viabackwards.yml");
             Files.writeString(viaBackwardsConfig.toPath(), """
                     fix-1_13-face-player: 5
                     handle-pings-as-inv-acknowledgements: true
@@ -105,7 +124,7 @@ public class ProtocolTranslator {
         }
 
         try {
-            final File viaRewindConfig = new File(configFolder, "viarewind.yml");
+            final File viaRewindConfig = new File(ViaProxy.getCwd(), "viarewind.yml");
             Files.writeString(viaRewindConfig.toPath(), """
                     replace-adventure: true
                     replace-particles: true
