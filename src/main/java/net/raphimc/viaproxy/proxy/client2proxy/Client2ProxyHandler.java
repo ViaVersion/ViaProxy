@@ -22,7 +22,6 @@ import com.google.common.net.HostAndPort;
 import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.storage.CookieStorage;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.protocol.version.VersionType;
 import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -264,7 +263,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         }
-        if (ViaProxy.getConfig().shouldSendConnectionDetails() && !serverVersion.equals(clientVersion) && serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_8) && serverVersion.getVersionType() == VersionType.RELEASE) {
+        if (ViaProxy.getConfig().shouldSendConnectionDetails() && !serverVersion.equals(clientVersion)) {
             this.proxyConnection.getPacketHandlers().add(new ViaVersionConnectionDetailsPacketHandler(this.proxyConnection));
         }
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));

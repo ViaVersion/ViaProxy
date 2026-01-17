@@ -21,6 +21,9 @@ import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.libs.gson.JsonArray;
 import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.platform.UserConnectionViaVersionPlatform;
+import io.netty.channel.ChannelFutureListener;
+import net.raphimc.netminecraft.packet.impl.configuration.C2SConfigCustomPayloadPacket;
+import net.raphimc.netminecraft.packet.impl.play.C2SPlayCustomPayloadPacket;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -37,7 +40,7 @@ public class ViaProxyViaVersionPlatformImpl extends UserConnectionViaVersionPlat
     }
 
     @Override
-    public Logger createLogger(String name) {
+    public Logger createLogger(final String name) {
         return new JLoggerToSLF4J(LoggerFactory.getLogger(name));
     }
 
@@ -52,12 +55,22 @@ public class ViaProxyViaVersionPlatformImpl extends UserConnectionViaVersionPlat
     }
 
     @Override
-    public boolean kickPlayer(UserConnection connection, String message) {
+    public boolean kickPlayer(final UserConnection connection, final String message) {
         try {
             ProxyConnection.fromUserConnection(connection).kickClient(message);
         } catch (CloseAndReturn ignored) {
         }
         return true;
+    }
+
+    @Override
+    public void sendCustomPayload(final UserConnection connection, final String channel, final byte[] message) {
+        final ProxyConnection proxyConnection = ProxyConnection.fromUserConnection(connection);
+        proxyConnection.getChannel().writeAndFlush(switch (proxyConnection.getP2sConnectionState()) {
+            case CONFIGURATION -> new C2SConfigCustomPayloadPacket(channel, message);
+            case PLAY -> new C2SPlayCustomPayloadPacket(channel, message);
+            default -> throw new UnsupportedOperationException("Can't send custom payloads in state: " + proxyConnection.getP2sConnectionState());
+        }).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 
     @Override
