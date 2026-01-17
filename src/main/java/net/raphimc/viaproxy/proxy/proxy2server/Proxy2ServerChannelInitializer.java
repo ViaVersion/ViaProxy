@@ -83,18 +83,16 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         if (proxyConnection.getServerVersion().olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)) {
             channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, PreNettyLengthCodec.NAME, new PreNettyLengthCodec(user));
         } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
-            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, DisconnectHandler.NAME, new DisconnectHandler());
-            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MessageCodec.NAME, new MessageCodec());
-            channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.SIZER_HANDLER_NAME, new BatchLengthCodec());
-            channel.pipeline().addBefore(ViaProxyViaCodec.NAME, PacketCodec.NAME, new PacketCodec());
-
             channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
             channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
 
-            if (proxyConnection.getC2pConnectionState() == ConnectionState.STATUS) {
-                channel.pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
-                channel.pipeline().remove(PacketCodec.NAME);
-                channel.pipeline().replace(MessageCodec.NAME, "viabedrock-datagram-codec", new DatagramCodec());
+            if (proxyConnection.getC2pConnectionState() != ConnectionState.STATUS) {
+                channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, DisconnectHandler.NAME, new DisconnectHandler());
+                channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MessageCodec.NAME, new MessageCodec());
+                channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.SIZER_HANDLER_NAME, new BatchLengthCodec());
+                channel.pipeline().addBefore(ViaProxyViaCodec.NAME, PacketCodec.NAME, new PacketCodec());
+            } else {
+                channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, DatagramCodec.NAME, new DatagramCodec());
                 if (proxyConnection.getServerAddress() instanceof NetherNetInetSocketAddress) {
                     user.getProtocolInfo().getPipeline().add(NetherNetStatusProtocol.INSTANCE);
                 } else if (proxyConnection.getServerAddress() instanceof InetSocketAddress) {
