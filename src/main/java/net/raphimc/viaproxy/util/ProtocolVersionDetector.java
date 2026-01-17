@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.util;
 
-import com.viaversion.vialoader.util.ProtocolVersionList;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.mcping.MCPing;
 import net.lenni0451.mcping.pings.sockets.impl.factories.SocketChannelSocketFactory;
@@ -45,7 +44,7 @@ public class ProtocolVersionDetector {
         if (ProtocolVersion.isRegistered(response.version.protocol)) { // If the protocol is registered, we can use it
             return ProtocolVersion.getProtocol(response.version.protocol);
         } else {
-            for (ProtocolVersion protocolVersion : ProtocolVersionList.getProtocolsNewToOld()) {
+            for (ProtocolVersion protocolVersion : ProtocolVersion.getReversedProtocols()) {
                 for (String version : protocolVersion.getIncludedVersions()) {
                     if (response.version.name.contains(version)) {
                         return protocolVersion;

@@ -17,10 +17,8 @@
  */
 package net.raphimc.viaproxy.proxy.client2proxy;
 
-import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.connection.UserConnectionImpl;
-import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
+import com.viaversion.viaversion.platform.ViaChannelInitializer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
@@ -31,7 +29,7 @@ import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Client2ProxyChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLPipeline;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaCodec;
 import net.raphimc.viaproxy.proxy.client2proxy.passthrough.LegacyPassthroughInitialHandler;
 
 import java.util.function.Supplier;
@@ -64,10 +62,9 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
         super.initChannel(channel);
         channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(new DefaultPacketRegistry(false, -1));
 
-        final UserConnection user = new UserConnectionImpl(channel, false);
-        new ProtocolPipelineImpl(user);
-        channel.pipeline().addLast(new ViaProxyVLPipeline(user));
-        channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
+        final UserConnection user = ViaChannelInitializer.createUserConnection(channel, false);
+        channel.pipeline().addBefore(MCPipeline.PACKET_CODEC_HANDLER_NAME, ViaProxyViaCodec.NAME, new ViaProxyViaCodec(user));
+        channel.pipeline().addAfter(ViaProxyViaCodec.NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
 
         if (ViaProxy.EVENT_MANAGER.call(new Client2ProxyChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
             channel.close();

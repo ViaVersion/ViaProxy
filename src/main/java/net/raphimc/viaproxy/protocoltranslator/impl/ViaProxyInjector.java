@@ -17,35 +17,18 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
-import com.viaversion.vialoader.netty.VLPipeline;
-import com.viaversion.viaversion.api.connection.UserConnection;
-import io.netty.channel.ChannelHandler;
-import net.raphimc.netminecraft.constants.MCPipeline;
+import com.viaversion.viaversion.platform.NoopInjector;
 
-public class ViaProxyVLPipeline extends VLPipeline {
+public class ViaProxyInjector extends NoopInjector {
 
-    public ViaProxyVLPipeline(final UserConnection user) {
-        super(user);
+    @Override
+    public String getEncoderName() {
+        return ViaProxyViaCodec.NAME;
     }
 
     @Override
-    public ChannelHandler createViaCodec() {
-        return new ViaProxyViaCodec(this.connection);
-    }
-
-    @Override
-    protected String compressionCodecName() {
-        return MCPipeline.COMPRESSION_HANDLER_NAME;
-    }
-
-    @Override
-    protected String packetCodecName() {
-        return MCPipeline.PACKET_CODEC_HANDLER_NAME;
-    }
-
-    @Override
-    protected String lengthCodecName() {
-        return MCPipeline.SIZER_HANDLER_NAME;
+    public String getDecoderName() {
+        return ViaProxyViaCodec.NAME;
     }
 
 }

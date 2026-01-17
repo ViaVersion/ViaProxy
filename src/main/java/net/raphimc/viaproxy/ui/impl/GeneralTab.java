@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.ui.impl;
 
-import com.viaversion.vialoader.util.ProtocolVersionList;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.commons.swing.GBC;
@@ -109,7 +108,7 @@ public class GeneralTab extends UITab {
             JLabel serverVersionLabel = new JLabel(I18n.get("tab.general.server_version.label"));
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(serverVersionLabel);
 
-            this.serverVersion = new JComboBox<>(ProtocolVersionList.getProtocolsNewToOld().toArray(new ProtocolVersion[0]));
+            this.serverVersion = new JComboBox<>(ProtocolVersion.getReversedProtocols().toArray(new ProtocolVersion[0]));
             this.serverVersion.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {

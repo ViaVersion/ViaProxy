@@ -17,10 +17,8 @@
  */
 package net.raphimc.viaproxy.proxy.proxy2server;
 
-import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.connection.UserConnectionImpl;
-import com.viaversion.viaversion.protocol.ProtocolPipelineImpl;
+import com.viaversion.viaversion.platform.ViaChannelInitializer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
@@ -30,13 +28,19 @@ import net.raphimc.netminecraft.netty.codec.NoReadFlowControlHandler;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
 import net.raphimc.netminecraft.packet.registry.DefaultPacketRegistry;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.viabedrock.netty.BatchLengthCodec;
+import net.raphimc.viabedrock.netty.DisconnectHandler;
+import net.raphimc.viabedrock.netty.PacketCodec;
+import net.raphimc.viabedrock.netty.raknet.MessageCodec;
 import net.raphimc.viabedrock.netty.util.DatagramCodec;
 import net.raphimc.viabedrock.protocol.NetherNetStatusProtocol;
 import net.raphimc.viabedrock.protocol.RakNetStatusProtocol;
+import net.raphimc.vialegacy.api.LegacyProtocolVersion;
+import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLPipeline;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaCodec;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.util.NetherNetInetSocketAddress;
 
@@ -71,19 +75,26 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         super.initChannel(channel);
         channel.attr(MCPipeline.PACKET_REGISTRY_ATTRIBUTE_KEY).set(new DefaultPacketRegistry(true, proxyConnection.getClientVersion().getVersion()));
 
-        final UserConnection user = new UserConnectionImpl(channel, true);
-        new ProtocolPipelineImpl(user);
+        final UserConnection user = ViaChannelInitializer.createUserConnection(channel, true);
         proxyConnection.setUserConnection(user);
-        channel.pipeline().addLast(new ViaProxyVLPipeline(user));
-        channel.pipeline().addAfter(VLPipeline.VIA_CODEC_NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
-        if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
+
+        channel.pipeline().addBefore(MCPipeline.PACKET_CODEC_HANDLER_NAME, ViaProxyViaCodec.NAME, new ViaProxyViaCodec(user));
+        channel.pipeline().addAfter(ViaProxyViaCodec.NAME, "via-" + MCPipeline.FLOW_CONTROL_HANDLER_NAME, new NoReadFlowControlHandler());
+        if (proxyConnection.getServerVersion().olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)) {
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, PreNettyLengthCodec.NAME, new PreNettyLengthCodec(user));
+        } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, DisconnectHandler.NAME, new DisconnectHandler());
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MessageCodec.NAME, new MessageCodec());
+            channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.SIZER_HANDLER_NAME, new BatchLengthCodec());
+            channel.pipeline().addBefore(ViaProxyViaCodec.NAME, PacketCodec.NAME, new PacketCodec());
+
             channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
             channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
 
             if (proxyConnection.getC2pConnectionState() == ConnectionState.STATUS) {
                 channel.pipeline().remove(MCPipeline.SIZER_HANDLER_NAME);
-                channel.pipeline().remove(VLPipeline.VIABEDROCK_PACKET_CODEC_NAME);
-                channel.pipeline().replace(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME, "viabedrock-datagram-codec", new DatagramCodec());
+                channel.pipeline().remove(PacketCodec.NAME);
+                channel.pipeline().replace(MessageCodec.NAME, "viabedrock-datagram-codec", new DatagramCodec());
                 if (proxyConnection.getServerAddress() instanceof NetherNetInetSocketAddress) {
                     user.getProtocolInfo().getPipeline().add(NetherNetStatusProtocol.INSTANCE);
                 } else if (proxyConnection.getServerAddress() instanceof InetSocketAddress) {

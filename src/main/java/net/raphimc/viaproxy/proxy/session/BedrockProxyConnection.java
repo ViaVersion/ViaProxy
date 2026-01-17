@@ -17,7 +17,6 @@
  */
 package net.raphimc.viaproxy.proxy.session;
 
-import com.viaversion.vialoader.netty.VLPipeline;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import dev.kastle.netty.channel.nethernet.NetherNetChannelFactory;
 import dev.kastle.netty.channel.nethernet.config.NetherChannelOption;
@@ -32,6 +31,7 @@ import io.netty.channel.socket.DatagramChannel;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.util.EventLoops;
 import net.raphimc.netminecraft.util.TransportType;
+import net.raphimc.viabedrock.netty.raknet.MessageCodec;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
@@ -126,7 +126,7 @@ public class BedrockProxyConnection extends ProxyConnection {
                     @Override
                     protected void initChannel(final Channel channel) {
                         channel.pipeline().addLast(channelHandler);
-                        channel.pipeline().remove(VLPipeline.VIABEDROCK_RAKNET_MESSAGE_CODEC_NAME);
+                        channel.pipeline().remove(MessageCodec.NAME);
                     }
                 });
     }

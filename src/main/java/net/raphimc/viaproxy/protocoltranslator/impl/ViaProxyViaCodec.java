@@ -17,13 +17,13 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
-import com.viaversion.vialoader.netty.ViaCodec;
 import com.viaversion.viaversion.api.connection.UserConnection;
+import com.viaversion.viaversion.platform.ViaCodecHandler;
 import io.netty.channel.ChannelHandlerContext;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.util.logging.Logger;
 
-public class ViaProxyViaCodec extends ViaCodec {
+public class ViaProxyViaCodec extends ViaCodecHandler {
 
     public ViaProxyViaCodec(UserConnection user) {
         super(user);

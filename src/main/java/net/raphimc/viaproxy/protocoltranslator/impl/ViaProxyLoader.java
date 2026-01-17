@@ -18,8 +18,8 @@
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
-import com.viaversion.vialoader.impl.viaversion.VLLoader;
 import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
@@ -33,12 +33,10 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
 import net.raphimc.viaproxy.protocoltranslator.providers.*;
 
-public class ViaProxyVLLoader extends VLLoader {
+public class ViaProxyLoader implements ViaPlatformLoader {
 
     @Override
     public void load() {
-        super.load();
-
         // ViaVersion
         Via.getManager().getProviders().use(CompressionProvider.class, new ViaProxyCompressionProvider());
         Via.getManager().getProviders().use(VersionProvider.class, new ViaProxyVersionProvider());
@@ -59,6 +57,10 @@ public class ViaProxyVLLoader extends VLLoader {
 
         // ViaProxy plugins
         ViaProxy.EVENT_MANAGER.call(new ViaLoadingEvent());
+    }
+
+    @Override
+    public void unload() {
     }
 
 }

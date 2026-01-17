@@ -17,19 +17,18 @@
  */
 package net.raphimc.viaproxy.protocoltranslator;
 
-import com.viaversion.vialoader.ViaLoader;
-import com.viaversion.vialoader.impl.platform.ViaAprilFoolsPlatformImpl;
-import com.viaversion.vialoader.impl.platform.ViaBackwardsPlatformImpl;
-import com.viaversion.vialoader.impl.platform.ViaBedrockPlatformImpl;
-import com.viaversion.vialoader.impl.platform.ViaRewindPlatformImpl;
+import com.viaversion.viaaprilfools.ViaAprilFoolsPlatformImpl;
+import com.viaversion.viabackwards.ViaBackwardsPlatformImpl;
+import com.viaversion.viarewind.ViaRewindPlatformImpl;
+import com.viaversion.viaversion.ViaManagerImpl;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.protocol.version.VersionType;
+import com.viaversion.viaversion.commands.ViaCommandHandler;
 import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.Protocol1_20_3To1_20_5;
+import net.raphimc.viabedrock.ViaBedrockPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ProtocolTranslatorInitEvent;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyVLLoader;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaVersionPlatformImpl;
+import net.raphimc.viaproxy.protocoltranslator.impl.*;
 
 import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
@@ -63,7 +62,11 @@ public class ProtocolTranslator {
     public static void init() {
         patchConfigs();
         final Supplier<?>[] platformSuppliers = ViaProxy.EVENT_MANAGER.call(new ProtocolTranslatorInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaProxyViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
-        ViaLoader.init(new ViaProxyViaVersionPlatformImpl(), new ViaProxyVLLoader(), null, null, platformSuppliers);
+        ViaManagerImpl.initAndLoad(new ViaProxyViaVersionPlatformImpl(), new ViaProxyInjector(), new ViaCommandHandler(false), new ViaProxyLoader(), () -> {
+            for (Supplier<?> platformSupplier : platformSuppliers) {
+                platformSupplier.get();
+            }
+        });
         Protocol1_20_3To1_20_5.strictErrorHandling = false;
         ProtocolVersion.register(AUTO_DETECT_PROTOCOL);
     }

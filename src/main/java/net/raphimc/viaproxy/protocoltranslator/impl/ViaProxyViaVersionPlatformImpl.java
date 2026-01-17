@@ -17,19 +17,28 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
-import com.viaversion.vialoader.impl.platform.ViaVersionPlatformImpl;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.libs.gson.JsonArray;
 import com.viaversion.viaversion.libs.gson.JsonObject;
+import com.viaversion.viaversion.platform.UserConnectionViaVersionPlatform;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.util.CloseAndReturn;
+import net.raphimc.viaproxy.util.logging.JLoggerToSLF4J;
+import org.slf4j.LoggerFactory;
 
-public class ViaProxyViaVersionPlatformImpl extends ViaVersionPlatformImpl {
+import java.util.logging.Logger;
+
+public class ViaProxyViaVersionPlatformImpl extends UserConnectionViaVersionPlatform {
 
     public ViaProxyViaVersionPlatformImpl() {
         super(ViaProxy.getCwd());
+    }
+
+    @Override
+    public Logger createLogger(String name) {
+        return new JLoggerToSLF4J(LoggerFactory.getLogger(name));
     }
 
     @Override
