@@ -33,13 +33,13 @@ import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyInjector;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyPlatformLoader;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatform;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaVersionPlatform;
+import net.raphimc.viaproxy.util.YamlConfigPatcher;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class ProtocolTranslator {
@@ -95,42 +95,39 @@ public class ProtocolTranslator {
 
     private static void patchConfigs() {
         try {
-            final File viaVersionConfig = new File(ViaProxy.getCwd(), "viaversion.yml");
-            Files.writeString(viaVersionConfig.toPath(), """
-                    1_13-tab-complete-delay: 5
-                    no-delay-shield-blocking: true
-                    handle-invalid-item-count: true
-                    send-player-details: false
-                    packet-limiter:
-                      max-per-second: 1400
-                      sustained-max-per-second: 400
-                    logging:
-                      log-text-component-conversion-errors: true
-                      log-other-conversion-warnings: true
-                    """, StandardOpenOption.CREATE_NEW);
-        } catch (FileAlreadyExistsException ignored) {
+            final YamlConfigPatcher configPatcher = new YamlConfigPatcher(new File(ViaProxy.getCwd(), "viaversion.yml"));
+            final Map<String, Object> config = configPatcher.getConfig();
+            config.putIfAbsent("1_13-tab-complete-delay", 5);
+            config.putIfAbsent("no-delay-shield-blocking", true);
+            config.putIfAbsent("handle-invalid-item-count", true);
+            config.putIfAbsent("send-player-details", false);
+            final Map<String, Object> packetLimiter = (Map<String, Object>) config.computeIfAbsent("packet-limiter", k -> new LinkedHashMap<>());
+            packetLimiter.putIfAbsent("max-per-second", 1400);
+            packetLimiter.putIfAbsent("sustained-max-per-second", 400);
+            final Map<String, Object> logging = (Map<String, Object>) config.computeIfAbsent("logging", k -> new LinkedHashMap<>());
+            logging.putIfAbsent("log-text-component-conversion-errors", true);
+            logging.putIfAbsent("log-other-conversion-warnings", true);
+            configPatcher.write();
         } catch (Throwable e) {
             throw new RuntimeException("Failed to patch ViaVersion config", e);
         }
 
         try {
-            final File viaBackwardsConfig = new File(ViaProxy.getCwd(), "viabackwards.yml");
-            Files.writeString(viaBackwardsConfig.toPath(), """
-                    fix-1_13-face-player: 5
-                    handle-pings-as-inv-acknowledgements: true
-                    """, StandardOpenOption.CREATE_NEW);
-        } catch (FileAlreadyExistsException ignored) {
+            final YamlConfigPatcher configPatcher = new YamlConfigPatcher(new File(ViaProxy.getCwd(), "viabackwards.yml"));
+            final Map<String, Object> config = configPatcher.getConfig();
+            config.putIfAbsent("fix-1_13-face-player", true);
+            config.putIfAbsent("handle-pings-as-inv-acknowledgements", true);
+            configPatcher.write();
         } catch (Throwable e) {
             throw new RuntimeException("Failed to patch ViaBackwards config", e);
         }
 
         try {
-            final File viaRewindConfig = new File(ViaProxy.getCwd(), "viarewind.yml");
-            Files.writeString(viaRewindConfig.toPath(), """
-                    replace-adventure: true
-                    replace-particles: true
-                    """, StandardOpenOption.CREATE_NEW);
-        } catch (FileAlreadyExistsException ignored) {
+            final YamlConfigPatcher configPatcher = new YamlConfigPatcher(new File(ViaProxy.getCwd(), "viarewind.yml"));
+            final Map<String, Object> config = configPatcher.getConfig();
+            config.putIfAbsent("replace-adventure", true);
+            config.putIfAbsent("replace-particles", true);
+            configPatcher.write();
         } catch (Throwable e) {
             throw new RuntimeException("Failed to patch ViaRewind config", e);
         }
