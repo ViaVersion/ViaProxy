@@ -20,6 +20,7 @@ package net.raphimc.viaproxy.proxy.client2proxy;
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
 import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.storage.CookieStorage;
+import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
@@ -263,7 +264,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         }
-        if (ViaProxy.getConfig().shouldSendConnectionDetails() && !serverVersion.equals(clientVersion)) {
+        if ((Via.getConfig().sendPlayerDetails() || Via.getConfig().sendServerDetails()) && !serverVersion.equals(clientVersion)) {
             this.proxyConnection.getPacketHandlers().add(new ViaVersionConnectionDetailsPacketHandler(this.proxyConnection));
         }
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));

@@ -100,6 +100,7 @@ public class ProtocolTranslator {
                     1_13-tab-complete-delay: 5
                     no-delay-shield-blocking: true
                     handle-invalid-item-count: true
+                    send-player-details: false
                     packet-limiter:
                       max-per-second: 1400
                       sustained-max-per-second: 400

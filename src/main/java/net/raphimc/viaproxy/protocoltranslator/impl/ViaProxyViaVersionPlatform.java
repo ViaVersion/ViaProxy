@@ -23,7 +23,9 @@ import com.viaversion.viaversion.libs.gson.JsonObject;
 import com.viaversion.viaversion.platform.UserConnectionViaVersionPlatform;
 import io.netty.channel.ChannelFutureListener;
 import net.raphimc.netminecraft.packet.impl.configuration.C2SConfigCustomPayloadPacket;
+import net.raphimc.netminecraft.packet.impl.configuration.S2CConfigCustomPayloadPacket;
 import net.raphimc.netminecraft.packet.impl.play.C2SPlayCustomPayloadPacket;
+import net.raphimc.netminecraft.packet.impl.play.S2CPlayCustomPayloadPacket;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.ViaProxyPlugin;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -75,6 +77,16 @@ public class ViaProxyViaVersionPlatform extends UserConnectionViaVersionPlatform
             case CONFIGURATION -> new C2SConfigCustomPayloadPacket(channel, message);
             case PLAY -> new C2SPlayCustomPayloadPacket(channel, message);
             default -> throw new UnsupportedOperationException("Can't send custom payloads in state: " + proxyConnection.getP2sConnectionState());
+        }).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+    }
+
+    @Override
+    public void sendCustomPayloadToClient(final UserConnection connection, final String channel, final byte[] message) {
+        final ProxyConnection proxyConnection = ProxyConnection.fromUserConnection(connection);
+        proxyConnection.getC2P().writeAndFlush(switch (proxyConnection.getC2pConnectionState()) {
+            case CONFIGURATION -> new S2CConfigCustomPayloadPacket(channel, message);
+            case PLAY -> new S2CPlayCustomPayloadPacket(channel, message);
+            default -> throw new UnsupportedOperationException("Can't send custom payloads in state: " + proxyConnection.getC2pConnectionState());
         }).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
 

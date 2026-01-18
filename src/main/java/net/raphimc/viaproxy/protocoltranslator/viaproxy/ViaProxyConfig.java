@@ -215,23 +215,12 @@ public class ViaProxyConfig {
     })
     private boolean skipConfigStatePacketQueue = false;
 
-    @Option("send-connection-details")
-    @Description({
-            "If enabled, ViaProxy will send a connection details custom payload packet to the server.",
-            "This includes the actual client version as well as the ViaProxy version."
-    })
-    private boolean sendConnectionDetails = false;
-
     @Option("log-ips")
-    @Description({
-            "Disable this if you want to hide IP addresses in the console and log files.",
-    })
+    @Description("Disable this if you want to hide IP addresses in the console and log files.")
     private boolean logIps = true;
 
     @Option("log-client-status-requests")
-    @Description({
-            "Enable this if you want to see client status requests in the console and log files.",
-    })
+    @Description("Enable this if you want to see client status requests in the console and log files.")
     private boolean logClientStatusRequests = false;
 
     public static ViaProxyConfig create(final File configFile) {
@@ -571,15 +560,6 @@ public class ViaProxyConfig {
 
     public void setSkipConfigStatePacketQueue(final boolean skipConfigStatePacketQueue) {
         this.skipConfigStatePacketQueue = skipConfigStatePacketQueue;
-        this.save();
-    }
-
-    public boolean shouldSendConnectionDetails() {
-        return this.sendConnectionDetails;
-    }
-
-    public void setSendConnectionDetails(final boolean sendConnectionDetails) {
-        this.sendConnectionDetails = sendConnectionDetails;
         this.save();
     }
 
