@@ -264,7 +264,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         }
-        if ((Via.getConfig().sendPlayerDetails() || Via.getConfig().sendServerDetails()) && !serverVersion.equals(clientVersion)) {
+        if (Via.getConfig().sendPlayerDetails() || Via.getConfig().sendServerDetails()) {
             this.proxyConnection.getPacketHandlers().add(new ViaVersionConnectionDetailsPacketHandler(this.proxyConnection));
         }
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
