@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.protocoltranslator.impl;
 import com.viaversion.viaversion.api.Via;
 import net.raphimc.vialegacy.ViaLegacyPlatformImpl;
 
-public class ViaProxyViaLegacyPlatformImpl extends ViaLegacyPlatformImpl {
+public class ViaProxyViaLegacyPlatform extends ViaLegacyPlatformImpl {
 
     @Override
     public String getCpeAppName() {

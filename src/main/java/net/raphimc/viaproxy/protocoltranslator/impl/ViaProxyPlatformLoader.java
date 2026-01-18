@@ -33,7 +33,7 @@ import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ViaLoadingEvent;
 import net.raphimc.viaproxy.protocoltranslator.providers.*;
 
-public class ViaProxyLoader implements ViaPlatformLoader {
+public class ViaProxyPlatformLoader implements ViaPlatformLoader {
 
     @Override
     public void load() {

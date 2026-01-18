@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.logging.Logger;
 
-public class ViaProxyViaVersionPlatformImpl extends UserConnectionViaVersionPlatform {
+public class ViaProxyViaVersionPlatform extends UserConnectionViaVersionPlatform {
 
-    public ViaProxyViaVersionPlatformImpl() {
+    public ViaProxyViaVersionPlatform() {
         super(ViaProxy.getCwd());
     }
 

@@ -30,9 +30,9 @@ import net.raphimc.viabedrock.ViaBedrockPlatformImpl;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.plugins.events.ProtocolTranslatorInitEvent;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyInjector;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyLoader;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatformImpl;
-import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaVersionPlatformImpl;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyPlatformLoader;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaLegacyPlatform;
+import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaVersionPlatform;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -67,8 +67,8 @@ public class ProtocolTranslator {
     public static void init() {
         moveConfigs();
         patchConfigs();
-        final Supplier<?>[] platformSuppliers = ViaProxy.EVENT_MANAGER.call(new ProtocolTranslatorInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaProxyViaLegacyPlatformImpl::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
-        ViaManagerImpl.initAndLoad(new ViaProxyViaVersionPlatformImpl(), new ViaProxyInjector(), new ViaCommandHandler(false), new ViaProxyLoader(), () -> {
+        final Supplier<?>[] platformSuppliers = ViaProxy.EVENT_MANAGER.call(new ProtocolTranslatorInitEvent(ViaBackwardsPlatformImpl::new, ViaRewindPlatformImpl::new, ViaProxyViaLegacyPlatform::new, ViaAprilFoolsPlatformImpl::new, ViaBedrockPlatformImpl::new)).getPlatformSuppliers().toArray(new Supplier[0]);
+        ViaManagerImpl.initAndLoad(new ViaProxyViaVersionPlatform(), new ViaProxyInjector(), new ViaCommandHandler(false), new ViaProxyPlatformLoader(), () -> {
             for (Supplier<?> platformSupplier : platformSuppliers) {
                 platformSupplier.get();
             }
