@@ -30,7 +30,10 @@ public class SplashScreen extends JFrame {
     public SplashScreen() throws IOException {
         this.setAlwaysOnTop(true);
         this.setUndecorated(true);
-        this.setBackground(new Color(0, 0, 0, 0));
+        try {
+            this.setBackground(new Color(0, 0, 0, 0));
+        } catch (UnsupportedOperationException ignored) { // https://github.com/ViaVersion/ViaProxy/issues/562
+        }
         this.setType(Window.Type.UTILITY);
         this.setSize(300, 235);
         this.setLocationRelativeTo(null);
