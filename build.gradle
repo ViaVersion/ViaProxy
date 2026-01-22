@@ -108,8 +108,8 @@ dependencies {
     includeInJar "gs.mclo:api:5.0.2"
     includeInJar "net.lenni0451:optconfig:1.1.1"
 
-    includeInJarJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:1.3.5"))
-    includeInJarJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.3.5:downgraded-8"
+    includeInJarJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:1.3.6"))
+    includeInJarJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.3.6:downgraded-8"
 }
 
 application {
