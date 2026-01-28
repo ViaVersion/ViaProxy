@@ -73,7 +73,7 @@ dependencies {
     includeInJar "net.lenni0451.classtransform:mixinstranslator:1.14.1"
     includeInJar "net.lenni0451.classtransform:mixinsdummy:1.14.1"
     includeInJar "net.lenni0451.classtransform:additionalclassprovider:1.14.1"
-    includeInJar "net.lenni0451:Reflect:1.6.1"
+    includeInJar "net.lenni0451:Reflect:1.6.2"
     includeInJar "net.lenni0451:LambdaEvents:2.4.2"
     includeInJar("net.lenni0451:MCPing:1.4.4") {
         exclude group: "com.google.code.gson", module: "gson"
