@@ -24,10 +24,7 @@ import net.raphimc.netminecraft.constants.MCPipeline;
 public class ViaProxyCompressionProvider extends CompressionProvider {
 
     @Override
-    public void handlePlayCompression(UserConnection user, int threshold) {
-        if (!user.isClientSide()) {
-            throw new IllegalStateException("PLAY state Compression packet is unsupported");
-        }
+    public void handlePlayCompression(final UserConnection user, final int threshold) {
         user.getChannel().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(threshold);
     }
 

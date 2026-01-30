@@ -38,8 +38,8 @@ public class ViaProxyPlatformLoader implements ViaPlatformLoader {
     @Override
     public void load() {
         // ViaVersion
-        Via.getManager().getProviders().use(CompressionProvider.class, new ViaProxyCompressionProvider());
         Via.getManager().getProviders().use(VersionProvider.class, new ViaProxyVersionProvider());
+        Via.getManager().getProviders().use(CompressionProvider.class, new ViaProxyCompressionProvider());
 
         // ViaBackwards
         Via.getManager().getProviders().use(TransferProvider.class, new ViaProxyTransferProvider());
