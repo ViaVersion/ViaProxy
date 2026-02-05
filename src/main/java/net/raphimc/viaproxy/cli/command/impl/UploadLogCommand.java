@@ -48,11 +48,7 @@ public class UploadLogCommand extends Command {
             try {
                 final MclogsClient mclogsClient = new MclogsClient("ViaProxy", ViaProxy.VERSION);
                 final UploadLogResponse apiResponse = mclogsClient.uploadLog(logFile.toPath()).get();
-                if (apiResponse.isSuccess()) {
-                    context.getSource().sendMessage("Uploaded log file to " + apiResponse.getUrl());
-                } else {
-                    context.getSource().sendMessage("The log file could not be uploaded: " + apiResponse.getError());
-                }
+                context.getSource().sendMessage("Uploaded log file to " + apiResponse.getUrl());
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof FileNotFoundException) {
                     context.getSource().sendMessage("The log file could not be found");

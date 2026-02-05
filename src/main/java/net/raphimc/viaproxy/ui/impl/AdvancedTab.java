@@ -182,14 +182,11 @@ public class AdvancedTab extends UITab {
                     this.uploadLogsButton.setEnabled(false);
                     final MclogsClient mclogsClient = new MclogsClient("ViaProxy", ViaProxy.VERSION);
                     final UploadLogResponse apiResponse = mclogsClient.uploadLog(logFile.toPath()).get();
-                    if (apiResponse.isSuccess()) {
-                        ViaProxyWindow.openURL(apiResponse.getUrl());
-                        final StringSelection selection = new StringSelection(apiResponse.getUrl());
-                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
-                        ViaProxyWindow.showInfo("<html>" + I18n.get("tab.advanced.upload_latest_log.success", "<a href=\"\">" + apiResponse.getUrl() + "</a>") + "</html>");
-                    } else {
-                        ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_generic", apiResponse.getError()));
-                    }
+
+                    ViaProxyWindow.openURL(apiResponse.getUrl());
+                    final StringSelection selection = new StringSelection(apiResponse.getUrl());
+                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+                    ViaProxyWindow.showInfo("<html>" + I18n.get("tab.advanced.upload_latest_log.success", "<a href=\"\">" + apiResponse.getUrl() + "</a>") + "</html>");
                 } catch (ExecutionException e) {
                     if (e.getCause() instanceof FileNotFoundException) {
                         ViaProxyWindow.showError(I18n.get("tab.advanced.upload_latest_log.error_not_found"));
