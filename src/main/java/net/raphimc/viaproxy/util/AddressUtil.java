@@ -24,6 +24,7 @@ import io.netty.channel.unix.DomainSocketAddress;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.util.MinecraftServerAddress;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
+import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 
 import java.net.InetSocketAddress;
@@ -46,7 +47,7 @@ public class AddressUtil {
                 if (hostAndPort.getHost().isBlank()) {
                     throw new IllegalArgumentException("Server address cannot be blank");
                 }
-                return new NetherNetInetSocketAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(7551));
+                return new NetherNetInetSocketAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(ProtocolConstants.BEDROCK_NETHERNET_DEFAULT_PORT));
             }
         } else { // IP Address
             final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
@@ -56,7 +57,7 @@ public class AddressUtil {
 
             final int port;
             if (version != null) {
-                port = hostAndPort.getPortOrDefault(version.equals(BedrockProtocolVersion.bedrockLatest) ? 19132 : 25565);
+                port = hostAndPort.getPortOrDefault(version.equals(BedrockProtocolVersion.bedrockLatest) ? ProtocolConstants.BEDROCK_RAKNET_DEFAULT_PORT : 25565);
             } else {
                 port = hostAndPort.getPort();
             }
@@ -86,7 +87,7 @@ public class AddressUtil {
     @Deprecated(forRemoval = true)
     public static int getDefaultPort(final ProtocolVersion version) {
         if (version.equals(BedrockProtocolVersion.bedrockLatest)) {
-            return 19132;
+            return ProtocolConstants.BEDROCK_RAKNET_DEFAULT_PORT;
         }
 
         return 25565;
