@@ -37,9 +37,16 @@ public class AddressUtil {
 
     public static SocketAddress parse(final String serverAddress, final ProtocolVersion version) {
         if (serverAddress.startsWith("file://") || serverAddress.startsWith("unix://")) { // Unix Socket
-            return new DomainSocketAddress(serverAddress.substring(7));
+            return new DomainSocketAddress(serverAddress.substring(serverAddress.indexOf("://") + 3));
+        } else if (serverAddress.startsWith("nethernet-rpc://")) { // NetherNet JSON-RPC Address
+            final String addressPart = serverAddress.substring(serverAddress.indexOf("://") + 3);
+            if (NETHERNET_NETWORK_ID_PATTERN.matcher(addressPart).matches()) {
+                return new NetherNetJsonRpcAddress(addressPart);
+            } else {
+                throw new IllegalArgumentException("Invalid NetherNet JSON RPC address");
+            }
         } else if (serverAddress.startsWith("nethernet://")) { // NetherNet Address
-            final String addressPart = serverAddress.substring(12);
+            final String addressPart = serverAddress.substring(serverAddress.indexOf("://") + 3);
             if (NETHERNET_NETWORK_ID_PATTERN.matcher(addressPart).matches()) {
                 return new NetherNetAddress(addressPart);
             } else {
@@ -73,6 +80,8 @@ public class AddressUtil {
     public static String toString(final SocketAddress address) {
         if (address instanceof DomainSocketAddress domainSocketAddress) {
             return "unix://" + domainSocketAddress.path();
+        } else if (address instanceof NetherNetJsonRpcAddress netherNetAddress) {
+            return "nethernet-rpc://" + netherNetAddress;
         } else if (address instanceof NetherNetAddress netherNetAddress) {
             return "nethernet://" + netherNetAddress;
         } else if (address instanceof NetherNetInetSocketAddress netherNetAddress) {

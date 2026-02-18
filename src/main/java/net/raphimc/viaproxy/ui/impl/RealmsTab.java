@@ -261,6 +261,7 @@ public class RealmsTab extends UITab {
             switch (joinInformation.getNetworkProtocol()) {
                 case RealmsJoinInformation.PROTOCOL_DEFAULT -> generalTab.serverAddress.setText(joinInformation.getAddress());
                 case RealmsJoinInformation.PROTOCOL_NETHERNET -> generalTab.serverAddress.setText("nethernet://" + joinInformation.getAddress());
+                case RealmsJoinInformation.PROTOCOL_NETHERNET_JSONRPC -> generalTab.serverAddress.setText("nethernet-rpc://" + joinInformation.getAddress());
                 default -> throw new IllegalArgumentException("Unknown realms network protocol: " + joinInformation.getNetworkProtocol());
             }
 

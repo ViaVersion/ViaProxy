@@ -23,6 +23,7 @@ import dev.kastle.netty.channel.nethernet.config.NetherChannelOption;
 import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
 import dev.kastle.netty.channel.nethernet.signaling.NetherNetClientSignaling;
 import dev.kastle.netty.channel.nethernet.signaling.NetherNetDiscoverySignaling;
+import dev.kastle.netty.channel.nethernet.signaling.NetherNetXboxRpcSignaling;
 import dev.kastle.netty.channel.nethernet.signaling.NetherNetXboxSignaling;
 import dev.kastle.webrtc.PeerConnectionFactory;
 import io.netty.bootstrap.Bootstrap;
@@ -36,6 +37,7 @@ import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.util.NetherNetInetSocketAddress;
+import net.raphimc.viaproxy.util.NetherNetJsonRpcAddress;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.RakClientChannel;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
@@ -47,6 +49,7 @@ public class BedrockProxyConnection extends ProxyConnection {
 
     private boolean useNetherNetDiscovery;
     private boolean useNetherNetXbox;
+    private boolean useNetherNetXboxRpc;
 
     public BedrockProxyConnection(final ChannelInitializer<Channel> channelInitializer, final Channel c2p) {
         super(channelInitializer, c2p);
@@ -74,6 +77,7 @@ public class BedrockProxyConnection extends ProxyConnection {
     public ChannelFuture connectToServer(final SocketAddress serverAddress, final ProtocolVersion targetVersion) {
         this.useNetherNetDiscovery = serverAddress instanceof NetherNetInetSocketAddress;
         this.useNetherNetXbox = serverAddress instanceof NetherNetAddress;
+        this.useNetherNetXboxRpc = serverAddress instanceof NetherNetJsonRpcAddress;
         return super.connectToServer(serverAddress, targetVersion);
     }
 
@@ -108,13 +112,19 @@ public class BedrockProxyConnection extends ProxyConnection {
         final NetherNetClientSignaling netherNetSignaling;
         if (this.useNetherNetDiscovery) {
             netherNetSignaling = new NetherNetDiscoverySignaling();
-        } else {
+        } else if (this.useNetherNetXbox) {
             if (this.getUserOptions().account() instanceof BedrockAccount bedrockAccount) {
-                netherNetSignaling = new NetherNetXboxSignaling(bedrockAccount.getAuthManager().getMinecraftSession().getUpToDateUnchecked().getAuthorizationHeader());
+                if (this.useNetherNetXboxRpc) {
+                    netherNetSignaling = new NetherNetXboxRpcSignaling(bedrockAccount.getAuthManager().getMinecraftSession().getUpToDateUnchecked().getAuthorizationHeader());
+                } else {
+                    netherNetSignaling = new NetherNetXboxSignaling(bedrockAccount.getAuthManager().getMinecraftSession().getUpToDateUnchecked().getAuthorizationHeader());
+                }
             } else {
                 this.kickClient("§cThe configured target server requires Xbox signaling, but no Minecraft: Bedrock Edition account is selected.");
                 return;
             }
+        } else {
+            throw new IllegalStateException("Invalid signaling type");
         }
         final ChannelHandler channelHandler = bootstrap.config().handler();
         bootstrap
