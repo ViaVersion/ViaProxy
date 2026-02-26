@@ -51,10 +51,10 @@ repositories {
 
 dependencies {
     includeInJar "com.viaversion:viaversion-common:5.7.2-SNAPSHOT"
-    includeInJar "com.viaversion:viabackwards-common:5.7.1"
-    includeInJar "com.viaversion:viarewind-common:4.0.14"
-    includeInJar "net.raphimc:ViaLegacy:3.0.13"
-    includeInJar "com.viaversion:viaaprilfools-common:4.0.8"
+    includeInJar "com.viaversion:viabackwards-common:5.7.2-SNAPSHOT"
+    includeInJar "com.viaversion:viarewind-common:4.0.15-SNAPSHOT"
+    includeInJar "net.raphimc:ViaLegacy:3.0.14-SNAPSHOT"
+    includeInJar "com.viaversion:viaaprilfools-common:4.0.9-SNAPSHOT"
     includeInJar "net.raphimc:ViaBedrock:0.0.26-SNAPSHOT"
 
     includeInJar "com.google.guava:guava:33.5.0-jre"
