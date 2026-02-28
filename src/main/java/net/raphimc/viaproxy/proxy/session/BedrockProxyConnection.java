@@ -86,7 +86,7 @@ public class BedrockProxyConnection extends ProxyConnection {
             throw new IllegalArgumentException("Channel type must be a DatagramChannel");
         }
         if (transportType == TransportType.KQUEUE) {
-            transportType = TransportType.NIO; // KQueue doesn't work for some reason
+            transportType = TransportType.NIO; // KQueue doesn't work due to requiring the channel to be bound instead of connected
         }
 
         final RakChannelFactory<RakClientChannel> channelFactory = RakChannelFactory.client((Class<? extends DatagramChannel>) transportType.udpClientChannelClass());
@@ -143,7 +143,7 @@ public class BedrockProxyConnection extends ProxyConnection {
 
     protected void initializeRaw(TransportType transportType, final Bootstrap bootstrap) {
         if (transportType == TransportType.KQUEUE) {
-            transportType = TransportType.NIO; // KQueue doesn't work for some reason
+            transportType = TransportType.NIO; // KQueue doesn't work due to requiring the channel to be bound instead of connected
         }
 
         bootstrap
