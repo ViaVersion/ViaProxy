@@ -53,9 +53,9 @@ dependencies {
     includeInJar "com.viaversion:viaversion-common:5.7.2"
     includeInJar "com.viaversion:viabackwards-common:5.7.2"
     includeInJar "com.viaversion:viarewind-common:4.0.15"
-    includeInJar "net.raphimc:ViaLegacy:3.0.14-SNAPSHOT"
+    includeInJar "net.raphimc:ViaLegacy:3.0.14"
     includeInJar "com.viaversion:viaaprilfools-common:4.0.9"
-    includeInJar "net.raphimc:ViaBedrock:0.0.26-SNAPSHOT"
+    includeInJar "net.raphimc:ViaBedrock:0.0.26-20260301.185942-3"
 
     includeInJar "com.google.guava:guava:33.5.0-jre"
     includeInJar "com.google.code.gson:gson:2.13.2"
@@ -81,7 +81,7 @@ dependencies {
     includeInJar "net.lenni0451.commons:swing:1.9.2"
     includeInJar "net.lenni0451.commons:brigadier:1.9.2"
     includeInJar "net.lenni0451.commons:unchecked:1.9.2"
-    includeInJar("net.raphimc.netminecraft:all:3.1.5-SNAPSHOT") {
+    includeInJar("net.raphimc.netminecraft:all:3.1.5-20260217.200817-5") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     includeInJar("io.netty:netty-codec-haproxy:4.2.10.Final") {
