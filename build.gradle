@@ -102,7 +102,7 @@ dependencies {
     includeInJar("dev.kastle.netty:netty-transport-nethernet:1.7.0") {
         exclude group: "io.netty"
     }
-    ["windows-x86_64", "windows-aarch64", "linux-x86_64", "linux-aarch64", "macos-aarch64"].each {
+    ["windows-x86_64", "windows-aarch64", "linux-x86_64", "linux-aarch64", "macos-x86_64", "macos-aarch64"].each {
         includeInJar "dev.kastle.webrtc:webrtc-java:1.0.3:$it"
     }
     includeInJar "gs.mclo:api:6.2.1"
