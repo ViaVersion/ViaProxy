@@ -81,7 +81,7 @@ dependencies {
     includeInJar "net.lenni0451.commons:swing:1.9.2"
     includeInJar "net.lenni0451.commons:brigadier:1.9.2"
     includeInJar "net.lenni0451.commons:unchecked:1.9.2"
-    includeInJar("net.raphimc.netminecraft:all:3.1.5-SNAPSHOT") {
+    includeInJar("net.raphimc.netminecraft:all:3.1.5") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     includeInJar("io.netty:netty-codec-haproxy:4.2.12.Final") {
