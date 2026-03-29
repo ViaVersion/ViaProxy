@@ -35,6 +35,7 @@ import java.util.List;
 public class AccountsSave extends AbstractSave {
 
     private final List<Account> accounts = new ArrayList<>();
+    private final List<JsonObject> unknownAccounts = new ArrayList<>();
 
     public AccountsSave() {
         super("accountsV4");
@@ -48,17 +49,30 @@ public class AccountsSave extends AbstractSave {
 
         this.accounts.clear();
         for (JsonElement element : jsonElement.getAsJsonArray()) {
+            JsonObject jsonObject = null;
             try {
-                final JsonObject jsonObject = element.getAsJsonObject();
-                final String type = jsonObject.get("accountType").getAsString();
+                jsonObject = element.getAsJsonObject();
+                if (!jsonObject.has("accountType")) {
+                    Logger.LOGGER.error("Failed to load an account, missing accountType");
+                    continue;
+                }
+
+                String type = jsonObject.get("accountType").getAsString();
                 final Class<?> clazz = Classes.find(type, true, classLoaders);
 
                 final Account account = (Account) clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
                 this.accounts.add(account);
-            } catch (Throwable e) {
-                Logger.LOGGER.error("Failed to load an account", e);
+            } catch (Throwable t) {
+                if (t instanceof ClassNotFoundException classNotFoundException) {
+                    Logger.LOGGER.error("Failed to load an account, unknown accountType: " + classNotFoundException.getMessage());
+                    this.unknownAccounts.add(jsonObject);
+                    continue;
+                }
+
+                Logger.LOGGER.error("Failed to load an account", t);
             }
         }
+        Logger.LOGGER.info("Loaded " + this.accounts.size() + " accounts, " + this.unknownAccounts.size() + " unknown accounts");
     }
 
     @Override
@@ -69,6 +83,7 @@ public class AccountsSave extends AbstractSave {
             jsonObject.addProperty("accountType", account.getClass().getName());
             array.add(jsonObject);
         }
+        this.unknownAccounts.forEach(array::add);
         return array;
     }
 
