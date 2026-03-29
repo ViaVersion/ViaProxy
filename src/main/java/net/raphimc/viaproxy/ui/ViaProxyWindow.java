@@ -25,6 +25,7 @@ import net.lenni0451.lambdaevents.generator.LambdaMetaFactoryGenerator;
 import net.lenni0451.reflect.JavaBypass;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.viaproxy.ViaProxy;
+import net.raphimc.viaproxy.plugins.events.UITabInitializeEvent;
 import net.raphimc.viaproxy.ui.events.UICloseEvent;
 import net.raphimc.viaproxy.ui.impl.*;
 import net.raphimc.viaproxy.util.logging.Logger;
@@ -111,8 +112,17 @@ public class ViaProxyWindow extends JFrame {
                 .fields()
                 .filter(field -> UITab.class.isAssignableFrom(field.type()))
                 .forEach(field -> {
-                    final UITab tab = field.get();
-                    this.tabs.add(field.get());
+                    UITab tab = field.get();
+
+                    UITabInitializeEvent event = ViaProxy.EVENT_MANAGER.call(new UITabInitializeEvent(ViaProxyWindow.this, tab));
+                    if (event.isCancelled())
+                        return;
+
+                    tab = event.getTab();
+                    if (tab == null)
+                        throw new IllegalStateException("UITabInitializeEvent returned null tab");
+
+                    this.tabs.add(tab);
                     tab.add(this.contentPane);
                     this.eventManager.register(tab);
                 });
