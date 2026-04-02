@@ -50,11 +50,11 @@ repositories {
 }
 
 dependencies {
-    includeInJar "com.viaversion:viaversion-common:5.8.1"
-    includeInJar "com.viaversion:viabackwards-common:5.8.1"
+    includeInJar "com.viaversion:viaversion-common:5.9.0-SNAPSHOT"
+    includeInJar "com.viaversion:viabackwards-common:5.9.0-SNAPSHOT"
     includeInJar "com.viaversion:viarewind-common:4.1.0-SNAPSHOT"
     includeInJar "net.raphimc:ViaLegacy:3.0.14"
-    includeInJar "com.viaversion:viaaprilfools-common:4.1.1-SNAPSHOT"
+    includeInJar "com.viaversion:viaaprilfools-common:4.2.0-SNAPSHOT"
     includeInJar "net.raphimc:ViaBedrock:0.0.27-SNAPSHOT"
 
     includeInJar "com.google.guava:guava:33.5.0-jre"
