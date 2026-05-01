@@ -119,20 +119,20 @@ public class LoginPacketHandler extends PacketHandler {
             this.proxyConnection.getC2P().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(secretKey));
 
             HTTP_EXECUTOR.submit(() -> {
-                final String userName = this.proxyConnection.getGameProfile().getName();
+                final String profileName = this.proxyConnection.getGameProfile().name();
                 try {
                     final String serverHash = new BigInteger(CryptUtil.computeServerIdHash("", KEY_PAIR.getPublic(), secretKey)).toString(16);
-                    final ProfileResult profileResult = AuthLibServices.SESSION_SERVICE.hasJoinedServer(userName, serverHash, null);
+                    final ProfileResult profileResult = AuthLibServices.SESSION_SERVICE.hasJoinedServer(profileName, serverHash, null);
                     if (profileResult == null) {
                         Logger.u_err("auth", this.proxyConnection, "Invalid session");
                         this.proxyConnection.kickClient("§cInvalid session! Please restart minecraft (and the launcher) and try again.");
                     } else {
                         this.proxyConnection.setGameProfile(profileResult.profile());
                     }
-                    Logger.u_info("auth", this.proxyConnection, "Authenticated as " + this.proxyConnection.getGameProfile().getId().toString());
+                    Logger.u_info("auth", this.proxyConnection, "Authenticated as " + this.proxyConnection.getGameProfile().id().toString());
                 } catch (CloseAndReturn ignored) {
                 } catch (Throwable e) {
-                    Logger.LOGGER.error("Failed to make session request for user '" + userName + "'!", e);
+                    Logger.LOGGER.error("Failed to make session request for user '" + profileName + "'!", e);
                     try {
                         this.proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again later.");
                     } catch (Throwable ignored) {

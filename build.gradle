@@ -67,7 +67,7 @@ dependencies {
     includeInJar "org.apache.logging.log4j:log4j-core:2.25.4"
     includeInJar "org.apache.logging.log4j:log4j-slf4j2-impl:2.25.4"
     includeInJar "org.jline:jansi:4.0.14"
-    includeInJar("com.mojang:authlib:6.0.58") {
+    includeInJar("com.mojang:authlib:7.0.63") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
     includeInJar "net.lenni0451.classtransform:mixinstranslator:1.14.1"

@@ -72,13 +72,13 @@ public class ExternalInterface {
                     final byte[] publicKeyBytes = publicKey.getEncoded();
                     final byte[] keySignature = playerCertificates.getPublicKeySignature();
                     final PrivateKey privateKey = playerCertificates.getKeyPair().getPrivate();
-                    final UUID uuid = proxyConnection.getGameProfile().getId();
+                    final UUID uuid = proxyConnection.getGameProfile().id();
 
                     byte[] loginHelloKeySignature = keySignature;
                     if (proxyConnection.getClientVersion().equals(ProtocolVersion.v1_19)) {
                         loginHelloKeySignature = playerCertificates.getLegacyPublicKeySignature();
                     }
-                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket(proxyConnection.getGameProfile().getName(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().getId()));
+                    proxyConnection.setLoginHelloPacket(new C2SLoginHelloPacket(proxyConnection.getGameProfile().name(), expiresAt, publicKey, loginHelloKeySignature, proxyConnection.getGameProfile().id()));
 
                     user.put(new ChatSession1_19_0(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.getLegacyPublicKeySignature())));
                     user.put(new ChatSession1_19_1(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
@@ -98,8 +98,8 @@ public class ExternalInterface {
             proxyConnection.kickClient("§cFailed to fill player data. This might be caused by outdated account tokens or rate limits. Wait a couple of seconds and try again. If the problem persists, remove and re-add your account.");
         }
 
-        proxyConnection.getLoginHelloPacket().name = proxyConnection.getGameProfile().getName();
-        proxyConnection.getLoginHelloPacket().uuid = proxyConnection.getGameProfile().getId();
+        proxyConnection.getLoginHelloPacket().name = proxyConnection.getGameProfile().name();
+        proxyConnection.getLoginHelloPacket().uuid = proxyConnection.getGameProfile().id();
     }
 
     public static void joinServer(final String serverIdHash, final ProxyConnection proxyConnection) {
@@ -108,7 +108,7 @@ public class ExternalInterface {
             if (proxyConnection.getUserOptions().account() instanceof MicrosoftAccount microsoftAccount) {
                 try {
                     if (ViaProxy.getConfig().getBackendProxy() == null) {
-                        AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getAuthManager().getMinecraftToken().getUpToDate().getToken(), serverIdHash);
+                        AuthLibServices.SESSION_SERVICE.joinServer(microsoftAccount.getGameProfile().id(), microsoftAccount.getAuthManager().getMinecraftToken().getUpToDate().getToken(), serverIdHash);
                     } else {
                         final Proxy proxy = ViaProxy.getConfig().getBackendProxy();
                         final MinecraftSessionService sessionService = new YggdrasilAuthenticationService(proxy.toJavaProxy()).createMinecraftSessionService();
@@ -117,7 +117,7 @@ public class ExternalInterface {
                             if (proxy.getUsername() != null && proxy.getPassword() != null) {
                                 Authenticator.setDefault(new SingleProxyAuthenticator(proxy.getUsername(), proxy.getPassword()));
                             }
-                            sessionService.joinServer(microsoftAccount.getGameProfile().getId(), microsoftAccount.getAuthManager().getMinecraftToken().getUpToDate().getToken(), serverIdHash);
+                            sessionService.joinServer(microsoftAccount.getGameProfile().id(), microsoftAccount.getAuthManager().getMinecraftToken().getUpToDate().getToken(), serverIdHash);
                         } finally {
                             Authenticator.setDefault(prevAuthenticator);
                         }

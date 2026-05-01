@@ -67,7 +67,7 @@ public class Logger {
     }
 
     public static void u_log(final Level level, final String title, final SocketAddress address, final GameProfile gameProfile, final String msg) {
-        LOGGER.log(level, "[" + title.toUpperCase(Locale.ROOT) + "] (" + AddressUtil.toString(address) + " | " + (gameProfile != null ? gameProfile.getName() : "null") + ") " + msg);
+        LOGGER.log(level, "[" + title.toUpperCase(Locale.ROOT) + "] (" + AddressUtil.toString(address) + " | " + (gameProfile != null ? gameProfile.name() : "null") + ") " + msg);
     }
 
 }
