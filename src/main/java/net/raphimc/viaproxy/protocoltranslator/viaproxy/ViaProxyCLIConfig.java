@@ -43,6 +43,7 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
 
     @Option("help")
     private boolean help = false;
+
     @Option("list-versions")
     private boolean listVersions = false;
 
@@ -57,11 +58,11 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
     }
 
     public void loadFromArguments(final String[] args) {
-        CLIConfigLoader<ViaProxyCLIConfig> cliConfigLoader = new CLIConfigLoader<>(this.configContext);
+        final CLIConfigLoader<ViaProxyCLIConfig> cliConfigLoader = new CLIConfigLoader<>(this.configContext);
         try {
 //            ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(optionParser));
 
-            List<UnknownOption> unknownOptions = cliConfigLoader.loadCLIOptions(args, true);
+            final List<UnknownOption> unknownOptions = cliConfigLoader.loadCLIOptions(args, true);
             if (this.help) {
                 throw new HelpRequestedException();
             } else if (this.listVersions) {
@@ -87,8 +88,7 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
         } catch (HelpRequestedException ignored) {
         }
 
-        String help = cliConfigLoader.buildCLIHelp(HelpOptions.DEFAULT/*.withShowDepends(false).withShowDescription(false).withSort(true).withShowBooleanType(false).withQuoteStrings(true)*/);
-        Logger.SYSOUT.println(help);
+        cliConfigLoader.printCLIHelp(Logger.SYSOUT, HelpOptions.DEFAULT/*.withShowDepends(false).withShowDescription(false).withSort(true).withShowBooleanType(false).withQuoteStrings(true)*/);
         Logger.LOGGER.info("For a more detailed description of the options, please refer to the viaproxy.yml file.");
         System.exit(1);
     }

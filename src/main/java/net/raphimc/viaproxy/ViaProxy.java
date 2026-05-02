@@ -233,7 +233,7 @@ public class ViaProxy {
             viaProxyConfigFile = new File(ViaProxy.getCwd(), "viaproxy.yml");
         }
         final boolean firstStart = !viaProxyConfigFile.exists();
-        if (!useUI && useCLI) {
+        if (useCLI) {
             CONFIG = ViaProxyCLIConfig.create(viaProxyConfigFile);
         } else {
             CONFIG = ViaProxyConfig.create(viaProxyConfigFile);
