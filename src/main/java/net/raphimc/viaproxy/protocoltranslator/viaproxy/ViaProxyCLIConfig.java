@@ -27,7 +27,6 @@ import net.lenni0451.optconfig.cli.UnknownOption;
 import net.lenni0451.optconfig.exceptions.CLIIncompatibleOptionException;
 import net.lenni0451.optconfig.exceptions.CLIParserException;
 import net.lenni0451.optconfig.provider.ConfigProvider;
-import net.raphimc.viaproxy.cli.HelpRequestedException;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.File;
@@ -67,8 +66,6 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
     public void loadFromArguments(final String[] args) {
         final CLIConfigLoader<ViaProxyCLIConfig> cliConfigLoader = new CLIConfigLoader<>(this.configContext);
         try {
-//            ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(optionParser));
-
             final List<UnknownOption> unknownOptions = cliConfigLoader.loadCLIOptions(args, true);
             if (this.help || this.extendedHelp) {
                 throw new HelpRequestedException();
@@ -84,13 +81,11 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
 //            if (options.has("minecraft-account-index")) {
 //                this.setAuthMethod(AuthMethod.ACCOUNT);
 //            }
-
-//            ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
             return;
         } catch (CLIParserException e) {
             Logger.LOGGER.fatal("Error parsing CLI options: {}", e.getMessage());
         } catch (CLIIncompatibleOptionException e) {
-            Logger.LOGGER.fatal("Config option incompatible with CLI, please contact the developer and provide the following error", e);
+            Logger.LOGGER.fatal("Incompatible CLI option", e);
             System.exit(1);
         } catch (HelpRequestedException ignored) {
         }
@@ -100,6 +95,13 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
             Logger.LOGGER.info("For a more detailed description of the options, use --extended-help or refer to the viaproxy.yml file.");
         }
         System.exit(1);
+    }
+
+    @Override
+    public void save() {
+    }
+
+    private static class HelpRequestedException extends Exception {
     }
 
 }
