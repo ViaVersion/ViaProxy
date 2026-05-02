@@ -89,7 +89,7 @@ public class LoginPacketHandler extends PacketHandler {
                 proxyConnection.setGameProfile(new GameProfile(GameProfileUtil.getOfflinePlayerUuid(loginHelloPacket.name), loginHelloPacket.name));
             }
 
-            if (ViaProxy.getConfig().isProxyOnlineMode() && !ViaProxy.EVENT_MANAGER.call(new ShouldVerifyOnlineModeEvent(this.proxyConnection)).isCancelled()) {
+            if (ViaProxy.getConfig().getFrontend().isOnlineMode() && !ViaProxy.EVENT_MANAGER.call(new ShouldVerifyOnlineModeEvent(this.proxyConnection)).isCancelled()) {
                 this.proxyConnection.getC2P().writeAndFlush(new S2CLoginHelloPacket("", KEY_PAIR.getPublic().getEncoded(), this.verifyToken, true)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             } else {
                 ViaProxy.EVENT_MANAGER.call(new ClientLoggedInEvent(this.proxyConnection));

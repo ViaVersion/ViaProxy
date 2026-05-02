@@ -284,8 +284,8 @@ public class ViaProxy {
             Logger.LOGGER.info("Starting proxy server");
             currentProxyServer = new NetServer(new Client2ProxyChannelInitializer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler()));
             EVENT_MANAGER.call(new ProxyStartEvent());
-            Logger.LOGGER.info("Binding proxy server to " + AddressUtil.toString(CONFIG.getBindAddress()));
-            currentProxyServer.bind(CONFIG.getBindAddress(), false);
+            Logger.LOGGER.info("Binding proxy server to " + AddressUtil.toString(CONFIG.getFrontend().getBindAddress()));
+            currentProxyServer.bind(CONFIG.getFrontend().getBindAddress(), false);
         } catch (Throwable e) {
             currentProxyServer = null;
             throw e;

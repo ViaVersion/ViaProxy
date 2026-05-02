@@ -66,7 +66,7 @@ public class ResourcePackPacketHandler extends PacketHandler {
     private void sendResourcePack() {
         this.proxyConnection.getChannel().eventLoop().schedule(() -> {
             try {
-                final String url = ViaProxy.getConfig().getResourcePackUrl();
+                final String url = ViaProxy.getConfig().getFrontend().getResourcePackUrl();
                 final boolean required = Via.getConfig().isForcedUse1_17ResourcePack();
                 final TextComponent message;
                 if (Via.getConfig().get1_17ResourcePackPrompt() != null) {

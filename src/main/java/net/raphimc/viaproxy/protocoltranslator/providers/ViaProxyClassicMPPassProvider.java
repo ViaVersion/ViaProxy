@@ -39,7 +39,7 @@ public class ViaProxyClassicMPPassProvider extends ClassicMPPassProvider {
         final String mppass = ProxyConnection.fromUserConnection(user).getUserOptions().classicMpPass();
         if (mppass != null && !mppass.isBlank()) {
             return mppass;
-        } else if (ViaProxy.getConfig().useBetacraftAuth()) {
+        } else if (ViaProxy.getConfig().getBackend().useBetacraftAuth()) {
             try {
                 final HttpClient httpClient = new HttpClient();
                 String externalIp;

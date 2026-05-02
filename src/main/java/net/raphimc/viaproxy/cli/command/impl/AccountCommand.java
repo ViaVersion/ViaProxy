@@ -55,14 +55,14 @@ public class AccountCommand extends Command {
                 ctx.getSource().sendMessage("No accounts added yet.");
             } else {
                 for (int i = 0; i < accounts.size(); i++) {
-                    boolean isSelected = ViaProxy.getConfig().getAccount() == accounts.get(i);
+                    boolean isSelected = ViaProxy.getConfig().getBackend().getAccount() == accounts.get(i);
                     ctx.getSource().sendMessage("[" + i + "] " + accounts.get(i).getDisplayString() + (isSelected ? " <--" : ""));
                 }
             }
             return 1;
         }));
         builder.then(literal("deselect").executes(ctx -> {
-            ViaProxy.getConfig().setAccount(null);
+            ViaProxy.getConfig().getBackend().setAccount(null);
             ctx.getSource().sendMessage("Deselected current account.");
             return 1;
         }));
@@ -78,7 +78,7 @@ public class AccountCommand extends Command {
                 return 0;
             }
             Account account = ViaProxy.getSaveManager().accountsSave.getAccounts().get(index);
-            ViaProxy.getConfig().setAccount(account);
+            ViaProxy.getConfig().getBackend().setAccount(account);
             ctx.getSource().sendMessage("Selected account " + index + ": " + account.getDisplayString() + ".");
             return 1;
         })));
@@ -111,8 +111,8 @@ public class AccountCommand extends Command {
             Account account = ViaProxy.getSaveManager().accountsSave.getAccounts().get(index);
             ViaProxy.getSaveManager().accountsSave.removeAccount(account);
             ViaProxy.getSaveManager().save();
-            if (ViaProxy.getConfig().getAccount() == account) {
-                ViaProxy.getConfig().setAccount(null);
+            if (ViaProxy.getConfig().getBackend().getAccount() == account) {
+                ViaProxy.getConfig().getBackend().setAccount(null);
             }
             ctx.getSource().sendMessage("Removed account " + index + ": " + account.getDisplayString() + ".");
             return 1;

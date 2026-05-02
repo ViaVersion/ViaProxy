@@ -103,7 +103,7 @@ public class AccountsTab extends UITab {
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                     DefaultListCellRenderer component = (DefaultListCellRenderer) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                     Account account = (Account) value;
-                    if (ViaProxy.getConfig().getAccount() == account) {
+                    if (ViaProxy.getConfig().getBackend().getAccount() == account) {
                         component.setText("<html><span style=\"color:rgb(0, 180, 0)\"><b>" + account.getDisplayString() + "</b></span></html>");
                     } else {
                         component.setText(account.getDisplayString());
@@ -129,7 +129,7 @@ public class AccountsTab extends UITab {
                         Account removed = model.remove(index);
                         ViaProxy.getSaveManager().accountsSave.removeAccount(removed);
                         ViaProxy.getSaveManager().save();
-                        if (ViaProxy.getConfig().getAccount() == removed) {
+                        if (ViaProxy.getConfig().getBackend().getAccount() == removed) {
                             if (model.isEmpty()) this.markSelected(-1);
                             else this.markSelected(0);
                         }
@@ -224,11 +224,11 @@ public class AccountsTab extends UITab {
 
     public void markSelected(final int index) {
         if (index < 0 || index >= this.accountsList.getModel().getSize()) {
-            ViaProxy.getConfig().setAccount(null);
+            ViaProxy.getConfig().getBackend().setAccount(null);
             return;
         }
 
-        ViaProxy.getConfig().setAccount(ViaProxy.getSaveManager().accountsSave.getAccounts().get(index));
+        ViaProxy.getConfig().getBackend().setAccount(ViaProxy.getSaveManager().accountsSave.getAccounts().get(index));
         this.accountsList.repaint();
     }
 

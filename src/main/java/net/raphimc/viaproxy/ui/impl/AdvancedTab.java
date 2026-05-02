@@ -99,7 +99,7 @@ public class AdvancedTab extends UITab {
         {
             this.proxyOnlineMode = new JCheckBox(I18n.get("tab.advanced.proxy_online_mode.label"));
             this.proxyOnlineMode.setToolTipText(I18n.get("tab.advanced.proxy_online_mode.tooltip"));
-            this.proxyOnlineMode.setSelected(ViaProxy.getConfig().isProxyOnlineMode());
+            this.proxyOnlineMode.setSelected(ViaProxy.getConfig().getFrontend().isOnlineMode());
             checkboxes.add(this.proxyOnlineMode);
         }
         {
@@ -111,35 +111,35 @@ public class AdvancedTab extends UITab {
         {
             this.chatSigning = new JCheckBox(I18n.get("tab.advanced.chat_signing.label"));
             this.chatSigning.setToolTipText(I18n.get("tab.advanced.chat_signing.tooltip"));
-            this.chatSigning.setSelected(ViaProxy.getConfig().shouldSignChat());
+            this.chatSigning.setSelected(ViaProxy.getConfig().getBackend().useChatSigning());
             checkboxes.add(this.chatSigning);
         }
         {
             this.ignorePacketTranslationErrors = new JCheckBox(I18n.get("tab.advanced.ignore_packet_translation_errors.label"));
             this.ignorePacketTranslationErrors.setToolTipText(I18n.get("tab.advanced.ignore_packet_translation_errors.tooltip"));
             this.ignorePacketTranslationErrors.setSelected(false);
-            this.ignorePacketTranslationErrors.setSelected(ViaProxy.getConfig().shouldIgnoreProtocolTranslationErrors());
+            this.ignorePacketTranslationErrors.setSelected(ViaProxy.getConfig().getProxy().shouldIgnoreProtocolTranslationErrors());
             checkboxes.add(this.ignorePacketTranslationErrors);
         }
         {
             this.allowBetaPinging = new JCheckBox(I18n.get("tab.advanced.allow_beta_pinging.label"));
             this.allowBetaPinging.setToolTipText(I18n.get("tab.advanced.allow_beta_pinging.tooltip"));
             this.allowBetaPinging.setSelected(false);
-            this.allowBetaPinging.setSelected(ViaProxy.getConfig().shouldAllowBetaPinging());
+            this.allowBetaPinging.setSelected(ViaProxy.getConfig().getBackend().shouldAllowBetaPinging());
             checkboxes.add(this.allowBetaPinging);
         }
         {
             this.simpleVoiceChatSupport = new JCheckBox(I18n.get("tab.advanced.simple_voice_chat_support.label"));
             this.simpleVoiceChatSupport.setToolTipText(I18n.get("tab.advanced.simple_voice_chat_support.tooltip"));
             this.simpleVoiceChatSupport.setSelected(false);
-            this.simpleVoiceChatSupport.setSelected(ViaProxy.getConfig().shouldSupportSimpleVoiceChat());
+            this.simpleVoiceChatSupport.setSelected(ViaProxy.getConfig().getProxy().shouldSupportSimpleVoiceChat());
             checkboxes.add(this.simpleVoiceChatSupport);
         }
         {
             this.fakeAcceptResourcePacks = new JCheckBox(I18n.get("tab.advanced.fake_accept_resource_packs.label"));
             this.fakeAcceptResourcePacks.setToolTipText(I18n.get("tab.advanced.fake_accept_resource_packs.tooltip"));
             this.fakeAcceptResourcePacks.setSelected(false);
-            this.fakeAcceptResourcePacks.setSelected(ViaProxy.getConfig().shouldFakeAcceptResourcePacks());
+            this.fakeAcceptResourcePacks.setSelected(ViaProxy.getConfig().getProxy().shouldFakeAcceptResourcePacks());
             checkboxes.add(this.fakeAcceptResourcePacks);
         }
         GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, BODY_BLOCK_PADDING).fill(GBC.BOTH).weight(1, 1).add(checkboxes);
@@ -215,13 +215,13 @@ public class AdvancedTab extends UITab {
     void applyGuiState() {
         ViaProxy.getSaveManager().uiSave.put("bind_address", this.bindAddress.getText());
         ViaProxy.getSaveManager().uiSave.put("proxy", this.proxy.getText());
-        ViaProxy.getConfig().setProxyOnlineMode(this.proxyOnlineMode.isSelected());
+        ViaProxy.getConfig().getFrontend().setOnlineMode(this.proxyOnlineMode.isSelected());
         ViaProxy.getSaveManager().uiSave.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
-        ViaProxy.getConfig().setChatSigning(this.chatSigning.isSelected());
-        ViaProxy.getConfig().setIgnoreProtocolTranslationErrors(this.ignorePacketTranslationErrors.isSelected());
-        ViaProxy.getConfig().setAllowBetaPinging(this.allowBetaPinging.isSelected());
-        ViaProxy.getConfig().setSimpleVoiceChatSupport(this.simpleVoiceChatSupport.isSelected());
-        ViaProxy.getConfig().setFakeAcceptResourcePacks(this.fakeAcceptResourcePacks.isSelected());
+        ViaProxy.getConfig().getBackend().setChatSigning(this.chatSigning.isSelected());
+        ViaProxy.getConfig().getProxy().setIgnoreProtocolTranslationErrors(this.ignorePacketTranslationErrors.isSelected());
+        ViaProxy.getConfig().getBackend().setAllowBetaPinging(this.allowBetaPinging.isSelected());
+        ViaProxy.getConfig().getProxy().setSimpleVoiceChatSupport(this.simpleVoiceChatSupport.isSelected());
+        ViaProxy.getConfig().getProxy().setFakeAcceptResourcePacks(this.fakeAcceptResourcePacks.isSelected());
     }
 
 }

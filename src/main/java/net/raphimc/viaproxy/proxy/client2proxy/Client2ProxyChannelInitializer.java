@@ -51,11 +51,11 @@ public class Client2ProxyChannelInitializer extends MinecraftChannelInitializer 
             return;
         }
 
-        if (ViaProxy.getConfig().useFrontendHaProxy()) {
+        if (ViaProxy.getConfig().getFrontend().useHaProxy()) {
             channel.pipeline().addLast(VIAPROXY_HAPROXY_DECODER_NAME, new HAProxyMessageDecoder());
             channel.pipeline().addLast(VIAPROXY_HAPROXY_HANDLER_NAME, new HAProxyHandler());
         }
-        if (ViaProxy.getConfig().shouldAllowLegacyClientPassthrough()) {
+        if (ViaProxy.getConfig().getProxy().shouldAllowLegacyClientPassthrough()) {
             channel.pipeline().addLast(LEGACY_PASSTHROUGH_INITIAL_HANDLER_NAME, new LegacyPassthroughInitialHandler());
         }
 

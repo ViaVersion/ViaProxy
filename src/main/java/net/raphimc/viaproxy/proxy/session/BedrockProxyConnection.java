@@ -58,7 +58,7 @@ public class BedrockProxyConnection extends ProxyConnection {
     @Override
     public void initialize(final TransportType transportType, final Bootstrap bootstrap) {
         bootstrap
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getConnectTimeout())
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getBackend().getConnectTimeout())
                 .attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY, this)
                 .handler(this.channelInitializer);
 
@@ -103,7 +103,7 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .option(RakChannelOption.RAK_COMPATIBILITY_MODE, true)
                 .option(RakChannelOption.RAK_CLIENT_INTERNAL_ADDRESSES, 20)
                 .option(RakChannelOption.RAK_TIME_BETWEEN_SEND_CONNECTION_ATTEMPTS_MS, 500)
-                .option(RakChannelOption.RAK_CONNECT_TIMEOUT, (long) ViaProxy.getConfig().getConnectTimeout())
+                .option(RakChannelOption.RAK_CONNECT_TIMEOUT, (long) ViaProxy.getConfig().getBackend().getConnectTimeout())
                 .option(RakChannelOption.RAK_SESSION_TIMEOUT, 30_000L)
                 .option(RakChannelOption.RAK_GUID, ThreadLocalRandom.current().nextLong());
     }
@@ -130,7 +130,7 @@ public class BedrockProxyConnection extends ProxyConnection {
         bootstrap
                 .group(EventLoops.getClientEventLoop(TransportType.NIO))
                 .channelFactory(NetherNetChannelFactory.client(new PeerConnectionFactory(), netherNetSignaling))
-                .option(NetherChannelOption.NETHER_CLIENT_HANDSHAKE_TIMEOUT_MS, ViaProxy.getConfig().getConnectTimeout())
+                .option(NetherChannelOption.NETHER_CLIENT_HANDSHAKE_TIMEOUT_MS, ViaProxy.getConfig().getBackend().getConnectTimeout())
                 .option(NetherChannelOption.NETHER_CLIENT_MAX_HANDSHAKE_ATTEMPTS, 1)
                 .handler(new ChannelInitializer<>() {
                     @Override

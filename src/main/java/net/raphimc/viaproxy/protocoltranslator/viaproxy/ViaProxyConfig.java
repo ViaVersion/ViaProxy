@@ -117,7 +117,7 @@ public class ViaProxyConfig {
             }
 
             if (options.has("minecraft-account-index")) {
-                this.setAuthMethod(AuthMethod.ACCOUNT);
+                this.getBackend().setAuthMethod(AuthMethod.ACCOUNT);
             }
             for (Map.Entry<OptionSpec<Object>, ConfigOption> entry : optionMap.entrySet()) {
                 final ConfigOption option = entry.getValue();
