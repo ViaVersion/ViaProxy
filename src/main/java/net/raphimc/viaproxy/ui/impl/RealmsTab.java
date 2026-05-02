@@ -78,8 +78,8 @@ public class RealmsTab extends UITab {
 
     @Override
     protected void onTabOpened() {
-        if (ViaProxy.getConfig().getBackend().getAccount() != this.currentAccount) {
-            this.currentAccount = ViaProxy.getConfig().getBackend().getAccount();
+        if (ViaProxy.getConfig().getProxy().getAccount() != this.currentAccount) {
+            this.currentAccount = ViaProxy.getConfig().getProxy().getAccount();
             this.reinit();
         }
     }

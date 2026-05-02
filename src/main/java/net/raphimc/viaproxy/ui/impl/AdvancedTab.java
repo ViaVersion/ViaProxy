@@ -111,7 +111,7 @@ public class AdvancedTab extends UITab {
         {
             this.chatSigning = new JCheckBox(I18n.get("tab.advanced.chat_signing.label"));
             this.chatSigning.setToolTipText(I18n.get("tab.advanced.chat_signing.tooltip"));
-            this.chatSigning.setSelected(ViaProxy.getConfig().getBackend().useChatSigning());
+            this.chatSigning.setSelected(ViaProxy.getConfig().getProxy().useChatSigning());
             checkboxes.add(this.chatSigning);
         }
         {
@@ -217,7 +217,7 @@ public class AdvancedTab extends UITab {
         ViaProxy.getSaveManager().uiSave.put("proxy", this.proxy.getText());
         ViaProxy.getConfig().getFrontend().setOnlineMode(this.proxyOnlineMode.isSelected());
         ViaProxy.getSaveManager().uiSave.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
-        ViaProxy.getConfig().getBackend().setChatSigning(this.chatSigning.isSelected());
+        ViaProxy.getConfig().getProxy().setChatSigning(this.chatSigning.isSelected());
         ViaProxy.getConfig().getProxy().setIgnoreProtocolTranslationErrors(this.ignorePacketTranslationErrors.isSelected());
         ViaProxy.getConfig().getBackend().setAllowBetaPinging(this.allowBetaPinging.isSelected());
         ViaProxy.getConfig().getProxy().setSimpleVoiceChatSupport(this.simpleVoiceChatSupport.isSelected());

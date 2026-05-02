@@ -128,7 +128,7 @@ public class ViaProxyConfig {
                 "Allows clients to specify a target server and version using wildcard domains.",
                 "none: No wildcard domain handling.",
                 "public: Public wildcard domain handling. Intended for usage by external clients. (Example: address_port_version.viaproxy.127.0.0.1.nip.io)",
-                "internal: Internal wildcard domain handling. Intended for local usage by custom clients. (Example: original-handshake-address\\7address:port\\7version\\7classic-mppass)"
+                "internal: Internal wildcard domain handling. Intended for local usage by custom clients. (Example: original-handshake-address\\7address:port\\7version)"
         })
         private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
 
@@ -261,6 +261,11 @@ public class ViaProxyConfig {
     @Section
     public class Proxy {
 
+        @Option("minecraft-account-index")
+        @Description("The GUI account list index (0 indexed) of the selected account.")
+        @TypeSerializer(AccountTypeSerializer.class)
+        private Account account = null;
+
         @Option("bungeecord-player-info-passthrough")
         @Description({
                 "Allow additional information like player ip, player uuid to be passed through to the backend server.",
@@ -278,6 +283,10 @@ public class ViaProxyConfig {
         @Option("allow-legacy-client-passthrough")
         @Description("Allow <= 1.6.4 clients to connect through ViaProxy to the backend server. (No protocol translation or packet handling)")
         private boolean allowLegacyClientPassthrough = false;
+
+        @Option("chat-signing")
+        @Description("Enables sending signed chat messages on >= 1.19 servers.")
+        private boolean chatSigning = true;
 
         @Option("rewrite-handshake-packet")
         @Description({
@@ -322,6 +331,15 @@ public class ViaProxyConfig {
         @Description("Disable this if you want to hide IP addresses in the console and log files.")
         private boolean logIps = true;
 
+        public Account getAccount() {
+            return this.account;
+        }
+
+        public void setAccount(final Account account) {
+            this.account = account;
+            ViaProxyConfig.this.save();
+        }
+
         public boolean shouldPassthroughBungeecordPlayerInfo() {
             return this.bungeecordPlayerInfoPassthrough;
         }
@@ -346,6 +364,15 @@ public class ViaProxyConfig {
 
         public void setAllowLegacyClientPassthrough(final boolean allowLegacyClientPassthrough) {
             this.allowLegacyClientPassthrough = allowLegacyClientPassthrough;
+            ViaProxyConfig.this.save();
+        }
+
+        public boolean useChatSigning() {
+            return this.chatSigning;
+        }
+
+        public void setChatSigning(final boolean chatSigning) {
+            this.chatSigning = chatSigning;
             ViaProxyConfig.this.save();
         }
 
@@ -439,17 +466,12 @@ public class ViaProxyConfig {
         })
         private AuthMethod authMethod = AuthMethod.NONE;
 
-        @Option(value = "minecraft-account-index", dependencies = "auth-method")
-        @Description("The GUI account list index (0 indexed) of the selected account.")
-        @TypeSerializer(AccountTypeSerializer.class)
-        private Account account = null;
-
         @Option("betacraft-auth")
         @Description({
                 "Use BetaCraft authentication for joining classic servers.",
                 "This allows clients to join classic servers which have online mode enabled."
         })
-        private boolean betacraftAuth = false;
+        private boolean betaCraftAuth = false;
 
         @Option("allow-beta-pinging")
         @Description("Enabling this allows clients to ping <= b1.7.3 servers. This may cause issues if the server blocks too frequent connections.")
@@ -468,10 +490,6 @@ public class ViaProxyConfig {
         })
         @TypeSerializer(ProxyTypeSerializer.class)
         private net.raphimc.viaproxy.util.Proxy proxy = null;
-
-        @Option("chat-signing")
-        @Description("Enables sending signed chat messages on >= 1.19 servers.")
-        private boolean chatSigning = true;
 
         public SocketAddress getAddress() {
             return this.address;
@@ -509,21 +527,12 @@ public class ViaProxyConfig {
             ViaProxyConfig.this.save();
         }
 
-        public Account getAccount() {
-            return this.account;
+        public boolean useBetaCraftAuth() {
+            return this.betaCraftAuth;
         }
 
-        public void setAccount(final Account account) {
-            this.account = account;
-            ViaProxyConfig.this.save();
-        }
-
-        public boolean useBetacraftAuth() {
-            return this.betacraftAuth;
-        }
-
-        public void setBetacraftAuth(final boolean betacraftAuth) {
-            this.betacraftAuth = betacraftAuth;
+        public void setBetaCraftAuth(final boolean betaCraftAuth) {
+            this.betaCraftAuth = betaCraftAuth;
             ViaProxyConfig.this.save();
         }
 
@@ -551,15 +560,6 @@ public class ViaProxyConfig {
 
         public void setProxy(final net.raphimc.viaproxy.util.Proxy proxy) {
             this.proxy = proxy;
-            ViaProxyConfig.this.save();
-        }
-
-        public boolean useChatSigning() {
-            return this.chatSigning;
-        }
-
-        public void setChatSigning(final boolean chatSigning) {
-            this.chatSigning = chatSigning;
             ViaProxyConfig.this.save();
         }
 
@@ -629,12 +629,12 @@ public class ViaProxyConfig {
             this.move(loadedValues, "connect-timeout", "backend", "connect-timeout");
             this.move(loadedValues, "proxy-online-mode", "frontend", "online-mode");
             this.move(loadedValues, "auth-method", "backend", "auth-method");
-            this.move(loadedValues, "minecraft-account-index", "backend", "minecraft-account-index");
+            this.move(loadedValues, "minecraft-account-index", "proxy", "minecraft-account-index");
             this.move(loadedValues, "betacraft-auth", "backend", "betacraft-auth");
             this.move(loadedValues, "backend-proxy-url", "backend", "proxy-url");
             this.move(loadedValues, "backend-haproxy", "backend", "haproxy");
             this.move(loadedValues, "frontend-haproxy", "frontend", "haproxy");
-            this.move(loadedValues, "chat-signing", "backend", "chat-signing");
+            this.move(loadedValues, "chat-signing", "proxy", "chat-signing");
             this.move(loadedValues, "compression-threshold", "frontend", "compression-threshold");
             this.move(loadedValues, "allow-beta-pinging", "backend", "allow-beta-pinging");
             this.move(loadedValues, "ignore-protocol-translation-errors", "proxy", "ignore-protocol-translation-errors");
@@ -743,22 +743,22 @@ public class ViaProxyConfig {
 
     @Deprecated(forRemoval = true)
     public Account getAccount() {
-        return this.getBackend().getAccount();
+        return this.getProxy().getAccount();
     }
 
     @Deprecated(forRemoval = true)
     public void setAccount(final Account account) {
-        this.getBackend().setAccount(account);
+        this.getProxy().setAccount(account);
     }
 
     @Deprecated(forRemoval = true)
     public boolean useBetacraftAuth() {
-        return this.getBackend().useBetacraftAuth();
+        return this.getBackend().useBetaCraftAuth();
     }
 
     @Deprecated(forRemoval = true)
     public void setBetacraftAuth(final boolean betacraftAuth) {
-        this.getBackend().setBetacraftAuth(betacraftAuth);
+        this.getBackend().setBetaCraftAuth(betacraftAuth);
     }
 
     @Deprecated(forRemoval = true)
@@ -793,12 +793,12 @@ public class ViaProxyConfig {
 
     @Deprecated(forRemoval = true)
     public boolean shouldSignChat() {
-        return this.getBackend().useChatSigning();
+        return this.getProxy().useChatSigning();
     }
 
     @Deprecated(forRemoval = true)
     public void setChatSigning(final boolean chatSigning) {
-        this.getBackend().setChatSigning(chatSigning);
+        this.getProxy().setChatSigning(chatSigning);
     }
 
     @Deprecated(forRemoval = true)

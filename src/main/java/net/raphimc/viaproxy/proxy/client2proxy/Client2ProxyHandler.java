@@ -49,7 +49,6 @@ import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
-import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.*;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -132,7 +131,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
 
         SocketAddress serverAddress = ViaProxy.getConfig().getBackend().getAddress();
         ProtocolVersion serverVersion = ViaProxy.getConfig().getBackend().getVersion();
-        String classicMpPass = ViaProxy.getConfig().getBackend().getAccount() instanceof ClassicAccount classicAccount ? classicAccount.getMppass() : null;
 
         if (ViaProxy.getConfig().getFrontend().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.PUBLIC) {
             if (handshakeParts[0].toLowerCase().contains("f2.viaproxy.")) { // Format 2: address.<address>.port.<port>.version.<version>.f2.viaproxy.hostname
@@ -165,9 +163,6 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
             serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
             if (serverVersion == null) throw CloseAndReturn.INSTANCE;
             serverAddress = AddressUtil.parse(arrayHelper.get(1), serverVersion);
-            if (arrayHelper.isIndexValid(3)) {
-                classicMpPass = arrayHelper.getString(3);
-            }
         }
 
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && TransferDataHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
@@ -200,7 +195,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
             this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
         }
 
-        final UserOptions userOptions = new UserOptions(classicMpPass, ViaProxy.getConfig().getBackend().getAccount());
+        final UserOptions userOptions = new UserOptions(ViaProxy.getConfig().getBackend().getAuthMethod() == ViaProxyConfig.AuthMethod.ACCOUNT ? ViaProxy.getConfig().getProxy().getAccount() : null);
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && serverVersion.equals(ProtocolTranslator.AUTO_DETECT_PROTOCOL)) {

@@ -21,7 +21,6 @@ import net.lenni0451.optconfig.serializer.ConfigTypeSerializer;
 import net.lenni0451.optconfig.serializer.info.DeserializerInfo;
 import net.lenni0451.optconfig.serializer.info.SerializerInfo;
 import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 
 import java.util.List;
@@ -32,8 +31,7 @@ public class AccountTypeSerializer implements ConfigTypeSerializer<Account> {
     public Account deserialize(final DeserializerInfo<Account> info) {
         final List<Account> accounts = ViaProxy.getSaveManager().accountsSave.getAccounts();
         final int accountIndex = (int) info.value();
-        final ViaProxyConfig config = (ViaProxyConfig) info.configInstance();
-        if (config.getBackend().getAuthMethod() == ViaProxyConfig.AuthMethod.ACCOUNT && accountIndex >= 0 && accountIndex < accounts.size()) {
+        if (accountIndex >= 0 && accountIndex < accounts.size()) {
             return accounts.get(accountIndex);
         } else {
             return null;
@@ -45,7 +43,7 @@ public class AccountTypeSerializer implements ConfigTypeSerializer<Account> {
         if (info.value() != null) {
             return ViaProxy.getSaveManager().accountsSave.getAccounts().indexOf(info.value());
         } else {
-            return 0;
+            return -1;
         }
     }
 

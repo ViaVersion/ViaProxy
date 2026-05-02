@@ -151,7 +151,7 @@ public class GeneralTab extends UITab {
         {
             this.betaCraftAuth = new JCheckBox(I18n.get("tab.general.betacraft_auth.label"));
             this.betaCraftAuth.setToolTipText(I18n.get("tab.general.betacraft_auth.tooltip"));
-            this.betaCraftAuth.setSelected(ViaProxy.getConfig().getBackend().useBetacraftAuth());
+            this.betaCraftAuth.setSelected(ViaProxy.getConfig().getBackend().useBetaCraftAuth());
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.betaCraftAuth);
             // Simulate user action on serverVersion to update betaCraftAuth
             final ActionEvent fakeAction = new ActionEvent(this.serverVersion, ActionEvent.ACTION_PERFORMED, "");
@@ -264,7 +264,7 @@ public class GeneralTab extends UITab {
                         }
 
                         ViaProxy.getConfig().getBackend().setAddress(new InetSocketAddress(uri.getHost(), uri.getPort()));
-                        ViaProxy.getConfig().getBackend().setAccount(new ClassicAccount(path[0], path[1]));
+                        ViaProxy.getConfig().getProxy().setAccount(new ClassicAccount(path[0], path[1]));
                     } else {
                         try {
                             ViaProxy.getConfig().getBackend().setAddress(AddressUtil.parse(serverAddress, serverVersion));
@@ -273,11 +273,9 @@ public class GeneralTab extends UITab {
                         }
 
                         if (authMethod == ViaProxyConfig.AuthMethod.ACCOUNT) {
-                            if (ViaProxy.getConfig().getBackend().getAccount() == null) {
+                            if (ViaProxy.getConfig().getProxy().getAccount() == null) {
                                 this.viaProxyWindow.accountsTab.markSelected(0);
                             }
-                        } else {
-                            ViaProxy.getConfig().getBackend().setAccount(null);
                         }
                     }
                     try {
@@ -344,7 +342,7 @@ public class GeneralTab extends UITab {
         if (this.authMethod.getSelectedItem() instanceof ViaProxyConfig.AuthMethod authMethod) {
             ViaProxy.getConfig().getBackend().setAuthMethod(authMethod);
         }
-        ViaProxy.getConfig().getBackend().setBetacraftAuth(this.betaCraftAuth.isSelected());
+        ViaProxy.getConfig().getBackend().setBetaCraftAuth(this.betaCraftAuth.isSelected());
     }
 
 }
