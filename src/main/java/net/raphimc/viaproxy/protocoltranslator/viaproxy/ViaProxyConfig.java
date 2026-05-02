@@ -44,15 +44,15 @@ public class ViaProxyConfig {
 
     @Option("frontend")
     @Description("These options affect the behavior of the proxy related to client connections.")
-    private Frontend frontend = new Frontend();
+    private final Frontend frontend = new Frontend();
 
     @Option("proxy")
     @Description("These options affect the general behavior of the proxy.")
-    private Proxy proxy = new Proxy();
+    private final Proxy proxy = new Proxy();
 
     @Option("backend")
     @Description("These options affect the behavior of the proxy related to server connections.")
-    private Backend backend = new Backend();
+    private final Backend backend = new Backend();
 
     public static ViaProxyConfig create(final File configFile) {
         final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
@@ -123,7 +123,7 @@ public class ViaProxyConfig {
 
         @Option("motd")
         @Description("These options allow you to override parts of the backend server's MotD.")
-        private MotD motd = new MotD();
+        private final MotD motd = new MotD();
 
         @Option("resource-pack-url")
         @CLIName(value = "resource-pack-url", omitSection = true)
@@ -280,7 +280,7 @@ public class ViaProxyConfig {
                 "Allow additional information like player ip, player uuid to be passed through to the backend server.",
                 "This is typically used by proxies like BungeeCord and requires support from the backend server as well."
         })
-        private boolean bungeecordPlayerInfoPassthrough = false;
+        private boolean bungeeCordPlayerInfoPassthrough = false;
 
         @Option("ignore-protocol-translation-errors")
         @CLIName(value = "ignore-protocol-translation-errors", omitSection = true)
@@ -359,12 +359,12 @@ public class ViaProxyConfig {
             ViaProxyConfig.this.save();
         }
 
-        public boolean shouldPassthroughBungeecordPlayerInfo() {
-            return this.bungeecordPlayerInfoPassthrough;
+        public boolean shouldPassthroughBungeeCordPlayerInfo() {
+            return this.bungeeCordPlayerInfoPassthrough;
         }
 
-        public void setPassthroughBungeecordPlayerInfo(final boolean bungeecordPlayerInfoPassthrough) {
-            this.bungeecordPlayerInfoPassthrough = bungeecordPlayerInfoPassthrough;
+        public void setPassthroughBungeeCordPlayerInfo(final boolean bungeeCordPlayerInfoPassthrough) {
+            this.bungeeCordPlayerInfoPassthrough = bungeeCordPlayerInfoPassthrough;
             ViaProxyConfig.this.save();
         }
 
@@ -594,16 +594,17 @@ public class ViaProxyConfig {
 
         @Validator("version")
         private ProtocolVersion validateVersion(final ProtocolVersion backendVersion) {
-            if (backendVersion == null) {
+            if (backendVersion != null) {
+                return backendVersion;
+            } else {
                 Logger.LOGGER.warn("Invalid backend version. Defaulting to auto detect.");
-                Logger.LOGGER.warn("=== Supported Protocol Versions ===");
+                Logger.LOGGER.warn("=== Supported backend server versions ===");
                 for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
                     Logger.LOGGER.warn(version.getName());
                 }
                 Logger.LOGGER.warn("===================================");
                 return ProtocolTranslator.AUTO_DETECT_PROTOCOL;
             }
-            return backendVersion;
         }
 
     }
@@ -875,12 +876,12 @@ public class ViaProxyConfig {
 
     @Deprecated(forRemoval = true)
     public boolean shouldPassthroughBungeecordPlayerInfo() {
-        return this.getProxy().shouldPassthroughBungeecordPlayerInfo();
+        return this.getProxy().shouldPassthroughBungeeCordPlayerInfo();
     }
 
     @Deprecated(forRemoval = true)
     public void setPassthroughBungeecordPlayerInfo(final boolean bungeecordPlayerInfoPassthrough) {
-        this.getProxy().setPassthroughBungeecordPlayerInfo(bungeecordPlayerInfoPassthrough);
+        this.getProxy().setPassthroughBungeeCordPlayerInfo(bungeecordPlayerInfoPassthrough);
     }
 
     @Deprecated(forRemoval = true)

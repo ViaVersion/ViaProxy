@@ -123,7 +123,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         }
 
         final String[] handshakeParts;
-        if (ViaProxy.getConfig().getProxy().shouldPassthroughBungeecordPlayerInfo()) {
+        if (ViaProxy.getConfig().getProxy().shouldPassthroughBungeeCordPlayerInfo()) {
             handshakeParts = packet.address.split("\0");
         } else {
             handshakeParts = new String[]{packet.address};
