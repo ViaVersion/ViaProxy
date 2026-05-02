@@ -21,9 +21,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.optconfig.CLIConfigLoader;
 import net.lenni0451.optconfig.ConfigContext;
 import net.lenni0451.optconfig.ConfigLoader;
-import net.lenni0451.optconfig.annotations.CheckSuperclasses;
-import net.lenni0451.optconfig.annotations.OptConfig;
-import net.lenni0451.optconfig.annotations.Option;
+import net.lenni0451.optconfig.annotations.*;
 import net.lenni0451.optconfig.cli.HelpOptions;
 import net.lenni0451.optconfig.cli.UnknownOption;
 import net.lenni0451.optconfig.exceptions.CLIIncompatibleOptionException;
@@ -41,10 +39,19 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
 
     private ConfigContext<ViaProxyCLIConfig> configContext;
 
+    @Hidden
     @Option("help")
+    @Description("Displays a help message with a list of all available options")
     private boolean help = false;
 
+    @Hidden
+    @Option("extended-help")
+    @Description("Displays an extended help message with detailed descriptions of the options")
+    private boolean extendedHelp = false;
+
+    @Hidden
     @Option("list-versions")
+    @Description("Lists all supported backend server versions and exits")
     private boolean listVersions = false;
 
     public static ViaProxyCLIConfig create(final File configFile) {
@@ -63,10 +70,10 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
 //            ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(optionParser));
 
             final List<UnknownOption> unknownOptions = cliConfigLoader.loadCLIOptions(args, true);
-            if (this.help) {
+            if (this.help || this.extendedHelp) {
                 throw new HelpRequestedException();
             } else if (this.listVersions) {
-                Logger.LOGGER.info("=== Supported Server Versions ===");
+                Logger.LOGGER.info("=== Supported backend server versions ===");
                 for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
                     Logger.LOGGER.info(version.getName());
                 }
@@ -88,8 +95,10 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
         } catch (HelpRequestedException ignored) {
         }
 
-        cliConfigLoader.printCLIHelp(Logger.SYSOUT, HelpOptions.DEFAULT/*.withShowDepends(false).withShowDescription(false).withSort(true).withShowBooleanType(false).withQuoteStrings(true)*/);
-        Logger.LOGGER.info("For a more detailed description of the options, please refer to the viaproxy.yml file.");
+        cliConfigLoader.printCLIHelp(Logger.SYSOUT, HelpOptions.DEFAULT.withShowDescription(this.extendedHelp).withShowDepends(false).withShowBooleanType(true));
+        if (!this.extendedHelp) {
+            Logger.LOGGER.info("For a more detailed description of the options, use --extended-help or refer to the viaproxy.yml file.");
+        }
         System.exit(1);
     }
 
