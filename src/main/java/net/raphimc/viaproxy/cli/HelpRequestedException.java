@@ -17,5 +17,5 @@
  */
 package net.raphimc.viaproxy.cli;
 
-public class HelpRequestedException extends RuntimeException {
+public class HelpRequestedException extends Exception {
 }

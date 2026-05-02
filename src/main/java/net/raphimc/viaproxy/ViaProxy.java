@@ -44,6 +44,7 @@ import net.raphimc.viaproxy.plugins.events.ProxyStartEvent;
 import net.raphimc.viaproxy.plugins.events.ProxyStopEvent;
 import net.raphimc.viaproxy.plugins.events.ViaProxyLoadedEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
+import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyCLIConfig;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.raphimc.viaproxy.proxy.client2proxy.Client2ProxyHandler;
@@ -232,7 +233,11 @@ public class ViaProxy {
             viaProxyConfigFile = new File(ViaProxy.getCwd(), "viaproxy.yml");
         }
         final boolean firstStart = !viaProxyConfigFile.exists();
-        CONFIG = ViaProxyConfig.create(viaProxyConfigFile);
+        if (!useUI && useCLI) {
+            CONFIG = ViaProxyCLIConfig.create(viaProxyConfigFile);
+        } else {
+            CONFIG = ViaProxyConfig.create(viaProxyConfigFile);
+        }
 
         if (useUI) {
             progressConsumer.accept("Loading GUI");
@@ -256,7 +261,7 @@ public class ViaProxy {
                 final String[] cliArgs = new String[args.length - 1];
                 System.arraycopy(args, 1, cliArgs, 0, cliArgs.length);
                 try {
-                    CONFIG.loadFromArguments(cliArgs);
+                    ((ViaProxyCLIConfig) CONFIG).loadFromArguments(cliArgs);
                 } catch (Throwable e) {
                     throw new RuntimeException("Failed to load CLI arguments", e);
                 }

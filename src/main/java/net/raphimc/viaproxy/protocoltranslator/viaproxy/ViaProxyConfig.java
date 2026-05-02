@@ -18,24 +18,11 @@
 package net.raphimc.viaproxy.protocoltranslator.viaproxy;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 import net.lenni0451.optconfig.ConfigContext;
 import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.annotations.*;
-import net.lenni0451.optconfig.index.ClassIndexer;
-import net.lenni0451.optconfig.index.ConfigType;
-import net.lenni0451.optconfig.index.types.ConfigOption;
-import net.lenni0451.optconfig.index.types.SectionIndex;
 import net.lenni0451.optconfig.migrate.ConfigMigrator;
 import net.lenni0451.optconfig.provider.ConfigProvider;
-import net.raphimc.viaproxy.ViaProxy;
-import net.raphimc.viaproxy.cli.BetterHelpFormatter;
-import net.raphimc.viaproxy.cli.HelpRequestedException;
-import net.raphimc.viaproxy.plugins.events.PostOptionsParseEvent;
-import net.raphimc.viaproxy.plugins.events.PreOptionsParseEvent;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
 import net.raphimc.viaproxy.util.AddressUtil;
@@ -46,7 +33,6 @@ import java.io.File;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 @OptConfig(header = "ViaProxy configuration file", version = 2)
 @Migrator(from = 1, to = 2, migrator = ViaProxyConfig.Migrator1To2.class)
@@ -74,76 +60,6 @@ public class ViaProxyConfig {
         } catch (Throwable e) {
             throw new RuntimeException("Failed to load config", e);
         }
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    public void loadFromArguments(final String[] args) throws Exception {
-        final OptionParser optionParser = new OptionParser();
-        final OptionSpec<Void> optionHelp = optionParser.accepts("help").forHelp();
-        final OptionSpec<Void> optionListVersions = optionParser.accepts("list-versions", "Lists all supported server/target versions").forHelp();
-
-        final Map<OptionSpec<Object>, ConfigOption> optionMap = new HashMap<>();
-        final Stack<SectionIndex> stack = new Stack<>();
-        final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
-        stack.push(ClassIndexer.indexClass(ConfigType.INSTANCED, ViaProxyConfig.class, configLoader.getConfigOptions().getClassAccessFactory()));
-        while (!stack.isEmpty()) {
-            final SectionIndex index = stack.pop();
-            stack.addAll(index.getSubSections().values());
-
-            for (ConfigOption option : index.getOptions()) {
-                if (index.getSubSections().containsKey(option)) continue;
-
-                Object defaultValue = option.getFieldAccess().getValue(this);
-                if (option.getTypeSerializer() != null) {
-                    defaultValue = option.createTypeSerializer(configLoader, ViaProxyConfig.class, this).serialize(defaultValue);
-                }
-                final OptionSpec<Object> cliOption = optionParser.accepts(option.getName()).withRequiredArg().ofType((Class<Object>) defaultValue.getClass()).defaultsTo(defaultValue);
-                optionMap.put(cliOption, option);
-            }
-        }
-
-        try {
-            ViaProxy.EVENT_MANAGER.call(new PreOptionsParseEvent(optionParser));
-            final OptionSet options = optionParser.parse(args);
-            if (options.has(optionHelp)) {
-                throw new HelpRequestedException();
-            } else if (options.has(optionListVersions)) {
-                Logger.LOGGER.info("=== Supported Server Versions ===");
-                for (ProtocolVersion version : ProtocolVersion.getProtocols()) {
-                    Logger.LOGGER.info(version.getName());
-                }
-                Logger.LOGGER.info("===================================");
-                System.exit(0);
-            }
-
-            if (options.has("minecraft-account-index")) {
-                this.getBackend().setAuthMethod(AuthMethod.ACCOUNT);
-            }
-            for (Map.Entry<OptionSpec<Object>, ConfigOption> entry : optionMap.entrySet()) {
-                final ConfigOption option = entry.getValue();
-                if (options.has(entry.getKey())) {
-                    Object value = options.valueOf(entry.getKey());
-                    if (option.getTypeSerializer() != null) {
-                        value = option.createTypeSerializer(configLoader, ViaProxyConfig.class, this).deserialize((Class<Object>) option.getFieldAccess().getType(), value);
-                    }
-                    if (option.getValidator() != null) {
-                        value = option.getValidator().invoke(this, value);
-                    }
-                    option.getFieldAccess().setValue(this, value);
-                }
-            }
-
-            ViaProxy.EVENT_MANAGER.call(new PostOptionsParseEvent(options));
-            return;
-        } catch (OptionException e) {
-            Logger.LOGGER.fatal("Error parsing CLI options: " + e.getMessage());
-        } catch (HelpRequestedException ignored) {
-        }
-
-        optionParser.formatHelpWith(new BetterHelpFormatter());
-        optionParser.printHelpOn(Logger.SYSOUT);
-        Logger.LOGGER.info("For a more detailed description of the options, please refer to the viaproxy.yml file.");
-        System.exit(1);
     }
 
     public void save() {
