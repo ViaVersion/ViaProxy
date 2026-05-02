@@ -26,7 +26,7 @@ public class ProtocolTranslatorInitEvent {
     private final List<Supplier<?>> additionalPlatformSuppliers = new ArrayList<>();
 
     public ProtocolTranslatorInitEvent(final Supplier<?>... additionalPlatformSuppliers) {
-        for (final Supplier<?> platformSupplier : additionalPlatformSuppliers) {
+        for (Supplier<?> platformSupplier : additionalPlatformSuppliers) {
             this.registerPlatform(platformSupplier);
         }
     }

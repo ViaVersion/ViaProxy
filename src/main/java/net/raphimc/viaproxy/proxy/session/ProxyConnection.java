@@ -113,7 +113,7 @@ public class ProxyConnection extends NetClient {
     }
 
     public <T> T getPacketHandler(final Class<T> packetHandlerType) {
-        for (final PacketHandler packetHandler : this.packetHandlers) {
+        for (PacketHandler packetHandler : this.packetHandlers) {
             if (packetHandlerType.isInstance(packetHandler)) {
                 return packetHandlerType.cast(packetHandler);
             }

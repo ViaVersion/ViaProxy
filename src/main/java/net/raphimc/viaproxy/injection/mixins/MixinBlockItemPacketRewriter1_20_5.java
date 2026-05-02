@@ -146,7 +146,7 @@ public abstract class MixinBlockItemPacketRewriter1_20_5 extends ItemRewriter<Cl
     @Unique
     private int[] blockJsonArrayToIds(final ProtocolVersion protocolVersion, final JsonArray jsonArray) {
         final IntSet ids = new IntOpenHashSet();
-        for (final JsonElement element : jsonArray) {
+        for (JsonElement element : jsonArray) {
             final String name = element.getAsString();
             if (name.startsWith("#")) { // Material name
                 final String material = name.substring(1);
