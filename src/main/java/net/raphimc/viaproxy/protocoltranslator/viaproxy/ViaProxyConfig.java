@@ -21,6 +21,8 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.optconfig.ConfigContext;
 import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.annotations.*;
+import net.lenni0451.optconfig.annotations.cli.CLIAliases;
+import net.lenni0451.optconfig.annotations.cli.CLIName;
 import net.lenni0451.optconfig.migrate.ConfigMigrator;
 import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.raphimc.viaproxy.protocoltranslator.ProtocolTranslator;
@@ -86,11 +88,14 @@ public class ViaProxyConfig {
     public class Frontend {
 
         @Option("bind-address")
+        @CLIName(value = "bind-address", omitSection = true)
         @Description("The address on which ViaProxy should listen for clients.")
         @TypeSerializer(SocketAddressTypeSerializer.class)
         private SocketAddress bindAddress = AddressUtil.parse("0.0.0.0:25568", null);
 
         @Option("online-mode")
+        @CLIName(value = "frontend-online-mode", omitSection = true)
+        @CLIAliases("proxy-online-mode")
         @Description({
                 "Enabling Online Mode allows clients see skins on online mode servers and use the signed chat features.",
                 "This requires clients to use a valid Minecraft account."
@@ -98,14 +103,18 @@ public class ViaProxyConfig {
         private boolean onlineMode = false;
 
         @Option("haproxy")
+        @CLIName(value = "frontend-haproxy", omitSection = true)
         @Description("Read HAProxy protocol messages from clients.")
         private boolean haProxy = false;
 
         @Option("compression-threshold")
+        @CLIName(value = "compression-threshold", omitSection = true)
         @Description("The threshold for packet compression. Packets larger than this size will be compressed. (-1 to disable)")
         private int compressionThreshold = 256;
 
         @Option("suppress-packet-errors")
+        @CLIName(value = "suppress-client-packet-errors", omitSection = true)
+        @CLIAliases("suppress-client-protocol-errors")
         @Description({
                 "Enabling this will suppress packet errors to prevent lag when ViaProxy is getting spammed with invalid packets.",
                 "This may cause issues with debugging client connection issues because no error messages will be printed."
@@ -117,6 +126,7 @@ public class ViaProxyConfig {
         private MotD motd = new MotD();
 
         @Option("resource-pack-url")
+        @CLIName(value = "resource-pack-url", omitSection = true)
         @Description({
                 "URL of a resource pack which will be sent to clients. Leave empty to disable.",
                 "Example: https://example.com/resourcepack.zip"
@@ -124,6 +134,7 @@ public class ViaProxyConfig {
         private String resourcePackUrl = "";
 
         @Option("wildcard-domain-handling")
+        @CLIName(value = "wildcard-domain-handling", omitSection = true)
         @Description({
                 "Allows clients to specify a target server and version using wildcard domains.",
                 "none: No wildcard domain handling.",
@@ -133,6 +144,7 @@ public class ViaProxyConfig {
         private WildcardDomainHandling wildcardDomainHandling = WildcardDomainHandling.NONE;
 
         @Option("log-client-status-requests")
+        @CLIName(value = "log-client-status-requests", omitSection = true)
         @Description("Enable this if you want to see client status requests in the console and log files.")
         private boolean logClientStatusRequests = false;
 
@@ -215,25 +227,20 @@ public class ViaProxyConfig {
         @Section
         public class MotD {
 
-            @Option("enabled")
-            @Description("Enable this to override parts of the backend server's MotD.")
-            private boolean enabled = false;
-
             @Option("description")
+            @CLIName(value = "custom-motd-description", omitSection = true)
+            @CLIAliases("custom-motd")
             @Description("Custom description. Leave empty to use the backend server's description.")
             private String description = "";
 
             @Option("favicon-path")
+            @CLIName(value = "custom-motd-favicon-path", omitSection = true)
+            @CLIAliases("custom-favicon-path")
             @Description("Relative file path to a custom favicon. Leave empty to use the backend server's favicon.")
             private String faviconPath = "";
 
-            public boolean isEnabled() {
-                return this.enabled;
-            }
-
-            public void setEnabled(final boolean enabled) {
-                this.enabled = enabled;
-                ViaProxyConfig.this.save();
+            public boolean hasAnyNonBlankOption() {
+                return !this.description.isBlank() || !this.faviconPath.isBlank();
             }
 
             public String getDescription() {
@@ -262,11 +269,13 @@ public class ViaProxyConfig {
     public class Proxy {
 
         @Option("minecraft-account-index")
+        @CLIName(value = "minecraft-account-index", omitSection = true)
         @Description("The GUI account list index (0 indexed) of the selected account.")
         @TypeSerializer(AccountTypeSerializer.class)
         private Account account = null;
 
         @Option("bungeecord-player-info-passthrough")
+        @CLIName(value = "bungeecord-player-info-passthrough", omitSection = true)
         @Description({
                 "Allow additional information like player ip, player uuid to be passed through to the backend server.",
                 "This is typically used by proxies like BungeeCord and requires support from the backend server as well."
@@ -274,6 +283,7 @@ public class ViaProxyConfig {
         private boolean bungeecordPlayerInfoPassthrough = false;
 
         @Option("ignore-protocol-translation-errors")
+        @CLIName(value = "ignore-protocol-translation-errors", omitSection = true)
         @Description({
                 "Enabling this will prevent getting disconnected from the backend server when a packet translation error occurs and instead only print the error in the console.",
                 "This may cause issues depending on the type of packet which failed to translate."
@@ -281,14 +291,17 @@ public class ViaProxyConfig {
         private boolean ignoreProtocolTranslationErrors = false;
 
         @Option("allow-legacy-client-passthrough")
+        @CLIName(value = "allow-legacy-client-passthrough", omitSection = true)
         @Description("Allow <= 1.6.4 clients to connect through ViaProxy to the backend server. (No protocol translation or packet handling)")
         private boolean allowLegacyClientPassthrough = false;
 
         @Option("chat-signing")
+        @CLIName(value = "chat-signing", omitSection = true)
         @Description("Enables sending signed chat messages on >= 1.19 servers.")
         private boolean chatSigning = true;
 
         @Option("rewrite-handshake-packet")
+        @CLIName(value = "rewrite-handshake-packet", omitSection = true)
         @Description({
                 "Enabling this will rewrite the address in the handshake packet to a value the vanilla client would have sent when connecting directly to the backend server.",
                 "This should be left enabled unless you are a server owner and you need the original address on the backend server."
@@ -296,6 +309,7 @@ public class ViaProxyConfig {
         private boolean rewriteHandshakePacket = true;
 
         @Option("rewrite-transfer-packets")
+        @CLIName(value = "rewrite-transfer-packets", omitSection = true)
         @Description({
                 "Enabling this will rewrite transfer packets to point back to ViaProxy. This allows ViaProxy to perform protocol translation when forwarding the player to the actual server from the transfer packet.",
                 "This should be left enabled unless you are a server owner and the servers you are transferring to perform their own protocol translation."
@@ -303,6 +317,7 @@ public class ViaProxyConfig {
         private boolean rewriteTransferPackets = true;
 
         @Option("fake-accept-resource-packs")
+        @CLIName(value = "fake-accept-resource-packs", omitSection = true)
         @Description({
                 "Accepts resource packs from the server without showing a prompt to clients.",
                 "This is required if the server requires a resource pack, but the client can't load it due to version differences."
@@ -310,10 +325,12 @@ public class ViaProxyConfig {
         private boolean fakeAcceptResourcePacks = false;
 
         @Option("simple-voice-chat-support")
+        @CLIName(value = "simple-voice-chat-support", omitSection = true)
         @Description("Enables handling and rewriting of Simple Voice Chat mod packets.")
         private boolean simpleVoiceChatSupport = false;
 
         @Option("fix-fabric-particle-api")
+        @CLIName(value = "fix-fabric-particle-api", omitSection = true)
         @Description({
                 "Fixes an issue where the Fabric Particle API causes disconnects when both the client and server have the mod installed and both are 1.21.5+.",
                 "See https://github.com/ViaVersion/ViaFabric/issues/428"
@@ -321,6 +338,7 @@ public class ViaProxyConfig {
         private boolean fixFabricParticleApi = true;
 
         @Option("skip-config-state-packet-queue")
+        @CLIName(value = "skip-config-state-packet-queue", omitSection = true)
         @Description({
                 "Fixes potential join issues on <= 1.20.1 quilt/fabric servers.",
                 "It's recommended to only enable this if you are experiencing issues with the config state packet queue."
@@ -328,6 +346,7 @@ public class ViaProxyConfig {
         private boolean skipConfigStatePacketQueue = false;
 
         @Option("log-ips")
+        @CLIName(value = "log-ips", omitSection = true)
         @Description("Disable this if you want to hide IP addresses in the console and log files.")
         private boolean logIps = true;
 
@@ -445,20 +464,26 @@ public class ViaProxyConfig {
     public class Backend {
 
         @Option(value = "address", dependencies = "version")
+        @CLIName(value = "backend-address", omitSection = true)
+        @CLIAliases("target-address")
         @Description("The address of the server ViaProxy should connect to.")
         @TypeSerializer(BackendAddressTypeSerializer.class)
         private SocketAddress address = AddressUtil.parse("127.0.0.1:25565", null);
 
         @Option("version")
+        @CLIName(value = "backend-version", omitSection = true)
+        @CLIAliases("target-version")
         @Description("The version ViaProxy should translate to. (See ViaProxy GUI for a list of versions)")
         @TypeSerializer(ProtocolVersionTypeSerializer.class)
         private ProtocolVersion version = ProtocolTranslator.AUTO_DETECT_PROTOCOL;
 
         @Option("connect-timeout")
+        @CLIName(value = "connect-timeout", omitSection = true)
         @Description("The connect timeout in milliseconds.")
         private int connectTimeout = 8000;
 
         @Option("auth-method")
+        @CLIName(value = "auth-method", omitSection = true)
         @Description({
                 "The authentication method to use for joining the server.",
                 "none: No authentication (Offline mode)",
@@ -467,6 +492,7 @@ public class ViaProxyConfig {
         private AuthMethod authMethod = AuthMethod.NONE;
 
         @Option("betacraft-auth")
+        @CLIName(value = "betacraft-auth", omitSection = true)
         @Description({
                 "Use BetaCraft authentication for joining classic servers.",
                 "This allows clients to join classic servers which have online mode enabled."
@@ -474,14 +500,17 @@ public class ViaProxyConfig {
         private boolean betaCraftAuth = false;
 
         @Option("allow-beta-pinging")
+        @CLIName(value = "allow-beta-pinging", omitSection = true)
         @Description("Enabling this allows clients to ping <= b1.7.3 servers. This may cause issues if the server blocks too frequent connections.")
         private boolean allowBetaPinging = false;
 
         @Option("haproxy")
+        @CLIName(value = "backend-haproxy", omitSection = true)
         @Description("Send HAProxy protocol messages to the server.")
         private boolean haProxy = false;
 
         @Option("proxy-url")
+        @CLIName(value = "backend-proxy-url", omitSection = true)
         @Description({
                 "URL of a SOCKS(4/5)/HTTP(S) proxy through which connections will be made. Leave empty to connect directly.",
                 "Supported formats:",
@@ -592,7 +621,7 @@ public class ViaProxyConfig {
 
         private final String guiTranslationKey;
 
-        AuthMethod(String guiTranslationKey) {
+        AuthMethod(final String guiTranslationKey) {
             this.guiTranslationKey = guiTranslationKey;
         }
 
@@ -613,7 +642,7 @@ public class ViaProxyConfig {
          */
         PUBLIC,
         /**
-         * Iternal wildcard domain handling
+         * Internal wildcard domain handling
          */
         INTERNAL,
 
@@ -643,7 +672,6 @@ public class ViaProxyConfig {
             this.move(loadedValues, "bungeecord-player-info-passthrough", "proxy", "bungeecord-player-info-passthrough");
             this.move(loadedValues, "rewrite-handshake-packet", "proxy", "rewrite-handshake-packet");
             this.move(loadedValues, "rewrite-transfer-packets", "proxy", "rewrite-transfer-packets");
-            this.put(loadedValues, "frontend", "motd", "enabled", true);
             this.move(loadedValues, "custom-motd", "frontend", "motd", "description");
             this.move(loadedValues, "custom-favicon-path", "frontend", "motd", "favicon-path");
             this.move(loadedValues, "resource-pack-url", "frontend", "resource-pack-url");
@@ -671,12 +699,6 @@ public class ViaProxyConfig {
                 final Map<String, Object> subSectionMap = (Map<String, Object>) sectionMap.computeIfAbsent(newSubSection, k -> new HashMap<>());
                 subSectionMap.put(newKey, value);
             }
-        }
-
-        private void put(final Map<String, Object> loadedValues, final String section, final String subSection, final String key, final Object value) {
-            final Map<String, Object> sectionMap = (Map<String, Object>) loadedValues.computeIfAbsent(section, k -> new HashMap<>());
-            final Map<String, Object> subSectionMap = (Map<String, Object>) sectionMap.computeIfAbsent(subSection, k -> new HashMap<>());
-            subSectionMap.put(key, value);
         }
 
     }

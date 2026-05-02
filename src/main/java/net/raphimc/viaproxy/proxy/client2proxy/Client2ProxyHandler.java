@@ -189,7 +189,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         final boolean isJavaBetaPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3) && !ViaProxy.getConfig().getBackend().shouldAllowBetaPinging();
         final boolean isBedrockNetherNetPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.bedrockLatest) && serverAddress instanceof NetherNetAddress;
         if (isJavaBetaPing || isBedrockNetherNetPing) {
-            if (!ViaProxy.getConfig().getFrontend().getMotd().isEnabled()) {
+            if (!ViaProxy.getConfig().getFrontend().getMotd().getDescription().isBlank()) {
                 this.proxyConnection.kickClient(ViaProxy.getConfig().getFrontend().getMotd().getDescription());
             }
             this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
@@ -231,7 +231,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         this.proxyConnection.setClientHandshakeAddress(clientHandshakeAddress);
         this.proxyConnection.setUserOptions(userOptions);
         this.proxyConnection.setC2pConnectionState(intendedState.getConnectionState());
-        if (ViaProxy.getConfig().getFrontend().getMotd().isEnabled()) {
+        if (ViaProxy.getConfig().getFrontend().getMotd().hasAnyNonBlankOption()) {
             this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
         }
         if (ViaProxy.getConfig().getProxy().shouldSupportSimpleVoiceChat() && serverVersion.newerThan(ProtocolVersion.v1_14) && clientVersion.newerThan(ProtocolVersion.v1_14)) {
