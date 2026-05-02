@@ -23,9 +23,9 @@ import net.raphimc.viaproxy.util.AddressUtil;
 
 import java.net.SocketAddress;
 
-public class TargetAddressTypeSerializer extends ConfigTypeSerializer<ViaProxyConfig, SocketAddress> {
+public class BackendAddressTypeSerializer extends ConfigTypeSerializer<ViaProxyConfig, SocketAddress> {
 
-    public TargetAddressTypeSerializer(final ViaProxyConfig config) {
+    public BackendAddressTypeSerializer(final ViaProxyConfig config) {
         super(config);
     }
 
