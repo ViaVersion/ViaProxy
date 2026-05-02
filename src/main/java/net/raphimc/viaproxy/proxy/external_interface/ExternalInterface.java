@@ -27,7 +27,6 @@ import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19
 import com.viaversion.viaversion.api.minecraft.signature.storage.ChatSession1_19_3;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.lenni0451.commons.httpclient.proxy.SingleProxyAuthenticator;
-import net.raphimc.minecraftauth.bedrock.model.MinecraftCertificateChain;
 import net.raphimc.minecraftauth.bedrock.model.MinecraftMultiplayerToken;
 import net.raphimc.minecraftauth.java.model.MinecraftPlayerCertificates;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
@@ -85,8 +84,7 @@ public class ExternalInterface {
                     user.put(new ChatSession1_19_3(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                 } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
                     final MinecraftMultiplayerToken multiplayerToken = bedrockAccount.getAuthManager().getMinecraftMultiplayerToken().refresh();
-                    final MinecraftCertificateChain certificateChain = bedrockAccount.getAuthManager().getMinecraftCertificateChain().refresh();
-                    user.put(new AuthData(certificateChain.getMojangJwt(), certificateChain.getIdentityJwt(), multiplayerToken.getToken(), bedrockAccount.getAuthManager().getSessionKeyPair(), bedrockAccount.getAuthManager().getDeviceId()));
+                    user.put(new AuthData(multiplayerToken.getToken(), bedrockAccount.getAuthManager().getSessionKeyPair(), bedrockAccount.getAuthManager().getDeviceId()));
                 }
             }
 
