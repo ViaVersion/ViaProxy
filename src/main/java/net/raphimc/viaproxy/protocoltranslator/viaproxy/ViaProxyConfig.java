@@ -54,6 +54,10 @@ public class ViaProxyConfig {
     @Description("These options affect the behavior of the proxy related to server connections.")
     private final Backend backend = new Backend();
 
+    @Option("advanced")
+    @Description("These options are for advanced users and typically shouldn't be changed.")
+    private final Advanced advanced = new Advanced();
+
     public static ViaProxyConfig create(final File configFile) {
         final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
         configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
@@ -82,6 +86,10 @@ public class ViaProxyConfig {
 
     public Backend getBackend() {
         return this.backend;
+    }
+
+    public Advanced getAdvanced() {
+        return this.advanced;
     }
 
     @Section
@@ -282,14 +290,6 @@ public class ViaProxyConfig {
         })
         private boolean bungeeCordPlayerInfoPassthrough = false;
 
-        @Option("ignore-protocol-translation-errors")
-        @CLIName(value = "ignore-protocol-translation-errors", omitSection = true)
-        @Description({
-                "Enabling this will prevent getting disconnected from the backend server when a packet translation error occurs and instead only print the error in the console.",
-                "This may cause issues depending on the type of packet which failed to translate."
-        })
-        private boolean ignoreProtocolTranslationErrors = false;
-
         @Option("allow-legacy-client-passthrough")
         @CLIName(value = "allow-legacy-client-passthrough", omitSection = true)
         @Description("Allow <= 1.6.4 clients to connect through ViaProxy to the backend server. (No protocol translation or packet handling)")
@@ -365,15 +365,6 @@ public class ViaProxyConfig {
 
         public void setPassthroughBungeeCordPlayerInfo(final boolean bungeeCordPlayerInfoPassthrough) {
             this.bungeeCordPlayerInfoPassthrough = bungeeCordPlayerInfoPassthrough;
-            ViaProxyConfig.this.save();
-        }
-
-        public boolean shouldIgnoreProtocolTranslationErrors() {
-            return this.ignoreProtocolTranslationErrors;
-        }
-
-        public void setIgnoreProtocolTranslationErrors(final boolean ignoreProtocolTranslationErrors) {
-            this.ignoreProtocolTranslationErrors = ignoreProtocolTranslationErrors;
             ViaProxyConfig.this.save();
         }
 
@@ -609,6 +600,28 @@ public class ViaProxyConfig {
 
     }
 
+    @Section
+    public class Advanced {
+
+        @Option("ignore-protocol-translation-errors")
+        @CLIName(value = "ignore-protocol-translation-errors", omitSection = true)
+        @Description({
+                "Enabling this will prevent getting disconnected when a packet translation error occurs and instead only print the error in the console.",
+                "This may cause issues depending on the type of packet which failed to translate."
+        })
+        private boolean ignoreProtocolTranslationErrors = false;
+
+        public boolean shouldIgnoreProtocolTranslationErrors() {
+            return this.ignoreProtocolTranslationErrors;
+        }
+
+        public void setIgnoreProtocolTranslationErrors(final boolean ignoreProtocolTranslationErrors) {
+            this.ignoreProtocolTranslationErrors = ignoreProtocolTranslationErrors;
+            ViaProxyConfig.this.save();
+        }
+
+    }
+
     public enum AuthMethod {
 
         /**
@@ -667,7 +680,7 @@ public class ViaProxyConfig {
             this.move(loadedValues, "chat-signing", "proxy", "chat-signing");
             this.move(loadedValues, "compression-threshold", "frontend", "compression-threshold");
             this.move(loadedValues, "allow-beta-pinging", "backend", "allow-beta-pinging");
-            this.move(loadedValues, "ignore-protocol-translation-errors", "proxy", "ignore-protocol-translation-errors");
+            this.move(loadedValues, "ignore-protocol-translation-errors", "advanced", "ignore-protocol-translation-errors");
             this.move(loadedValues, "suppress-client-protocol-errors", "proxy", "suppress-packet-errors");
             this.move(loadedValues, "allow-legacy-client-passthrough", "proxy", "allow-legacy-client-passthrough");
             this.move(loadedValues, "bungeecord-player-info-passthrough", "proxy", "bungeecord-player-info-passthrough");
@@ -846,12 +859,12 @@ public class ViaProxyConfig {
 
     @Deprecated(forRemoval = true)
     public boolean shouldIgnoreProtocolTranslationErrors() {
-        return this.getProxy().shouldIgnoreProtocolTranslationErrors();
+        return this.getAdvanced().shouldIgnoreProtocolTranslationErrors();
     }
 
     @Deprecated(forRemoval = true)
     public void setIgnoreProtocolTranslationErrors(final boolean ignoreProtocolTranslationErrors) {
-        this.getProxy().setIgnoreProtocolTranslationErrors(ignoreProtocolTranslationErrors);
+        this.getAdvanced().setIgnoreProtocolTranslationErrors(ignoreProtocolTranslationErrors);
     }
 
     @Deprecated(forRemoval = true)

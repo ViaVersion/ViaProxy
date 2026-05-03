@@ -31,7 +31,7 @@ public class ViaProxyViaCodec extends ViaCodecHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (ViaProxy.getConfig().getProxy().shouldIgnoreProtocolTranslationErrors()) {
+        if (ViaProxy.getConfig().getAdvanced().shouldIgnoreProtocolTranslationErrors()) {
             try {
                 super.channelRead(ctx, msg);
             } catch (Throwable e) {

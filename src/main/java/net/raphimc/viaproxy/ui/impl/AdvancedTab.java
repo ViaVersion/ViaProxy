@@ -118,7 +118,7 @@ public class AdvancedTab extends UITab {
             this.ignorePacketTranslationErrors = new JCheckBox(I18n.get("tab.advanced.ignore_packet_translation_errors.label"));
             this.ignorePacketTranslationErrors.setToolTipText(I18n.get("tab.advanced.ignore_packet_translation_errors.tooltip"));
             this.ignorePacketTranslationErrors.setSelected(false);
-            this.ignorePacketTranslationErrors.setSelected(ViaProxy.getConfig().getProxy().shouldIgnoreProtocolTranslationErrors());
+            this.ignorePacketTranslationErrors.setSelected(ViaProxy.getConfig().getAdvanced().shouldIgnoreProtocolTranslationErrors());
             checkboxes.add(this.ignorePacketTranslationErrors);
         }
         {
@@ -218,7 +218,7 @@ public class AdvancedTab extends UITab {
         ViaProxy.getConfig().getFrontend().setOnlineMode(this.proxyOnlineMode.isSelected());
         ViaProxy.getSaveManager().uiSave.put("legacy_skin_loading", String.valueOf(this.legacySkinLoading.isSelected()));
         ViaProxy.getConfig().getProxy().setChatSigning(this.chatSigning.isSelected());
-        ViaProxy.getConfig().getProxy().setIgnoreProtocolTranslationErrors(this.ignorePacketTranslationErrors.isSelected());
+        ViaProxy.getConfig().getAdvanced().setIgnoreProtocolTranslationErrors(this.ignorePacketTranslationErrors.isSelected());
         ViaProxy.getConfig().getBackend().setAllowBetaPinging(this.allowBetaPinging.isSelected());
         ViaProxy.getConfig().getProxy().setSimpleVoiceChatSupport(this.simpleVoiceChatSupport.isSelected());
         ViaProxy.getConfig().getProxy().setFakeAcceptResourcePacks(this.fakeAcceptResourcePacks.isSelected());
