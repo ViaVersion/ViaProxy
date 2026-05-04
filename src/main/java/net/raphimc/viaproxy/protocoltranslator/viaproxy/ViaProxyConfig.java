@@ -103,7 +103,7 @@ public class ViaProxyConfig {
 
         @Option("online-mode")
         @CLIName(value = "frontend-online-mode", omitSection = true)
-        @CLIAliases("proxy-online-mode")
+        @CLIAliases(value = "proxy-online-mode", hidden = true)
         @Description({
                 "Enabling Online Mode allows clients see skins on online mode servers and use the signed chat features.",
                 "This requires clients to use a valid Minecraft account."
@@ -122,7 +122,7 @@ public class ViaProxyConfig {
 
         @Option("suppress-packet-errors")
         @CLIName(value = "suppress-client-packet-errors", omitSection = true)
-        @CLIAliases("suppress-client-protocol-errors")
+        @CLIAliases(value = "suppress-client-protocol-errors", hidden = true)
         @Description({
                 "Enabling this will suppress packet errors to prevent lag when ViaProxy is getting spammed with invalid packets.",
                 "This may cause issues with debugging client connection issues because no error messages will be printed."
@@ -237,13 +237,13 @@ public class ViaProxyConfig {
 
             @Option("description")
             @CLIName(value = "custom-motd-description", omitSection = true)
-            @CLIAliases("custom-motd")
+            @CLIAliases(value = "custom-motd", hidden = true)
             @Description("Custom description. Leave empty to use the backend server's description.")
             private String description = "";
 
             @Option("favicon-path")
             @CLIName(value = "custom-motd-favicon-path", omitSection = true)
-            @CLIAliases("custom-favicon-path")
+            @CLIAliases(value = "custom-favicon-path", hidden = true)
             @Description("Relative file path to a custom favicon. Leave empty to use the backend server's favicon.")
             private String faviconPath = "";
 
@@ -456,14 +456,14 @@ public class ViaProxyConfig {
 
         @Option(value = "address", dependencies = "version")
         @CLIName(value = "backend-address", omitSection = true)
-        @CLIAliases("target-address")
+        @CLIAliases(value = "target-address", hidden = true)
         @Description("The address of the server ViaProxy should connect to.")
         @TypeSerializer(BackendAddressTypeSerializer.class)
         private SocketAddress address = AddressUtil.parse("127.0.0.1:25565", null);
 
         @Option("version")
         @CLIName(value = "backend-version", omitSection = true)
-        @CLIAliases("target-version")
+        @CLIAliases(value = "target-version", hidden = true)
         @Description("The version ViaProxy should translate to. (See ViaProxy GUI for a list of versions)")
         @TypeSerializer(ProtocolVersionTypeSerializer.class)
         private ProtocolVersion version = ProtocolTranslator.AUTO_DETECT_PROTOCOL;

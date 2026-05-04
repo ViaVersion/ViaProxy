@@ -22,18 +22,18 @@ import net.lenni0451.optconfig.CLIConfigLoader;
 import net.lenni0451.optconfig.ConfigContext;
 import net.lenni0451.optconfig.ConfigLoader;
 import net.lenni0451.optconfig.annotations.*;
-import net.lenni0451.optconfig.cli.HelpOptions;
-import net.lenni0451.optconfig.cli.UnknownOption;
-import net.lenni0451.optconfig.exceptions.CLIIncompatibleOptionException;
+import net.lenni0451.optconfig.cli.model.HelpOptions;
+import net.lenni0451.optconfig.cli.model.LoadedOptions;
+import net.lenni0451.optconfig.exceptions.CLIMissingOptionValueException;
 import net.lenni0451.optconfig.exceptions.CLIParserException;
+import net.lenni0451.optconfig.exceptions.InvalidSerializedObjectException;
 import net.lenni0451.optconfig.provider.ConfigProvider;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.io.File;
-import java.util.List;
 
 @OptConfig
-@CheckSuperclasses
+@CheckSuperclass(useParentAnnotation = true)
 public class ViaProxyCLIConfig extends ViaProxyConfig {
 
     private ConfigContext<ViaProxyCLIConfig> configContext;
@@ -64,9 +64,10 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
     }
 
     public void loadFromArguments(final String[] args) {
+        this.configContext.getConfigLoader().getConfigOptions().setResetInvalidOptions(false);
         final CLIConfigLoader<ViaProxyCLIConfig> cliConfigLoader = new CLIConfigLoader<>(this.configContext);
         try {
-            final List<UnknownOption> unknownOptions = cliConfigLoader.loadCLIOptions(args, true);
+            final LoadedOptions loadedOptions = cliConfigLoader.loadCLIOptions(args, true);
             if (this.help || this.extendedHelp) {
                 throw new HelpRequestedException();
             } else if (this.listVersions) {
@@ -78,15 +79,12 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
                 System.exit(0);
             }
 
-//            if (options.has("minecraft-account-index")) {
-//                this.setAuthMethod(AuthMethod.ACCOUNT);
-//            }
+            if (loadedOptions.options().contains("minecraft-account-index") && !loadedOptions.options().contains("auth-method")) {
+                this.getBackend().setAuthMethod(AuthMethod.ACCOUNT);
+            }
             return;
-        } catch (CLIParserException e) {
+        } catch (CLIParserException | CLIMissingOptionValueException | InvalidSerializedObjectException e) {
             Logger.LOGGER.fatal("Error parsing CLI options: {}", e.getMessage());
-        } catch (CLIIncompatibleOptionException e) {
-            Logger.LOGGER.fatal("Incompatible CLI option", e);
-            System.exit(1);
         } catch (HelpRequestedException ignored) {
         }
 

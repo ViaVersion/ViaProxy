@@ -105,8 +105,7 @@ dependencies {
         includeInJar "dev.kastle.webrtc:webrtc-java:1.0.3:$it"
     }
     includeInJar "gs.mclo:api:6.2.1"
-    includeInJar "net.lenni0451.optconfig:core:2.0.0-20260502.183532-3"
-    includeInJar "net.lenni0451.optconfig:cli:2.0.0-20260502.183532-3"
+    includeInJar "net.lenni0451.optconfig:cli:2.0.0-20260504.183918-6"
 
     includeInJarJ8(compileOnly("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:1.3.6"))
     includeInJarJ8 "xyz.wagyourtail.jvmdowngrader:jvmdowngrader-java-api:1.3.6:downgraded-8"
