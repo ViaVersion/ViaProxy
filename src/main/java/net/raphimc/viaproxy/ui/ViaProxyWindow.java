@@ -135,7 +135,7 @@ public class ViaProxyWindow extends JFrame {
     }
 
     public static void showException(final Throwable t) {
-        Logger.LOGGER.error("Caught exception in thread " + Thread.currentThread().getName(), t);
+        Logger.LOGGER.error("Caught exception in thread {}", Thread.currentThread().getName(), t);
         StringBuilder builder = new StringBuilder("An error occurred:\n");
         builder.append("[").append(t.getClass().getSimpleName()).append("] ").append(t.getMessage()).append("\n");
         for (StackTraceElement element : t.getStackTrace()) builder.append(element.toString()).append("\n");

@@ -28,12 +28,12 @@ public class ConsoleCommandSender implements ViaCommandSender {
     private static final UUID CONSOLE_UUID = new UUID(0, 0);
 
     @Override
-    public boolean hasPermission(String permission) {
+    public boolean hasPermission(final String permission) {
         return true;
     }
 
     @Override
-    public void sendMessage(String msg) {
+    public void sendMessage(final String msg) {
         Via.getPlatform().getLogger().info(ConsoleFormatter.convert(msg));
     }
 

@@ -76,7 +76,7 @@ public class UpdateCheckTask implements Runnable {
                 updateAvailable = !VERSION.equals(latestVersion);
             }
             if (updateAvailable) {
-                Logger.LOGGER.warn("You are running an outdated version of ViaProxy! Latest version: " + latestVersion);
+                Logger.LOGGER.warn("You are running an outdated version of ViaProxy! Latest version: {}", latestVersion);
                 if (this.hasUI && JarUtil.getJarFile().isPresent()) {
                     final boolean runsJava8 = System.getProperty("java.version").startsWith("1.8");
                     JsonArray assets = object.getAsJsonArray("assets");

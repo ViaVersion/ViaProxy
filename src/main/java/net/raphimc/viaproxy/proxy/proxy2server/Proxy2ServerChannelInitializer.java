@@ -65,10 +65,10 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
 
         final ProxyConnection proxyConnection = ProxyConnection.fromChannel(channel);
 
-        if (ViaProxy.getConfig().getBackendProxy() != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
-            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, ViaProxy.getConfig().getBackendProxy().createNettyProxyHandler());
+        if (ViaProxy.getConfig().getBackend().getProxy() != null && !proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
+            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, ViaProxy.getConfig().getBackend().getProxy().createNettyProxyHandler());
         }
-        if (ViaProxy.getConfig().useBackendHaProxy()) {
+        if (ViaProxy.getConfig().getBackend().useHaProxy()) {
             channel.pipeline().addLast(VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
         }
 

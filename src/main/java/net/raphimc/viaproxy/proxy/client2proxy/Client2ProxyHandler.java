@@ -49,7 +49,6 @@ import net.raphimc.viaproxy.proxy.session.DummyProxyConnection;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
 import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
-import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.*;
 import net.raphimc.viaproxy.util.logging.Logger;
 
@@ -124,17 +123,16 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         }
 
         final String[] handshakeParts;
-        if (ViaProxy.getConfig().shouldPassthroughBungeecordPlayerInfo()) {
+        if (ViaProxy.getConfig().getProxy().shouldPassthroughBungeeCordPlayerInfo()) {
             handshakeParts = packet.address.split("\0");
         } else {
             handshakeParts = new String[]{packet.address};
         }
 
-        SocketAddress serverAddress = ViaProxy.getConfig().getTargetAddress();
-        ProtocolVersion serverVersion = ViaProxy.getConfig().getTargetVersion();
-        String classicMpPass = ViaProxy.getConfig().getAccount() instanceof ClassicAccount classicAccount ? classicAccount.getMppass() : null;
+        SocketAddress serverAddress = ViaProxy.getConfig().getBackend().getAddress();
+        ProtocolVersion serverVersion = ViaProxy.getConfig().getBackend().getVersion();
 
-        if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.PUBLIC) {
+        if (ViaProxy.getConfig().getFrontend().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.PUBLIC) {
             if (handshakeParts[0].toLowerCase().contains("f2.viaproxy.")) { // Format 2: address.<address>.port.<port>.version.<version>.f2.viaproxy.hostname
                 WildcardDomainParser.ParsedDomain parsedDomain = WildcardDomainParser.parseFormat2(handshakeParts[0]);
                 if (parsedDomain == null) {
@@ -158,16 +156,13 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
             } else {
                 this.proxyConnection.kickClient("§cWrong domain syntax! §6Please use:\n§7address_port_version.viaproxy.hostname");
             }
-        } else if (ViaProxy.getConfig().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.INTERNAL) {
+        } else if (ViaProxy.getConfig().getFrontend().getWildcardDomainHandling() == ViaProxyConfig.WildcardDomainHandling.INTERNAL) {
             final ArrayHelper arrayHelper = ArrayHelper.instanceOf(handshakeParts[0].split("\7"));
             handshakeParts[0] = arrayHelper.get(0); // Restore the original address
             final String versionString = arrayHelper.get(2);
             serverVersion = ProtocolVersionUtil.fromNameLenient(versionString);
             if (serverVersion == null) throw CloseAndReturn.INSTANCE;
             serverAddress = AddressUtil.parse(arrayHelper.get(1), serverVersion);
-            if (arrayHelper.isIndexValid(3)) {
-                classicMpPass = arrayHelper.getString(3);
-            }
         }
 
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && TransferDataHolder.hasTempRedirect(this.proxyConnection.getC2P())) {
@@ -191,16 +186,16 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         serverAddress = preConnectEvent.getServerAddress();
         serverVersion = preConnectEvent.getServerVersion();
 
-        final boolean isJavaBetaPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3) && !ViaProxy.getConfig().shouldAllowBetaPinging();
+        final boolean isJavaBetaPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3) && !ViaProxy.getConfig().getBackend().shouldAllowBetaPinging();
         final boolean isBedrockNetherNetPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.bedrockLatest) && serverAddress instanceof NetherNetAddress;
         if (isJavaBetaPing || isBedrockNetherNetPing) {
-            if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
-                this.proxyConnection.kickClient(ViaProxy.getConfig().getCustomMotd());
+            if (!ViaProxy.getConfig().getFrontend().getMotd().getDescription().isBlank()) {
+                this.proxyConnection.kickClient(ViaProxy.getConfig().getFrontend().getMotd().getDescription());
             }
             this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
         }
 
-        final UserOptions userOptions = new UserOptions(classicMpPass, ViaProxy.getConfig().getAccount());
+        final UserOptions userOptions = new UserOptions(ViaProxy.getConfig().getBackend().getAuthMethod() == ViaProxyConfig.AuthMethod.ACCOUNT ? ViaProxy.getConfig().getProxy().getAccount() : null);
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && serverVersion.equals(ProtocolTranslator.AUTO_DETECT_PROTOCOL)) {
@@ -236,14 +231,16 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         this.proxyConnection.setClientHandshakeAddress(clientHandshakeAddress);
         this.proxyConnection.setUserOptions(userOptions);
         this.proxyConnection.setC2pConnectionState(intendedState.getConnectionState());
-        this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
-        if (ViaProxy.getConfig().shouldSupportSimpleVoiceChat() && serverVersion.newerThan(ProtocolVersion.v1_14) && clientVersion.newerThan(ProtocolVersion.v1_14)) {
+        if (ViaProxy.getConfig().getFrontend().getMotd().hasAnyNonBlankOption()) {
+            this.proxyConnection.getPacketHandlers().add(new StatusPacketHandler(this.proxyConnection));
+        }
+        if (ViaProxy.getConfig().getProxy().shouldSupportSimpleVoiceChat() && serverVersion.newerThan(ProtocolVersion.v1_14) && clientVersion.newerThan(ProtocolVersion.v1_14)) {
             this.proxyConnection.getPacketHandlers().add(new SimpleVoiceChatPacketHandler(this.proxyConnection));
         }
-        if (ViaProxy.getConfig().shouldFixFabricParticleApi() && serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_21_5) && clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_21_5) && !serverVersion.equals(clientVersion)) {
+        if (ViaProxy.getConfig().getProxy().shouldFixFabricParticleApi() && serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_21_5) && clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_21_5) && !serverVersion.equals(clientVersion)) {
             this.proxyConnection.getPacketHandlers().add(new FabricParticleApiFixPacketHandler(this.proxyConnection));
         }
-        if (ViaProxy.getConfig().shouldFakeAcceptResourcePacks() && serverVersion.newerThanOrEqualTo(LegacyProtocolVersion.r1_3_1tor1_3_2)) {
+        if (ViaProxy.getConfig().getProxy().shouldFakeAcceptResourcePacks() && serverVersion.newerThanOrEqualTo(LegacyProtocolVersion.r1_3_1tor1_3_2)) {
             this.proxyConnection.getPacketHandlers().add(new ResourcePackSpooferPacketHandler(this.proxyConnection));
         }
         if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)) {
@@ -252,7 +249,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         this.proxyConnection.getPacketHandlers().add(new CompressionPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new LoginPacketHandler(this.proxyConnection));
         this.proxyConnection.getPacketHandlers().add(new DisconnectPacketHandler(this.proxyConnection));
-        if (ViaProxy.getConfig().shouldRewriteTransferPackets() && clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+        if (ViaProxy.getConfig().getProxy().shouldRewriteTransferPackets() && clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
             this.proxyConnection.getPacketHandlers().add(new TransferPacketHandler(this.proxyConnection));
         }
         if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2) || serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2)) {
@@ -261,7 +258,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         if (clientVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_3) && serverVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_3)) {
             this.proxyConnection.getPacketHandlers().add(new ChatSignaturePacketHandler(this.proxyConnection));
         }
-        if (!ViaProxy.getConfig().getResourcePackUrl().isBlank()) {
+        if (!ViaProxy.getConfig().getFrontend().getResourcePackUrl().isBlank()) {
             this.proxyConnection.getPacketHandlers().add(new ResourcePackPacketHandler(this.proxyConnection));
         }
         if (Via.getConfig().sendPlayerDetails() || Via.getConfig().sendServerDetails()) {
@@ -269,13 +266,13 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         }
         this.proxyConnection.getPacketHandlers().add(new UnexpectedPacketHandler(this.proxyConnection));
 
-        if (ViaProxy.getConfig().shouldLogClientStatusRequests() || intendedState != IntendedState.STATUS) {
+        if (ViaProxy.getConfig().getFrontend().shouldLogClientStatusRequests() || intendedState != IntendedState.STATUS) {
             Logger.u_info("connect", this.proxyConnection, "[" + clientVersion.getName() + " <-> " + serverVersion.getName() + "] Connecting to " + AddressUtil.toString(serverAddress));
         }
         ViaProxy.EVENT_MANAGER.call(new ConnectEvent(this.proxyConnection));
 
         final int handshakePort;
-        if (ViaProxy.getConfig().shouldRewriteHandshakePacket()) {
+        if (ViaProxy.getConfig().getProxy().shouldRewriteHandshakePacket()) {
             if (serverAddress instanceof InetSocketAddress inetSocketAddress) {
                 handshakeParts[0] = inetSocketAddress.getHostString();
                 handshakePort = inetSocketAddress.getPort();
@@ -290,7 +287,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         this.proxyConnection.connectToServer(serverAddress, serverVersion).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
                 f.channel().eventLoop().submit(() -> { // Reschedule so the packets get sent after the channel is fully initialized and active
-                    if (ViaProxy.getConfig().useBackendHaProxy()) {
+                    if (ViaProxy.getConfig().getBackend().useHaProxy()) {
                         this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), clientVersion)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                     }
 
