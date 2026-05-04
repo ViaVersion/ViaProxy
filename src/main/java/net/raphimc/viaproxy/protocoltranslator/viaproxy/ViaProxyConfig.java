@@ -60,7 +60,7 @@ public class ViaProxyConfig {
 
     public static ViaProxyConfig create(final File configFile) {
         final ConfigLoader<ViaProxyConfig> configLoader = new ConfigLoader<>(ViaProxyConfig.class);
-        configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
+        configLoader.getConfigOptions().setRewriteConfig(true).setDeserializerExceptionHandler((option, exception) -> Logger.LOGGER.warn("Failed to deserialize option '{}'. Resetting it. Error: {}", option, exception.getMessage()));
         try {
             return configLoader.load(ConfigProvider.file(configFile)).getConfigInstance();
         } catch (Throwable e) {

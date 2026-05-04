@@ -55,7 +55,7 @@ public class ViaProxyCLIConfig extends ViaProxyConfig {
 
     public static ViaProxyCLIConfig create(final File configFile) {
         final ConfigLoader<ViaProxyCLIConfig> configLoader = new ConfigLoader<>(ViaProxyCLIConfig.class);
-        configLoader.getConfigOptions().setResetInvalidOptions(true).setRewriteConfig(true).setCommentSpacing(1);
+        configLoader.getConfigOptions().setRewriteConfig(true).setDeserializerExceptionHandler((option, exception) -> Logger.LOGGER.warn("Failed to deserialize option '{}'. Resetting it. Error: {}", option, exception.getMessage()));
         try {
             return configLoader.load(ConfigProvider.file(configFile)).getConfigInstance();
         } catch (Throwable e) {
