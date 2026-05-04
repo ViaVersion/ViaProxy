@@ -32,7 +32,7 @@ public abstract class MixinProtocol1_20To1_20_2 {
 
     @Inject(method = "lambda$queueServerboundPacket$12", at = @At("HEAD"), cancellable = true)
     private static void dontQueueConfigPackets(ServerboundPackets1_20_2 packetType, PacketWrapper wrapper, CallbackInfo ci) {
-        if (ViaProxy.getConfig().shouldSkipConfigStatePacketQueue()) {
+        if (ViaProxy.getConfig().getProxy().shouldSkipConfigStatePacketQueue()) {
             ci.cancel();
             switch (packetType) {
                 case CUSTOM_PAYLOAD -> wrapper.setPacketType(ServerboundPackets1_19_4.CUSTOM_PAYLOAD);

@@ -66,7 +66,7 @@ public class SaveManager {
                                 save.load(saveObject.remove(save.getName()));
                             }
                         } catch (Throwable e) {
-                            Logger.LOGGER.error("Failed to load save " + save.getName(), e);
+                            Logger.LOGGER.error("Failed to load save {}", save.getName(), e);
                         }
                     });
 
@@ -96,7 +96,7 @@ public class SaveManager {
                                 saveObject.add(save.getName(), saveData);
                             }
                         } catch (Throwable e) {
-                            Logger.LOGGER.error("Failed to save save " + save.getName(), e);
+                            Logger.LOGGER.error("Failed to save save {}", save.getName(), e);
                         }
                     });
 

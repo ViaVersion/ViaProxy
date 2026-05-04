@@ -93,7 +93,7 @@ public class ProxyConnection extends NetClient {
 
     @Override
     public void initialize(final TransportType transportType, final Bootstrap bootstrap) {
-        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getConnectTimeout());
+        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getBackend().getConnectTimeout());
         bootstrap.attr(PROXY_CONNECTION_ATTRIBUTE_KEY, this);
         super.initialize(transportType, bootstrap);
     }

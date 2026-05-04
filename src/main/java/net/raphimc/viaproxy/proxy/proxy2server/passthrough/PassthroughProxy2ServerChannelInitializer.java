@@ -41,10 +41,10 @@ public class PassthroughProxy2ServerChannelInitializer extends Proxy2ServerChann
             return;
         }
 
-        if (ViaProxy.getConfig().getBackendProxy() != null) {
-            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, ViaProxy.getConfig().getBackendProxy().createNettyProxyHandler());
+        if (ViaProxy.getConfig().getBackend().getProxy() != null) {
+            channel.pipeline().addLast(VIAPROXY_PROXY_HANDLER_NAME, ViaProxy.getConfig().getBackend().getProxy().createNettyProxyHandler());
         }
-        if (ViaProxy.getConfig().useBackendHaProxy()) {
+        if (ViaProxy.getConfig().getBackend().useHaProxy()) {
             channel.pipeline().addLast(VIAPROXY_HAPROXY_ENCODER_NAME, HAProxyMessageEncoder.INSTANCE);
         }
 

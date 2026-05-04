@@ -27,6 +27,7 @@ import net.raphimc.vialegacy.protocol.classic.c0_28_30toa1_0_15.provider.Classic
 import net.raphimc.vialegacy.protocol.release.r1_2_4_5tor1_3_1_2.provider.OldAuthProvider;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
+import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
@@ -36,10 +37,9 @@ public class ViaProxyClassicMPPassProvider extends ClassicMPPassProvider {
 
     @Override
     public String getMpPass(UserConnection user) {
-        final String mppass = ProxyConnection.fromUserConnection(user).getUserOptions().classicMpPass();
-        if (mppass != null && !mppass.isBlank()) {
-            return mppass;
-        } else if (ViaProxy.getConfig().useBetacraftAuth()) {
+        if (ProxyConnection.fromUserConnection(user).getUserOptions().account() instanceof ClassicAccount classicAccount) {
+            return classicAccount.getMppass();
+        } else if (ViaProxy.getConfig().getBackend().useBetaCraftAuth()) {
             try {
                 final HttpClient httpClient = new HttpClient();
                 String externalIp;

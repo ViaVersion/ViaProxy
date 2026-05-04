@@ -46,7 +46,7 @@ public class Proxy2ServerHandler extends SimpleChannelInboundHandler<Packet> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
 
-        if (ViaProxy.getConfig().shouldLogClientStatusRequests() || this.proxyConnection.getP2sConnectionState() != ConnectionState.STATUS) {
+        if (ViaProxy.getConfig().getFrontend().shouldLogClientStatusRequests() || this.proxyConnection.getP2sConnectionState() != ConnectionState.STATUS) {
             Logger.u_info("disconnect", this.proxyConnection, "Connection closed");
         }
         try {

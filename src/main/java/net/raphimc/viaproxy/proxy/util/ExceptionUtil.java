@@ -35,7 +35,7 @@ public class ExceptionUtil {
             ctx.channel().close();
             return;
         }
-        if (!client2Proxy || !ViaProxy.getConfig().shouldSuppressClientProtocolErrors()) {
+        if (!client2Proxy || !ViaProxy.getConfig().getFrontend().shouldSuppressPacketErrors()) {
             Logger.LOGGER.error("Caught unhandled netty exception", cause);
             try {
                 if (proxyConnection != null) {
