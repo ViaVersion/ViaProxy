@@ -86,7 +86,7 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
         this.proxyConnection.connect(serverAddress).addListeners((ThrowingChannelFutureListener) f -> {
             if (f.isSuccess()) {
                 f.channel().eventLoop().submit(() -> { // Reschedule so the packets get sent after the channel is fully initialized and active
-                    if (ViaProxy.getConfig().useBackendHaProxy()) {
+                    if (ViaProxy.getConfig().getBackend().useHaProxy()) {
                         this.proxyConnection.getChannel().writeAndFlush(HAProxyUtil.createMessage(this.proxyConnection.getC2P(), this.proxyConnection.getChannel(), null)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                     }
 
@@ -103,7 +103,7 @@ public class PassthroughClient2ProxyHandler extends SimpleChannelInboundHandler<
     }
 
     protected SocketAddress getServerAddress() {
-        return ViaProxy.getConfig().getTargetAddress();
+        return ViaProxy.getConfig().getBackend().getAddress();
     }
 
 }

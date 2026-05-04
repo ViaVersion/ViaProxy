@@ -44,19 +44,19 @@ public class StatusPacketHandler extends PacketHandler {
     public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) {
         if (packet instanceof S2CStatusPongResponsePacket) {
             listeners.add(ChannelFutureListener.CLOSE);
-        } else if (packet instanceof S2CStatusResponsePacket statusResponsePacket && (!ViaProxy.getConfig().getCustomMotd().isBlank() || !ViaProxy.getConfig().getCustomFaviconPath().isBlank())) {
+        } else if (packet instanceof S2CStatusResponsePacket statusResponsePacket) {
             try {
                 final JsonObject obj = JsonParser.parseString(statusResponsePacket.statusJson).getAsJsonObject();
-                if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
-                    obj.addProperty("description", ViaProxy.getConfig().getCustomMotd());
+                if (!ViaProxy.getConfig().getFrontend().getMotd().getDescription().isBlank()) {
+                    obj.addProperty("description", ViaProxy.getConfig().getFrontend().getMotd().getDescription());
                 }
-                if (!ViaProxy.getConfig().getCustomFaviconPath().isBlank()) {
+                if (!ViaProxy.getConfig().getFrontend().getMotd().getFaviconPath().isBlank()) {
                     if (FAVICON_BASE_64 == null) {
                         try {
-                            final byte[] faviconBytes = Files.readAllBytes(new File(ViaProxy.getCwd(), ViaProxy.getConfig().getCustomFaviconPath()).toPath());
+                            final byte[] faviconBytes = Files.readAllBytes(new File(ViaProxy.getCwd(), ViaProxy.getConfig().getFrontend().getMotd().getFaviconPath()).toPath());
                             FAVICON_BASE_64 = "data:image/png;base64," + Base64.getEncoder().encodeToString(faviconBytes);
                         } catch (Throwable e) {
-                            Logger.LOGGER.error("Failed to load custom favicon from path: " + ViaProxy.getConfig().getCustomFaviconPath(), e);
+                            Logger.LOGGER.error("Failed to load custom favicon from path: " + ViaProxy.getConfig().getFrontend().getMotd().getFaviconPath(), e);
                             FAVICON_BASE_64 = "";
                         }
                     }

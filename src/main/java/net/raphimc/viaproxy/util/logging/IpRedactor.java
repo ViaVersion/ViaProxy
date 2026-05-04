@@ -43,7 +43,7 @@ public class IpRedactor extends LogEventPatternConverter {
 
     @Override
     public void format(final LogEvent event, final StringBuilder toAppendTo) {
-        if (ViaProxy.getConfig() != null && !ViaProxy.getConfig().shouldLogIps()) {
+        if (ViaProxy.getConfig() != null && !ViaProxy.getConfig().getProxy().shouldLogIps()) {
             String message = toAppendTo.toString();
             message = IPV4_REGEX.matcher(message).replaceAll("REDACTED_IP");
             message = IPV6_REGEX.matcher(message).replaceAll("REDACTED_IP");
