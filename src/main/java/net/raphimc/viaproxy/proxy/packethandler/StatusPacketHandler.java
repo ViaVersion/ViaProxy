@@ -56,7 +56,7 @@ public class StatusPacketHandler extends PacketHandler {
                             final byte[] faviconBytes = Files.readAllBytes(new File(ViaProxy.getCwd(), ViaProxy.getConfig().getFrontend().getMotd().getFaviconPath()).toPath());
                             FAVICON_BASE_64 = "data:image/png;base64," + Base64.getEncoder().encodeToString(faviconBytes);
                         } catch (Throwable e) {
-                            Logger.LOGGER.error("Failed to load custom favicon from path: " + ViaProxy.getConfig().getFrontend().getMotd().getFaviconPath(), e);
+                            Logger.LOGGER.error("Failed to load custom favicon from path: {}", ViaProxy.getConfig().getFrontend().getMotd().getFaviconPath(), e);
                             FAVICON_BASE_64 = "";
                         }
                     }

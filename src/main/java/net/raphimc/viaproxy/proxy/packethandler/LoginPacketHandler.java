@@ -132,7 +132,7 @@ public class LoginPacketHandler extends PacketHandler {
                     Logger.u_info("auth", this.proxyConnection, "Authenticated as " + this.proxyConnection.getGameProfile().id().toString());
                 } catch (CloseAndReturn ignored) {
                 } catch (Throwable e) {
-                    Logger.LOGGER.error("Failed to make session request for user '" + profileName + "'!", e);
+                    Logger.LOGGER.error("Failed to make session request for user '{}'!", profileName, e);
                     try {
                         this.proxyConnection.kickClient("§cFailed to authenticate with Mojang servers! Please try again later.");
                     } catch (Throwable ignored) {

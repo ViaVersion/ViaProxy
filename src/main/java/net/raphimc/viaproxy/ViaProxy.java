@@ -170,20 +170,20 @@ public class ViaProxy {
         Logger.setup();
         if (!useUI && !useConfig && !useCLI) {
             final String fileName = JarUtil.getJarFile().map(File::getName).orElse("ViaProxy.jar");
-            Logger.LOGGER.info("Usage: java -jar " + fileName + " | Starts ViaProxy in graphical mode if available");
-            Logger.LOGGER.info("Usage: java -jar " + fileName + " config <config file> | Starts ViaProxy with the specified config file");
-            Logger.LOGGER.info("Usage: java -jar " + fileName + " cli --help | Starts ViaProxy in CLI mode");
+            Logger.LOGGER.info("Usage: java -jar {} | Starts ViaProxy in graphical mode if available", fileName);
+            Logger.LOGGER.info("Usage: java -jar {} config <config file> | Starts ViaProxy with the specified config file", fileName);
+            Logger.LOGGER.info("Usage: java -jar {} cli --help | Starts ViaProxy in CLI mode", fileName);
             System.exit(1);
         }
 
         Logger.LOGGER.info("Initializing ViaProxy {} v{} ({}) (Injected using {})...", useUI ? "GUI" : "CLI", VERSION, IMPL_VERSION, injectionMethod);
-        Logger.LOGGER.info("Using java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") on " + System.getProperty("os.name"));
-        Logger.LOGGER.info("Available memory (bytes): " + Runtime.getRuntime().maxMemory());
-        Logger.LOGGER.info("Working directory: " + CWD.getAbsolutePath());
+        Logger.LOGGER.info("Using java version: {} {} ({}) on {}", System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("java.vendor"), System.getProperty("os.name"));
+        Logger.LOGGER.info("Available memory (bytes): {}", Runtime.getRuntime().maxMemory());
+        Logger.LOGGER.info("Working directory: {}", CWD.getAbsolutePath());
         if (!failedCwds.isEmpty()) {
             Logger.LOGGER.warn("Failed to use the following directories as working directory:");
             for (File failedCwd : failedCwds) {
-                Logger.LOGGER.warn("\t- " + failedCwd.getAbsolutePath());
+                Logger.LOGGER.warn("\t- {}", failedCwd.getAbsolutePath());
             }
         }
         if (System.getProperty("ignoreSystemRequirements") == null) {
@@ -266,7 +266,7 @@ public class ViaProxy {
                     throw new RuntimeException("Failed to load CLI arguments", e);
                 }
             } else if (firstStart) {
-                Logger.LOGGER.info("This is the first start of ViaProxy. Please configure the settings in the " + viaProxyConfigFile.getName() + " file and restart ViaProxy.");
+                Logger.LOGGER.info("This is the first start of ViaProxy. Please configure the settings in the {} file and restart ViaProxy.", viaProxyConfigFile.getName());
                 System.exit(0);
             }
 
@@ -289,7 +289,7 @@ public class ViaProxy {
             Logger.LOGGER.info("Starting proxy server");
             currentProxyServer = new NetServer(new Client2ProxyChannelInitializer(() -> EVENT_MANAGER.call(new Client2ProxyHandlerCreationEvent(new Client2ProxyHandler(), false)).getHandler()));
             EVENT_MANAGER.call(new ProxyStartEvent());
-            Logger.LOGGER.info("Binding proxy server to " + AddressUtil.toString(CONFIG.getFrontend().getBindAddress()));
+            Logger.LOGGER.info("Binding proxy server to {}", AddressUtil.toString(CONFIG.getFrontend().getBindAddress()));
             currentProxyServer.bind(CONFIG.getFrontend().getBindAddress(), false);
         } catch (Throwable e) {
             currentProxyServer = null;
