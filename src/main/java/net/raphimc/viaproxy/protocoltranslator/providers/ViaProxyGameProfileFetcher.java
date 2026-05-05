@@ -17,6 +17,7 @@
  */
 package net.raphimc.viaproxy.protocoltranslator.providers;
 
+import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import com.mojang.authlib.yggdrasil.ProfileResult;
@@ -26,12 +27,29 @@ import net.raphimc.viaproxy.proxy.external_interface.AuthLibServices;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class ViaProxyGameProfileFetcher extends GameProfileFetcher {
 
     @Override
-    public UUID loadMojangUuid(final String playerName) {
-        return AuthLibServices.PROFILE_REPOSITORY.findProfileByName(playerName).orElseThrow(ProfileNotFoundException::new).id();
+    public UUID loadMojangUuid(final String playerName) throws ExecutionException, InterruptedException {
+        final CompletableFuture<com.mojang.authlib.GameProfile> future = new CompletableFuture<>();
+        AuthLibServices.PROFILE_REPOSITORY.findProfilesByNames(new String[]{playerName}, new ProfileLookupCallback() {
+            @Override
+            public void onProfileLookupSucceeded(final com.mojang.authlib.GameProfile gameProfile) {
+                future.complete(gameProfile);
+            }
+
+            @Override
+            public void onProfileLookupFailed(final String profileName, final Exception exception) {
+                future.completeExceptionally(exception);
+            }
+        });
+        if (!future.isDone()) {
+            future.completeExceptionally(new ProfileNotFoundException());
+        }
+        return future.get().getId();
     }
 
     @Override
@@ -42,12 +60,12 @@ public class ViaProxyGameProfileFetcher extends GameProfileFetcher {
         }
 
         final com.mojang.authlib.GameProfile gameProfile = result.profile();
-        final GameProfile.Property[] properties = new GameProfile.Property[gameProfile.properties().size()];
+        final GameProfile.Property[] properties = new GameProfile.Property[gameProfile.getProperties().size()];
         int i = 0;
-        for (Map.Entry<String, Property> entry : gameProfile.properties().entries()) {
+        for (Map.Entry<String, Property> entry : gameProfile.getProperties().entries()) {
             properties[i++] = new GameProfile.Property(entry.getValue().name(), entry.getValue().value(), entry.getValue().signature());
         }
-        return new GameProfile(gameProfile.name(), gameProfile.id(), properties);
+        return new GameProfile(gameProfile.getName(), gameProfile.getId(), properties);
     }
 
 }
