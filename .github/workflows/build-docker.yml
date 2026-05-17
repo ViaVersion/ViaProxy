@@ -31,7 +31,7 @@ jobs:
           java-version: 25
           check-latest: true
       - name: "Build with Gradle"
-        run: "./gradlew build"
+        run: "./gradlew build --stacktrace"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
       - name: Set up Docker Buildx
