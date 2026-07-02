@@ -43,7 +43,7 @@ public class FabricParticleApiFixPacketHandler extends PacketHandler {
             final String channel = Key.namespaced(customPayloadPacket.channel);
             if (channel.equals(REGISTER_CHANNEL) || channel.equals(UNREGISTER_CHANNEL)) {
                 final List<String> channels = Lists.newArrayList(new String(customPayloadPacket.data, StandardCharsets.UTF_8).split("\0"));
-                if (channels.remove("fabric:extended_block_state_particle_effect_sync")) {
+                if (channels.remove("fabric:extended_block_state_particle_effect_sync") | channels.remove("fabric:extended_block_particle_option_sync")) {
                     if (!channels.isEmpty()) {
                         customPayloadPacket.data = String.join("\0", channels).getBytes(StandardCharsets.UTF_8);
                     } else {
