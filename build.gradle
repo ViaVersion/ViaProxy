@@ -70,9 +70,9 @@ dependencies {
     includeInJar("com.mojang:authlib:6.0.58") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    includeInJar "net.lenni0451.classtransform:mixinstranslator:1.15.0"
-    includeInJar "net.lenni0451.classtransform:mixinsdummy:1.15.0"
-    includeInJar "net.lenni0451.classtransform:additionalclassprovider:1.15.0"
+    includeInJar "net.lenni0451.classtransform:mixinstranslator:1.15.1"
+    includeInJar "net.lenni0451.classtransform:mixinsdummy:1.15.1"
+    includeInJar "net.lenni0451.classtransform:additionalclassprovider:1.15.1"
     includeInJar "net.lenni0451:Reflect:1.6.4"
     includeInJar "net.lenni0451:LambdaEvents:2.4.2"
     includeInJar("net.lenni0451:MCPing:1.4.4") {
