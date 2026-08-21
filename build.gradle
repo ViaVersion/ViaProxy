@@ -57,7 +57,7 @@ dependencies {
     includeInJar "com.viaversion:viaaprilfools-common:4.2.3-SNAPSHOT"
     includeInJar "net.raphimc:ViaBedrock:0.0.29-SNAPSHOT"
 
-    includeInJar "com.google.guava:guava:33.6.0-jre"
+    includeInJar "com.google.guava:guava:33.7.1-jre"
     includeInJar "com.google.code.gson:gson:2.14.0"
     includeInJar "com.formdev:flatlaf:3.7.2"
     includeInJar "com.formdev:flatlaf-extras:3.7.2"
