@@ -7,9 +7,13 @@ plugins {
 jar {
     manifest {
         attributes(
-                "Main-Class": application.mainClass,
-                "Multi-Release": "true",
-                "Enable-Native-Access": "ALL-UNNAMED"
+            "Main-Class": application.mainClass,
+            "Multi-Release": "true",
+            "Enable-Native-Access": "ALL-UNNAMED"
         )
     }
+}
+
+tasks.named("run", JavaExec) {
+    workingDir = file("${projectDir}/run")
 }
