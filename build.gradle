@@ -55,7 +55,7 @@ dependencies {
     includeInJar "com.viaversion:viarewind-common:4.2.0"
     includeInJar "net.raphimc:ViaLegacy:3.1.0"
     includeInJar "com.viaversion:viaaprilfools-common:4.2.3"
-    includeInJar "net.raphimc:ViaBedrock:0.0.31-20260918.161855-1"
+    includeInJar "net.raphimc:ViaBedrock:0.0.31-SNAPSHOT"
 
     includeInJar "com.google.guava:guava:33.7.1-jre"
     includeInJar "com.google.code.gson:gson:2.14.0"
