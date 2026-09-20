@@ -22,7 +22,6 @@ import com.viaversion.viaversion.platform.ViaChannelInitializer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageEncoder;
-import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.netminecraft.netty.codec.NoReadFlowControlHandler;
 import net.raphimc.netminecraft.netty.connection.MinecraftChannelInitializer;
@@ -32,9 +31,6 @@ import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.DisconnectHandler;
 import net.raphimc.viabedrock.netty.PacketCodec;
 import net.raphimc.viabedrock.netty.raknet.MessageCodec;
-import net.raphimc.viabedrock.netty.util.DatagramCodec;
-import net.raphimc.viabedrock.protocol.NetherNetStatusProtocol;
-import net.raphimc.viabedrock.protocol.RakNetStatusProtocol;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.viaproxy.ViaProxy;
@@ -42,9 +38,7 @@ import net.raphimc.viaproxy.plugins.events.Proxy2ServerChannelInitializeEvent;
 import net.raphimc.viaproxy.plugins.events.types.ITyped;
 import net.raphimc.viaproxy.protocoltranslator.impl.ViaProxyViaCodec;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
-import net.raphimc.viaproxy.util.NetherNetInetSocketAddress;
 
-import java.net.InetSocketAddress;
 import java.util.function.Supplier;
 
 public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer {
@@ -85,22 +79,10 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
         } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest)) {
             channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
             channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
-
-            if (proxyConnection.getC2pConnectionState() != ConnectionState.STATUS) {
-                channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, DisconnectHandler.NAME, new DisconnectHandler());
-                channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MessageCodec.NAME, new MessageCodec());
-                channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.SIZER_HANDLER_NAME, new BatchLengthCodec());
-                channel.pipeline().addBefore(ViaProxyViaCodec.NAME, PacketCodec.NAME, new PacketCodec());
-            } else {
-                channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, DatagramCodec.NAME, new DatagramCodec());
-                if (proxyConnection.getServerAddress() instanceof NetherNetInetSocketAddress) {
-                    user.getProtocolInfo().getPipeline().add(NetherNetStatusProtocol.INSTANCE);
-                } else if (proxyConnection.getServerAddress() instanceof InetSocketAddress) {
-                    user.getProtocolInfo().getPipeline().add(RakNetStatusProtocol.INSTANCE);
-                } else {
-                    throw new UnsupportedOperationException("Unsupported address type for Bedrock status: " + proxyConnection.getServerAddress().getClass().getName());
-                }
-            }
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, DisconnectHandler.NAME, new DisconnectHandler());
+            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MessageCodec.NAME, new MessageCodec());
+            channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.SIZER_HANDLER_NAME, new BatchLengthCodec());
+            channel.pipeline().addBefore(ViaProxyViaCodec.NAME, PacketCodec.NAME, new PacketCodec());
         }
 
         if (ViaProxy.EVENT_MANAGER.call(new Proxy2ServerChannelInitializeEvent(ITyped.Type.POST, channel, false)).isCancelled()) {
