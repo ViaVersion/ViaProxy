@@ -24,6 +24,7 @@ import io.jsonwebtoken.Jwts;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.DatagramChannel;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.ScheduledFuture;
 import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
 import net.raphimc.minecraftauth.bedrock.model.MinecraftMultiplayerToken;
@@ -34,6 +35,7 @@ import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
 import net.raphimc.viaproxy.util.address.*;
+import net.raphimc.viaproxy.util.logging.Logger;
 import org.cloudburstmc.netty.channel.nethernet.NetherNetChannelFactory;
 import org.cloudburstmc.netty.channel.nethernet.NetherNetConstants;
 import org.cloudburstmc.netty.channel.nethernet.config.NetherChannelOption;
@@ -45,23 +47,36 @@ import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.RakClientChannel;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.cloudburstmc.netty.util.nethernet.IdentityUtils;
+import tel.schich.libdatachannel.LibDataChannelArchDetect;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -123,13 +138,15 @@ public class BedrockProxyConnection extends ProxyConnection {
     }
 
     protected void initializeNetherNet(final TransportType transportType, final Bootstrap bootstrap) {
+        LibDataChannelArchDetect.initialize();
+
         final NetherNetClientSignaling netherNetSignaling;
         if (this.serverAddress instanceof NetherNetHttpAddress address) {
             if (this.getUserOptions().account() instanceof BedrockAccount bedrockAccount) {
                 final BedrockAuthManager authManager = bedrockAccount.getAuthManager();
                 final MinecraftMultiplayerToken multiplayerToken = authManager.getMinecraftMultiplayerToken().getUpToDateUnchecked();
                 netherNetSignaling = new NetherNetHttpSignaling(EventLoops.getClientEventLoop(TransportType.NIO).next(), address, new NetherNetHttpSignaling.Identity(
-                        authManager.getSessionKeyPair(), multiplayerToken.getXuid(), multiplayerToken.getDisplayName(), "example.com"
+                        authManager.getSessionKeyPair(), multiplayerToken.getToken()
                 ));
             } else {
                 this.kickClient("§cOffline mode is currently not supported for NetherNet HTTP signaling");
@@ -176,12 +193,12 @@ public class BedrockProxyConnection extends ProxyConnection {
 
         private static final long CANDIDATE_QUIET_MILLIS = 700;
         private static final long GATHER_CAP_MILLIS = 5_000;
-        private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(10);
+        private static final int HTTP_TIMEOUT_MILLIS = 10_000;
+        private static final int MAX_BODY_BYTES = 64 * 1024;
 
-        private static final HttpClient HTTP = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(5))
-                .followRedirects(HttpClient.Redirect.NEVER)
-                .build();
+        private static final Executor EXECUTOR = Executors.newCachedThreadPool(new DefaultThreadFactory("NetherNet Signaling", true));
+        private static final SSLSocketFactory TRUST_ALL_SSL_FACTORY = createTrustAllSslFactory();
+        private static final HostnameVerifier TRUST_ALL_HOSTNAME_VERIFIER = (hostname, session) -> true;
 
         private final String localNetworkId = Long.toUnsignedString(ThreadLocalRandom.current().nextLong());
         private final List<String> candidates = new ObjectArrayList<>();
@@ -205,7 +222,7 @@ public class BedrockProxyConnection extends ProxyConnection {
             this.identity = identity;
         }
 
-        public record Identity(KeyPair keyPair, String xuid, String name, String domain) {
+        public record Identity(KeyPair keyPair, String token) {
         }
 
         @Override
@@ -272,52 +289,93 @@ public class BedrockProxyConnection extends ProxyConnection {
             if (this.identity != null) {
                 try {
                     // Signed over the finished offer, so every fingerprint it binds to is already in it.
-                    body = BedrockProxyConnection.SdpUtil.withIdentity(body, ClientAssertionFactory.create(body, this.identity.keyPair(),
-                            this.identity.xuid(), this.identity.name(), this.identity.domain()));
+                    body = BedrockProxyConnection.SdpUtil.withIdentity(body, ClientAssertionFactory.create(body, this.identity.keyPair(), this.identity.token()));
                 } catch (Exception e) {
                     this.fail("unable to sign the identity assertion: " + e);
                     return;
                 }
             }
-            final HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl(this.address) + "/v1/join/" + this.localNetworkId))
-                    .timeout(HTTP_TIMEOUT)
-                    .header("Content-Type", "application/sdp")
-                    .header("Accept", "application/sdp")
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
-            HTTP.sendAsync(request, HttpResponse.BodyHandlers.ofString()).whenCompleteAsync(this::onAnswer, this.eventLoop);
+            final String offerSdp = body;
+            CompletableFuture.supplyAsync(() -> this.exchange(offerSdp), EXECUTOR).whenCompleteAsync(this::onAnswer, this.eventLoop);
         }
 
-        private void onAnswer(final HttpResponse<String> response, final Throwable error) {
+        /**
+         * Sends the offer over TLS and falls back to plaintext, the same way the NetherNet status ping picks
+         * its scheme, so every server which can be pinged can also be joined.
+         */
+        private String exchange(final String offerSdp) {
+            try {
+                try {
+                    return this.exchange(offerSdp, "https");
+                } catch (SSLException | EOFException | SocketException e) {
+                    return this.exchange(offerSdp, "http");
+                }
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        }
+
+        private String exchange(final String offerSdp, final String scheme) throws IOException {
+            final URI uri = URI.create(scheme + "://" + host(this.address) + ":" + this.address.getPort() + "/v1/join/" + this.localNetworkId);
+            final HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+            if (connection instanceof HttpsURLConnection httpsConnection) {
+                httpsConnection.setSSLSocketFactory(TRUST_ALL_SSL_FACTORY);
+                httpsConnection.setHostnameVerifier(TRUST_ALL_HOSTNAME_VERIFIER);
+            }
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("User-Agent", NetherNetConstants.SIGNALING_USER_AGENT);
+            connection.setRequestProperty("Content-Type", "application/sdp");
+            connection.setRequestProperty("Accept", "application/sdp");
+            connection.setConnectTimeout(HTTP_TIMEOUT_MILLIS);
+            connection.setReadTimeout(HTTP_TIMEOUT_MILLIS);
+            connection.setInstanceFollowRedirects(false);
+            connection.setDoOutput(true);
+            try {
+                try (OutputStream outputStream = connection.getOutputStream()) {
+                    outputStream.write(offerSdp.getBytes(StandardCharsets.UTF_8));
+                }
+
+                final int responseCode = connection.getResponseCode();
+                if ("http".equals(scheme) && requiresTls(connection, responseCode)) {
+                    return this.exchange(offerSdp, "https");
+                }
+                if (responseCode / 100 != 2) {
+                    throw new IOException("signaling returned HTTP " + responseCode + " " + read(connection.getErrorStream()).strip());
+                }
+
+                final String answer = read(connection.getInputStream());
+                // A rejection can arrive as a 2xx with a short body instead of an SDP, so the shape has to
+                // be checked rather than the status alone.
+                if (!answer.startsWith("v=")) {
+                    throw new IOException("signaling returned a 2xx that is not an SDP answer: " + (answer.isEmpty() ? "empty" : answer.strip()));
+                }
+                return answer;
+            } finally {
+                connection.disconnect();
+            }
+        }
+
+        private void onAnswer(final String answer, final Throwable error) {
             if (this.closed) {
                 return;
             }
             if (error != null) {
-                this.fail("signaling request failed: " + error.getMessage());
-                return;
-            }
-            if (response.statusCode() / 100 != 2) {
-                this.fail("signaling returned HTTP " + response.statusCode());
+                final Throwable cause = error instanceof CompletionException && error.getCause() != null ? error.getCause() : error;
+                this.fail("signaling request failed: " + cause.getMessage());
                 return;
             }
 
-            final String answer = response.body();
-            // A rejection can arrive as a 2xx with a short body instead of an SDP, so the shape has to
-            // be checked rather than the status alone.
-            if (answer == null || !answer.startsWith("v=")) {
-                this.fail("signaling returned a 2xx that is not an SDP answer: "
-                        + (answer == null ? "empty" : answer.strip()));
-                return;
-            }
-
-            if (this.handler != null) {
-                this.handler.onSignal(NetherNetConstants.buildSignalConnectResponse(this.connectionId, answer));
+            final SignalHandler handler = this.handler;
+            if (handler != null) {
+                handler.onSignal(NetherNetConstants.buildSignalConnectResponse(this.connectionId, answer));
             }
         }
 
-        private void fail(String reason) {
-            if (this.notFound != null) {
-                this.notFound.onNotFound(reason);
+        private void fail(final String reason) {
+            Logger.LOGGER.warn("NetherNet signaling to " + this.address + " failed: " + reason);
+            final NotFoundHandler notFound = this.notFound;
+            if (notFound != null) {
+                notFound.onNotFound(reason);
             }
         }
 
@@ -366,10 +424,62 @@ public class BedrockProxyConnection extends ProxyConnection {
             }
         }
 
-        private static String baseUrl(final InetSocketAddress address) {
+        private static String host(final InetSocketAddress address) {
             final InetAddress host = address.getAddress();
             final String literal = host == null ? address.getHostString() : host.getHostAddress();
-            return "http://" + (literal.indexOf(':') >= 0 ? "[" + literal + "]" : literal) + ":" + address.getPort();
+            return literal.indexOf(':') >= 0 ? "[" + literal + "]" : literal;
+        }
+
+        private static boolean requiresTls(final HttpURLConnection connection, final int responseCode) {
+            if (responseCode == 426) {
+                return true;
+            }
+            if (responseCode != 301 && responseCode != 302 && responseCode != 307 && responseCode != 308) {
+                return false;
+            }
+            final String location = connection.getHeaderField("Location");
+            return location != null && location.startsWith("https://");
+        }
+
+        private static String read(final InputStream inputStream) throws IOException {
+            if (inputStream == null) {
+                return "";
+            }
+            try (InputStream stream = inputStream) {
+                final byte[] body = stream.readNBytes(MAX_BODY_BYTES + 1);
+                if (body.length > MAX_BODY_BYTES) {
+                    throw new IOException("signaling body exceeds " + MAX_BODY_BYTES + " bytes");
+                }
+                return new String(body, StandardCharsets.UTF_8);
+            }
+        }
+
+        /**
+         * NetherNet anchors trust in the identity assertion rather than in the signaling certificate, and
+         * servers commonly present a self signed one on a raw address. Rejecting those would push them onto
+         * the plaintext path they answer with a 426.
+         */
+        private static SSLSocketFactory createTrustAllSslFactory() {
+            try {
+                final SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+
+                    @Override
+                    public void checkClientTrusted(final X509Certificate[] chain, final String authType) {
+                    }
+
+                    @Override
+                    public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
+                    }
+                }}, new SecureRandom());
+                return sslContext.getSocketFactory();
+            } catch (Throwable e) {
+                throw new ExceptionInInitializerError(e);
+            }
         }
 
     }
@@ -441,50 +551,35 @@ public class BedrockProxyConnection extends ProxyConnection {
      */
     private static final class ClientAssertionFactory {
 
-        private static final long LIFETIME_SECONDS = 3600;
+        private static final String IDENTITY_PROVIDER_DOMAIN = "authorization.franchise.minecraft-services.net";
 
         private ClientAssertionFactory() {
         }
 
         /**
          * @param offerSdp the offer whose fingerprints the assertion binds to, without an identity line
-         * @param xuid     the connecting player's XUID, surfaced to the downstream server
-         * @param name     the connecting player's name
+         * @param keyPair  the key pair the token's cpk claim is bound to
+         * @param token    the multiplayer token the Minecraft auth service issued for the account
          */
-        public static String create(String offerSdp, KeyPair keyPair, String xuid, String name, String domain) {
-            ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
-            String cpk = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-
-            Instant now = Instant.now();
-
-            String token = Jwts.builder()
-                    .claim("cpk", cpk)
-                    .claim("xid", xuid == null ? "" : xuid)
-                    .claim("xname", name == null ? "" : name)
-                    .issuer(domain)
-                    .issuedAt(Date.from(now))
-                    .expiration(Date.from(now.plusSeconds(LIFETIME_SECONDS)))
-                    .signWith(privateKey, Jwts.SIG.ES384)
-                    .compact();
-
-            String fingerprintJws = Jwts.builder()
+        public static String create(final String offerSdp, final KeyPair keyPair, final String token) {
+            final String fingerprintJws = Jwts.builder()
                     .content(IdentityUtils.getCanonicalFingerprintJson(offerSdp)
                             .getBytes(StandardCharsets.UTF_8))
-                    .signWith(privateKey, Jwts.SIG.ES384)
+                    .signWith((ECPrivateKey) keyPair.getPrivate(), Jwts.SIG.ES384)
                     .compact();
 
-            String[] parts = fingerprintJws.split("\\.");
-            String detachedFingerprintJws = parts[0] + ".." + parts[2];
+            final String[] parts = fingerprintJws.split("\\.");
+            final String detachedFingerprintJws = parts[0] + ".." + parts[2];
 
-            JsonObject assertion = new JsonObject();
+            final JsonObject assertion = new JsonObject();
             assertion.addProperty("fingerprints", detachedFingerprintJws);
             assertion.addProperty("token", token);
 
-            JsonObject idp = new JsonObject();
-            idp.addProperty("domain", domain);
+            final JsonObject idp = new JsonObject();
+            idp.addProperty("domain", IDENTITY_PROVIDER_DOMAIN);
             idp.addProperty("protocol", "default");
 
-            JsonObject envelope = new JsonObject();
+            final JsonObject envelope = new JsonObject();
             envelope.addProperty("assertion", assertion.toString());
             envelope.add("idp", idp);
 
