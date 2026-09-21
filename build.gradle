@@ -111,11 +111,8 @@ dependencies {
     includeInJar("org.cloudburstmc.netty:netty-transport-nethernet:2.0.0.CR3-20260920.154058-21") {
         exclude group: "io.netty"
         exclude group: "org.bouncycastle"
-        exclude group: "dev.opencollab:libdatachannel-java"
     }
-    ["windows-x86_64", "windows-aarch64", "x86_64", "aarch64", "macos-x86_64", "macos-arm64"].each {
-        includeInJar "dev.opencollab:libdatachannel-java:0.24.5.0-20260920.151857-10:$it"
-    }
+    includeInJar "dev.opencollab:libdatachannel-java-arch-detect:0.24.5.0-20260920.202826-11"
     includeInJar "gs.mclo:api:6.2.1"
     includeInJar "net.lenni0451:optconfig:1.1.1"
 
