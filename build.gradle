@@ -105,10 +105,10 @@ dependencies {
     includeInJar("net.raphimc:MinecraftAuth:5.0.2") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    includeInJar("org.cloudburstmc.netty:netty-transport-raknet:2.0.0.CR4-20260921.144528-1") {
+    includeInJar("org.cloudburstmc.netty:netty-transport-raknet:2.0.0.CR4-20260922.202324-5") {
         exclude group: "io.netty"
     }
-    includeInJar("org.cloudburstmc.netty:netty-transport-nethernet:2.0.0.CR4-20260921.144528-1") {
+    includeInJar("org.cloudburstmc.netty:netty-transport-nethernet:2.0.0.CR4-20260922.202324-5") {
         exclude group: "io.netty"
         exclude group: "org.bouncycastle"
         exclude group: "dev.opencollab:libdatachannel-java"
