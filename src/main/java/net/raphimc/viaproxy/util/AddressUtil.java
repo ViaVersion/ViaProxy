@@ -19,43 +19,41 @@ package net.raphimc.viaproxy.util;
 
 import com.google.common.net.HostAndPort;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
 import io.netty.channel.unix.DomainSocketAddress;
+import net.lenni0451.mcping.ServerAddress;
 import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.util.MinecraftServerAddress;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
-import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
+import net.raphimc.viaproxy.util.address.NetherNetHttpAddress;
+import net.raphimc.viaproxy.util.address.NetherNetLanAddress;
+import net.raphimc.viaproxy.util.address.NetherNetXboxAddress;
+import net.raphimc.viaproxy.util.address.NetherNetXboxJsonRpcAddress;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.regex.Pattern;
 
 public class AddressUtil {
-
-    private static final Pattern NETHERNET_NETWORK_ID_PATTERN = Pattern.compile("^(?>[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}|\\d+)$", Pattern.CASE_INSENSITIVE);
 
     public static SocketAddress parse(final String serverAddress, final ProtocolVersion version) {
         if (serverAddress.startsWith("file://") || serverAddress.startsWith("unix://")) { // Unix Socket
             return new DomainSocketAddress(serverAddress.substring(serverAddress.indexOf("://") + 3));
-        } else if (serverAddress.startsWith("nethernet-rpc://")) { // NetherNet JSON-RPC Address
-            final String addressPart = serverAddress.substring(serverAddress.indexOf("://") + 3);
-            if (NETHERNET_NETWORK_ID_PATTERN.matcher(addressPart).matches()) {
-                return new NetherNetJsonRpcAddress(addressPart);
-            } else {
-                throw new IllegalArgumentException("Invalid NetherNet JSON RPC address");
+        } else if (serverAddress.startsWith("nethernet://")) { // NetherNet HTTP Address
+            final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress.substring(serverAddress.indexOf("://") + 3));
+            if (hostAndPort.getHost().isBlank()) {
+                throw new IllegalArgumentException("Server address cannot be blank");
             }
-        } else if (serverAddress.startsWith("nethernet://")) { // NetherNet Address
-            final String addressPart = serverAddress.substring(serverAddress.indexOf("://") + 3);
-            if (NETHERNET_NETWORK_ID_PATTERN.matcher(addressPart).matches()) {
-                return new NetherNetAddress(addressPart);
-            } else {
-                final HostAndPort hostAndPort = HostAndPort.fromString(addressPart);
-                if (hostAndPort.getHost().isBlank()) {
-                    throw new IllegalArgumentException("Server address cannot be blank");
-                }
-                return new NetherNetInetSocketAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(ProtocolConstants.BEDROCK_NETHERNET_DEFAULT_PORT));
+            return new NetherNetHttpAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(ServerAddress.DEFAULT_BEDROCK_PORT));
+        } else if (serverAddress.startsWith("nethernet-lan://")) { // NetherNet LAN Address
+            final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress.substring(serverAddress.indexOf("://") + 3));
+            if (hostAndPort.getHost().isBlank()) {
+                throw new IllegalArgumentException("Server address cannot be blank");
             }
+            return new NetherNetLanAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(ServerAddress.DEFAULT_BEDROCK_NETHERNET_LAN_PORT));
+        } else if (serverAddress.startsWith("nethernet-xbox://")) { // NetherNet Xbox Address
+            return new NetherNetXboxAddress(serverAddress.substring(serverAddress.indexOf("://") + 3));
+        } else if (serverAddress.startsWith("nethernet-xbox-json-rpc://")) { // NetherNet XBOX JSON RPC Address
+            return new NetherNetXboxJsonRpcAddress(serverAddress.substring(serverAddress.indexOf("://") + 3));
         } else { // IP Address
             final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress);
             if (hostAndPort.getHost().isBlank()) {
@@ -64,7 +62,7 @@ public class AddressUtil {
 
             final int port;
             if (version != null) {
-                port = hostAndPort.getPortOrDefault(version.equals(BedrockProtocolVersion.bedrockLatest) ? ProtocolConstants.BEDROCK_RAKNET_DEFAULT_PORT : 25565);
+                port = hostAndPort.getPortOrDefault(version.equals(BedrockProtocolVersion.bedrockLatest) ? ServerAddress.DEFAULT_BEDROCK_PORT : ServerAddress.DEFAULT_JAVA_PORT);
             } else {
                 port = hostAndPort.getPort();
             }
@@ -80,12 +78,14 @@ public class AddressUtil {
     public static String toString(final SocketAddress address) {
         if (address instanceof DomainSocketAddress domainSocketAddress) {
             return "unix://" + domainSocketAddress.path();
-        } else if (address instanceof NetherNetJsonRpcAddress netherNetAddress) {
-            return "nethernet-rpc://" + netherNetAddress;
-        } else if (address instanceof NetherNetAddress netherNetAddress) {
-            return "nethernet://" + netherNetAddress;
-        } else if (address instanceof NetherNetInetSocketAddress netherNetAddress) {
+        } else if (address instanceof NetherNetHttpAddress netherNetAddress) {
             return "nethernet://" + netherNetAddress.getHostString() + ":" + netherNetAddress.getPort();
+        } else if (address instanceof NetherNetLanAddress netherNetAddress) {
+            return "nethernet-lan://" + netherNetAddress.getHostString() + ":" + netherNetAddress.getPort();
+        } else if (address instanceof NetherNetXboxAddress netherNetAddress) {
+            return "nethernet-xbox://" + netherNetAddress;
+        } else if (address instanceof NetherNetXboxJsonRpcAddress netherNetAddress) {
+            return "nethernet-xbox-rpc://" + netherNetAddress;
         } else if (address instanceof InetSocketAddress inetSocketAddress) {
             return inetSocketAddress.getHostString() + ":" + inetSocketAddress.getPort();
         } else {
@@ -96,10 +96,10 @@ public class AddressUtil {
     @Deprecated(forRemoval = true)
     public static int getDefaultPort(final ProtocolVersion version) {
         if (version.equals(BedrockProtocolVersion.bedrockLatest)) {
-            return ProtocolConstants.BEDROCK_RAKNET_DEFAULT_PORT;
+            return ServerAddress.DEFAULT_BEDROCK_PORT;
         }
 
-        return 25565;
+        return ServerAddress.DEFAULT_JAVA_PORT;
     }
 
     /**

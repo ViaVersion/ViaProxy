@@ -18,38 +18,32 @@
 package net.raphimc.viaproxy.proxy.session;
 
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import dev.kastle.netty.channel.nethernet.NetherNetChannelFactory;
-import dev.kastle.netty.channel.nethernet.config.NetherChannelOption;
-import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
-import dev.kastle.netty.channel.nethernet.signaling.NetherNetClientSignaling;
-import dev.kastle.netty.channel.nethernet.signaling.NetherNetDiscoverySignaling;
-import dev.kastle.netty.channel.nethernet.signaling.NetherNetXboxRpcSignaling;
-import dev.kastle.netty.channel.nethernet.signaling.NetherNetXboxSignaling;
-import dev.kastle.webrtc.PeerConnectionFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.DatagramChannel;
-import net.raphimc.netminecraft.constants.ConnectionState;
+import net.raphimc.minecraftauth.bedrock.BedrockAuthManager;
+import net.raphimc.minecraftauth.bedrock.model.MinecraftMultiplayerToken;
 import net.raphimc.netminecraft.util.EventLoops;
 import net.raphimc.netminecraft.util.TransportType;
 import net.raphimc.viabedrock.netty.raknet.MessageCodec;
 import net.raphimc.viabedrock.protocol.data.ProtocolConstants;
 import net.raphimc.viaproxy.ViaProxy;
 import net.raphimc.viaproxy.saves.impl.accounts.BedrockAccount;
-import net.raphimc.viaproxy.util.NetherNetInetSocketAddress;
-import net.raphimc.viaproxy.util.NetherNetJsonRpcAddress;
+import net.raphimc.viaproxy.util.address.*;
+import org.cloudburstmc.netty.channel.nethernet.NetherNetChannelFactory;
+import org.cloudburstmc.netty.channel.nethernet.config.NetherChannelOption;
+import org.cloudburstmc.netty.channel.nethernet.signaling.*;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.RakClientChannel;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
+import org.cloudburstmc.netty.util.nethernet.OperatorIdentity;
 
 import java.net.SocketAddress;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BedrockProxyConnection extends ProxyConnection {
 
-    private boolean useNetherNetDiscovery;
-    private boolean useNetherNetXbox;
-    private boolean useNetherNetXboxRpc;
+    private SocketAddress serverAddress;
 
     public BedrockProxyConnection(final ChannelInitializer<Channel> channelInitializer, final Channel c2p) {
         super(channelInitializer, c2p);
@@ -62,9 +56,7 @@ public class BedrockProxyConnection extends ProxyConnection {
                 .attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY, this)
                 .handler(this.channelInitializer);
 
-        if (this.getC2pConnectionState() == ConnectionState.STATUS) {
-            this.initializeRaw(transportType, bootstrap);
-        } else if (this.useNetherNetDiscovery || this.useNetherNetXbox) {
+        if (this.serverAddress instanceof NetherNetAddress) {
             this.initializeNetherNet(transportType, bootstrap);
         } else {
             this.initializeRakNet(transportType, bootstrap);
@@ -75,9 +67,7 @@ public class BedrockProxyConnection extends ProxyConnection {
 
     @Override
     public ChannelFuture connectToServer(final SocketAddress serverAddress, final ProtocolVersion targetVersion) {
-        this.useNetherNetDiscovery = serverAddress instanceof NetherNetInetSocketAddress;
-        this.useNetherNetXbox = serverAddress instanceof NetherNetAddress;
-        this.useNetherNetXboxRpc = serverAddress instanceof NetherNetJsonRpcAddress;
+        this.serverAddress = serverAddress;
         return super.connectToServer(serverAddress, targetVersion);
     }
 
@@ -110,28 +100,43 @@ public class BedrockProxyConnection extends ProxyConnection {
 
     protected void initializeNetherNet(final TransportType transportType, final Bootstrap bootstrap) {
         final NetherNetClientSignaling netherNetSignaling;
-        if (this.useNetherNetDiscovery) {
+        if (this.serverAddress instanceof NetherNetHttpAddress) {
+            netherNetSignaling = new NetherNetHTTPClientSignaling();
+        } else if (this.serverAddress instanceof NetherNetLanAddress) {
             netherNetSignaling = new NetherNetDiscoverySignaling();
-        } else if (this.useNetherNetXbox) {
+        } else if (this.serverAddress instanceof NetherNetXboxAddress || this.serverAddress instanceof NetherNetXboxJsonRpcAddress) {
             if (this.getUserOptions().account() instanceof BedrockAccount bedrockAccount) {
-                if (this.useNetherNetXboxRpc) {
+                if (this.serverAddress instanceof NetherNetXboxAddress) {
+                    netherNetSignaling = new NetherNetXboxSignaling(bedrockAccount.getAuthManager().getMinecraftSession().getUpToDateUnchecked().getAuthorizationHeader());
+                } else if (this.serverAddress instanceof NetherNetXboxJsonRpcAddress) {
                     netherNetSignaling = new NetherNetXboxRpcSignaling(bedrockAccount.getAuthManager().getMinecraftSession().getUpToDateUnchecked().getAuthorizationHeader());
                 } else {
-                    netherNetSignaling = new NetherNetXboxSignaling(bedrockAccount.getAuthManager().getMinecraftSession().getUpToDateUnchecked().getAuthorizationHeader());
+                    throw new IllegalStateException("Unsupported NetherNet address type: " + this.serverAddress.getClass().getName());
                 }
             } else {
                 this.kickClient("§cThe configured target server requires Xbox signaling, but no Minecraft: Bedrock Edition account is selected.");
                 return;
             }
         } else {
-            throw new IllegalStateException("Invalid signaling type");
+            throw new IllegalStateException("Unsupported NetherNet address type: " + this.serverAddress.getClass().getName());
         }
+
+        final OperatorIdentity identity;
+        if (this.getUserOptions().account() instanceof BedrockAccount bedrockAccount) {
+            final BedrockAuthManager authManager = bedrockAccount.getAuthManager();
+            final MinecraftMultiplayerToken multiplayerToken = authManager.getMinecraftMultiplayerToken().getUpToDateUnchecked();
+            identity = OperatorIdentity.fromToken(authManager.getSessionKeyPair(), multiplayerToken.getToken(), "https://authorization.franchise.minecraft-services.net/");
+        } else {
+            identity = null;
+        }
+
         final ChannelHandler channelHandler = bootstrap.config().handler();
         bootstrap
                 .group(EventLoops.getClientEventLoop(TransportType.NIO))
-                .channelFactory(NetherNetChannelFactory.client(new PeerConnectionFactory(), netherNetSignaling))
+                .channelFactory(NetherNetChannelFactory.client(netherNetSignaling))
                 .option(NetherChannelOption.NETHER_CLIENT_HANDSHAKE_TIMEOUT_MS, ViaProxy.getConfig().getConnectTimeout())
                 .option(NetherChannelOption.NETHER_CLIENT_MAX_HANDSHAKE_ATTEMPTS, 1)
+                .option(NetherChannelOption.NETHER_CLIENT_IDENTITY, identity)
                 .handler(new ChannelInitializer<>() {
                     @Override
                     protected void initChannel(final Channel channel) {
@@ -139,16 +144,6 @@ public class BedrockProxyConnection extends ProxyConnection {
                         channel.pipeline().remove(MessageCodec.NAME);
                     }
                 });
-    }
-
-    protected void initializeRaw(TransportType transportType, final Bootstrap bootstrap) {
-        if (transportType == TransportType.KQUEUE) {
-            transportType = TransportType.NIO; // KQueue doesn't work due to requiring the channel to be bound instead of connected
-        }
-
-        bootstrap
-                .group(EventLoops.getClientEventLoop(transportType))
-                .channel(transportType.udpClientChannelClass());
     }
 
 }

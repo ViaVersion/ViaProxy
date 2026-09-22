@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.raphimc.viaproxy.util;
+package net.raphimc.viaproxy.util.address;
 
-import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
+import org.cloudburstmc.netty.channel.nethernet.config.NetherNetAddress;
 
-public class NetherNetJsonRpcAddress extends NetherNetAddress {
+public class NetherNetXboxAddress extends NetherNetAddress implements net.raphimc.viaproxy.util.address.NetherNetAddress {
 
-    public NetherNetJsonRpcAddress(final String networkId) {
+    public NetherNetXboxAddress(final String networkId) {
         super(networkId);
     }
 

@@ -32,6 +32,15 @@ repositories {
         }
     }
     maven {
+        name = "OpenCollab Snapshots"
+        url = "https://repo.opencollab.dev/maven-snapshots"
+
+        content {
+            includeGroupByRegex "org\\.cloudburstmc\\..+"
+            includeGroup "dev.opencollab"
+        }
+    }
+    maven {
         name = "Minecraft Libraries"
         url = "https://libraries.minecraft.net"
 
@@ -55,7 +64,7 @@ dependencies {
     includeInJar "com.viaversion:viarewind-common:4.2.0"
     includeInJar "net.raphimc:ViaLegacy:3.1.0"
     includeInJar "com.viaversion:viaaprilfools-common:4.2.3"
-    includeInJar "net.raphimc:ViaBedrock:0.0.31-20260918.161855-1"
+    includeInJar "net.raphimc:ViaBedrock:0.0.31-20260920.192303-2"
 
     includeInJar "com.google.guava:guava:33.7.1-jre"
     includeInJar "com.google.code.gson:gson:2.14.0"
@@ -75,7 +84,7 @@ dependencies {
     includeInJar "net.lenni0451.classtransform:additionalclassprovider:1.15.1"
     includeInJar "net.lenni0451:Reflect:1.6.4"
     includeInJar "net.lenni0451:LambdaEvents:2.4.2"
-    includeInJar("net.lenni0451:MCPing:1.4.4") {
+    includeInJar("net.lenni0451:MCPing:1.4.5-20260920.192552-4") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     includeInJar "net.lenni0451.commons:swing:1.9.2"
@@ -96,16 +105,15 @@ dependencies {
     includeInJar("net.raphimc:MinecraftAuth:5.0.2") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    includeInJar("dev.kastle.netty:netty-transport-raknet:1.7.4") {
+    includeInJar("org.cloudburstmc.netty:netty-transport-raknet:2.0.0.CR4-20260921.144528-1") {
         exclude group: "io.netty"
     }
-    includeInJar("dev.kastle.netty:netty-transport-nethernet:1.7.4") {
+    includeInJar("org.cloudburstmc.netty:netty-transport-nethernet:2.0.0.CR4-20260921.144528-1") {
         exclude group: "io.netty"
-        exclude group: "org.bitbucket.b_c", module: "jose4j"
+        exclude group: "org.bouncycastle"
+        exclude group: "dev.opencollab:libdatachannel-java"
     }
-    ["windows-x86_64", "windows-aarch64", "linux-x86_64", "linux-aarch64", "macos-x86_64", "macos-aarch64"].each {
-        includeInJar "dev.kastle.webrtc:webrtc-java:1.0.3:$it"
-    }
+    includeInJar "dev.opencollab:libdatachannel-java-arch-detect:0.24.5.0-20260921.140330-12"
     includeInJar "gs.mclo:api:6.2.1"
     includeInJar "net.lenni0451:optconfig:1.1.1"
 

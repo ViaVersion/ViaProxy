@@ -18,10 +18,10 @@
 package net.raphimc.viaproxy.proxy.session;
 
 import com.google.common.net.HostAndPort;
+import com.google.gson.JsonPrimitive;
 import com.mojang.authlib.GameProfile;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.libs.gson.JsonPrimitive;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.util.AttributeKey;

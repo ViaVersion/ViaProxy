@@ -19,19 +19,24 @@ package net.raphimc.viaproxy.proxy.client2proxy;
 
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
+import com.google.gson.Gson;
 import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.storage.CookieStorage;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import dev.kastle.netty.channel.nethernet.config.NetherNetAddress;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import net.lenni0451.mcping.ServerAddress;
+import net.lenni0451.mcping.responses.IPingResponse;
+import net.lenni0451.mcping.responses.MCPingResponse;
 import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.IntendedState;
 import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.impl.handshaking.C2SHandshakingClientIntentionPacket;
+import net.raphimc.netminecraft.packet.impl.status.S2CStatusPongResponsePacket;
+import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.viaproxy.ViaProxy;
@@ -51,13 +56,11 @@ import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
 import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.*;
+import net.raphimc.viaproxy.util.address.NetherNetHttpAddress;
 import net.raphimc.viaproxy.util.logging.Logger;
 
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.net.PortUnreachableException;
 import java.net.SocketAddress;
-import java.nio.channels.UnresolvedAddressException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -191,30 +194,43 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         serverAddress = preConnectEvent.getServerAddress();
         serverVersion = preConnectEvent.getServerVersion();
 
+        ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
+
         final boolean isJavaBetaPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3) && !ViaProxy.getConfig().shouldAllowBetaPinging();
-        final boolean isBedrockNetherNetPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.bedrockLatest) && serverAddress instanceof NetherNetAddress;
-        if (isJavaBetaPing || isBedrockNetherNetPing) {
+        final boolean isBedrockPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.bedrockLatest);
+        if (isJavaBetaPing || isBedrockPing) {
             if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
                 this.proxyConnection.kickClient(ViaProxy.getConfig().getCustomMotd());
+            } else if (isBedrockPing) {
+                final CompletableFuture<? extends IPingResponse> pingFuture;
+                if (serverAddress instanceof NetherNetHttpAddress) {
+                    pingFuture = StatusPingUtil.pingBedrockNetherNetHttp(serverAddress);
+                } else {
+                    pingFuture = StatusPingUtil.pingBedrockRakNet(serverAddress);
+                }
+                pingFuture.thenAccept(response -> {
+                    final MCPingResponse javaResponse = StatusPingUtil.convertToJavaPingResponse(response);
+                    javaResponse.version.protocol = clientVersion.getOriginalVersion();
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CStatusResponsePacket(new Gson().toJson(javaResponse))).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CStatusPongResponsePacket(0)).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                }).exceptionally(t -> {
+                    this.proxyConnection.kickClient("§cPing failed: " + t.getClass().getSimpleName() + "\n§c" + t.getMessage());
+                    return null;
+                });
+            } else {
+                this.proxyConnection.kickClient("§7ViaProxy is running!\n§7Connect to join the configured server");
             }
-            this.proxyConnection.kickClient("§7ViaProxy is working!\n§7Connect to join the configured server");
+            return;
         }
 
         final UserOptions userOptions = new UserOptions(classicMpPass, ViaProxy.getConfig().getAccount());
-        ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
-
         if (packet.intendedState.getConnectionState() == ConnectionState.LOGIN && serverVersion.equals(ProtocolTranslator.AUTO_DETECT_PROTOCOL)) {
-            SocketAddress finalServerAddress = serverAddress;
-            HostAndPort finalClientHandshakeAddress = clientHandshakeAddress;
-            CompletableFuture.runAsync(() -> {
-                final ProtocolVersion detectedVersion = ProtocolVersionDetector.get(finalServerAddress, clientVersion);
+            final SocketAddress finalServerAddress = serverAddress;
+            final HostAndPort finalClientHandshakeAddress = clientHandshakeAddress;
+            StatusPingUtil.detectProtocolVersion(serverAddress, clientVersion).thenAccept(detectedVersion -> {
                 this.connect(finalServerAddress, detectedVersion, clientVersion, packet.intendedState, finalClientHandshakeAddress, userOptions, handshakeParts);
             }).exceptionally(t -> {
-                if (t instanceof ConnectException || t instanceof UnresolvedAddressException || t instanceof PortUnreachableException) {
-                    this.proxyConnection.kickClient("§cCould not connect to the backend server!");
-                } else {
-                    this.proxyConnection.kickClient("§cAutomatic protocol detection failed!\n§c" + t.getMessage());
-                }
+                this.proxyConnection.kickClient("§cProtocol detection failed: " + t.getClass().getSimpleName() + "\n§c" + t.getMessage());
                 return null;
             });
         } else {
@@ -281,7 +297,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
                 handshakePort = inetSocketAddress.getPort();
             } else {
                 handshakeParts[0] = AddressUtil.toString(serverAddress);
-                handshakePort = 25565;
+                handshakePort = ServerAddress.DEFAULT_JAVA_PORT;
             }
         } else {
             handshakePort = clientHandshakeAddress.getPort();
@@ -309,12 +325,8 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
             }
         }, (ThrowingChannelFutureListener) f -> {
             if (!f.isSuccess()) {
-                if (f.cause() instanceof ConnectException || f.cause() instanceof UnresolvedAddressException || f.cause() instanceof PortUnreachableException) {
-                    this.proxyConnection.kickClient("§cCould not connect to the backend server!");
-                } else {
-                    Logger.LOGGER.error("Error while connecting to the backend server", f.cause());
-                    this.proxyConnection.kickClient("§cAn error occurred while connecting to the backend server: " + f.cause().getMessage() + "\n§cCheck the console for more information.");
-                }
+                Logger.LOGGER.error("Error while connecting to the backend server", f.cause());
+                this.proxyConnection.kickClient("§cConnect failed: " + f.cause().getClass().getSimpleName() + "\n§c" + f.cause().getMessage());
             }
         });
     }
