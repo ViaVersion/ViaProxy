@@ -102,7 +102,7 @@ dependencies {
     includeInJar("io.netty:netty-codec-socks:4.2.18.Final") {
         transitive = false
     }
-    includeInJar("net.raphimc:MinecraftAuth:5.0.2") {
+    includeInJar("net.raphimc:MinecraftAuth:5.0.3-20260923.192703-2") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     includeInJar("org.cloudburstmc.netty:netty-transport-raknet:2.0.0.CR4-20260922.202324-5") {

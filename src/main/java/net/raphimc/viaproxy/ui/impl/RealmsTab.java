@@ -238,6 +238,9 @@ public class RealmsTab extends UITab {
                                 javaRealmsService.acceptTosUnchecked();
                                 join.doClick(0);
                             }
+                        } else if (realmsService instanceof BedrockRealmsService bedrockRealmsService && cause instanceof RealmsRequestException realmsRequestException && realmsRequestException.getErrorCode() == RealmsRequestException.ERROR_TIMELINE_OPT_IN_REQUIRED) {
+                            bedrockRealmsService.updateWorldStorySettingsUnchecked(server, null, true);
+                            join.doClick(0);
                         } else {
                             Logger.LOGGER.error("Failed to join realm", cause);
                             ViaProxyWindow.showError(I18n.get("tab.realms.error_generic", cause.getMessage()));
