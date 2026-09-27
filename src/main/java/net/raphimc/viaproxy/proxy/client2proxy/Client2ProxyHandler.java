@@ -197,7 +197,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
         final boolean isJavaBetaPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3) && !ViaProxy.getConfig().shouldAllowBetaPinging();
-        final boolean isBedrockPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.bedrockLatest);
+        final boolean isBedrockPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.BEDROCK_LATEST);
         if (isJavaBetaPing || isBedrockPing) {
             if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
                 this.proxyConnection.kickClient(ViaProxy.getConfig().getCustomMotd());
@@ -241,7 +241,7 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
     private void connect(final SocketAddress serverAddress, final ProtocolVersion serverVersion, final ProtocolVersion clientVersion, final IntendedState intendedState, final HostAndPort clientHandshakeAddress, final UserOptions userOptions, final String[] handshakeParts) {
         final Supplier<ChannelHandler> handlerSupplier = () -> ViaProxy.EVENT_MANAGER.call(new Proxy2ServerHandlerCreationEvent(new Proxy2ServerHandler(), false)).getHandler();
         final ProxyConnection proxyConnection;
-        if (serverVersion.equals(BedrockProtocolVersion.bedrockLatest)) {
+        if (serverVersion.equals(BedrockProtocolVersion.BEDROCK_LATEST)) {
             proxyConnection = new BedrockProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());
         } else {
             proxyConnection = new ProxyConnection(new Proxy2ServerChannelInitializer(handlerSupplier), this.proxyConnection.getC2P());

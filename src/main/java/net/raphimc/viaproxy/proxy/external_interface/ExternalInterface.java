@@ -82,7 +82,7 @@ public class ExternalInterface {
                     user.put(new ChatSession1_19_0(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, playerCertificates.getLegacyPublicKeySignature())));
                     user.put(new ChatSession1_19_1(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
                     user.put(new ChatSession1_19_3(uuid, privateKey, new ProfileKey(expiresAtMillis, publicKeyBytes, keySignature)));
-                } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.bedrockLatest) && account instanceof BedrockAccount bedrockAccount) {
+                } else if (proxyConnection.getServerVersion().equals(BedrockProtocolVersion.BEDROCK_LATEST) && account instanceof BedrockAccount bedrockAccount) {
                     final MinecraftMultiplayerToken multiplayerToken = bedrockAccount.getAuthManager().getMinecraftMultiplayerToken().getUpToDate();
                     user.put(new AuthData(multiplayerToken.getToken(), bedrockAccount.getAuthManager().getSessionKeyPair(), bedrockAccount.getAuthManager().getDeviceId()));
                 }

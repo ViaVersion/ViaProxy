@@ -62,12 +62,12 @@ public class AddressUtil {
 
             final int port;
             if (version != null) {
-                port = hostAndPort.getPortOrDefault(version.equals(BedrockProtocolVersion.bedrockLatest) ? ServerAddress.DEFAULT_BEDROCK_PORT : ServerAddress.DEFAULT_JAVA_PORT);
+                port = hostAndPort.getPortOrDefault(version.equals(BedrockProtocolVersion.BEDROCK_LATEST) ? ServerAddress.DEFAULT_BEDROCK_PORT : ServerAddress.DEFAULT_JAVA_PORT);
             } else {
                 port = hostAndPort.getPort();
             }
 
-            if (version == null || version.olderThan(LegacyProtocolVersion.r1_3_1tor1_3_2) || version.equals(BedrockProtocolVersion.bedrockLatest)) {
+            if (version == null || version.olderThan(LegacyProtocolVersion.r1_3_1tor1_3_2) || version.equals(BedrockProtocolVersion.BEDROCK_LATEST)) {
                 return new InetSocketAddress(hostAndPort.getHost(), port);
             } else {
                 return MinecraftServerAddress.ofResolved(hostAndPort.getHost(), port);
@@ -95,7 +95,7 @@ public class AddressUtil {
 
     @Deprecated(forRemoval = true)
     public static int getDefaultPort(final ProtocolVersion version) {
-        if (version.equals(BedrockProtocolVersion.bedrockLatest)) {
+        if (version.equals(BedrockProtocolVersion.BEDROCK_LATEST)) {
             return ServerAddress.DEFAULT_BEDROCK_PORT;
         }
 

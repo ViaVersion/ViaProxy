@@ -226,7 +226,7 @@ public class RealmsTab extends UITab {
                 realmsService.joinWorldAsync(server).thenAccept(joinInformation -> SwingUtilities.invokeLater(() -> {
                     join.setEnabled(true);
                     join.setText(I18n.get("tab.realms.join"));
-                    this.setServerAddressAndStartViaProxy(joinInformation, realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : BedrockProtocolVersion.bedrockLatest);
+                    this.setServerAddressAndStartViaProxy(joinInformation, realmsService instanceof JavaRealmsService ? this.currentSelectedJavaVersion : BedrockProtocolVersion.BEDROCK_LATEST);
                 })).exceptionally(e -> {
                     final Throwable cause = e.getCause();
                     SwingUtilities.invokeLater(() -> {
