@@ -64,7 +64,7 @@ dependencies {
     includeInJar "com.viaversion:viarewind-common:4.2.0"
     includeInJar "net.raphimc:ViaLegacy:3.1.0"
     includeInJar "com.viaversion:viaaprilfools-common:4.2.3"
-    includeInJar "net.raphimc:ViaBedrock:0.0.31-20260927.164935-4"
+    includeInJar "net.raphimc:ViaBedrock:0.0.31-20261003.172326-5"
 
     includeInJar "com.google.guava:guava:33.7.1-jre"
     includeInJar "com.google.code.gson:gson:2.14.0"
@@ -105,15 +105,15 @@ dependencies {
     includeInJar("net.raphimc:MinecraftAuth:5.0.3-20260923.192703-2") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    includeInJar("org.cloudburstmc.netty:netty-transport-raknet:2.0.0.CR4-20260922.202324-5") {
+    includeInJar("org.cloudburstmc.netty:netty-transport-raknet:2.0.0.CR4-20261001.235918-13") {
         exclude group: "io.netty"
     }
-    includeInJar("org.cloudburstmc.netty:netty-transport-nethernet:2.0.0.CR4-20260922.202324-5") {
+    includeInJar("org.cloudburstmc.netty:netty-transport-nethernet:2.0.0.CR4-20261001.235918-13") {
         exclude group: "io.netty"
         exclude group: "org.bouncycastle"
         exclude group: "dev.opencollab:libdatachannel-java"
     }
-    includeInJar "dev.opencollab:libdatachannel-java-arch-detect:0.24.5.0-20260921.140330-12"
+    includeInJar "dev.opencollab:libdatachannel-java-arch-detect:0.24.6.0-20260930.214316-2"
     includeInJar "gs.mclo:api:6.2.1"
     includeInJar "net.lenni0451:optconfig:1.1.1"
 
