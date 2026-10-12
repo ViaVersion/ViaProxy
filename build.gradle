@@ -93,13 +93,13 @@ dependencies {
     includeInJar("net.raphimc.netminecraft:all:3.1.7") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    includeInJar("io.netty:netty-codec-haproxy:4.2.18.Final") {
+    includeInJar("io.netty:netty-codec-haproxy:4.2.19.Final") {
         transitive = false
     }
-    includeInJar("io.netty:netty-handler-proxy:4.2.18.Final") {
+    includeInJar("io.netty:netty-handler-proxy:4.2.19.Final") {
         transitive = false
     }
-    includeInJar("io.netty:netty-codec-socks:4.2.18.Final") {
+    includeInJar("io.netty:netty-codec-socks:4.2.19.Final") {
         transitive = false
     }
     includeInJar("net.raphimc:MinecraftAuth:5.0.3-20260923.192703-2") {
