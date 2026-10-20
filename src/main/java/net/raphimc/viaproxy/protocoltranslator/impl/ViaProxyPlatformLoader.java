@@ -18,6 +18,7 @@
 package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
+import com.viaversion.viabackwards.protocol.v26_4to26_3.provider.ConnectionOptionsProvider;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
@@ -43,6 +44,7 @@ public class ViaProxyPlatformLoader implements ViaPlatformLoader {
 
         // ViaBackwards
         Via.getManager().getProviders().use(TransferProvider.class, new ViaProxyTransferProvider());
+        Via.getManager().getProviders().use(ConnectionOptionsProvider.class, new ViaProxyConnectionOptionsProvider());
 
         // ViaLegacy
         Via.getManager().getProviders().use(GameProfileFetcher.class, new ViaProxyGameProfileFetcher());
