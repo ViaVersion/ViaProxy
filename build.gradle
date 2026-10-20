@@ -13,6 +13,7 @@ configurations {
 }
 
 repositories {
+    mavenLocal() // TODO
     maven {
         name = "ViaVersion"
         url = "https://repo.viaversion.com"
@@ -59,8 +60,8 @@ repositories {
 }
 
 dependencies {
-    includeInJar "com.viaversion:viaversion-common:5.12.2-SNAPSHOT"
-    includeInJar "com.viaversion:viabackwards-common:5.12.2-SNAPSHOT"
+    includeInJar "com.viaversion:viaversion-common:5.13.0-mc26.4-SNAPSHOT"
+    includeInJar "com.viaversion:viabackwards-common:5.13.0-mc26.4-SNAPSHOT"
     includeInJar "com.viaversion:viarewind-common:4.2.1-SNAPSHOT"
     includeInJar "net.raphimc:ViaLegacy:3.1.0"
     includeInJar "com.viaversion:viaaprilfools-common:4.2.3"
