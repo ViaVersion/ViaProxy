@@ -67,7 +67,7 @@ dependencies {
     includeInJar "net.raphimc:ViaBedrock:0.0.31-20261017.231609-7"
 
     includeInJar "com.google.guava:guava:33.7.2-jre"
-    includeInJar "com.google.code.gson:gson:2.14.0"
+    includeInJar "com.google.code.gson:gson:2.15.0"
     includeInJar "com.formdev:flatlaf:3.7.2"
     includeInJar "com.formdev:flatlaf-extras:3.7.2"
     includeInJar "org.apache.commons:commons-lang3:3.21.0"
