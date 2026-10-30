@@ -30,7 +30,6 @@ import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.viabedrock.netty.BatchLengthCodec;
 import net.raphimc.viabedrock.netty.DisconnectHandler;
 import net.raphimc.viabedrock.netty.PacketCodec;
-import net.raphimc.viabedrock.netty.raknet.MessageCodec;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec;
 import net.raphimc.viaproxy.ViaProxy;
@@ -80,7 +79,6 @@ public class Proxy2ServerChannelInitializer extends MinecraftChannelInitializer 
             channel.pipeline().remove(MCPipeline.COMPRESSION_HANDLER_NAME);
             channel.pipeline().remove(MCPipeline.ENCRYPTION_HANDLER_NAME);
             channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, DisconnectHandler.NAME, new DisconnectHandler());
-            channel.pipeline().addBefore(MCPipeline.SIZER_HANDLER_NAME, MessageCodec.NAME, new MessageCodec());
             channel.pipeline().replace(MCPipeline.SIZER_HANDLER_NAME, MCPipeline.SIZER_HANDLER_NAME, new BatchLengthCodec());
             channel.pipeline().addBefore(ViaProxyViaCodec.NAME, PacketCodec.NAME, new PacketCodec());
         }

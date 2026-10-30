@@ -25,7 +25,6 @@ import net.lenni0451.reflect.stream.RStream;
 import net.raphimc.netminecraft.util.MinecraftServerAddress;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import net.raphimc.vialegacy.api.LegacyProtocolVersion;
-import net.raphimc.viaproxy.util.address.NetherNetHttpAddress;
 import net.raphimc.viaproxy.util.address.NetherNetLanAddress;
 import net.raphimc.viaproxy.util.address.NetherNetXboxAddress;
 import net.raphimc.viaproxy.util.address.NetherNetXboxJsonRpcAddress;
@@ -38,12 +37,6 @@ public class AddressUtil {
     public static SocketAddress parse(final String serverAddress, final ProtocolVersion version) {
         if (serverAddress.startsWith("file://") || serverAddress.startsWith("unix://")) { // Unix Socket
             return new DomainSocketAddress(serverAddress.substring(serverAddress.indexOf("://") + 3));
-        } else if (serverAddress.startsWith("nethernet://")) { // NetherNet HTTP Address
-            final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress.substring(serverAddress.indexOf("://") + 3));
-            if (hostAndPort.getHost().isBlank()) {
-                throw new IllegalArgumentException("Server address cannot be blank");
-            }
-            return new NetherNetHttpAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(ServerAddress.DEFAULT_BEDROCK_PORT));
         } else if (serverAddress.startsWith("nethernet-lan://")) { // NetherNet LAN Address
             final HostAndPort hostAndPort = HostAndPort.fromString(serverAddress.substring(serverAddress.indexOf("://") + 3));
             if (hostAndPort.getHost().isBlank()) {
@@ -78,8 +71,6 @@ public class AddressUtil {
     public static String toString(final SocketAddress address) {
         if (address instanceof DomainSocketAddress domainSocketAddress) {
             return "unix://" + domainSocketAddress.path();
-        } else if (address instanceof NetherNetHttpAddress netherNetAddress) {
-            return "nethernet://" + netherNetAddress.getHostString() + ":" + netherNetAddress.getPort();
         } else if (address instanceof NetherNetLanAddress netherNetAddress) {
             return "nethernet-lan://" + netherNetAddress.getHostString() + ":" + netherNetAddress.getPort();
         } else if (address instanceof NetherNetXboxAddress netherNetAddress) {

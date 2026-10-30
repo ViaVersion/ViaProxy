@@ -17,9 +17,7 @@
  */
 package net.raphimc.viaproxy.util.address;
 
-import org.cloudburstmc.netty.channel.nethernet.config.NetherNetAddress;
-
-public class NetherNetXboxAddress extends NetherNetAddress implements net.raphimc.viaproxy.util.address.NetherNetAddress {
+public class NetherNetXboxAddress extends org.cloudburstmc.netty.channel.nethernet.config.NetherNetAddress implements NetherNetAddress {
 
     public NetherNetXboxAddress(final String networkId) {
         super(networkId);

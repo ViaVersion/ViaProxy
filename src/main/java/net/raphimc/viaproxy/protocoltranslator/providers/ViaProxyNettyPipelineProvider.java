@@ -19,11 +19,8 @@ package net.raphimc.viaproxy.protocoltranslator.providers;
 
 import com.viaversion.viaversion.api.connection.UserConnection;
 import io.netty.channel.Channel;
-import net.lenni0451.commons.unchecked.Sneaky;
 import net.raphimc.netminecraft.constants.MCPipeline;
 import net.raphimc.viabedrock.netty.CompressionCodec;
-import net.raphimc.viabedrock.netty.raknet.AesEncryptionCodec;
-import net.raphimc.viabedrock.netty.raknet.MessageCodec;
 import net.raphimc.viabedrock.protocol.data.enums.bedrock.generated.PacketCompressionAlgorithm;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 import net.raphimc.viaproxy.proxy.session.ProxyConnection;
@@ -45,19 +42,7 @@ public class ViaProxyNettyPipelineProvider extends NettyPipelineProvider {
 
     @Override
     public void enableEncryption(final UserConnection user, final SecretKey key) {
-        final ProxyConnection proxyConnection = ProxyConnection.fromUserConnection(user);
-        final Channel channel = proxyConnection.getChannel();
-        if (channel.pipeline().names().contains(MCPipeline.ENCRYPTION_HANDLER_NAME)) {
-            throw new IllegalStateException("Encryption already enabled");
-        }
-
-        if (channel.pipeline().get(MessageCodec.NAME) != null) { // Only enable encryption for RakNet connections
-            try {
-                channel.pipeline().addAfter(MessageCodec.NAME, MCPipeline.ENCRYPTION_HANDLER_NAME, new AesEncryptionCodec(key));
-            } catch (Throwable e) {
-                Sneaky.sneakyThrow(e);
-            }
-        }
+        // Not needed for NetherNet
     }
 
 }

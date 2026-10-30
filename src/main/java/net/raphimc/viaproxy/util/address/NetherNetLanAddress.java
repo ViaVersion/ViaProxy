@@ -20,7 +20,7 @@ package net.raphimc.viaproxy.util.address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-public class NetherNetLanAddress extends InetSocketAddress implements NetherNetAddress{
+public class NetherNetLanAddress extends InetSocketAddress implements NetherNetAddress {
 
     public NetherNetLanAddress(final InetAddress addr, final int port) {
         super(addr, port);
