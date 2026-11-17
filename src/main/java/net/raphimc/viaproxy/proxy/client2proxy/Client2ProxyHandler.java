@@ -34,6 +34,8 @@ import net.raphimc.netminecraft.constants.ConnectionState;
 import net.raphimc.netminecraft.constants.IntendedState;
 import net.raphimc.netminecraft.packet.Packet;
 import net.raphimc.netminecraft.packet.impl.handshaking.C2SHandshakingClientIntentionPacket;
+import net.raphimc.netminecraft.packet.impl.status.C2SStatusPingRequestPacket;
+import net.raphimc.netminecraft.packet.impl.status.C2SStatusRequestPacket;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusPongResponsePacket;
 import net.raphimc.netminecraft.packet.impl.status.S2CStatusResponsePacket;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
@@ -55,6 +57,8 @@ import net.raphimc.viaproxy.proxy.session.UserOptions;
 import net.raphimc.viaproxy.proxy.util.*;
 import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 import net.raphimc.viaproxy.util.*;
+import net.raphimc.viaproxy.util.address.NetherNetXboxAddress;
+import net.raphimc.viaproxy.util.address.NetherNetXboxJsonRpcAddress;
 import net.raphimc.viaproxy.util.logging.Logger;
 
 import java.net.InetSocketAddress;
@@ -65,6 +69,8 @@ import java.util.function.Supplier;
 public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
 
     private ProxyConnection proxyConnection;
+    private S2CStatusResponsePacket localStatusResponse;
+    private boolean localStatusSent;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -88,6 +94,18 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
         if (this.proxyConnection.isClosed()) return;
+
+        if (this.localStatusResponse != null) {
+            if (packet instanceof C2SStatusRequestPacket && !this.localStatusSent) {
+                this.localStatusSent = true;
+                ctx.writeAndFlush(this.localStatusResponse).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            } else if (packet instanceof C2SStatusPingRequestPacket ping && this.localStatusSent) {
+                ctx.writeAndFlush(new S2CStatusPongResponsePacket(ping.startTime)).addListener(ChannelFutureListener.CLOSE);
+            } else {
+                ctx.close();
+            }
+            return;
+        }
 
         if (this.proxyConnection.getC2pConnectionState() == ConnectionState.HANDSHAKING) {
             if (packet instanceof C2SHandshakingClientIntentionPacket) this.handleHandshake((C2SHandshakingClientIntentionPacket) packet);
@@ -191,10 +209,22 @@ public class Client2ProxyHandler extends SimpleChannelInboundHandler<Packet> {
         serverAddress = preConnectEvent.getServerAddress();
         serverVersion = preConnectEvent.getServerVersion();
 
+        final boolean isBedrockPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.BEDROCK_LATEST);
+        if (isBedrockPing && (serverAddress instanceof NetherNetXboxAddress || serverAddress instanceof NetherNetXboxJsonRpcAddress)) {
+            // Xbox signaling addresses identify sessions. Only dedicated servers expose the HTTP status endpoint.
+            final MCPingResponse response = new MCPingResponse();
+            response.version = new MCPingResponse.Version();
+            response.version.name = "ViaProxy";
+            response.version.protocol = clientVersion.getOriginalVersion();
+            final String customMotd = ViaProxy.getConfig().getCustomMotd();
+            response.description = customMotd.isBlank() ? "ViaProxy · Bedrock via Xbox Live" : customMotd;
+            this.localStatusResponse = new S2CStatusResponsePacket(new Gson().toJson(response));
+            return;
+        }
+
         ChannelUtil.disableAutoRead(this.proxyConnection.getC2P());
 
         final boolean isJavaBetaPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.olderThanOrEqualTo(LegacyProtocolVersion.b1_7tob1_7_3) && !ViaProxy.getConfig().shouldAllowBetaPinging();
-        final boolean isBedrockPing = packet.intendedState.getConnectionState() == ConnectionState.STATUS && serverVersion.equals(BedrockProtocolVersion.BEDROCK_LATEST);
         if (isJavaBetaPing || isBedrockPing) {
             if (!ViaProxy.getConfig().getCustomMotd().isBlank()) {
                 this.proxyConnection.kickClient(ViaProxy.getConfig().getCustomMotd());
