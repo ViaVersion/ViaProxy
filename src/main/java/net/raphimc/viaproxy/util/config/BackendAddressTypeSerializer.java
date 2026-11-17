@@ -18,25 +18,24 @@
 package net.raphimc.viaproxy.util.config;
 
 import net.lenni0451.optconfig.serializer.ConfigTypeSerializer;
+import net.lenni0451.optconfig.serializer.info.DeserializerInfo;
+import net.lenni0451.optconfig.serializer.info.SerializerInfo;
 import net.raphimc.viaproxy.protocoltranslator.viaproxy.ViaProxyConfig;
 import net.raphimc.viaproxy.util.AddressUtil;
 
 import java.net.SocketAddress;
 
-public class TargetAddressTypeSerializer extends ConfigTypeSerializer<ViaProxyConfig, SocketAddress> {
+public class BackendAddressTypeSerializer implements ConfigTypeSerializer<SocketAddress> {
 
-    public TargetAddressTypeSerializer(final ViaProxyConfig config) {
-        super(config);
+    @Override
+    public SocketAddress deserialize(final DeserializerInfo<SocketAddress> info) {
+        final ViaProxyConfig config = (ViaProxyConfig) info.configInstance();
+        return AddressUtil.parse((String) info.value(), config.getBackend().getVersion());
     }
 
     @Override
-    public SocketAddress deserialize(final Class<SocketAddress> typeClass, final Object serializedObject) {
-        return AddressUtil.parse((String) serializedObject, this.config.getTargetVersion());
-    }
-
-    @Override
-    public Object serialize(final SocketAddress object) {
-        return AddressUtil.toString(object);
+    public Object serialize(final SerializerInfo<SocketAddress> info) {
+        return AddressUtil.toString(info.value());
     }
 
 }

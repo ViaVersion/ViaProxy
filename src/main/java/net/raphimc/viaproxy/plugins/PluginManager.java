@@ -82,7 +82,7 @@ public class PluginManager {
             try {
                 loadAndScanJar(file);
             } catch (Throwable e) {
-                Logger.LOGGER.error("Unable to load plugin '" + file.getName() + "'", e);
+                Logger.LOGGER.error("Unable to load plugin '{}'", file.getName(), e);
             }
         }
 
@@ -138,7 +138,7 @@ public class PluginManager {
             throw new IllegalStateException("Plugin '" + file.getName() + "' has more than one dependency. This is not supported yet.");
         }
 
-        Logger.LOGGER.info("Loaded plugin '" + plugin.getName() + "' by " + plugin.getAuthor() + " (v" + plugin.getVersion() + ")");
+        Logger.LOGGER.info("Loaded plugin '{}' by {} (v{})", plugin.getName(), plugin.getAuthor(), plugin.getVersion());
         this.plugins.add(plugin);
     }
 
@@ -146,7 +146,7 @@ public class PluginManager {
         for (String depend : plugin.getDepends()) {
             final ViaProxyPlugin dependPlugin = this.getPlugin(depend);
             if (dependPlugin == null) {
-                Logger.LOGGER.error("Plugin '" + plugin.getName() + "' depends on '" + depend + "' which is not loaded");
+                Logger.LOGGER.error("Plugin '{}' depends on '{}' which is not loaded", plugin.getName(), depend);
                 return;
             }
             if (!dependPlugin.isEnabled()) {
@@ -158,9 +158,9 @@ public class PluginManager {
 
         try {
             plugin.enable();
-            Logger.LOGGER.info("Enabled plugin '" + plugin.getName() + "'");
+            Logger.LOGGER.info("Enabled plugin '{}'", plugin.getName());
         } catch (Throwable e) {
-            Logger.LOGGER.error("Failed to enable plugin '" + plugin.getName() + "'", e);
+            Logger.LOGGER.error("Failed to enable plugin '{}'", plugin.getName(), e);
         }
     }
 
@@ -176,7 +176,7 @@ public class PluginManager {
         for (String depend : plugin.getDepends()) {
             final ViaProxyPlugin dependPlugin = this.getPlugin(depend);
             if (dependPlugin == null) {
-                Logger.LOGGER.error("Plugin '" + plugin.getName() + "' depends on '" + depend + "' which is not loaded");
+                Logger.LOGGER.error("Plugin '{}' depends on '{}' which is not loaded", plugin.getName(), depend);
                 return;
             }
             if (dependPlugin.isEnabled()) {
@@ -186,9 +186,9 @@ public class PluginManager {
 
         try {
             plugin.disable();
-            Logger.LOGGER.info("Disabled plugin '" + plugin.getName() + "'");
+            Logger.LOGGER.info("Disabled plugin '{}'", plugin.getName());
         } catch (Throwable e) {
-            Logger.LOGGER.error("Failed to disable plugin '" + plugin.getName() + "'", e);
+            Logger.LOGGER.error("Failed to disable plugin '{}'", plugin.getName(), e);
         }
     }
 

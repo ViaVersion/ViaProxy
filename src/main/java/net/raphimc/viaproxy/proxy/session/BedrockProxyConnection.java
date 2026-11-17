@@ -81,8 +81,8 @@ public class BedrockProxyConnection extends ProxyConnection {
         bootstrap
                 .group(EventLoops.getClientEventLoop(TransportType.NIO))
                 .channelFactory(NetherNetChannelFactory.client(netherNetSignaling))
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getConnectTimeout())
-                .option(NetherChannelOption.NETHER_CLIENT_HANDSHAKE_TIMEOUT_MS, ViaProxy.getConfig().getConnectTimeout())
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ViaProxy.getConfig().getBackend().getConnectTimeout())
+                .option(NetherChannelOption.NETHER_CLIENT_HANDSHAKE_TIMEOUT_MS, ViaProxy.getConfig().getBackend().getConnectTimeout())
                 .option(NetherChannelOption.NETHER_CLIENT_MAX_HANDSHAKE_ATTEMPTS, 1)
                 .option(NetherChannelOption.NETHER_CLIENT_IDENTITY, identity)
                 .attr(ProxyConnection.PROXY_CONNECTION_ATTRIBUTE_KEY, this)

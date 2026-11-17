@@ -43,11 +43,12 @@ public class CompressionPacketHandler extends PacketHandler {
             return false;
         } else if (packet instanceof S2CLoginGameProfilePacket) {
             if (this.proxyConnection.getClientVersion().newerThanOrEqualTo(ProtocolVersion.v1_8)) {
-                if (ViaProxy.getConfig().getCompressionThreshold() > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
+                final int compressionThreshold = ViaProxy.getConfig().getFrontend().getCompressionThreshold();
+                if (compressionThreshold > -1 && this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).get() == -1) {
                     ChannelUtil.disableAutoRead(this.proxyConnection.getChannel());
-                    this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(ViaProxy.getConfig().getCompressionThreshold())).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
+                    this.proxyConnection.getC2P().writeAndFlush(new S2CLoginCompressionPacket(compressionThreshold)).addListeners(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE, (ChannelFutureListener) f -> {
                         if (f.isSuccess()) {
-                            this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(ViaProxy.getConfig().getCompressionThreshold());
+                            this.proxyConnection.getC2P().attr(MCPipeline.COMPRESSION_THRESHOLD_ATTRIBUTE_KEY).set(compressionThreshold);
                             ChannelUtil.restoreAutoRead(this.proxyConnection.getChannel());
                         }
                     });

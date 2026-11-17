@@ -70,7 +70,7 @@ public class CommandManager implements CommandBuilder<CommandExecutor> {
                         }
                         this.commands.add(command);
                     } catch (Throwable e) {
-                        Logger.LOGGER.error("Failed to register command " + command.getNames()[0], e);
+                        Logger.LOGGER.error("Failed to register command {}", command.getNames()[0], e);
                     }
                 });
 

@@ -18,6 +18,20 @@
 package net.raphimc.viaproxy.proxy.session;
 
 import net.raphimc.viaproxy.saves.impl.accounts.Account;
+import net.raphimc.viaproxy.saves.impl.accounts.ClassicAccount;
 
-public record UserOptions(String classicMpPass, Account account) {
+public record UserOptions(Account account) {
+
+    @Deprecated(forRemoval = true)
+    public UserOptions(final String classicMpPass, final Account account) {
+        this(migrateClassicMpPass(classicMpPass, account));
+    }
+
+    private static Account migrateClassicMpPass(final String classicMpPass, final Account account) {
+        if (classicMpPass != null && account != null) {
+            return new ClassicAccount(account.getName(), classicMpPass);
+        }
+        return account;
+    }
+
 }

@@ -37,7 +37,7 @@ public class StatusPingUtil {
                 .tcpSocketFactory(new SocketChannelSocketFactory())
                 .address(AddressUtil.toJ16UnixSocketAddress(serverAddress))
                 .noResolve()
-                .timeout(ViaProxy.getConfig().getConnectTimeout() / 2, ViaProxy.getConfig().getConnectTimeout() / 2)
+                .timeout(ViaProxy.getConfig().getBackend().getConnectTimeout() / 2, ViaProxy.getConfig().getBackend().getConnectTimeout() / 2)
                 .getAsync()
                 .thenApply(response -> {
                     if (response.version.protocol == clientVersion.getOriginalVersion()) { // If the server is on the same version as the client, we can just connect
@@ -64,7 +64,7 @@ public class StatusPingUtil {
                 .pingBedrockNethernet()
                 .address(AddressUtil.toJ16UnixSocketAddress(serverAddress))
                 .noResolve()
-                .timeout(ViaProxy.getConfig().getConnectTimeout() / 2, ViaProxy.getConfig().getConnectTimeout() / 2)
+                .timeout(ViaProxy.getConfig().getBackend().getConnectTimeout() / 2, ViaProxy.getConfig().getBackend().getConnectTimeout() / 2)
                 .getAsync();
     }
 

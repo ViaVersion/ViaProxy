@@ -128,7 +128,7 @@ public class GeneralTab extends UITab {
                     this.betaCraftAuth.setSelected(false);
                 }
             });
-            this.serverVersion.setSelectedItem(ViaProxy.getConfig().getTargetVersion());
+            this.serverVersion.setSelectedItem(ViaProxy.getConfig().getBackend().getVersion());
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.serverVersion);
         }
         {
@@ -145,13 +145,13 @@ public class GeneralTab extends UITab {
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
             });
-            this.authMethod.setSelectedItem(ViaProxy.getConfig().getAuthMethod());
+            this.authMethod.setSelectedItem(ViaProxy.getConfig().getBackend().getAuthMethod());
             GBC.create(body).grid(0, gridy++).weightx(1).insets(0, BORDER_PADDING, 0, BORDER_PADDING).fill(GBC.HORIZONTAL).add(this.authMethod);
         }
         {
             this.betaCraftAuth = new JCheckBox(I18n.get("tab.general.betacraft_auth.label"));
             this.betaCraftAuth.setToolTipText(I18n.get("tab.general.betacraft_auth.tooltip"));
-            this.betaCraftAuth.setSelected(ViaProxy.getConfig().useBetacraftAuth());
+            this.betaCraftAuth.setSelected(ViaProxy.getConfig().getBackend().useBetaCraftAuth());
             GBC.create(body).grid(0, gridy++).insets(BODY_BLOCK_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(this.betaCraftAuth);
             // Simulate user action on serverVersion to update betaCraftAuth
             final ActionEvent fakeAction = new ActionEvent(this.serverVersion, ActionEvent.ACTION_PERFORMED, "");
@@ -214,10 +214,10 @@ public class GeneralTab extends UITab {
     }
 
     private void updateStateLabel() {
-        if (ViaProxy.getConfig().getBindAddress() instanceof InetSocketAddress inetSocketAddress) {
+        if (ViaProxy.getConfig().getFrontend().getBindAddress() instanceof InetSocketAddress inetSocketAddress) {
             this.stateLabel.setText(I18n.get("tab.general.state.running", "1.7+", "127.0.0.1:" + inetSocketAddress.getPort()));
         } else {
-            this.stateLabel.setText(I18n.get("tab.general.state.running", "1.7+", AddressUtil.toString(ViaProxy.getConfig().getBindAddress())));
+            this.stateLabel.setText(I18n.get("tab.general.state.running", "1.7+", AddressUtil.toString(ViaProxy.getConfig().getFrontend().getBindAddress())));
         }
         this.stateLabel.setForeground(Color.GREEN);
         this.stateLabel.setVisible(true);
@@ -263,36 +263,34 @@ public class GeneralTab extends UITab {
                             throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_classicube_url"));
                         }
 
-                        ViaProxy.getConfig().setTargetAddress(new InetSocketAddress(uri.getHost(), uri.getPort()));
-                        ViaProxy.getConfig().setAccount(new ClassicAccount(path[0], path[1]));
+                        ViaProxy.getConfig().getBackend().setAddress(new InetSocketAddress(uri.getHost(), uri.getPort()));
+                        ViaProxy.getConfig().getProxy().setAccount(new ClassicAccount(path[0], path[1]));
                     } else {
                         try {
-                            ViaProxy.getConfig().setTargetAddress(AddressUtil.parse(serverAddress, serverVersion));
+                            ViaProxy.getConfig().getBackend().setAddress(AddressUtil.parse(serverAddress, serverVersion));
                         } catch (Throwable t) {
                             throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_server_address"));
                         }
 
                         if (authMethod == ViaProxyConfig.AuthMethod.ACCOUNT) {
-                            if (ViaProxy.getConfig().getAccount() == null) {
+                            if (ViaProxy.getConfig().getProxy().getAccount() == null) {
                                 this.viaProxyWindow.accountsTab.markSelected(0);
                             }
-                        } else {
-                            ViaProxy.getConfig().setAccount(null);
                         }
                     }
                     try {
-                        ViaProxy.getConfig().setBindAddress(AddressUtil.parse(bindAddress, null));
+                        ViaProxy.getConfig().getFrontend().setBindAddress(AddressUtil.parse(bindAddress, null));
                     } catch (Throwable t) {
                         throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_bind_address"));
                     }
                     if (!proxyUrl.isBlank()) {
                         try {
-                            ViaProxy.getConfig().setBackendProxy(new Proxy(new URI(proxyUrl)));
+                            ViaProxy.getConfig().getBackend().setProxy(new Proxy(new URI(proxyUrl)));
                         } catch (URISyntaxException e) {
                             throw new IllegalArgumentException(I18n.get("tab.general.error.invalid_proxy_url"));
                         }
                     } else {
-                        ViaProxy.getConfig().setBackendProxy(null);
+                        ViaProxy.getConfig().getBackend().setProxy(null);
                     }
                     this.applyGuiState();
                     this.viaProxyWindow.advancedTab.applyGuiState();
@@ -339,12 +337,12 @@ public class GeneralTab extends UITab {
     void applyGuiState() {
         ViaProxy.getSaveManager().uiSave.put("server_address", this.serverAddress.getText());
         if (this.serverVersion.getSelectedItem() instanceof ProtocolVersion version) {
-            ViaProxy.getConfig().setTargetVersion(version);
+            ViaProxy.getConfig().getBackend().setVersion(version);
         }
         if (this.authMethod.getSelectedItem() instanceof ViaProxyConfig.AuthMethod authMethod) {
-            ViaProxy.getConfig().setAuthMethod(authMethod);
+            ViaProxy.getConfig().getBackend().setAuthMethod(authMethod);
         }
-        ViaProxy.getConfig().setBetacraftAuth(this.betaCraftAuth.isSelected());
+        ViaProxy.getConfig().getBackend().setBetaCraftAuth(this.betaCraftAuth.isSelected());
     }
 
 }

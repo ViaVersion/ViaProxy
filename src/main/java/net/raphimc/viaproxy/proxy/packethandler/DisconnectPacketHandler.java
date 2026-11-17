@@ -36,9 +36,9 @@ public class DisconnectPacketHandler extends PacketHandler {
     @Override
     public boolean handleP2S(Packet packet, List<ChannelFutureListener> listeners) throws Exception {
         if (packet instanceof S2CLoginDisconnectPacket loginDisconnectPacket) {
-            Logger.u_info("server disconnect", this.proxyConnection, ConsoleFormatter.convert(loginDisconnectPacket.reason.asLegacyFormatString()));
+            Logger.u_info("server disconnect", this.proxyConnection, ConsoleFormatter.convert(loginDisconnectPacket.reason));
         } else if (packet instanceof S2CDisconnectPacket disconnectPacket) {
-            Logger.u_info("server disconnect", this.proxyConnection, ConsoleFormatter.convert(disconnectPacket.reason.asLegacyFormatString()));
+            Logger.u_info("server disconnect", this.proxyConnection, ConsoleFormatter.convert(disconnectPacket.reason));
         }
         return super.handleP2S(packet, listeners);
     }
