@@ -65,6 +65,7 @@ public class ProxyConnection extends NetClient {
     private GameProfile gameProfile;
     private C2SLoginHelloPacket loginHelloPacket;
     private Key storedSecretKey;
+    private AESEncryption pendingEncryption;
 
     private UserConnection userConnection;
     private UserOptions userOptions;
@@ -166,8 +167,13 @@ public class ProxyConnection extends NetClient {
         this.storedSecretKey = key;
     }
 
+    public void setPendingEncryption(final AESEncryption encryption) {
+        this.pendingEncryption = encryption;
+    }
+
     public void enablePreNettyEncryption() throws GeneralSecurityException {
-        this.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(new AESEncryption(this.storedSecretKey));
+        this.getChannel().attr(MCPipeline.ENCRYPTION_ATTRIBUTE_KEY).set(this.pendingEncryption != null ? this.pendingEncryption : new AESEncryption(this.storedSecretKey));
+        this.pendingEncryption = null;
     }
 
     public UserConnection getUserConnection() {

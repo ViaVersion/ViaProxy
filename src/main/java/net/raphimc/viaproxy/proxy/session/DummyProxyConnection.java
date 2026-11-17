@@ -25,6 +25,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import net.raphimc.netminecraft.constants.ConnectionState;
+import net.raphimc.netminecraft.netty.crypto.AESEncryption;
 import net.raphimc.netminecraft.packet.impl.login.C2SLoginHelloPacket;
 import net.raphimc.netminecraft.util.TransportType;
 
@@ -89,6 +90,11 @@ public class DummyProxyConnection extends ProxyConnection {
 
     @Override
     public void setKeyForPreNettyEncryption(Key key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setPendingEncryption(AESEncryption encryption) {
         throw new UnsupportedOperationException();
     }
 

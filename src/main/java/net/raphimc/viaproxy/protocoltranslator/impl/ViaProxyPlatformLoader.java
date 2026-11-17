@@ -19,10 +19,12 @@ package net.raphimc.viaproxy.protocoltranslator.impl;
 
 import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
 import com.viaversion.viabackwards.protocol.v26_4to26_3.provider.ConnectionOptionsProvider;
+import com.viaversion.viabackwards.protocol.v26_4to26_3.provider.KeyExchangeProvider;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
 import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
+import com.viaversion.viaversion.protocols.v26_3to26_4.provider.LegacyKeyExchangeProvider;
 import net.raphimc.viabedrock.protocol.provider.NettyPipelineProvider;
 import net.raphimc.vialegacy.protocol.classic.c0_28_30toa1_0_15.provider.ClassicCustomCommandProvider;
 import net.raphimc.vialegacy.protocol.classic.c0_28_30toa1_0_15.provider.ClassicMpPassProvider;
@@ -45,6 +47,8 @@ public class ViaProxyPlatformLoader implements ViaPlatformLoader {
         // ViaBackwards
         Via.getManager().getProviders().use(TransferProvider.class, new ViaProxyTransferProvider());
         Via.getManager().getProviders().use(ConnectionOptionsProvider.class, new ViaProxyConnectionOptionsProvider());
+        Via.getManager().getProviders().use(KeyExchangeProvider.class, new ViaProxyKeyExchangeProvider());
+        Via.getManager().getProviders().use(LegacyKeyExchangeProvider.class, new ViaProxyLegacyKeyExchangeProvider());
 
         // ViaLegacy
         Via.getManager().getProviders().use(GameProfileFetcher.class, new ViaProxyGameProfileFetcher());
