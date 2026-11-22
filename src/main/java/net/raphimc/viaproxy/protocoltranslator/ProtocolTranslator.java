@@ -127,6 +127,7 @@ public class ProtocolTranslator {
             config.putIfAbsent("handle-invalid-item-count", true);
             config.putIfAbsent("send-player-details", false);
             config.putIfAbsent("backup-nested-items", true);
+            config.putIfAbsent("ignore-1_20_5-1_21_4-click-items", false);
             final Map<String, Object> packetLimiter = (Map<String, Object>) config.computeIfAbsent("packet-limiter", k -> new LinkedHashMap<>());
             packetLimiter.putIfAbsent("max-per-second", 1400);
             packetLimiter.putIfAbsent("sustained-max-per-second", 400);
